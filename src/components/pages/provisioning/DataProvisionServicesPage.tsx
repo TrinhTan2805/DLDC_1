@@ -266,6 +266,7 @@ export function DataProvisionServicesPage({ category, group, description }: Data
               if (service) setSelectedService(service);
             }}
             activeId={selectedService?.id}
+            flatList
           />
         </div>
       )}

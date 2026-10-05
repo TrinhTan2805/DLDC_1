@@ -71,7 +71,7 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
 
             <div className="flex flex-col gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 mb-3 leading-tight">
+                <h1 className="text-[16px] font-bold text-slate-900 mb-3 leading-tight">
                   {service.name || 'Dịch vụ chưa đặt tên'}
                 </h1>
 
@@ -141,7 +141,7 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
               <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-md">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-3 uppercase tracking-tight">
+                <h3 className="text-[16px] font-bold text-slate-900 flex items-center gap-3 uppercase tracking-tight">
                   <div className="p-2 bg-amber-100 rounded-lg">
                     <Power className="w-5 h-5 text-amber-600" />
                   </div>
@@ -158,18 +158,18 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
                   </div>
                   <div>
                     <div className="text-md font-medium text-red-900 mb-1">Cảnh báo gián đoạn dữ liệu</div>
-                    <p className="text-sm text-red-800/80 leading-relaxed font-medium">
+                    <p className="text-[13px] text-red-800/80 leading-relaxed font-medium">
                       Bạn có chắc muốn ngừng hoạt động này? Hành động này sẽ khiến luồng dữ liệu bị gián đoạn cho đến khi được kích hoạt lại thủ công.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-700 ml-1">
+                  <label className="block text-[13px] font-medium text-slate-700 ml-1">
                     Lý do ngừng hoạt động <span className="text-red-500 font-black">*</span>
                   </label>
                   <textarea
-                    className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-sm bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
+                    className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 min-h-[140px] text-[13px] bg-slate-50/30 outline-none transition-all placeholder:text-slate-400 resize-none"
                     placeholder="Vui lòng nhập lý do cụ thể (ví dụ: Thay đổi cấu hình Máy chủ thực thi, bảo trì định kỳ hệ thống nguồn...)"
                     value={inactiveReason}
                     onChange={(e) => setInactiveReason(e.target.value)}
@@ -179,7 +179,7 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
               <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-4">
                 <button
                   onClick={() => setShowInactiveModal(false)}
-                  className="px-6 py-2.5 text-base text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm"
+                  className="px-6 py-2.5 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm"
                 >
                   Hủy bỏ
                 </button>
@@ -190,7 +190,7 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
                     setShowInactiveModal(false);
                     setInactiveReason('');
                   }}
-                  className="px-8 py-2.5 bg-blue-600 text-white rounded-lg text-base hover:bg-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed font-medium"
+                  className="px-8 py-2.5 bg-blue-600 text-white rounded-lg text-[13px] hover:bg-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed font-medium"
                 >
                   Xác nhận ngừng
                 </button>
@@ -213,23 +213,23 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin dịch vụ
         </h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên dịch vụ</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{service.name || '-'}</div>
+            <div className="text-[13px] font-medium text-slate-500">Tên dịch vụ</div>
+            <div className="text-[13px] text-slate-900 break-words">{service.name || '-'}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống nguồn</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-medium text-slate-500">Tên hệ thống nguồn</div>
+            <div className="text-[13px] text-slate-900 break-words flex items-center gap-2">
               <Database className="w-4 h-4 text-blue-500" />
               {service.system || sourceSystem.systemName}
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div className="text-[13px] font-medium text-slate-500">Loại nguồn</div>
             <div>
               <StatusTag 
                 label={service.source} 
@@ -239,19 +239,19 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Mức độ bảo mật dữ liệu</div>
+            <div className="text-[13px] font-medium text-slate-500">Mức độ bảo mật dữ liệu</div>
             <div>
               <StatusTag label={service.securityLevel || 'Nội bộ'} variant="blue" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại dữ liệu thu thập</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{service.dataType || '-'}</div>
+            <div className="text-[13px] font-medium text-slate-500">Loại dữ liệu thu thập</div>
+            <div className="text-[13px] text-slate-900 break-words">{service.dataType || '-'}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạng thái dữ liệu</div>
+            <div className="text-[13px] font-medium text-slate-500">Trạng thái dữ liệu</div>
             <div>
               {(() => {
                 const dataStatus = service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY');
@@ -271,8 +271,8 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Kích thước dữ liệu</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-medium text-slate-500">Kích thước dữ liệu</div>
+            <div className="text-[13px] text-slate-900 break-words flex items-center gap-2">
               <span>{service.dataSize || formatDataSize(service.recordsReceived)}</span>
               <span className="text-slate-300">|</span>
               <span>{(service.recordCount ?? service.recordsReceived ?? 0).toLocaleString('vi-VN')} bản ghi</span>
@@ -280,9 +280,9 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Mô tả</div>
-            <div className="text-[13px] text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100 italic">
-              {service.description || 'Chưa có mô tả cho dịch vụ này.'}
+            <div className="text-[13px] font-medium text-slate-500">Mô tả</div>
+            <div className="text-[13px] text-slate-900 whitespace-pre-line break-words">
+              {service.description || '-'}
             </div>
           </div>
 
@@ -324,38 +324,38 @@ function TabGeneral({ service, sourceSystem, onEdit }: any) {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin hệ thống nguồn
         </h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
+            <div className="text-[13px] font-medium text-slate-500">Tên hệ thống</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.systemName}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
+            <div className="text-[13px] font-medium text-slate-500">Tên đơn vị</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.unitName}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-medium text-slate-500">Đầu mối liên hệ</div>
+            <div className="text-[13px] text-slate-900 break-words flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               {sourceSystem.contactPerson}
             </div>
           </div>
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+            <div className="text-[13px] font-medium text-slate-500">Địa chỉ</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.address}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
+            <div className="text-[13px] font-medium text-slate-500">Số điện thoại</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.phone}</div>
           </div>
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Email</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+            <div className="text-[13px] font-medium text-slate-500">Email</div>
+            <div className="text-[13px] text-blue-600 break-words">{sourceSystem.email}</div>
           </div>
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
-            <div className="text-[13px] text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
-              {sourceSystem.note || 'Không có ghi chú.'}
+            <div className="text-[13px] font-medium text-slate-500">Ghi chú</div>
+            <div className="text-[13px] text-slate-900 whitespace-pre-line break-words">
+              {sourceSystem.note || '-'}
             </div>
           </div>
         </div>
@@ -378,20 +378,20 @@ function TabContact({ sourceSystem }: any) {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Thông tin hệ thống nguồn
         </h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-5xl">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 max-w-5xl">
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên hệ thống</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.systemName}</div>
+            <div className="text-[13px] font-medium text-slate-500">Tên hệ thống</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.systemName}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên đơn vị</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.unitName}</div>
+            <div className="text-[13px] font-medium text-slate-500">Tên đơn vị</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.unitName}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại nguồn</div>
+            <div className="text-[13px] font-medium text-slate-500">Loại nguồn</div>
             <div>
               <StatusTag 
                 label={sourceSystem.sourceType} 
@@ -401,32 +401,32 @@ function TabContact({ sourceSystem }: any) {
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Đầu mối liên hệ</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed flex items-center gap-2">
+            <div className="text-[13px] font-medium text-slate-500">Đầu mối liên hệ</div>
+            <div className="text-[13px] text-slate-900 break-words flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               {sourceSystem.contactPerson}
             </div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed italic">{sourceSystem.address}</div>
+            <div className="text-[13px] font-medium text-slate-500">Địa chỉ</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.address}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Số điện thoại</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed">{sourceSystem.phone}</div>
+            <div className="text-[13px] font-medium text-slate-500">Số điện thoại</div>
+            <div className="text-[13px] text-slate-900 break-words">{sourceSystem.phone}</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Email</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-relaxed text-blue-600 underline underline-offset-4">{sourceSystem.email}</div>
+            <div className="text-[13px] font-medium text-slate-500">Email</div>
+            <div className="text-[13px] text-blue-600 break-words">{sourceSystem.email}</div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Ghi chú</div>
-            <div className="text-[13px] text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
-              {sourceSystem.note || 'Không có ghi chú.'}
+            <div className="text-[13px] font-medium text-slate-500">Ghi chú</div>
+            <div className="text-[13px] text-slate-900 whitespace-pre-line break-words">
+              {sourceSystem.note || '-'}
             </div>
           </div>
 
@@ -487,10 +487,10 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình kết nối
         </h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-6 max-w-4xl">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 max-w-4xl">
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Phương thức kết nối</div>
-            <div className="text-[13px] text-slate-900 font-medium">
+            <div className="text-[13px] font-medium text-slate-500">Phương thức kết nối</div>
+            <div className="text-[13px] text-slate-900 break-words">
               {connectionType === 'API' ? 'API' : connectionType === 'API_RECEIVE_JSON' ? 'API nhận (JSON)' : connectionType === 'API_RECEIVE_XML' ? 'API nhận (XML)' : connectionType === 'DB' ? 'Cơ sở dữ liệu' : 'Tải file'}
             </div>
           </div>
@@ -498,32 +498,32 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {(connectionType === 'API' || connectionType === 'API_RECEIVE_JSON' || connectionType === 'API_RECEIVE_XML') && (
             <>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên api</div>
-                <div className="text-[13px] text-slate-900 font-medium">API Lấy thông tin công dân</div>
+                <div className="text-[13px] font-medium text-slate-500">Tên api</div>
+                <div className="text-[13px] text-slate-900 break-words">API Lấy thông tin công dân</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">URL</div>
-                <div className="text-[13px] text-slate-900 font-medium font-mono">https://api.hotich.moj.gov.vn/api/v1/quoctich</div>
+                <div className="text-[13px] font-medium text-slate-500">URL</div>
+                <div className="text-[13px] text-slate-900 break-words font-mono">https://api.hotich.moj.gov.vn/api/v1/quoctich</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-[13px] text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-[13px] font-medium text-slate-500">Máy chủ thực thi</div>
+                <div className="text-[13px] text-slate-900 break-words">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-[13px] text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-[13px] font-medium text-slate-500">Trạm kết nối</div>
+                <div className="text-[13px] text-slate-900 break-words">Trạm kết nối 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Method</div>
-                <div className="text-[13px] text-slate-900 font-medium">GET</div>
+                <div className="text-[13px] font-medium text-slate-500">Method</div>
+                <div className="text-[13px] text-slate-900 break-words">GET</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Authorization</div>
-                <div className="text-[13px] text-slate-900 font-medium">Bearer Token</div>
+                <div className="text-[13px] font-medium text-slate-500">Authorization</div>
+                <div className="text-[13px] text-slate-900 break-words">Bearer Token</div>
               </div>
               <div className="space-y-1 col-span-2">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Body</div>
-                <div className="text-[13px] text-slate-900 font-medium">-</div>
+                <div className="text-[13px] font-medium text-slate-500">Body</div>
+                <div className="text-[13px] text-slate-900 break-words">-</div>
               </div>
             </>
           )}
@@ -531,36 +531,36 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {connectionType === 'DB' && (
             <>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL</div>
-                <div className="text-[13px] text-slate-900 font-medium">HOTICH_PROD</div>
+                <div className="text-[13px] font-medium text-slate-500">Tên CSDL</div>
+                <div className="text-[13px] text-slate-900 break-words">HOTICH_PROD</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên CSDL gốc</div>
-                <div className="text-[13px] text-slate-900 font-medium">HOTICH_MASTER</div>
+                <div className="text-[13px] font-medium text-slate-500">Tên CSDL gốc</div>
+                <div className="text-[13px] text-slate-900 break-words">HOTICH_MASTER</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Kiểu CSDL</div>
-                <div className="text-[13px] text-slate-900 font-medium">POSTGRESQL</div>
+                <div className="text-[13px] font-medium text-slate-500">Kiểu CSDL</div>
+                <div className="text-[13px] text-slate-900 break-words">POSTGRESQL</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-[13px] text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-[13px] font-medium text-slate-500">Trạm kết nối</div>
+                <div className="text-[13px] text-slate-900 break-words">Trạm kết nối 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-[13px] text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-[13px] font-medium text-slate-500">Máy chủ thực thi</div>
+                <div className="text-[13px] text-slate-900 break-words">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Địa chỉ CSDL</div>
-                <div className="text-[13px] text-slate-900 font-medium">192.168.1.100</div>
+                <div className="text-[13px] font-medium text-slate-500">Địa chỉ CSDL</div>
+                <div className="text-[13px] text-slate-900 break-words">192.168.1.100</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Cổng kết nối</div>
-                <div className="text-[13px] text-slate-900 font-medium">5432</div>
+                <div className="text-[13px] font-medium text-slate-500">Cổng kết nối</div>
+                <div className="text-[13px] text-slate-900 break-words">5432</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tài khoản</div>
-                <div className="text-[13px] text-slate-900 font-medium">admin_db</div>
+                <div className="text-[13px] font-medium text-slate-500">Tài khoản</div>
+                <div className="text-[13px] text-slate-900 break-words">admin_db</div>
               </div>
             </>
           )}
@@ -568,16 +568,16 @@ function TabConnection({ service, showApiKey, setShowApiKey, onEdit }: any) {
           {connectionType === 'FILE' && (
             <>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Tên File CSDL</div>
-                <div className="text-[13px] text-slate-900 font-medium">Data_Export_2024.csv</div>
+                <div className="text-[13px] font-medium text-slate-500">Tên File CSDL</div>
+                <div className="text-[13px] text-slate-900 break-words">Data_Export_2024.csv</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Máy chủ thực thi</div>
-                <div className="text-[13px] text-slate-900 font-medium">Máy chủ thực thi 1</div>
+                <div className="text-[13px] font-medium text-slate-500">Máy chủ thực thi</div>
+                <div className="text-[13px] text-slate-900 break-words">Máy chủ thực thi 1</div>
               </div>
               <div className="space-y-1">
-                <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Trạm kết nối</div>
-                <div className="text-[13px] text-slate-900 font-medium">Trạm kết nối 1</div>
+                <div className="text-[13px] font-medium text-slate-500">Trạm kết nối</div>
+                <div className="text-[13px] text-slate-900 break-words">Trạm kết nối 1</div>
               </div>
             </>
           )}
@@ -602,36 +602,36 @@ function TabCollection({ service, onEdit }: any) {
           <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
           Cấu hình đồng bộ dữ liệu
         </h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-8 max-w-4xl">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 max-w-4xl">
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Loại tần suất</div>
-            <div className="text-[13px] text-slate-900 font-medium">Cập nhật</div>
+            <div className="text-[13px] font-medium text-slate-500">Loại tần suất</div>
+            <div className="text-[13px] text-slate-900 break-words">Cập nhật</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Lặp lại</div>
-            <div className="text-[13px] text-slate-900 font-medium">Hằng ngày</div>
+            <div className="text-[13px] font-medium text-slate-500">Lặp lại</div>
+            <div className="text-[13px] text-slate-900 break-words">Hằng ngày</div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Lặp lại trong</div>
-            <div className="text-[13px] text-slate-900 font-medium leading-tight">
+            <div className="text-[13px] font-medium text-slate-500">Lặp lại trong</div>
+            <div className="text-[13px] text-slate-900 break-words">
               1 ngày
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Thực hiện lúc</div>
-            <div className="text-[13px] text-blue-700 font-medium flex items-center gap-2">
+            <div className="text-[13px] font-medium text-slate-500">Thực hiện lúc</div>
+            <div className="text-[13px] text-slate-900 flex items-center gap-2">
               <Clock className="w-4 h-4" />
               12:00
             </div>
           </div>
 
           <div className="space-y-1 col-span-2">
-            <div className="text-[13px] font-semibold text-slate-500 uppercase tracking-tight">Mô tả tóm lược</div>
-            <div className="text-[13px] text-slate-700 font-medium italic bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+            <div className="text-[13px] font-medium text-slate-500">Mô tả tóm lược</div>
+            <div className="text-[13px] text-slate-900 bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
               Lặp lại mỗi 1 ngày lúc 12:00
             </div>
@@ -749,7 +749,7 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
                     </div>
                     <div>
                       <div className="text-[13px] ">{table.name}</div>
-                      <div className="text-[11px] opacity-70">{table.label}</div>
+                      <div className="text-[12px] opacity-70">{table.label}</div>
                     </div>
                   </div>
                 </button>
@@ -793,7 +793,7 @@ function TabMapping({ onEdit }: { onEdit: () => void }) {
                   <tr key={field.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-900">{field.name}</td>
                     <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[11px] font-mono text-slate-600">
+                      <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[12px] font-mono text-slate-600">
                         {field.dataType}
                       </span>
                     </td>
@@ -1160,7 +1160,7 @@ function TabActivityHistory({ onEdit }: { onEdit: () => void }) {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
         <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-white">
-          <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+          <h3 className="text-[14px] font-bold text-slate-900 flex items-center gap-3">
             Lịch sử hoạt động
           </h3>
           <div className="flex items-center gap-3">

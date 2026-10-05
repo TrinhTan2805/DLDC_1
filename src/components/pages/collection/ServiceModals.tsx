@@ -41,7 +41,7 @@ const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boole
             <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
               <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Kết nối thành công</h3>
+            <h3 className="text-[16px] font-bold text-slate-900 mb-1">Kết nối thành công</h3>
             <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
           </div>
           <div className="px-5 py-3.5 flex justify-center gap-3 bg-slate-50 border-t border-slate-100 w-full">
@@ -164,7 +164,7 @@ const DataMappingModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () =>
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-slate-50 rounded-xl shadow-2xl w-full max-w-[1000px] h-full max-h-[90vh] overflow-hidden flex flex-col relative border border-slate-200">
         <div className="px-6 py-4 border-b border-slate-200 bg-white flex justify-between items-center z-10 shrink-0">
-          <h2 className="text-base font-bold text-slate-800 uppercase tracking-tight">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
+          <h2 className="text-[16px] font-bold text-slate-800 uppercase tracking-tight">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
           <button onClick={onClose} aria-label="Đóng" className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
@@ -273,7 +273,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div className="bg-white rounded-lg shadow-xl w-2/3 max-h-[95vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-            <h2 className="text-base text-slate-900 font-bold uppercase tracking-tight">Thông tin kết nối</h2>
+            <h2 className="text-[16px] text-slate-900 font-bold uppercase tracking-tight">Thông tin kết nối</h2>
             <button onClick={onClose} title="Đóng" className="p-1 hover:bg-slate-100 rounded transition-colors">
               <X className="w-5 h-5 text-slate-500" />
             </button>
@@ -302,12 +302,12 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
               {activeTab === 'general' && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="add-name" className="block text-[13px] text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
-                    <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                    <label htmlFor="add-name" className="block text-[13px] font-medium text-slate-900 mb-1">Tên dịch vụ <span className="text-red-600">*</span></label>
+                    <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2 relative">
-                      <label htmlFor="add-source-system" className="block text-[13px] text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
+                      <label htmlFor="add-source-system" className="block text-[13px] font-medium text-slate-900 mb-1">Tên hệ thống nguồn <span className="text-red-600">*</span></label>
                       <input aria-label="Input field"
                         id="add-source-system"
                         title="Tên hệ thống nguồn"
@@ -319,7 +319,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                         }}
                         onFocus={() => setShowSourceDropdown(true)}
                         onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors"
+                        className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..."
                       />
 
@@ -348,8 +348,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <label htmlFor="add-security" className="block text-[13px] text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
-                      <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white">
+                      <label htmlFor="add-security" className="block text-[13px] font-medium text-slate-900 mb-1">Mức độ bảo mật dữ liệu</label>
+                      <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Chọn mức độ bảo mật</option>
                         <option value="Dữ liệu mở">Dữ liệu mở</option>
                         <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -362,13 +362,13 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <label htmlFor="add-data-type" className="block text-[13px] text-slate-600 mb-1">Loại dữ liệu thu thập <span className="text-red-500">*</span></label>
+                      <label htmlFor="add-data-type" className="block text-[13px] font-medium text-slate-900 mb-1">Loại dữ liệu thu thập <span className="text-red-600">*</span></label>
                       <select
                         aria-label="Select box"
                         id="add-data-type"
                         title="Loại dữ liệu thu thập"
                         required
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white"
+                        className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={collectionDataType}
                         onChange={(e) => setCollectionDataType(e.target.value)}
                       >
@@ -379,11 +379,11 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="desc" className="block text-[13px] text-slate-600 mb-1">Mô tả</label>
-                    <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" rows={3} placeholder="Mô tả chi tiết" />
+                    <label htmlFor="desc" className="block text-[13px] font-medium text-slate-900 mb-1">Mô tả</label>
+                    <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
                   </div>
                   <div>
-                    <label className="block text-[13px] text-slate-600 mb-2">Đính kèm văn bản</label>
+                    <label className="block text-[13px] font-medium text-slate-900 mb-2">Đính kèm văn bản</label>
                     <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
                       <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                       <p className="text-[13px] text-slate-600">Click để chọn file PDF, DOCX</p>
@@ -562,12 +562,12 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
             {activeTab === 'general' && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="edit-name" className="block text-[13px] text-slate-600 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
-                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <label htmlFor="edit-name" className="block text-[13px] font-medium text-slate-900 mb-1">Tên dịch vụ <span className="text-red-600">*</span></label>
+                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">
-                    <label htmlFor="edit-source-system" className="block text-[13px] text-slate-600 mb-1">Tên hệ thống nguồn <span className="text-red-500">*</span></label>
+                    <label htmlFor="edit-source-system" className="block text-[13px] font-medium text-slate-900 mb-1">Tên hệ thống nguồn <span className="text-red-600">*</span></label>
                     <input aria-label="Input field"
                       id="edit-source-system"
                       title="Tên hệ thống nguồn"
@@ -579,7 +579,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                       }}
                       onFocus={() => setShowSourceDropdown(true)}
                       onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors"
+                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..."
                     />
 
@@ -608,8 +608,8 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label htmlFor="edit-security" className="block text-[13px] text-slate-600 mb-1">Mức độ bảo mật dữ liệu</label>
-                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white">
+                    <label htmlFor="edit-security" className="block text-[13px] font-medium text-slate-900 mb-1">Mức độ bảo mật dữ liệu</label>
+                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="">Chọn mức độ bảo mật</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -622,13 +622,13 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label htmlFor="edit-data-type" className="block text-[13px] text-slate-600 mb-1">Loại dữ liệu thu thập <span className="text-red-500">*</span></label>
+                    <label htmlFor="edit-data-type" className="block text-[13px] font-medium text-slate-900 mb-1">Loại dữ liệu thu thập <span className="text-red-600">*</span></label>
                     <select
                       aria-label="Select box"
                       id="edit-data-type"
                       title="Loại dữ liệu thu thập"
                       required
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors bg-white"
+                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                       defaultValue={service.dataType || ''}
                     >
                       <option value="">Chọn loại dữ liệu thu thập</option>
@@ -638,11 +638,11 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="edit-desc" className="block text-[13px] text-slate-600 mb-1">Mô tả</label>
-                  <textarea aria-label="Text input" id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] transition-colors" rows={3} placeholder="Mô tả chi tiết" />
+                  <label htmlFor="edit-desc" className="block text-[13px] font-medium text-slate-900 mb-1">Mô tả</label>
+                  <textarea aria-label="Text input" id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
-                  <label className="block text-[13px] text-slate-600 mb-2">Đính kèm văn bản</label>
+                  <label className="block text-[13px] font-medium text-slate-900 mb-2">Đính kèm văn bản</label>
                   <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                     <p className="text-[13px] text-slate-600">Click để chọn file PDF, DOCX</p>

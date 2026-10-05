@@ -78,7 +78,7 @@ F:\BTP\DLDC_1\tailieu\docs\compomennt.md
 | **Font chữ** | Inter, system-ui, sans-serif |
 | **Cỡ chữ** | Nội dung: 13px · Label form: 13px · Menu: 12px · H1: 16px · H2: 14px |
 | **Màu chính** | Primary: `#2563eb` · Destructive: `#dc2626` · Border: `#e2e8f0` |
-| **Bo góc** | Nút/Input: `rounded-lg` (8px) · Card: `rounded-xl` (12px) · Modal: `rounded-2xl` |
+| **Bo góc** | Nút/Input: `rounded-lg` (8px) · Card: `rounded-lg` (8px) · Modal: `rounded-2xl` |
 | **Button Primary** | `bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px]` |
 | **Button Secondary** | `bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-[6px]` |
 | **Button Destructive** | `bg-red-600 text-white hover:bg-red-700 rounded-lg` |
@@ -86,7 +86,7 @@ F:\BTP\DLDC_1\tailieu\docs\compomennt.md
 | **Modal header** | `px-6 py-4 border-b border-slate-200 flex items-center justify-between` |
 | **Modal footer** | `px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3` |
 | **Badge/Tag** | Màu xanh: `bg-blue-50 text-blue-700` · Xanh lá: `bg-green-50 text-green-700` · Đỏ: `bg-red-50 text-red-700` |
-| **Table header** | `bg-slate-50 text-[13px] font-semibold text-slate-500 uppercase tracking-tight` |
+| **Table header** | `bg-slate-50 text-[13px] font-semibold text-slate-500` — **bắt buộc in đậm**, chữ thường (không uppercase) |
 | **Spacing** | Padding section: `px-6 py-4` · Gap giữa các phần tử: `gap-3` hoặc `gap-4` |
 | **Shadow** | Card: `shadow-sm` · Modal: `shadow-2xl` |
 | **Transition** | `transition-colors` hoặc `transition-all` · Active: `active:scale-95` |

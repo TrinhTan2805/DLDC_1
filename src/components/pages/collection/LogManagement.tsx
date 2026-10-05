@@ -231,7 +231,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
               <input aria-label="Input field"
                 type="text"
                 placeholder="Tìm kiếm người dùng, hành động..."
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={logSearchText}
                 onChange={(e) => {
                   setLogSearchText(e.target.value);
@@ -256,9 +256,9 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
         {showFilters && (
           <div className="bg-white p-5 rounded-xl border border-slate-200 grid grid-cols-4 gap-6 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
             <div className="space-y-1.5 relative z-10">
-              <label className="text-base font-medium text-slate-500 uppercase tracking-tight">Người dùng</label>
+              <label className="text-[13px] font-medium text-slate-500 uppercase tracking-tight">Người dùng</label>
               <select aria-label="Select box"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={logUserFilter}
                 onChange={(e) => {
                   setLogUserFilter(e.target.value);
@@ -273,9 +273,9 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-base font-medium text-slate-500 uppercase tracking-tight">Hành động</label>
+              <label className="text-[13px] font-medium text-slate-500 uppercase tracking-tight">Hành động</label>
               <select aria-label="Select box"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={logActionFilter}
                 onChange={(e) => {
                   setLogActionFilter(e.target.value);
@@ -295,11 +295,11 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-base font-medium text-slate-500 uppercase tracking-tight">Từ ngày</label>
+              <label className="text-[13px] font-medium text-slate-500 uppercase tracking-tight">Từ ngày</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                 <input aria-label="Input field"
                   type="date"
-                  className="w-full border-0 bg-transparent text-[16px] focus:outline-none text-slate-700 p-0"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
                   value={logDateFrom}
                   onChange={(e) => {
                     setLogDateFrom(e.target.value);
@@ -311,11 +311,11 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-base font-medium text-slate-500 uppercase tracking-tight">Đến ngày</label>
+              <label className="text-[13px] font-medium text-slate-500 uppercase tracking-tight">Đến ngày</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                 <input aria-label="Input field"
                   type="date"
-                  className="w-full border-0 bg-transparent text-[16px] focus:outline-none text-slate-700 p-0"
+                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
                   value={logDateTo}
                   onChange={(e) => {
                     setLogDateTo(e.target.value);
@@ -462,7 +462,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-              <h2 className="text-base font-bold text-slate-900 uppercase tracking-tight">Chi tiết nhật ký</h2>
+              <h2 className="text-[16px] font-bold text-slate-900 uppercase tracking-tight">Chi tiết nhật ký</h2>
               <button
                 onClick={() => {
                   setShowLogDetailModal(false);
@@ -481,11 +481,11 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">ID nhật ký</label>
-                  <p className="text-base text-slate-900 font-normal">#{selectedLog.id}</p>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">ID nhật ký</label>
+                  <p className="text-[13px] text-slate-900 font-normal">#{selectedLog.id}</p>
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Trạng thái</label>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Trạng thái</label>
                   <StatusTag 
                     label={selectedLog.status} 
                     variant={selectedLog.status === 'Thành công' || selectedLog.status === 'Active' ? 'green' : selectedLog.status === 'Thất bại' ? 'red' : 'slate'} 
@@ -495,40 +495,40 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Tên đăng nhập</label>
-                  <p className="text-base text-slate-900 font-normal">{selectedLog.user}</p>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Tên đăng nhập</label>
+                  <p className="text-[13px] text-slate-900 font-normal">{selectedLog.user}</p>
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Họ và tên</label>
-                  <p className="text-base text-slate-900 font-normal">{selectedLog.userName}</p>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Họ và tên</label>
+                  <p className="text-[13px] text-slate-900 font-normal">{selectedLog.userName}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Hành động</label>
-                  <p className="text-base text-slate-900 font-normal">{selectedLog.action}</p>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Hành động</label>
+                  <p className="text-[13px] text-slate-900 font-normal">{selectedLog.action}</p>
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Module</label>
-                  <p className="text-base text-slate-900 font-normal">{selectedLog.module}</p>
+                  <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Module</label>
+                  <p className="text-[13px] text-slate-900 font-normal">{selectedLog.module}</p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Thời gian</label>
-                <p className="text-base text-slate-900 font-normal">{selectedLog.timestamp}</p>
+                <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Thời gian</label>
+                <p className="text-[13px] text-slate-900 font-normal">{selectedLog.timestamp}</p>
               </div>
 
               <div className="border-t border-slate-200 pt-4">
-                <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Chi tiết</label>
-                <p className="text-base text-slate-900 bg-slate-50 p-3 rounded font-normal">{selectedLog.details}</p>
+                <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Chi tiết</label>
+                <p className="text-[13px] text-slate-900 bg-slate-50 p-3 rounded font-normal">{selectedLog.details}</p>
               </div>
 
               <div className="border-t border-slate-200 pt-4">
                 <button
                   onClick={() => setShowExtraInfo(!showExtraInfo)}
-                  className="text-base font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5"
+                  className="text-[13px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1.5"
                 >
                   <Monitor className="w-4 h-4" />
                   {showExtraInfo ? 'Ẩn thông tin khác' : 'Xem thông tin khác'}
@@ -537,16 +537,16 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                 {showExtraInfo && (
                   <div className="mt-4 bg-slate-50 rounded-lg p-4 grid grid-cols-3 gap-6 border border-slate-100 animate-in slide-in-from-top-2">
                     <div>
-                      <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Địa chỉ IP</label>
-                      <p className="text-base text-slate-900 font-normal font-mono">{selectedLog.ip}</p>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Địa chỉ IP</label>
+                      <p className="text-[13px] text-slate-900 font-normal font-mono">{selectedLog.ip}</p>
                     </div>
                     <div>
-                      <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Thiết bị</label>
-                      <p className="text-base text-slate-900 font-normal">{selectedLog.device}</p>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Thiết bị</label>
+                      <p className="text-[13px] text-slate-900 font-normal">{selectedLog.device}</p>
                     </div>
                     <div>
-                      <label className="block text-base font-medium text-slate-500 mb-1 uppercase tracking-tight">Trình duyệt</label>
-                      <p className="text-base text-slate-900 font-normal">{selectedLog.browser}</p>
+                      <label className="block text-[13px] font-medium text-slate-500 mb-1 uppercase tracking-tight">Trình duyệt</label>
+                      <p className="text-[13px] text-slate-900 font-normal">{selectedLog.browser}</p>
                     </div>
                   </div>
                 )}
@@ -560,7 +560,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
                   setShowLogDetailModal(false);
                   setShowExtraInfo(false);
                 }}
-                className="px-4 py-2 text-base text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors font-medium shadow-sm"
+                className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors font-medium shadow-sm"
               >
                 Đóng
               </button>

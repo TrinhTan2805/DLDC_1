@@ -108,11 +108,17 @@ export function DataProvisionServiceSetupPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const handleDeleteService = (serviceId: string) => {
     setServices(services.filter(s => s.id !== serviceId));
     setShowDeleteConfirmModal(false);
-    alert("Đã xóa dịch vụ thành công!");
+    showToast("Đã xóa dịch vụ thành công!");
   };
 
   // Dynamic services list (including standard fields from UI mockups)
@@ -175,7 +181,14 @@ export function DataProvisionServiceSetupPage() {
   const paginatedServices = filteredServices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
+    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }} className="relative">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 z-[99999] bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300 font-medium text-sm">
+          <CheckCircle className="w-4 h-4 text-emerald-400" />
+          {toastMessage}
+        </div>
+      )}
       <div className="h-full flex flex-col bg-slate-50 min-h-screen animate-in fade-in duration-300">
         {/* Tabs */}
         <div className="bg-white border-b border-slate-200 px-6">
@@ -784,6 +797,7 @@ export function DataProvisionServiceSetupPage() {
           if (isPublic) {
             setActiveTab('publish');
           }
+          showToast(selectedService ? 'Cập nhật dịch vụ thành công!' : 'Khởi tạo dịch vụ cung cấp thành công!');
         }}
         onSaveDraft={(data) => {
           const now = new Date();
@@ -809,7 +823,7 @@ export function DataProvisionServiceSetupPage() {
             setServices([...services, newService]);
           }
           setShowServiceModal(false);
-          alert("Đã lưu bản nháp dịch vụ!");
+          showToast("Đã lưu bản nháp dịch vụ!");
         }}
         onSubmitApproval={(data) => {
           setSelectedService(data);
@@ -841,7 +855,7 @@ export function DataProvisionServiceSetupPage() {
             setServices([...services, newService]);
           }
 
-          alert(`Đã gửi trình duyệt thành công!`);
+          showToast("Đã gửi trình duyệt thành công!");
           setShowSubmitApprovalModal(false);
           setActiveTab('approve');
           setApprovalFilterStatus('pending');
@@ -858,12 +872,12 @@ export function DataProvisionServiceSetupPage() {
         onApprove={(serviceToApprove, reason) => {
           setServices(services.map(s => s.id === serviceToApprove.id ? { ...s, status: 'approved', approveReason: reason } : s));
           setShowApprovalModal(false);
-          alert(`Đã phê duyệt dịch vụ: ${serviceToApprove.name}${reason ? `. Lý do: ${reason}` : ''}`);
+          showToast(`Đã phê duyệt dịch vụ: ${serviceToApprove.name}${reason ? `. Lý do: ${reason}` : ''}`);
         }}
         onReject={(serviceToReject, reason) => {
           setServices(services.map(s => s.id === serviceToReject.id ? { ...s, status: 'rejected', rejectReason: reason } : s));
           setShowApprovalModal(false);
-          alert(`Đã từ chối dịch vụ: ${serviceToReject.name}. Lý do: ${reason}`);
+          showToast(`Đã từ chối dịch vụ: ${serviceToReject.name}. Lý do: ${reason}`);
         }}
       />
 
@@ -882,7 +896,7 @@ export function DataProvisionServiceSetupPage() {
           const publishDate = `${day}/${month}/${year} ${h}:${m}:${s}`;
           setServices(services.map(sv => sv.id === serviceToPublish.id ? { ...sv, status: 'published', publishReason: reason, publishDate } : sv));
           setShowPublishModal(false);
-          alert(`Đã công khai dịch vụ: ${serviceToPublish.name} thành công!${reason ? ` Lý do: ${reason}` : ''}`);
+          showToast(`Đã công khai dịch vụ: ${serviceToPublish.name} thành công!${reason ? ` Lý do: ${reason}` : ''}`);
         }}
       />
 
@@ -898,11 +912,11 @@ export function DataProvisionServiceSetupPage() {
         service={selectedService}
         onApprove={(serviceToApprove) => {
           setServices(services.map(s => s.id === serviceToApprove.id ? { ...s, status: 'approved' } : s));
-          alert(`Đã phê duyệt dịch vụ: ${serviceToApprove.name}`);
+          showToast(`Đã phê duyệt dịch vụ: ${serviceToApprove.name}`);
         }}
         onReject={(serviceToReject) => {
           setServices(services.map(s => s.id === serviceToReject.id ? { ...s, status: 'rejected' } : s));
-          alert(`Đã từ chối dịch vụ: ${serviceToReject.name}`);
+          showToast(`Đã từ chối dịch vụ: ${serviceToReject.name}`);
         }}
       />
 

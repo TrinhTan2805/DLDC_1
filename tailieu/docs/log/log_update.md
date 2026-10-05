@@ -1,5 +1,296 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 91
+
+**PM chốt:** badge trong bảng **căn trái**.
+
+**Nội dung thay đổi:**
+- `CollectionSetupPage.tsx`: gỡ tham số xem trước `?badge=left`; 4 cột badge (Loại nguồn, Phương thức kết nối, Trạng thái dịch vụ, Trạng thái dữ liệu) cố định căn trái (tiêu đề + dữ liệu).
+- `compomennt.md` mục 5.3.3: dòng Badge → **Trái**; code mẫu `badge: 'text-left'`.
+
+**Kiểm tra (chạy app):** URL thường `/collection-setup` (không tham số) — STT, Thao tác căn giữa; 9 cột còn lại căn trái cả tiêu đề và ô; Ngày tạo 2 dòng; tsc không lỗi ở file; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 90
+
+**Tài liệu (`tailieu/docs/compomennt.md`):** thêm mục **5.3.3 Căn lề cột** — căn theo kiểu dữ liệu, tiêu đề căn giống dữ liệu: STT giữa; văn bản trái; số phải + `tabular-nums`; ngày giờ trái (có cả ngày và giờ → giờ xuống dòng 2, chỉ có ngày → 1 dòng); phiên bản/mã trái; badge **chờ quyết định**; thao tác, checkbox giữa. Kèm quy tắc 1 dòng/ô (ngoại lệ ngày giờ), giá trị trống, độ rộng cột. Bảng mục 5.3 thêm dòng trỏ sang 5.3.3.
+
+**Màn hình:** Thiết lập thu thập (`CollectionSetupPage.tsx`):
+- Cột Phiên bản, Ngày tạo: căn giữa → căn trái (cả tiêu đề và dữ liệu).
+- Xem trước căn lề badge: mặc định căn giữa; thêm `?badge=left` vào URL (VD `/collection-setup?badge=left`) để 4 cột badge (Loại nguồn, Phương thức kết nối, Trạng thái dịch vụ, Trạng thái dữ liệu) căn trái. **Mã tạm phục vụ PM xem trước — gỡ sau khi chốt.**
+
+**Kiểm tra (chạy app):** đo `text-align` tiêu đề và ô cả 11 cột ở 2 chế độ — đúng bảng trên; Ngày tạo hiển thị 2 dòng (`19/12/2025` / `15:30:00`); tsc không lỗi ở file; không lỗi console.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`, `src/components/pages/collection/CollectionSetupPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 89
+
+**Màn hình:** Thiết lập thu thập → danh sách dịch vụ (`CollectionSetupPage.tsx`).
+
+**Nội dung thay đổi:** Đổi nhãn phương thức kết nối theo ảnh mẫu PM — badge trong bảng và lựa chọn trong bộ lọc "Loại kết nối":
+- "Cơ sở dữ liệu" → **"Cơ Sở Dữ Liệu"**; "Tải file Excel" → **"File"**; "API nhận JSON" → **"API nhận (JSON)"**; "API nhận XML" → **"API nhận (XML)"**; "API" giữ nguyên.
+- `compomennt.md` mục 5.8: cập nhật tên badge tương ứng.
+
+**Kiểm tra (chạy app):** 10/10 hàng đúng logic thao tác (API nhận (JSON)/(XML) vẫn ẩn Tích hợp mới, Cập nhật dữ liệu); lọc từng loại đều ra đúng 1 dịch vụ (API → 31); màu badge giữ nguyên; tsc không lỗi ở file; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 88
+
+**Màn hình:** Thiết lập thu thập → danh sách dịch vụ (`CollectionSetupPage.tsx`).
+
+**Nội dung thay đổi:**
+- Mock: dịch vụ #8 → phương thức **Tải file Excel** (trong `DEMO_STATES`) — 10 dịch vụ đầu có đủ API, API nhận JSON, API nhận XML, Tải file (Cơ sở dữ liệu nằm ở trang sau, dữ liệu gốc).
+- Màu badge theo ảnh mẫu PM cung cấp (đo từ ảnh, quy về màu Tailwind gần nhất):
+  - Loại nguồn: Trong ngành `#8200DB/#FAF5FF/#E7E1EC`; Ngoài ngành `#2563EB/#EFF6FF/#BFDBFE`.
+  - Phương thức: Cơ sở dữ liệu `#4338CA/#EEF2FF/#E0E7FF`; Tải file `#475569/#F8FAFC/#E2E8F0`; API `#047857/#ECFDF5/#D1FAE5`; API nhận JSON/XML `#C2410C/#FFF7ED/#FED7AA`.
+  - Trạng thái dịch vụ: Hoạt động `#15803D/#F0FDF4/#DCFCE7`; Bản nháp, Ngưng hoạt động `#64748B/#F8FAFC/#E2E8F0`.
+  - Trạng thái dữ liệu: Rỗng `#64748B/#F8FAFC/#E2E8F0`; Lỗi cập nhật `#B91C1C/#FEF2F2/#FEE2E2`; Cập nhật thành công `#047857/#ECFDF5/#D1FAE5`; Đang xử lý `#D97706/#FFFFFF/#F6B657` (nền trắng, viền cam).
+- `compomennt.md` mục 5.8: thay bảng màu badge (bỏ các dòng "chưa xác nhận"), ghi chú "Ngoài ngành" dùng `#2563EB` theo ảnh mẫu, "Đang xử lý" cần xác nhận lại bằng DevTools.
+
+**Kiểm tra (chạy app):** đo computed style 14 badge — khớp bảng trên, cao 26px; hàng 8 hiển thị "Tải file Excel", menu đúng logic (Tích hợp mới ✓, Cập nhật dữ liệu ✗, Xóa dữ liệu ✓, Ngừng hoạt động ✗, Xóa dịch vụ ✗); lọc Tải file Excel → 1 hàng; tsc không lỗi ở file; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật logic thao tác (Ngày thực hiện: 05/10/2026) — 87
+
+**Màn hình:** Thiết lập thu thập → danh sách dịch vụ (`CollectionSetupPage.tsx`).
+
+**Nội dung thay đổi:**
+- Bổ sung 2 phương thức kết nối **API nhận JSON**, **API nhận XML** (giữ nhãn "API" cho API thường); badge màu tạm (chưa có màu chuẩn).
+- Dịch vụ có phương thức API nhận JSON / API nhận XML: **ẩn hẳn** "Tích hợp mới" và "Cập nhật dữ liệu" khỏi menu `⋯` (các thao tác khác vẫn theo logic mục 86).
+- Mock: dịch vụ #2 → API nhận JSON, #5 → API nhận XML (trong `DEMO_STATES`).
+- Sửa lỗi bộ lọc "Loại kết nối": trước so `service.type` (REST/SOAP) với "API"/"Cơ sở dữ liệu" nên luôn rỗng → so theo phương thức kết nối; thêm 2 lựa chọn API nhận JSON / XML.
+- `compomennt.md` mục 5.8: dòng badge Phương thức kết nối bổ sung 2 loại mới.
+
+**Kiểm tra (chạy app):** đối chiếu tự động 10 hàng đầu — 10/10 đúng (hàng #2, #5 không có Tích hợp mới / Cập nhật dữ liệu); lọc API → 10 hàng/trang, API nhận JSON → 1, API nhận XML → 1, Cơ sở dữ liệu → 1; tsc không lỗi ở file; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật logic thao tác (Ngày thực hiện: 05/10/2026) — 86
+
+**Màn hình:** Thiết lập thu thập → danh sách dịch vụ (`CollectionSetupPage.tsx`).
+
+**Logic thao tác theo trạng thái (PM cung cấp, đã xác nhận 2 điểm mâu thuẫn):**
+| Thao tác | Được phép khi |
+|---|---|
+| Xem chi tiết | Luôn luôn |
+| Mapping chi tiết | Dữ liệu = Cập nhật thành công |
+| Tích hợp mới | Dữ liệu = Rỗng hoặc Lỗi cập nhật |
+| Cập nhật dữ liệu | Dữ liệu = Cập nhật thành công |
+| Xóa dữ liệu thu thập | Dữ liệu ≠ Rỗng và CSDL đích không còn dữ liệu (lỗi: "CSDL đích còn dữ liệu - xóa dữ liệu chuyển đổi trước") |
+| Ngừng hoạt động | Dịch vụ = Hoạt động; dịch vụ Ngưng hoạt động → nút đổi thành **Hoạt động** (mở modal xác nhận kích hoạt); Bản nháp → khóa |
+| Xóa dịch vụ | Dữ liệu = Rỗng |
+| Dữ liệu Đang xử lý | Khóa tất cả trừ Xem chi tiết |
+
+**Nội dung thay đổi:**
+- Thêm `getActionRules()` trả về lý do khóa cho từng thao tác; nút Mapping bị khóa giữ vị trí, tooltip ghi lý do; mục menu `⋯` bị khóa hiển thị lý do 12px ngay trong mục (compomennt.md 5.3.2).
+- Chuẩn hóa trạng thái: `serviceStatus` (Hoạt động / Ngưng hoạt động / Bản nháp), `dataStatus` (Rỗng / Lỗi cập nhật / Cập nhật thành công / Đang xử lý — đổi nhãn "Đang lấy dữ liệu" → "Đang xử lý"; "Lỗi cấu trúc" gộp vào "Lỗi cập nhật").
+- Mock trạng thái demo cho 10 dịch vụ đầu (`DEMO_STATES` trong `CollectionSetupPage.tsx`) — đủ 3 trạng thái dịch vụ, 4 trạng thái dữ liệu, 1 dịch vụ (#7) CSDL đích còn dữ liệu. **Không sửa `mockCollectionServices.ts`** vì file này còn được Dashboard thu thập / Báo cáo KPI dùng.
+- Sửa lỗi thẻ thống kê: Bản nháp/Ngưng hoạt động trước đếm `format_error`/`structure_error` (luôn 0) → đếm theo `serviceStatus`; bộ lọc Trạng thái lọc theo `serviceStatus`.
+- Thêm modal xác nhận "Kích hoạt lại dịch vụ" cho nút Hoạt động.
+
+**Kiểm tra (chạy app):** đối chiếu tự động 10 hàng đầu với ma trận trên — 10/10 đúng; tooltip lý do trên nút Mapping bị khóa hiển thị đúng; thẻ thống kê 36 / 31 / 2 / 3; lọc Bản nháp → 2, Ngưng hoạt động → 3, Hoạt động → 31; tsc không lỗi ở file; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 85
+
+**Tài liệu (`tailieu/docs/compomennt.md`):**
+- Mục 5.1 Nút bấm: gộp bảng loại nút với trạng thái thành **một bảng** (Bình thường / Hover / Đang chọn-mở / Bị vô hiệu) cho 8 loại: Primary, Outline, Ghost, Destructive, Icon nhấn mạnh, Icon outline, Icon trong bảng, Chuông. Quy tắc: nền `#F1F5F9` + chữ `#94A3B8` chỉ dành cho nút vô hiệu, bỏ `opacity-50`; trạng thái đang chọn dùng tông xanh `#EAF3FF`/`#155DFC`; viền nút outline/icon outline `#CBD5E1` (trang chuẩn `#E2E8F0`).
+- Mục 5.3.2: đồng bộ hover nút icon trong bảng `#F1F5F9`, thêm trạng thái menu mở / vô hiệu. Mục 5.14 Phân trang: nút dùng kiểu Outline, Trước/Sau ở đầu/cuối dùng trạng thái vô hiệu; cập nhật ví dụ.
+
+**Màn hình:** Thiết lập thu thập (`CollectionSetupPage.tsx`) — áp dụng cho **mọi nút trên màn hình**:
+- Thêm hằng `BTN_PRIMARY`, `BTN_OUTLINE`, `BTN_PAGE`, `BTN_GHOST_ICON`, `BTN_DISABLED`, `MENU_ITEM` dùng chung trong file.
+- Thêm mới, Đóng/Đồng ý/Gửi thông báo trong modal → Primary; Kết xuất, Đóng, Hủy bỏ → Outline; Tìm kiếm hover `#059669`; Bộ lọc viền `#CBD5E1`, đang mở nền `#EAF3FF`; nút X đóng modal → ghost icon.
+- Phân trang: Trước/Sau/số trang kiểu Outline, trang hiện tại nền `#155DFC`, vô hiệu nền xám chữ nhạt.
+- Nút "Xác nhận ngừng" (modal Ngừng hoạt động): bỏ gradient cam + `opacity-50`, dùng Primary; khi chưa nhập lý do hiển thị trạng thái vô hiệu chuẩn.
+- Nút icon trong bảng: hover `#F1F5F9`, menu `⋯` đang mở nền `#EAF3FF` icon `#155DFC`; mục menu hover `#F1F5F9`.
+- Mọi nút bấm được có con trỏ `pointer`, focus bàn phím viền 2px `#155DFC`.
+- Sửa lỗi tooltip "Thao tác khác" bị kẹt hiển thị đè lên modal sau khi chọn mục trong menu (tooltip nút `⋯` chỉ bật khi hover).
+
+**Kiểm tra (chạy app, đo computed style):** Trước (vô hiệu) nền `#F1F5F9` chữ `#94A3B8` con trỏ not-allowed — Sau/số trang nền trắng viền `#CBD5E1` chữ `#334155` con trỏ pointer; Kết xuất hover nền `#F8FAFC` viền `#94A3B8`; Bộ lọc mở nền `#EAF3FF`; `⋯` mở nền `#EAF3FF`; "Xác nhận ngừng" vô hiệu khi chưa nhập lý do → xanh khi đã nhập; không còn tooltip kẹt; không lỗi console; tsc không lỗi ở file.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`, `src/components/pages/collection/CollectionSetupPage.tsx`.
+
+## Sửa lỗi (Ngày thực hiện: 05/10/2026) — 84
+
+**Màn hình:** Thiết lập thu thập → tab Thiết lập dịch vụ (`CollectionSetupPage.tsx`) — thanh phân trang.
+
+**Lỗi:** Chọn số bản ghi/trang (20, 50, 100) không có tác dụng — ô chọn chưa gắn với state `itemsPerPage`.
+
+**Sửa:**
+- Gắn ô chọn với `itemsPerPage` (`value` + `onChange`), khi đổi số bản ghi thì quay về trang 1.
+- Khi danh sách rỗng hiển thị `0 - 0 / 0` thay vì `1 - 0 / 0`; nút "Sau" vô hiệu khi `currentPage >= tổng số trang` (tránh bấm được khi không có dữ liệu).
+
+**Kiểm tra (chạy app):** 10 → 10 hàng, 4 trang; trang 2 hiển thị 11–20, STT bắt đầu 11; 20 → 20 hàng, 2 trang; 50/100 → 36 hàng, 1 trang, Trước/Sau đều vô hiệu; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 83
+
+**Màn hình:** Quản lý thu thập → Thiết lập thu thập → tab Thiết lập dịch vụ (`CollectionSetupPage.tsx`) — áp dụng `tailieu/docs/compomennt.md` bản cập nhật 05/10/2026.
+
+**Nội dung thay đổi:**
+- Tab: cao 48px, padding 12×16, chữ 14px/600; đang chọn `#155DFC` (blue-600), thường `#64748B`.
+- Thẻ thống kê: bo 16px (`rounded-2xl`), viền `#E2E8F0`, bỏ shadow; nhãn 16px/400 `#64748B`, số 16px/600 `#0F172A`.
+- Thanh công cụ: ô tìm kiếm cao 35px, padding ngang 12px; nút icon 40×40 (Tìm kiếm nền `#10B981`, Bộ lọc nền trắng viền `#E2E8F0`); nút Thêm mới/Kết xuất cao 40px, Kết xuất dạng outline viền `#CBD5E1` chữ `#334155`; khoảng cách nút 8px. Ô lọc trong panel Bộ lọc cao 35px.
+- Bảng: `th` cao 42px, padding 13×12, 13px/700 đen, nền `#F8FAFC`; `td` padding 4×12, chữ đen 400; hàng cao 48px, kẻ dưới `#E0E0E0`; bỏ font mono ở Mã/Phiên bản/Ngày tạo (dùng Inter).
+- Chữ dài (Tên dịch vụ, Mã dịch vụ, Hệ thống nguồn): cắt 1 dòng `…`, hover hiện tooltip đầy đủ (chỉ khi bị cắt; Tên dịch vụ kèm mô tả trong tooltip thay vì dòng thứ 2 trong ô).
+- Badge: thay `StatusTag` (dùng chung) bằng `Badge` cục bộ theo mục 5.8 — 13px/400, padding 2×8, viền 1px, bo 16px, cao 26px, bảng màu chuẩn; các badge chưa có màu chuẩn dùng màu tạm.
+- Cột thao tác (mục 5.3.2): căn giữa, cố định bên phải khi cuộn ngang (có bóng phân tách); thứ tự Xem chi tiết → Mapping chi tiết → `⋯`; nút 32×32 icon `#475569`, tooltip chuẩn thay `title` (sửa nhãn "Quản lý" → "Xem chi tiết", "Maping" → "Mapping"); menu `⋯` nhãn nhóm 12px/500 không uppercase, mục 13px cao 32px, icon `#475569`, mục Xóa chữ + icon `#DC2626`.
+- Sửa lỗi STT đánh lại từ 1 ở mỗi trang → đánh số liên tục theo trang.
+- Phân trang: ô chọn số bản ghi viền `#E2E8F0`, bo 8px.
+
+**CSS toàn cục (`src/index.css`):** `th` 600/`#64748b` → **700/`#000000`**; `td` và chữ slate/gray trong ô `#020817` → `#000000`; `table.collection-table th` 600/`#64748b` → 700/`#000000` — theo compomennt.md mục 5.3 (áp dụng toàn hệ thống).
+
+**Kiểm tra:** tsc không lỗi ở file; build thành công; chạy app đo computed style: tab 48px 14/600, thẻ bo 16px, ô tìm 35px, nút 40px, `th` 42px 700 đen, mọi hàng 48px, kẻ `#E0E0E0`, badge 26px viền 1px, nút thao tác 32×32, tooltip 12px nền `#475569`/95 z-300, menu 7 mục đúng màu; font Inter toàn trang; không còn lỗi console; tab Quản lý nhật ký vẫn hiển thị bình thường.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`, `src/index.css`.
+
+## Cập nhật tài liệu quy chuẩn giao diện (Ngày thực hiện: 05/10/2026) — 82
+
+**Tài liệu:** `tailieu/docs/compomennt.md` mục 5.3.2 Cột thao tác — bổ sung theo tham chiếu UX (NN/g, IBM Carbon, GitHub Primer):
+- Nút thao tác (kể cả `⋯`) luôn hiển thị, không ẩn chờ hover.
+- Mục disabled trong menu `⋯` phải ghi lý do ngay trong mục (dòng phụ 12px `#64748B`), không dùng tooltip trong menu; kèm class mẫu.
+
+## Cập nhật tài liệu quy chuẩn giao diện (Ngày thực hiện: 05/10/2026) — 81
+
+**Tài liệu:** `tailieu/docs/compomennt.md` — thêm mục **5.3.2. Cột thao tác (Action Column)**. Chỉ sửa tài liệu, chưa sửa code.
+
+**Nội dung:**
+- 1–3 thao tác: hiện hết dạng nút icon; ≥ 4 thao tác: tối đa 2 nút icon + nút `⋯` (tổng ≤ 3 nút/hàng).
+- Thứ tự nút ngoài: Xem chi tiết → thao tác dùng nhiều nhất; Xóa/không hoàn tác luôn nằm trong menu `⋯`.
+- Nút icon 32×32, icon 16px `#475569`, hover `#155DFC`, tooltip bắt buộc.
+- Menu `⋯`: rộng 224px, mục 13px cao 32px, chia nhóm theo đối tượng (nhãn 12px/500 `#64748B`, không uppercase), Xóa đặt cuối nhóm màu `#DC2626` + modal xác nhận.
+- Thao tác không áp dụng theo trạng thái: nút ngoài giữ vị trí + mờ + tooltip lý do; mục menu hiển thị disabled.
+- Bảng áp dụng cụ thể cho màn Thiết lập thu thập (6 thao tác).
+- Dòng "Cột hành động" ở bảng mục 5.3 trỏ sang 5.3.2.
+
+## Cập nhật tài liệu quy chuẩn giao diện (Ngày thực hiện: 05/10/2026) — 80
+
+**Tài liệu:** `tailieu/docs/compomennt.md` — cập nhật theo "Bộ quy chuẩn giao diện KDLDC-BTP mới.docx" (lấy trang Thiết lập thu thập của hệ thống Bộ Tư pháp làm chuẩn). **Chỉ sửa tài liệu, chưa sửa code** — chờ PM kiểm tra.
+
+**Quyết định PM:** một màu xanh chính duy nhất `#155DFC` (thay `#2563EB`, `#135DFF`); chữ dài trong bảng cắt `…` + tooltip khi hover.
+
+**Nội dung thay đổi chính:**
+- Typography (mục 1): bổ sung logo, menu (12px, đang chọn 500 `#155DFC`), breadcrumb 12px, tab 14/600, thẻ thống kê 16px, `th` 13/700 `#000`, `td` 13/400 `#000`, badge 13/400; quy tắc `font-family: inherit` cho button/input.
+- Màu sắc (mục 2): bảng 14 màu theo vai trò; Primary đổi `#2563EB` → `#155DFC`.
+- Thêm 4.3 Bo góc (nút/input 8px, menu 10px, thẻ/badge 16px) và 4.4 Khung trang (sidebar 250px, header 64px, thứ tự thanh công cụ).
+- 5.1 Nút: bảng 7 loại nút, cao 40px. 5.2 Ô nhập: cao 35px, padding 8×12.
+- 5.3 Bảng: `th` cao 42px, padding 13×12, **700 `#000`** (thay quy định 600 `#64748B` trước đó); `td` padding 4×12; hàng 48px, kẻ `#E0E0E0`. Thêm 5.3.1 Cắt chữ dài + Tooltip.
+- 5.6/5.6.1 Thẻ thống kê: bo **16px** (thay 8px), số `#0F172A`, bỏ `shadow-sm`.
+- 5.8 Badge: khung chung 13/400, padding 2×8, viền 1px, bo 16px, cao 26px + bảng màu từng badge.
+- 5.9 Tab: trong nội dung, cao 48px, 14/600. 5.15 Breadcrumb: 12px `#020817`.
+- Thêm 5.18 Sidebar/Menu/Header; mục 7 Token CSS, checklist nghiệm thu, danh sách mục chưa xác nhận.
+- Thay toàn bộ mã `#2563eb` trong ví dụ bằng `#155dfc`; chuẩn hóa cỡ chữ ví dụ về 13px, bo góc ô nhập về 8px.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`. Bản sao lưu trước khi sửa: scratchpad `compomennt.backup.md`.
+
+**Chưa cập nhật:** bảng tóm tắt thiết kế trong `GEMINI.md` (còn ghi Card 8px, Table header 600, Primary `#2563eb`) — chờ PM duyệt compomennt.md.
+
+## Sửa lỗi phát hiện khi chạy thử (Ngày thực hiện: 05/10/2026) — 79
+
+**Phát hiện khi chạy thử màn Thiết lập dịch vụ thu thập (đo computed style trên trình duyệt):**
+- Thẻ thống kê `rounded-lg` hiển thị **10px** thay vì 8px do biến `--radius: .625rem`.
+- Header bảng hiển thị **700 / #0f172a** thay vì 600 / #64748b do rule riêng `table.collection-table th` (dùng chung cho nhiều bảng) ghi đè.
+
+**Nội dung sửa (`src/index.css`):**
+- `--radius: .625rem` → `.5rem` ⇒ `rounded-sm` 4px · `rounded-md` 6px · `rounded-lg` 8px · `rounded-xl` 12px, khớp `compomennt.md`. Áp dụng toàn hệ thống.
+- `table.collection-table th`: `font-weight: bold` → `600`, `color: #0f172a` → `#64748b`, đồng bộ với quy định header bảng in đậm màu muted.
+
+**Kết quả đo lại:** body 13px Inter `#020817`; `th` 13px/600/`#64748b`; `td` 13px/400/`#020817`; nhãn & số thẻ thống kê 16px (400/600); bo góc thẻ 8px; `.font-mono` dùng font monospace. Build `vite build` thành công.
+
+## Cập nhật giao diện toàn hệ thống (Ngày thực hiện: 05/10/2026) — 78
+
+**Phạm vi:** Toàn bộ hệ thống (file CSS dùng chung). PM xác nhận theo `compomennt.md`, thay thế yêu cầu cũ "10.5pt, chữ đen, không bôi đậm", và bổ sung quy định: **tất cả header bảng phải in đậm**.
+
+**Nội dung thay đổi:**
+- `body`: font-size 14px → 13px, màu `#000000` → `#020817` (foreground).
+- `body *`: loại trừ `code`, `pre`, `kbd`, `samp`, `.font-mono` khỏi override font Inter để các chỗ hiển thị mã/URL dùng font monospace.
+- Header bảng (`th`): font-weight normal → 600 (in đậm), 14px → 13px, màu `#000000` → `#64748b` (muted); giữ chữ thường.
+- Ô bảng (`td`) và text slate/gray trong ô: 14px → 13px, màu `#000000` → `#020817`.
+- `compomennt.md` mục 5.3: thêm quy định bắt buộc in đậm header bảng + class Tailwind chuẩn cho `th`/`td`.
+- `GEMINI.md`: bảng tóm tắt Table header bỏ `uppercase tracking-tight`, ghi rõ bắt buộc in đậm.
+
+**File bị ảnh hưởng:** `src/index.css`, `tailieu/docs/compomennt.md`, `GEMINI.md`.
+
+## Cập nhật giao diện toàn hệ thống (Ngày thực hiện: 05/10/2026) — 77
+
+**Phạm vi:** Toàn bộ hệ thống (file CSS dùng chung) — PM đã xác nhận thống nhất font chính là **Inter** theo `tailieu/docs/compomennt.md`.
+
+**Nội dung thay đổi:**
+- Override typography toàn cục: `body` và `body *` đổi `font-family: Arial, Helvetica, sans-serif !important` → `'Inter', system-ui, sans-serif !important`.
+- Biến `--font-sans`: `'Inter', Arial, Helvetica, sans-serif` → `'Inter', system-ui, sans-serif`.
+- Giữ nguyên các override cỡ chữ (`body` 14px, `table th/td` 14px) và màu chữ `#000000` — chưa có quyết định thay đổi.
+
+**File bị ảnh hưởng:** `src/index.css`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 76
+
+**Tài liệu:**
+- `tailieu/docs/compomennt.md`: ví dụ mục 5.6 Card đổi nhãn 14px → 16px, con số 24px → 16px. Thêm mục **5.6.1. Thẻ thống kê (Stat Card)**: bo góc 8px, `shadow-sm`, `p-4`, cỡ chữ thống nhất 16px (nhãn Regular `text-slate-500`, con số Semibold `text-slate-900`), dòng xu hướng 12px, quy định ô icon và màu theo ý nghĩa.
+- `GEMINI.md`: bảng tóm tắt Bo góc Card `rounded-xl` (12px) → `rounded-lg` (8px) cho khớp compomennt.md.
+
+**Màn hình:** Quản lý thu thập
+- Thiết lập dịch vụ thu thập (`CollectionSetupPage.tsx`): 4 thẻ thống kê đầu trang — nhãn 13px → 16px, thêm `shadow-sm`, màu số `slate-950` → `slate-900`; 3 ô Tổng quan trong modal kết quả kiểm tra — nhãn 13px → 16px, số `text-xl font-medium` → `text-[16px] font-semibold`.
+- Xem dữ liệu đã thu thập (`ViewCollectedDataPage.tsx`): `StatsCard` — `rounded-xl p-5` → `rounded-lg p-4`, nhãn 13px medium → 16px regular, số `font-bold` → `font-semibold`, dòng xu hướng 13px → 12px.
+- Chi tiết dữ liệu đã thu thập (`ServiceDataDetailPage.tsx`): 4 thẻ thống kê — nhãn `text-xs` → 16px `text-slate-500`, số `text-2xl` → 16px, thêm `shadow-sm`.
+- Giữ nguyên màu số theo ý nghĩa (xanh/xanh lá/cam/đỏ) ở các thẻ Bản ghi mới/cập nhật/lỗi.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`, `GEMINI.md`, `src/components/pages/collection/CollectionSetupPage.tsx`, `src/components/pages/collection/ViewCollectedDataPage.tsx`, `src/components/pages/collection/ServiceDataDetailPage.tsx`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 02/10/2026) — 75
+
+**Tài liệu:** `tailieu/docs/compomennt.md`
+- Sửa mâu thuẫn: ví dụ HTML nhãn/ô nhập ở mục 5.2 và 5.16 dùng 14px → đổi về 13px; bo góc input ví dụ 6px → 8px (khớp quy định "Bo góc: 8px").
+- Mục 5.2 bổ sung class Tailwind chuẩn cho Label / Input / Select / Textarea / thông báo lỗi.
+- Thêm mục **5.17. Trường thông tin chỉ đọc (Label – Value)** cho màn hình Xem chi tiết.
+
+**Màn hình (áp dụng thử):** Quản lý thu thập → Thiết lập dịch vụ thu thập
+- Modal Thêm mới / Chỉnh sửa dịch vụ (tab Thông tin chung): nhãn `text-slate-600` → `font-medium text-slate-900`; dấu `*` `text-red-500` → `text-red-600`; input/select `px-3 py-2 border-slate-300` → `h-10 px-3 border-slate-200 bg-white` + `focus:ring-2 focus:ring-blue-500`; textarea giữ `py-2`.
+- Modal Xem chi tiết dịch vụ (tab Thông tin chung, Cấu hình kết nối, Cấu hình thu thập): nhãn bỏ `font-semibold uppercase` → `font-medium text-slate-500`; giá trị bỏ `font-medium`/`italic` → `text-slate-900 break-words`; Mô tả/Ghi chú bỏ khung nền và in nghiêng, giá trị trống hiển thị `-`; email giữ màu primary, bỏ gạch chân; lưới `gap-x-12 gap-y-6/8` → `gap-x-6 gap-y-4`.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`, `src/components/pages/collection/ServiceModals.tsx`, `src/components/pages/collection/ViewServiceModal.tsx`.
+
+**Chưa áp dụng:** Tab Cấu hình kết nối / Cấu hình thu thập trong form Thêm mới/Chỉnh sửa (thuộc `ConnectionConfigSection.tsx`, `DataCollectionConfigSection.tsx` — đang khóa `[ ]`). Chưa có logic hiển thị lỗi validation trong form.
+
+## Cập nhật giao diện (Ngày thực hiện: 02/10/2026) — 74
+
+**Màn hình:** Quản lý thu thập — Thiết lập dịch vụ thu thập, Xem dữ liệu đã thu thập, Chi tiết dữ liệu đã thu thập, Quản lý nhật ký thu thập, Modals dịch vụ thu thập, Modal xem chi tiết dịch vụ, Sidebar phụ.
+
+**Nội dung thay đổi:** Chuẩn hóa cỡ chữ theo `tailieu/docs/compomennt.md` (132 vị trí, chỉ đổi class cỡ chữ, không đổi layout/logic):
+- `text-base` (16px), `text-sm` (14px), `text-[15px]`, `text-[16px]` ở nội dung/label/input/nút/ô bảng → `text-[13px]`.
+- Tiêu đề trang / tiêu đề modal (H1) → `text-[16px]` (trước đó: `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-[18px]`).
+- Tiêu đề khối/section (H2) → `text-[14px]`.
+- Badge, nhãn nhóm menu, nhãn phụ `text-[10px]`/`text-[11px]` → `text-[12px]`.
+- Chỉ số thống kê dạng `text-base` trên thẻ tổng quan → `text-[16px]`; giữ nguyên các chỉ số `text-xl`/`text-2xl` và dấu ✓ `text-[11px]` trong checkbox tự vẽ.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`, `src/components/pages/collection/ViewCollectedDataPage.tsx`, `src/components/pages/collection/ServiceDataDetailPage.tsx`, `src/components/pages/collection/LogManagement.tsx`, `src/components/pages/collection/ServiceModals.tsx`, `src/components/pages/collection/ViewServiceModal.tsx`, `src/components/pages/collection/InnerSidebar.tsx`.
+
+**Lưu ý:** Override toàn cục trong `src/index.css` (`body` 14px, `table th/td` 14px `!important`) vẫn còn — cỡ chữ ô bảng hiển thị thực tế vẫn là 14px cho đến khi PM quyết định xử lý file này.
+
+## Cập nhật giao diện (Ngày thực hiện: 24/09/2026) — 73
+
+**Màn hình:** Danh mục dùng chung → Tổng quan danh mục dùng chung (`CategoryDashboardPage.tsx`) — file đang khóa `[ ]` trong stauts.md, PM đã xác nhận cho phép sửa riêng nội dung này.
+
+**Nội dung thay đổi:**
+- Đổi biểu đồ ranked-list "Số lượng đơn vị khai thác theo danh mục" thành **"Lượt truy cập API theo danh mục"** — legend đổi thành "Lượt truy cập" (chấm tròn xanh), đơn vị hiển thị đổi từ "đơn vị" sang "lượt", màu số liệu giữ xám (`text-slate-500`).
+- Đổi tên biến cho khớp ngữ nghĩa mới: `categoryUnitsInUseCounts` → `categoryApiAccessCounts`, field `unitsInUse` → `accessCount`, `maxUnitsInUse` → `maxAccessCount`. Giữ nguyên toàn bộ dữ liệu mock (số liệu không đổi).
+
+**File bị ảnh hưởng:** `src/components/pages/category/CategoryDashboardPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 24/09/2026) — 72
+
+**Màn hình:** Dữ liệu chủ → Tổng quan dữ liệu chủ (`MasterDataDashboardPage.tsx`).
+
+**Nội dung thay đổi:**
+- Đổi biểu đồ ranked-list "Số lượng đơn vị khai thác theo mô hình dữ liệu chủ" thành **"Lượt truy cập API theo mô hình dữ liệu chủ"** theo mẫu yêu cầu — legend đổi thành "Lượt truy cập" (chấm tròn xanh), đơn vị hiển thị đổi từ "đơn vị" sang "lượt".
+- Đổi tên biến cho khớp ngữ nghĩa mới: `masterDataUnitsInUseCounts` → `masterDataApiAccessCounts`, `masterDataUnitsRanked` → `masterDataApiAccessRanked`, field `unitsInUse` → `accessCount`. Giữ nguyên toàn bộ dữ liệu mock (số liệu không đổi).
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataDashboardPage.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 25/08/2026) — 71
 
 **Màn hình:** Danh mục dùng chung — Biên tập & Công khai (`CategoryPage.tsx`, `CategoryAListPage.tsx`), Thiết lập danh mục (`CategoryWizardModal.tsx`, `CategoryInfoViewModal.tsx`), Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`), sidebar dùng chung (`InnerSidebar.tsx`).

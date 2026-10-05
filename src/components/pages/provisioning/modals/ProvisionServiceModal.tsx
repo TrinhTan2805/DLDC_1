@@ -358,7 +358,6 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       onSubmitApproval(updatedData);
     } else {
       if (onSave) onSave(updatedData, isPublic);
-      alert(service ? 'Cập nhật dịch vụ thành công!' : 'Khởi tạo dịch vụ cung cấp thành công!');
     }
     onClose();
   };
@@ -1155,7 +1154,6 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                          type="button"
                          onClick={() => {
                            navigator.clipboard.writeText(generateDynamicPreview());
-                           alert('Đã sao chép phản hồi mẫu JSON!');
                          }}
                          title="Copy JSON"
                          className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-lg border border-white/10 backdrop-blur-md transition-all cursor-pointer"

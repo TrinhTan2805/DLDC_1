@@ -73,17 +73,17 @@ export function CategoryDashboardPage() {
     'Trạng thái thi hành án',
   ];
 
-  // Danh mục dùng chung - Số lượng đơn vị khai thác theo danh mục [Unverified]
-  const categoryUnitsInUseCounts = [
+  // Danh mục dùng chung - Lượt truy cập API theo danh mục [Unverified]
+  const categoryApiAccessCounts = [
     5, 3, 8, 12, 15, 2, 21, 10, 17, 7,
     23, 6, 4, 3, 5, 9, 8, 28, 26, 6,
     32, 3, 19, 11,
   ];
 
   const categoryCombinedData = commonCategoryList
-    .map((category, i) => ({ category, unitsInUse: categoryUnitsInUseCounts[i] }))
-    .sort((a, b) => b.unitsInUse - a.unitsInUse);
-  const maxUnitsInUse = Math.max(...categoryCombinedData.map(d => d.unitsInUse));
+    .map((category, i) => ({ category, accessCount: categoryApiAccessCounts[i] }))
+    .sort((a, b) => b.accessCount - a.accessCount);
+  const maxAccessCount = Math.max(...categoryCombinedData.map(d => d.accessCount));
 
   // Xu hướng biến động số lượng danh mục 6 tháng gần nhất [Unverified] - chốt tại stats.totalCategories (124)
   const categoryCountTrendData = [
@@ -162,12 +162,12 @@ export function CategoryDashboardPage() {
 
       {/* Charts Row 1: Ranked list + Thị phần theo nguồn dữ liệu */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Ranked list: Số lượng đơn vị khai thác theo danh mục */}
+        {/* Ranked list: Lượt truy cập API theo danh mục */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[800px]">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[16px] font-semibold text-slate-800">Số lượng đơn vị khai thác theo danh mục</h3>
+            <h3 className="text-[16px] font-semibold text-slate-800">Lượt truy cập API theo danh mục</h3>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" />Đơn vị khai thác</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: 'rgb(6, 182, 212)' }} />Lượt truy cập</span>
             </div>
           </div>
           <div className="overflow-y-auto space-y-3 flex-1 min-h-0">
@@ -178,10 +178,10 @@ export function CategoryDashboardPage() {
                     {i + 1}
                   </span>
                   <span className="text-[13px] font-medium text-slate-900 flex-1 truncate" title={item.category}>{item.category}</span>
-                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.unitsInUse.toLocaleString('vi-VN')} đơn vị</span>
+                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.accessCount.toLocaleString('vi-VN')} lượt</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-400" style={{ width: `${(item.unitsInUse / maxUnitsInUse) * 100}%` }} />
+                  <div className="h-full rounded-full" style={{ width: `${(item.accessCount / maxAccessCount) * 100}%`, backgroundColor: 'rgb(6, 182, 212)' }} />
                 </div>
               </div>
             ))}

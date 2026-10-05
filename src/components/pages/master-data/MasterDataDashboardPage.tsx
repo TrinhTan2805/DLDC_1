@@ -55,16 +55,16 @@ const masterDataStats = {
   apisInUse: 18,
 };
 
-// Số lượng đơn vị khai thác theo mô hình dữ liệu chủ [Unverified]
-const masterDataUnitsInUseCounts = [
+// Lượt truy cập API theo mô hình dữ liệu chủ [Unverified]
+const masterDataApiAccessCounts = [
   4, 7, 28, 22, 12, 6, 4, 2, 15, 9,
   5, 20, 16, 8, 5, 11, 7, 14, 6, 9,
   3, 8, 2, 6, 2, 24, 26,
 ];
-const masterDataUnitsRanked = masterDataPublishedOnOpenData
-  .map((item, i) => ({ name: item.name, unitsInUse: masterDataUnitsInUseCounts[i] }))
-  .sort((a, b) => b.unitsInUse - a.unitsInUse);
-const maxMasterDataUnitsInUse = Math.max(...masterDataUnitsRanked.map(d => d.unitsInUse));
+const masterDataApiAccessRanked = masterDataPublishedOnOpenData
+  .map((item, i) => ({ name: item.name, accessCount: masterDataApiAccessCounts[i] }))
+  .sort((a, b) => b.accessCount - a.accessCount);
+const maxMasterDataApiAccessCount = Math.max(...masterDataApiAccessRanked.map(d => d.accessCount));
 
 // Tỷ lệ dữ liệu chủ theo loại thực thể [Unverified] - tổng khớp với masterDataStats.totalModels (32)
 const masterDataSourceShare = [
@@ -132,26 +132,26 @@ export function MasterDataDashboardPage() {
 
       {/* Charts Row 1: Ranked list + Thị phần theo nguồn dữ liệu */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Ranked list: Số lượng đơn vị khai thác theo mô hình dữ liệu chủ */}
+        {/* Ranked list: Lượt truy cập API theo mô hình dữ liệu chủ */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[800px]">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[16px] font-semibold text-slate-800">Số lượng đơn vị khai thác theo mô hình dữ liệu chủ</h3>
+            <h3 className="text-[16px] font-semibold text-slate-800">Lượt truy cập API theo mô hình dữ liệu chủ</h3>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" />Đơn vị khai thác</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />Lượt truy cập</span>
             </div>
           </div>
           <div className="overflow-y-auto space-y-3 flex-1 min-h-0">
-            {masterDataUnitsRanked.map((item, i) => (
+            {masterDataApiAccessRanked.map((item, i) => (
               <div key={item.name}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold flex items-center justify-center flex-shrink-0">
                     {i + 1}
                   </span>
                   <span className="text-[13px] font-medium text-slate-900 flex-1 truncate" title={item.name}>{item.name}</span>
-                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.unitsInUse.toLocaleString('vi-VN')} đơn vị</span>
+                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.accessCount.toLocaleString('vi-VN')} lượt</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-400" style={{ width: `${(item.unitsInUse / maxMasterDataUnitsInUse) * 100}%` }} />
+                  <div className="h-full rounded-full bg-blue-400" style={{ width: `${(item.accessCount / maxMasterDataApiAccessCount) * 100}%` }} />
                 </div>
               </div>
             ))}

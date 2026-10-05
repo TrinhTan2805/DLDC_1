@@ -92,21 +92,6 @@ const PROCESSING_RULES_INTERNAL_SOURCES = SOURCE_TREND_LIST.filter(
   source => !PROCESSING_RULES_EXTERNAL_SOURCES.includes(source)
 );
 
-// Khoảng thời gian mốc để tính tỷ lệ số quy tắc phát sinh trong khoảng ngày đã chọn (mock, đơn giản hoá)
-const PROCESSING_RULES_BASELINE_START = new Date('2025-01-01').getTime();
-const PROCESSING_RULES_BASELINE_END = new Date('2025-12-31').getTime();
-
-const getProcessingRulesDateScale = (from: string, to: string) => {
-  if (!from && !to) return 1;
-  const start = from ? new Date(from).getTime() : PROCESSING_RULES_BASELINE_START;
-  const end = to ? new Date(to).getTime() : PROCESSING_RULES_BASELINE_END;
-  const totalDays = (PROCESSING_RULES_BASELINE_END - PROCESSING_RULES_BASELINE_START) / 86400000;
-  const clampedStart = Math.max(start, PROCESSING_RULES_BASELINE_START);
-  const clampedEnd = Math.min(end, PROCESSING_RULES_BASELINE_END);
-  const selectedDays = Math.max(0, (clampedEnd - clampedStart) / 86400000);
-  return totalDays > 0 ? Math.max(0.1, Math.min(1, selectedDays / totalDays)) : 1;
-};
-
 // Mock: xu hướng xử lý 6 tháng gần nhất, chốt tại tổng hiện tại (GB và số bản ghi)
 // Dùng 2 chuỗi tỷ lệ khác nhau cho khối lượng (GB) và số bản ghi để 2 đường không trùng khít lên nhau
 const PROCESSING_TREND_MONTHS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
@@ -219,8 +204,6 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
   const [sortColumn, setSortColumn] = useState<'dataSize' | 'lastSync' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [processingRulesScope, setProcessingRulesScope] = useState<'Trong ngành' | 'Ngoài ngành'>('Trong ngành');
-  const [processingRulesDateFrom, setProcessingRulesDateFrom] = useState('');
-  const [processingRulesDateTo, setProcessingRulesDateTo] = useState('');
 
   const toggleSort = (column: 'dataSize' | 'lastSync') => {
     if (sortColumn === column) {
@@ -298,7 +281,6 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
     return sortDirection === 'asc' ? diff : -diff;
   });
 
-  const processingRulesDateScale = getProcessingRulesDateScale(processingRulesDateFrom, processingRulesDateTo);
   const processingRulesChartData = SOURCE_TREND_LIST
     .filter(source => {
       const isInternal = PROCESSING_RULES_INTERNAL_SOURCES.includes(source);
@@ -308,9 +290,9 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
       const rules = PROCESSING_RULES_BY_SOURCE[source];
       return {
         name: source,
-        cleaning: Math.round(rules.cleaning * processingRulesDateScale),
-        transform: Math.round(rules.transform * processingRulesDateScale),
-        normalize: Math.round(rules.normalize * processingRulesDateScale),
+        cleaning: rules.cleaning,
+        transform: rules.transform,
+        normalize: rules.normalize,
       };
     });
 
@@ -1479,30 +1461,6 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
               <option value="Trong ngành">Trong ngành</option>
               <option value="Ngoài ngành">Ngoài ngành</option>
             </select>
-            <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5">
-              <input
-                type="date"
-                value={processingRulesDateFrom}
-                onChange={(e) => setProcessingRulesDateFrom(e.target.value)}
-                className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
-              />
-              <span className="text-slate-400 text-[12px]">đến</span>
-              <input
-                type="date"
-                value={processingRulesDateTo}
-                onChange={(e) => setProcessingRulesDateTo(e.target.value)}
-                className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
-              />
-              {(processingRulesDateFrom || processingRulesDateTo) && (
-                <button
-                  onClick={() => { setProcessingRulesDateFrom(''); setProcessingRulesDateTo(''); }}
-                  className="text-[12px] text-slate-500 hover:text-slate-800 px-1.5"
-                  title="Bỏ lọc thời gian"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
           </div>
 
           <ResponsiveContainer width="100%" height={380}>

@@ -236,8 +236,8 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-white">
           <div>
-            <h2 className="text-lg text-slate-900 font-medium">Chi tiết dữ liệu đã thu thập</h2>
-            <p className="text-sm text-slate-600 mt-1">
+            <h2 className="text-[16px] text-slate-900 font-medium">Chi tiết dữ liệu đã thu thập</h2>
+            <p className="text-[13px] text-slate-600 mt-1">
               Dịch vụ: <span className="font-medium text-slate-900">{service.name}</span> ({service.code})
             </p>
           </div>
@@ -253,21 +253,21 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
         {/* Stats */}
         <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
           <div className="grid grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <p className="text-xs text-slate-600 mb-1">Tổng bản ghi</p>
-              <p className="text-2xl text-slate-900 font-semibold">{service.recordsReceived?.toLocaleString()}</p>
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
+              <p className="text-[16px] text-slate-500 mb-1">Tổng bản ghi</p>
+              <p className="text-[16px] text-slate-900 font-semibold">{service.recordsReceived?.toLocaleString()}</p>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <p className="text-xs text-slate-600 mb-1">Bản ghi mới</p>
-              <p className="text-2xl text-blue-600 font-semibold">{service.recordsNew?.toLocaleString()}</p>
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
+              <p className="text-[16px] text-slate-500 mb-1">Bản ghi mới</p>
+              <p className="text-[16px] text-blue-600 font-semibold">{service.recordsNew?.toLocaleString()}</p>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <p className="text-xs text-slate-600 mb-1">Bản ghi cập nhật</p>
-              <p className="text-2xl text-green-600 font-semibold">{service.recordsUpdated?.toLocaleString()}</p>
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
+              <p className="text-[16px] text-slate-500 mb-1">Bản ghi cập nhật</p>
+              <p className="text-[16px] text-green-600 font-semibold">{service.recordsUpdated?.toLocaleString()}</p>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-slate-200">
-              <p className="text-xs text-slate-600 mb-1">Bản ghi lỗi</p>
-              <p className="text-2xl text-orange-600 font-semibold">
+            <div className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm">
+              <p className="text-[16px] text-slate-500 mb-1">Bản ghi lỗi</p>
+              <p className="text-[16px] text-orange-600 font-semibold">
                 {service.validationDetails?.invalidRecords?.toLocaleString() || 0}
               </p>
             </div>
@@ -284,7 +284,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                 <input aria-label="Input field"
                   type="text"
                   placeholder="Tìm kiếm theo mã bản ghi, họ tên, CMND/CCCD, số điện thoại..."
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   title="Tìm kiếm bản ghi"
                   value={searchText}
                   onChange={(e: any) => setSearchText(e.target.value)}
@@ -293,7 +293,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
               <button
                 onClick={handleExport}
                 title="Kết xuất danh sách"
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm whitespace-nowrap"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-[13px] whitespace-nowrap"
               >
                 <Download className="w-4 h-4" />
                 Kết xuất
@@ -304,11 +304,11 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-slate-500" />
-                <span className="text-sm text-slate-600">Lọc:</span>
+                <span className="text-[13px] text-slate-600">Lọc:</span>
               </div>
               <select aria-label="Select box"
                 title="Lọc trạng thái dữ liệu"
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={statusFilter}
                 onChange={(e: any) => setStatusFilter(e.target.value)}
               >
@@ -318,7 +318,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
               </select>
               <select aria-label="Select box"
                 title="Lọc loại bản ghi"
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={recordTypeFilter}
                 onChange={(e: any) => setRecordTypeFilter(e.target.value)}
               >
@@ -328,7 +328,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
               </select>
               <select aria-label="Select box"
                 title="Lọc xử lý lỗi"
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 value={errorProcessFilter}
                 onChange={(e: any) => setErrorProcessFilter(e.target.value)}
               >
@@ -338,7 +338,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                 <option value="pending">Chờ xử lý</option>
               </select>
               <div className="flex-1"></div>
-              <span className="text-sm text-slate-600">
+              <span className="text-[13px] text-slate-600">
                 Hiển thị {startIndex + 1}-{Math.min(endIndex, filteredRecords.length)} / {filteredRecords.length} bản ghi
               </span>
             </div>
@@ -350,57 +350,57 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
           <table className="w-full border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Mã bản ghi</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Họ và tên</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">CMND/CCCD</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Ngày sinh</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Số điện thoại</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Địa chỉ</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Loại</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-base font-semibold text-slate-500 whitespace-nowrap">Thời gian thu thập</th>
-                <th className="px-4 py-3 text-center text-base font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Mã bản ghi</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Họ và tên</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">CMND/CCCD</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Ngày sinh</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Số điện thoại</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Địa chỉ</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Loại</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Thời gian thu thập</th>
+                <th className="px-4 py-3 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {currentRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-sm text-slate-500">
+                  <td colSpan={11} className="px-4 py-8 text-center text-[13px] text-slate-500">
                     Không tìm thấy bản ghi nào
                   </td>
                 </tr>
               ) : (
                 currentRecords.map((record, index) => (
                   <tr key={record.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100">
-                    <td className="px-4 py-3 text-base text-slate-600">{startIndex + index + 1}</td>
-                    <td className="px-4 py-3 text-base text-slate-900 font-mono">{record.recordId}</td>
-                    <td className="px-4 py-3 text-base text-slate-900">{record.fullName}</td>
-                    <td className="px-4 py-3 text-base text-slate-900 font-mono">
+                    <td className="px-4 py-3 text-[13px] text-slate-600">{startIndex + index + 1}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-900 font-mono">{record.recordId}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-900">{record.fullName}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-900 font-mono">
                       {record.status === 'error' && record.errorField === 'idNumber' ? (
                         <span className="text-orange-600">{record.idNumber}</span>
                       ) : (
                         record.idNumber
                       )}
                     </td>
-                    <td className="px-4 py-3 text-base text-slate-900">
+                    <td className="px-4 py-3 text-[13px] text-slate-900">
                       {record.status === 'error' && record.errorField === 'birthDate' ? (
                         <span className="text-orange-600">{record.birthDate}</span>
                       ) : (
                         record.birthDate
                       )}
                     </td>
-                    <td className="px-4 py-3 text-base text-slate-900 font-mono">
+                    <td className="px-4 py-3 text-[13px] text-slate-900 font-mono">
                       {record.status === 'error' && record.errorField === 'phoneNumber' ? (
                         <span className="text-orange-600">{record.phoneNumber}</span>
                       ) : (
                         record.phoneNumber
                       )}
                     </td>
-                    <td className="px-4 py-3 text-base text-slate-600 max-w-xs truncate" title={record.address}>
+                    <td className="px-4 py-3 text-[13px] text-slate-600 max-w-xs truncate" title={record.address}>
                       {record.address}
                     </td>
-                    <td className="px-4 py-3 text-base">
+                    <td className="px-4 py-3 text-[13px]">
                       <StatusTag 
                         label={record.recordType} 
                         variant={record.recordType === 'Mới' ? 'blue' : 'green'} 
@@ -426,7 +426,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-base text-slate-600">{record.collectedAt}</td>
+                    <td className="px-4 py-3 text-[13px] text-slate-600">{record.collectedAt}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center">
                         <button
@@ -451,10 +451,10 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-white">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Hiển thị</span>
+            <span className="text-[13px] text-slate-600">Hiển thị</span>
             <select aria-label="Select box"
               title="Số bản ghi trên trang"
-              className="px-2 py-1 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2 py-1 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={itemsPerPage}
               onChange={(e: any) => {
                 setItemsPerPage(Number(e.target.value));
@@ -466,7 +466,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
               <option value={50}>50</option>
               <option value={100}>100</option>
             </select>
-            <span className="text-sm text-slate-600">bản ghi/trang</span>
+            <span className="text-[13px] text-slate-600">bản ghi/trang</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -478,7 +478,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
             >
               <ChevronLeft className="w-4 h-4 text-slate-600" />
             </button>
-            <span className="text-sm text-slate-600">
+            <span className="text-[13px] text-slate-600">
               Trang {currentPage} / {totalPages}
             </span>
             <button

@@ -16,8 +16,8 @@ const PRIMARY = '#2563eb';
 const PIE_COLORS = ['#2563eb', '#0891b2', '#7c3aed', '#16a34a', '#f59e0b', '#db2777'];
 // Màu theo ngữ nghĩa trạng thái (Bản nháp / Hoạt động / Ngưng hoạt động)
 const RESULT_COLORS = ['#f59e0b', '#16a34a', '#dc2626'];
-// Màu cho biểu đồ phương thức (API / CSDL / Excel)
-const METHOD_COLORS = ['#2563eb', '#0891b2', '#7c3aed'];
+// Màu cho biểu đồ phương thức (API / CSDL / Excel / API nhận XML / API nhận JSON)
+const METHOD_COLORS = ['#2563eb', '#0891b2', '#7c3aed', '#f59e0b', '#16a34a'];
 
 
 const TOOLTIP_STYLE = {
@@ -44,9 +44,11 @@ function CategoryTick({ x, y, payload }: any) {
 }
 
 const methodData = [
-  { name: 'API', value: 45 },
-  { name: 'Cơ sở dữ liệu', value: 28 },
-  { name: 'File excel', value: 15 },
+  { name: 'API', value: 30 },
+  { name: 'Cơ sở dữ liệu', value: 20 },
+  { name: 'File excel', value: 10 },
+  { name: 'API nhận (XML)', value: 20 },
+  { name: 'API nhận (JSON)', value: 20 },
 ];
 
 // Mở rộng dữ liệu nguồn cung cấp với 3 chỉ tiêu (Dịch vụ/Bản ghi/Dung lượng) để phục vụ bộ lọc chỉ tiêu
@@ -105,21 +107,6 @@ const sourceDataExternal = withSourceMetrics([
   { name: 'Bộ Tài chính', value: 150 },
   { name: 'Bộ Y tế', value: 120 },
 ]);
-
-// Khoảng thời gian mốc để tính tỷ lệ dữ liệu phát sinh trong khoảng ngày đã chọn (mock, đơn giản hoá)
-const SOURCE_BASELINE_START = new Date('2025-01-01').getTime();
-const SOURCE_BASELINE_END = new Date('2025-12-31').getTime();
-
-const getSourceDateScale = (from: string, to: string) => {
-  if (!from && !to) return 1;
-  const start = from ? new Date(from).getTime() : SOURCE_BASELINE_START;
-  const end = to ? new Date(to).getTime() : SOURCE_BASELINE_END;
-  const totalDays = (SOURCE_BASELINE_END - SOURCE_BASELINE_START) / 86400000;
-  const clampedStart = Math.max(start, SOURCE_BASELINE_START);
-  const clampedEnd = Math.min(end, SOURCE_BASELINE_END);
-  const rangeDays = Math.max(0, (clampedEnd - clampedStart) / 86400000);
-  return totalDays > 0 ? Math.min(1, Math.max(0, rangeDays / totalDays)) : 1;
-};
 
 const resultData = [
   { name: 'Bản nháp', value: 156 },
@@ -208,7 +195,7 @@ interface ChartCardProps {
 function ChartCard({ title, total, data, chartType = 'bar', colors, filterValue, onFilterChange, filterOptions, renderFilter, headerRight }: ChartCardProps) {
   // Cột dọc (bar) tự giãn lấp đầy chiều cao card; pie/line dùng chiều cao cố định
   const isBar = chartType === 'bar';
-  const fixedHeight = chartType === 'pie' ? 220 : 256;
+  const fixedHeight = chartType === 'pie' ? 300 : 256;
   const pieColors = colors ?? PIE_COLORS;
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-6 h-full flex flex-col">
@@ -241,19 +228,47 @@ function ChartCard({ title, total, data, chartType = 'bar', colors, filterValue,
       <div className={isBar ? 'w-full flex-1 min-h-[320px]' : 'w-full'} style={isBar ? undefined : { height: fixedHeight }}>
         <ResponsiveContainer width="100%" height={isBar ? '100%' : fixedHeight}>
           {chartType === 'pie' ? (
-            <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+            <PieChart margin={{ top: 16, right: 40, bottom: 8, left: 40 }}>
               <Pie
                 data={data}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
-                cy="50%"
-                innerRadius={48}
-                outerRadius={78}
+                cy="40%"
+                innerRadius={50}
+                outerRadius={76}
                 paddingAngle={4}
                 cornerRadius={4}
                 labelLine={false}
-                label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                label={(props: any) => {
+                  const RADIAN = Math.PI / 180;
+                  const { cx, cy, midAngle, outerRadius: r, percent, index } = props;
+                  const sin = Math.sin(-midAngle * RADIAN);
+                  const cos = Math.cos(-midAngle * RADIAN);
+                  const sx = cx + (r + 2) * cos;
+                  const sy = cy + (r + 2) * sin;
+                  const mx = cx + (r + 14) * cos;
+                  const my = cy + (r + 14) * sin;
+                  const ex = mx + (cos >= 0 ? 1 : -1) * 12;
+                  const ey = my;
+                  const color = pieColors[index % pieColors.length];
+                  return (
+                    <g>
+                      <polyline points={`${sx},${sy} ${mx},${my} ${ex},${ey}`} stroke={color} fill="none" strokeWidth={1.5} />
+                      <text
+                        x={ex + (cos >= 0 ? 4 : -4)}
+                        y={ey}
+                        textAnchor={cos >= 0 ? 'start' : 'end'}
+                        dominantBaseline="central"
+                        fill={color}
+                        fontSize={11}
+                        fontWeight={600}
+                      >
+                        {`${((percent ?? 0) * 100).toFixed(2)}%`}
+                      </text>
+                    </g>
+                  );
+                }}
               >
                 {data.map((entry, index) => (
                   <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
@@ -291,7 +306,7 @@ function ChartCard({ title, total, data, chartType = 'bar', colors, filterValue,
                 />
               </Pie>
               <Tooltip contentStyle={TOOLTIP_STYLE} />
-              <Legend wrapperStyle={{ fontSize: '13px' }} />
+              <Legend wrapperStyle={{ fontSize: '13px', paddingTop: 12 }} />
             </PieChart>
           ) : chartType === 'line' ? (
             <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -445,8 +460,6 @@ export function CollectionDashboard() {
 
   const [sourceSystemFilter, setSourceSystemFilter] = React.useState('Trong ngành');
   const [sourceMetric, setSourceMetric] = React.useState<'services' | 'records' | 'dataSizeGB'>('services');
-  const [sourceDateFrom, setSourceDateFrom] = React.useState('');
-  const [sourceDateTo, setSourceDateTo] = React.useState('');
 
   const getSourceScopeData = (): SourceMetricItem[] => {
     switch(sourceSystemFilter) {
@@ -458,9 +471,8 @@ export function CollectionDashboard() {
   };
 
   const sourceScopeData = getSourceScopeData();
-  const sourceDateScale = getSourceDateScale(sourceDateFrom, sourceDateTo);
   const currentSourceData = sourceScopeData
-    .map(item => ({ name: item.name, value: Math.round(item[sourceMetric] * sourceDateScale) }));
+    .map(item => ({ name: item.name, value: item[sourceMetric] }));
   const sourceTotal = currentSourceData.reduce((acc, curr) => acc + curr.value, 0);
 
   // Dịch vụ lỗi cập nhật
@@ -543,30 +555,6 @@ export function CollectionDashboard() {
                         {option.label}
                       </button>
                     ))}
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5">
-                    <input
-                      type="date"
-                      value={sourceDateFrom}
-                      onChange={(e) => setSourceDateFrom(e.target.value)}
-                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
-                    />
-                    <span className="text-slate-400 text-[12px]">đến</span>
-                    <input
-                      type="date"
-                      value={sourceDateTo}
-                      onChange={(e) => setSourceDateTo(e.target.value)}
-                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
-                    />
-                    {(sourceDateFrom || sourceDateTo) && (
-                      <button
-                        onClick={() => { setSourceDateFrom(''); setSourceDateTo(''); }}
-                        className="text-[12px] text-slate-500 hover:text-slate-800 px-1.5"
-                        title="Bỏ lọc thời gian"
-                      >
-                        ✕
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

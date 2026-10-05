@@ -19,6 +19,7 @@ interface SharedFieldsConfigModalProps {
   consumerUnit: string;
   initialFields: FieldConfig[];
   onSave: (updatedFields: FieldConfig[]) => void;
+  readOnly?: boolean;
 }
 
 export function SharedFieldsConfigModal({
@@ -28,7 +29,8 @@ export function SharedFieldsConfigModal({
   apiCode,
   consumerUnit,
   onSave,
-  initialFields
+  initialFields,
+  readOnly = false
 }: SharedFieldsConfigModalProps) {
   const [fields, setFields] = useState<FieldConfig[]>([]);
 
@@ -115,7 +117,7 @@ export function SharedFieldsConfigModal({
             <div>
               <h3 className="text-[18px] font-bold text-slate-800 flex items-center gap-2" style={{ fontSize: '18px' }}>
                 <ShieldCheck className="w-5 h-5 text-blue-600" />
-                Điều chỉnh các trường dữ liệu chia sẻ
+                {readOnly ? 'Xem chi tiết cấu trúc trường dữ liệu chia sẻ' : 'Điều chỉnh các trường dữ liệu chia sẻ'}
               </h3>
               <p className="text-[13px] text-slate-500 mt-1" style={{ fontSize: '13px' }}>
                 Cấu hình gói tin cho API: <strong className="text-slate-700 font-semibold">{apiName} ({apiCode})</strong> | Đơn vị sử dụng: <strong className="text-slate-700 font-semibold">{consumerUnit}</strong>
@@ -159,9 +161,10 @@ export function SharedFieldsConfigModal({
                           <input
                             type="checkbox"
                             title="Chọn chia sẻ"
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer accent-blue-600"
+                            disabled={readOnly}
+                            className={`w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 ${readOnly ? 'cursor-default opacity-100' : 'cursor-pointer'}`}
                             checked={field.shared}
-                            onChange={() => handleToggleShared(field.id)}
+                            onChange={() => !readOnly && handleToggleShared(field.id)}
                           />
                         </td>
                         <td className="px-4 py-3.5 font-medium text-slate-800">
@@ -219,15 +222,17 @@ export function SharedFieldsConfigModal({
               onClick={onClose}
               className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm cursor-pointer"
             >
-              Hủy bỏ
+              {readOnly ? 'Đóng' : 'Hủy bỏ'}
             </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-[13px] shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              Lưu cấu hình
-            </button>
+            {!readOnly && (
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-[13px] shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Save className="w-4 h-4" />
+                Lưu cấu hình
+              </button>
+            )}
           </div>
 
         </div>

@@ -80,7 +80,7 @@
 }
 @layer theme {
   :root, :host {
-    --font-sans: 'Inter', Arial, Helvetica, sans-serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --color-red-50: oklch(.971 .013 17.38);
     --color-red-100: oklch(.936 .032 17.717);
@@ -5008,7 +5008,7 @@
   --chart-3: oklch(.398 .07 227.392);
   --chart-4: oklch(.828 .189 84.429);
   --chart-5: oklch(.769 .188 70.08);
-  --radius: .625rem;
+  --radius: .5rem; /* rounded-sm 4px · md 6px · lg 8px · xl 12px theo compomennt.md */
   --sidebar: oklch(.985 0 0);
   --sidebar-foreground: oklch(.145 0 0);
   --sidebar-primary: #030213;
@@ -5483,28 +5483,28 @@ input[type="range"].slider-thumb-blue::-moz-range-progress {
 
 /* --- Global Overrides for Typography --- */
 body {
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 14px !important;
-  color: #000000 !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 13px !important;
+  color: #020817 !important;
 }
 
-body * {
-  font-family: Arial, Helvetica, sans-serif !important;
+body *:not(code):not(pre):not(kbd):not(samp):not(.font-mono) {
+  font-family: 'Inter', system-ui, sans-serif !important;
 }
 
 
-/* Yeu cau 10.5pt, chu den, chu thuong, khong boi dam dong bo toan bo he thong */
+/* Theo tailieu/docs/compomennt.md muc 5.3: th 13px/700/#000, td 13px/400/#000, chu thuong. */
 table th, table thead th, th.uppercase {
   text-transform: none !important;
   letter-spacing: normal !important;
-  font-weight: normal !important;
-  font-size: 14px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
   color: #000000 !important;
 }
 
 table td, table tbody td {
   font-weight: normal !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   color: #000000 !important;
 }
 
@@ -5533,8 +5533,8 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 table.collection-table th,
 table.collection-table thead th {
   font-size: 13px !important;
-  font-weight: bold !important;
-  color: #0f172a !important;
+  font-weight: 700 !important;
+  color: #000000 !important;
 }
 
 table.collection-table td,

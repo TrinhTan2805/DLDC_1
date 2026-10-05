@@ -97,7 +97,7 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
       if (item.group && item.group !== currentGroup) {
         currentGroup = item.group;
         rendered.push(
-          <div key={`grp-${currentGroup}-${idx}`} className="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest first:pt-0">
+          <div key={`grp-${currentGroup}-${idx}`} className="px-3 pt-3 pb-1 text-[12px] font-bold text-slate-400 uppercase tracking-widest first:pt-0">
             {currentGroup}
           </div>
         );
@@ -162,7 +162,7 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
       style={stretchHeight ? { height: 'calc(100vh - 140px)' } : { maxHeight: 'calc(100vh - 160px)' }}
     >
       <div className="p-4 border-b border-slate-100">
-        <h3 className="text-[18px] font-bold text-slate-900 mb-3">{title}</h3>
+        <h3 className="text-[16px] font-bold text-slate-900 mb-3">{title}</h3>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input

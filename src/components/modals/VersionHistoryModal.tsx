@@ -7,6 +7,32 @@ interface VersionHistoryModalProps {
 
 const mockVersions = [
   {
+    id: 35,
+    version: 'v2.6.24',
+    date: '05/10/2026',
+    time: '14:50',
+    content: `1. Bộ quy chuẩn giao diện (tailieu/docs/compomennt.md) — cập nhật theo "Bộ quy chuẩn giao diện KDLDC-BTP":
+- Font Inter, cỡ chữ nền 13px; một màu xanh chính #155DFC; bảng màu theo vai trò; bo góc (nút 8px, thẻ/badge 16px, menu 10px).
+- Bổ sung quy định: trạng thái nút (bình thường/hover/đang chọn/vô hiệu), bảng dữ liệu (tiêu đề 42px đậm, hàng 48px, cắt chữ + tooltip), cột thao tác nhiều nút (2 nút icon + menu ⋯), căn lề cột theo kiểu dữ liệu, thẻ thống kê, badge, label–value, sidebar/header, token CSS và checklist nghiệm thu.
+
+2. CSS toàn cục (src/index.css):
+- Font Inter thay Arial; body 13px; tiêu đề bảng 13px/700, ô bảng 13px; --radius 8px; giữ font monospace cho mã.
+
+3. Thiết lập thu thập — danh sách dịch vụ (CollectionSetupPage.tsx):
+- Áp dụng quy chuẩn mới cho tab, thẻ thống kê, thanh công cụ, bảng, badge, phân trang và toàn bộ nút (trạng thái vô hiệu nền xám, không dùng mờ).
+- Logic thao tác theo trạng thái dịch vụ/dữ liệu: Mapping, Tích hợp mới, Cập nhật dữ liệu, Xóa dữ liệu, Ngừng hoạt động/Hoạt động, Xóa dịch vụ — thao tác bị khóa hiển thị lý do; API nhận (JSON)/(XML) ẩn Tích hợp mới, Cập nhật dữ liệu.
+- Mock trạng thái cho 10 dịch vụ đầu; màu và nhãn badge theo mẫu; badge căn trái.
+- Sửa lỗi: chọn số bản ghi/trang, STT theo trang, thẻ thống kê Bản nháp/Ngưng hoạt động, bộ lọc Trạng thái và Loại kết nối, tooltip bị kẹt.
+
+4. Các màn khác của Quản lý thu thập (ServiceModals, ViewServiceModal, LogManagement, ServiceDataDetailPage, ViewCollectedDataPage, InnerSidebar):
+- Chuẩn hóa cỡ chữ (13/14/16px), nhãn – giá trị ở form và màn xem chi tiết, thẻ thống kê 16px.
+
+5. Mã nguồn bị ảnh hưởng:
+- \`src/index.css\`
+- \`src/components/pages/collection/CollectionSetupPage.tsx\` và 6 file cùng thư mục collection
+- \`tailieu/docs/compomennt.md\`, \`GEMINI.md\`, \`tailieu/docs/log/log_update.md\``
+  },
+  {
     id: 34,
     version: 'v2.6.23',
     date: '25/08/2026',
