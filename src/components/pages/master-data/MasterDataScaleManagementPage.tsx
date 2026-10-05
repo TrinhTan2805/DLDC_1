@@ -8,6 +8,7 @@ import { UniqueIdentifierRulesTab, mockIdentifierRules, buildCode } from './Uniq
 import { ApprovalTab } from './ApprovalTab';
 import { ReviewResultCard } from '../category/components/modals/ReviewResultCard';
 import { Portal } from '../../common/Portal';
+import { ClampedText } from '../../common/ClampedText';
 
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
@@ -545,8 +546,8 @@ export function MasterDataScaleManagementPage() {
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="p-6">
+        {/* Tab Content — tab Thiết lập bỏ padding ngang vì MainLayout đã có sẵn p-6 */}
+        <div className={activeTab === 'setup' ? 'py-6' : 'p-6'}>
           {activeTab === 'setup' && (
             <div className="space-y-4">
               {/* Statistics Cards */}
@@ -697,32 +698,38 @@ export function MasterDataScaleManagementPage() {
               {/* Entity List */}
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left">
+                  {/* collection-table: dùng quy tắc ghi đè có sẵn trong index.css để header in đậm */}
+                  <table className="w-full text-left collection-table">
                     <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                       <tr>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã dữ liệu chủ</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên dữ liệu chủ</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Loại dữ liệu</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cơ quan quản lý</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Cập nhật lần cuối</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
+                        {/* Cột nhãn dùng w-px để co sát nội dung, phần rộng còn lại dồn cho cột Tên / Mã dữ liệu chủ */}
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-px text-center">STT</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap min-w-[220px]">Tên / Mã dữ liệu chủ</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 min-w-[120px]">Loại dữ liệu</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 min-w-[140px]">Cơ quan quản lý</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px">Người tạo / Ngày tạo</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px text-center">Cập nhật lần cuối</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Trạng thái</th>
+                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white">
                       {paginatedEntities.length > 0 ? (
                         paginatedEntities.map((entity, index) => (
                           <tr key={entity.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4 text-slate-500 text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                            <td className="px-6 py-4">
-                              <code className="text-[13px] bg-slate-100 px-2 py-1 rounded text-slate-800">{entity.code}</code>
+                            <td className="px-4 py-4 text-slate-500 text-[13px] text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                            <td className="px-4 py-4 text-[13px]">
+                              <ClampedText text={entity.name} className="font-semibold text-[#0f172a] leading-snug break-words text-[13px]" />
+                              <ClampedText text={entity.code} className="font-mono text-slate-500 font-medium break-all mt-0.5 text-[13px]" />
                             </td>
-                            <td className="px-6 py-4 text-slate-900 text-[13px]">{entity.name}</td>
-                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{dataTypeLabels[entity.dataType]}</td>
-                            <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency}</td>
-                            <td className="px-6 py-4 text-center text-[13px] text-slate-700">{entity.updatedDate}</td>
-                            <td className="px-6 py-4 text-center">
+                            <td className="px-4 py-4 text-slate-700 text-[13px] font-normal min-w-[120px]">{dataTypeLabels[entity.dataType]}</td>
+                            <td className="px-4 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency}</td>
+                            <td className="px-4 py-4 text-[13px]">
+                              <div className="text-slate-900 font-medium whitespace-nowrap">{entity.createdBy || '--'}</div>
+                              <div className="text-slate-500 font-medium font-mono mt-0.5 whitespace-nowrap">{entity.createdDate || '--'}</div>
+                            </td>
+                            <td className="px-4 py-4 text-center text-[13px] text-slate-700 whitespace-nowrap">{entity.updatedDate}</td>
+                            <td className="px-4 py-4 text-center">
                               <div className="flex justify-center">
                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
                                   entity.lifecycleStatus === 'approved'
@@ -737,7 +744,7 @@ export function MasterDataScaleManagementPage() {
                                 </span>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-4">
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
                                   onClick={() => { setViewingEntity(entity); setViewStep(1); }}

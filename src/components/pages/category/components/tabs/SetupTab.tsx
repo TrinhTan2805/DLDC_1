@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { MasterDataEntity, LifecycleStatus } from '../../categoryTypes';
 import { dataTypeLabels, lifecycleLabels, scopeLabels } from '../../categoryConstants';
+import { ClampedText } from '../../../../common/ClampedText';
 
 interface SetupTabProps {
   entities: MasterDataEntity[];
@@ -293,16 +294,17 @@ export function SetupTab({
       {/* Entity Table */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left collection-table">
             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã danh mục</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Đơn vị chủ quản</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phạm vi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-48">Thao tác</th>
+                {/* Cột nhãn dùng w-px để co sát nội dung, phần rộng còn lại dồn cho cột Tên / Mã danh mục */}
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-px text-center">STT</th>
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap min-w-[220px]">Tên / Mã danh mục</th>
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 min-w-[140px]">Đơn vị chủ quản</th>
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px">Phạm vi</th>
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px">Người tạo / Ngày tạo</th>
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Trạng thái</th>
+                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
@@ -311,14 +313,18 @@ export function SetupTab({
                   const isPublished = publishedEntities.includes(entity.id);
                   return (
                     <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                      <td className="px-6 py-4 text-slate-500 text-[13px] font-normal">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                      <td className="px-6 py-4 text-slate-900 text-[13px] font-mono font-semibold">{entity.code}</td>
-                      <td className="px-6 py-4 text-slate-900 text-[13px] font-normal hover:text-blue-600 transition-colors">
-                        {entity.name}
+                      <td className="px-4 py-4 text-slate-500 text-[13px] font-normal text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
+                      <td className="px-4 py-4 text-[13px]">
+                        <ClampedText text={entity.name} className="font-semibold text-[#0f172a] leading-snug break-words text-[13px]" />
+                        <ClampedText text={entity.code} className="font-mono text-slate-500 font-medium break-all mt-0.5 text-[13px]" />
                       </td>
-                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency || '--'}</td>
-                      <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{scopeLabels[entity.scope] || entity.scope || '--'}</td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-4 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency || '--'}</td>
+                      <td className="px-4 py-4 text-slate-700 text-[13px] font-normal whitespace-nowrap">{scopeLabels[entity.scope] || entity.scope || '--'}</td>
+                      <td className="px-4 py-4 text-[13px]">
+                        <div className="text-slate-900 font-medium whitespace-nowrap">{entity.createdBy || '--'}</div>
+                        <div className="text-slate-500 font-medium font-mono mt-0.5 whitespace-nowrap">{entity.createdDate || '--'}</div>
+                      </td>
+                      <td className="px-4 py-4 text-center">
                         <div className="flex justify-center">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal border whitespace-nowrap ${
                             entity.lifecycleStatus === 'active'
@@ -337,7 +343,7 @@ export function SetupTab({
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-4 py-4 text-center">
                         <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
                           {onView && (
                             <button

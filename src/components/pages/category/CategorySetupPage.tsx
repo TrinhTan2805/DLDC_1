@@ -774,8 +774,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="p-6">
+      {/* Tab Content — tab Thiết lập danh mục bỏ padding ngang vì MainLayout đã có sẵn p-6 */}
+      <div className={activeTab === 'setup' ? 'py-6' : 'p-6'}>
           {activeTab === 'setup' && (
             <SetupTab
               entities={entities} searchTerm={searchTerm} setSearchTerm={setSearchTerm}
