@@ -1,5 +1,68 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 76
+
+**Màn hình:** Cung cấp dữ liệu → Thiết lập điều phối dữ liệu → Thiết lập dịch vụ (`DataProvisionServiceSetupPage.tsx`).
+
+**Nội dung thay đổi:**
+- Header bảng danh sách API in đậm: gắn class `collection-table` để dùng quy tắc ghi đè có sẵn trong `index.css` (quy tắc chung `table th` đang ép `font-weight: normal !important`).
+
+**File bị ảnh hưởng:** `src/components/pages/provisioning/DataProvisionServiceSetupPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 75
+
+**Màn hình:** Dữ liệu chủ → Mô hình dữ liệu chủ (`MasterDataScaleManagementPage.tsx`), tab "Thiết lập".
+
+**Nội dung thay đổi:**
+- Gộp cột "Mã dữ liệu chủ" và "Tên dữ liệu chủ" thành một cột **"Tên / Mã dữ liệu chủ"** (dòng trên: tên in đậm, dòng dưới: mã). Mỗi phần tối đa 2 dòng, vượt quá hiển thị "..." và rê chuột hiện tooltip (dùng `common/ClampedText`).
+- Bổ sung cột **"Người tạo / Ngày tạo"** trước cột "Cập nhật lần cuối" (thứ tự: Người tạo / Ngày tạo → Cập nhật lần cuối → Trạng thái), lấy từ `entity.createdBy` và `entity.createdDate`.
+- Tối ưu độ rộng cột: cột nhãn dùng `w-px`, cột "Tên / Mã dữ liệu chủ" tối thiểu 220px, "Loại dữ liệu" tối thiểu 120px (cho phép xuống dòng); padding ô `px-6` → `px-4`.
+- Header bảng in đậm: gắn class `collection-table` để dùng quy tắc ghi đè có sẵn trong `index.css`.
+- Tab "Thiết lập" bỏ padding ngang trùng lặp ở vùng nội dung (`p-6` → `py-6`, chỉ áp dụng cho tab này) vì `MainLayout` đã có sẵn `p-6`.
+
+**File bị ảnh hưởng:** `src/components/pages/master-data/MasterDataScaleManagementPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 74
+
+**Màn hình:** Dữ liệu mở → Thiết lập danh mục dữ liệu mở (`OpenDataSetupPage.tsx`), tab "Quản lý danh mục".
+
+**Nội dung thay đổi:**
+- Bổ sung cột **"Người tạo / Ngày tạo"** trước cột "Trạng thái" (dòng trên: `createdBy`, dòng dưới: `createdDate`).
+- Bỏ cột **"Phiên bản"** khỏi bảng danh sách danh mục.
+- Tối ưu độ rộng cột: các cột nhãn dùng `w-px` để co sát nội dung, phần còn lại dồn cho cột "Tên danh mục" (tối thiểu 220px); padding ô header `px-6` → `px-4`.
+- Header bảng in đậm: gắn class `collection-table` để dùng quy tắc ghi đè có sẵn trong `index.css` (áp dụng cho bảng chung của cả 4 tab).
+- Bỏ padding ngang trùng lặp ở vùng nội dung tab (`p-6` → `py-6`) vì `MainLayout` đã có sẵn `p-6`.
+
+**File bị ảnh hưởng:** `src/components/pages/open-data/OpenDataSetupPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 73
+
+**Màn hình:** Danh mục dùng chung → Thiết lập danh mục, tab "Thiết lập danh mục" (`SetupTab.tsx`, hiển thị trong `CategorySetupPage.tsx`).
+
+**Nội dung thay đổi:**
+- Gộp cột "Mã danh mục" và "Tên danh mục" thành một cột **"Tên / Mã danh mục"** (dòng trên: tên in đậm, dòng dưới: mã). Mỗi phần tối đa 2 dòng, vượt quá hiển thị "..." và rê chuột hiện tooltip nội dung đầy đủ.
+- Bổ sung cột **"Người tạo / Ngày tạo"** trước cột "Trạng thái", lấy từ `entity.createdBy` và `entity.createdDate`.
+- Tối ưu độ rộng cột tương tự màn Thiết lập dịch vụ: các cột nhãn dùng `w-px` để co sát nội dung, phần còn lại dồn cho cột "Tên / Mã danh mục" (tối thiểu 220px); padding ô `px-6` → `px-4`.
+- Header bảng in đậm: gắn class `collection-table` cho bảng để dùng quy tắc ghi đè có sẵn trong `index.css` (quy tắc chung `table th` đang ép `font-weight: normal !important`).
+- Tab "Thiết lập danh mục" bỏ padding ngang trùng lặp ở vùng nội dung (`p-6` → `py-6`, chỉ áp dụng cho tab này) vì `MainLayout` đã có sẵn `p-6`.
+- Dữ liệu mẫu `defaultEntities` (`categoryConstants.ts`, chỉ dùng tại màn này): đổi `createdBy` từ "Hệ thống" sang tên người tạo cụ thể.
+- Tách component `ClampedText` (văn bản tối đa 2 dòng + tooltip khi bị cắt) ra file dùng chung `src/components/common/ClampedText.tsx`; màn Thiết lập dịch vụ (`CollectionSetupPage.tsx`) chuyển sang dùng component này.
+
+**File bị ảnh hưởng:** `src/components/pages/category/components/tabs/SetupTab.tsx`, `src/components/pages/category/CategorySetupPage.tsx`, `src/components/pages/category/categoryConstants.ts`, `src/components/common/ClampedText.tsx` (mới), `src/components/pages/collection/CollectionSetupPage.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 72
+
+**Màn hình:** Quản lý thu thập → Thiết lập thu thập → Thiết lập dịch vụ (`CollectionSetupPage.tsx`).
+
+**Nội dung thay đổi:**
+- Bảng danh sách dịch vụ: gộp thông tin người tạo và ngày tạo vào một cột **"Người tạo / Ngày tạo"** (dòng trên: tên người tạo, dòng dưới: ngày giờ tạo). Lấy từ `service.createdBy`, nếu dữ liệu mẫu chưa có thì dùng danh sách người tạo mặc định theo `id` dịch vụ.
+- Cột "Thao tác" → menu "...", nhóm "Dữ liệu": bổ sung mục **"Xóa cấu trúc"** (ngay sau "Xóa dữ liệu thu thập"), bấm vào hiển thị modal xác nhận cảnh báo xóa cấu hình mapping của dịch vụ.
+- Gộp cột "Tên dịch vụ" và "Mã dịch vụ" thành một cột **"Tên / Mã dịch vụ"** (dòng trên: tên dịch vụ in đậm, dòng dưới: mã dịch vụ). Tên và mã mỗi phần tối đa 2 dòng, vượt quá hiển thị "..." và rê chuột hiện tooltip nội dung đầy đủ (component `ClampedText` dùng `ui/tooltip`, chỉ mở tooltip khi văn bản thực sự bị cắt). Tên dùng màu `text-[#0f172a]` thay cho `text-slate-900` vì quy tắc chung trong `index.css` ép `font-weight: normal` cho `text-slate-*` trong ô bảng.
+- Header bảng: cho phép xuống dòng (bỏ `whitespace-nowrap` ở các cột từ "Loại nguồn" đến "Trạng thái dữ liệu") để tối ưu không gian; các cột nhãn (STT, Loại nguồn, Phương thức kết nối, Phiên bản, Người tạo / Ngày tạo, Trạng thái dịch vụ, Trạng thái dữ liệu, Thao tác) dùng `w-px` để co sát nội dung, phần rộng còn lại dồn cho cột "Tên / Mã dịch vụ" (tối thiểu 190px); "Hệ thống nguồn" tối thiểu 100px; giảm padding ô bảng `px-4` → `px-3` (STT, Thao tác: `px-2`); tên người tạo không xuống dòng, ngày giờ tạo được xuống dòng khi hẹp. Bảng không tràn ngang từ khổ 1536px (sidebar mở rộng).
+- Bỏ padding ngang trùng lặp ở vùng nội dung tab (`p-6` → `py-6`) vì `MainLayout` đã có sẵn `p-6`, giúp nội dung không bị thụt vào hai bên.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/CollectionSetupPage.tsx`.
+
 ## Cập nhật giao diện (Ngày thực hiện: 25/08/2026) — 71
 
 **Màn hình:** Danh mục dùng chung — Biên tập & Công khai (`CategoryPage.tsx`, `CategoryAListPage.tsx`), Thiết lập danh mục (`CategoryWizardModal.tsx`, `CategoryInfoViewModal.tsx`), Thống kê danh mục → Báo cáo thống kê danh sách danh mục (`CategoryReportListPage.tsx`), sidebar dùng chung (`InnerSidebar.tsx`).

@@ -11,6 +11,7 @@ import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
+import { ClampedText } from '../../common/ClampedText';
 
 // Định dạng dung lượng dữ liệu suy ra từ số bản ghi (dùng khi dịch vụ chưa có sẵn dataSize)
 const formatDataSize = (records: number) => {
@@ -20,6 +21,10 @@ const formatDataSize = (records: number) => {
   if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(0)} KB`;
   return `${bytes} B`;
 };
+
+// Người tạo mặc định cho dịch vụ chưa có sẵn createdBy trong dữ liệu mẫu
+const DEFAULT_CREATORS = ['Nguyễn Văn A', 'Trần Thị Bình', 'Lê Minh Châu', 'Phạm Quốc Dũng', 'Hoàng Thu Hà'];
+const getCreator = (service: any) => service.createdBy || DEFAULT_CREATORS[(service.id || 0) % DEFAULT_CREATORS.length];
 
 interface CollectionSetupPageProps {
   onNavigate?: (pageId: string) => void;
@@ -51,6 +56,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
   const [showUpdateSuccessModal, setShowUpdateSuccessModal] = useState(false);
   const [showIntegrateWarningModal, setShowIntegrateWarningModal] = useState(false);
   const [showDeleteDataConfirmModal, setShowDeleteDataConfirmModal] = useState(false);
+  const [showDeleteStructureConfirmModal, setShowDeleteStructureConfirmModal] = useState(false);
   const [inactiveReason, setInactiveReason] = useState('');
   const [selectedService, setSelectedService] = useState<any>(null);
 
@@ -218,7 +224,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto py-6">
         {/* Tab: Thiết lập dịch vụ */}
         {activeTab === 'service-setup' && (
           <div className="space-y-4">
@@ -417,17 +423,17 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                 <table className="w-full border-collapse collection-table text-[13px]">
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                     <tr>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-12 text-[13px]">STT</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px]">Tên dịch vụ</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px] w-36 max-w-[150px]">Mã dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Loại nguồn</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Phương thức kết nối</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-20 text-[13px]">Phiên bản</th>
-                      <th className="px-4 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Ngày tạo</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Trạng thái dịch vụ</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap text-[13px]">Trạng thái dữ liệu</th>
-                      <th className="px-4 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-32 text-[13px]">Thao tác</th>
+                      {/* Cột nhãn dùng w-px để co sát nội dung, phần rộng còn lại dồn cho cột Tên / Mã dịch vụ */}
+                      <th className="px-2 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-px text-[13px]">STT</th>
+                      <th className="px-3 py-3 text-left font-bold text-slate-900 whitespace-nowrap text-[13px] min-w-[190px]">Tên / Mã dịch vụ</th>
+                      <th className="px-3 py-3 text-center font-bold text-slate-900 w-px text-[13px]">Loại nguồn</th>
+                      <th className="px-3 py-3 text-center font-bold text-slate-900 w-px text-[13px]">Phương thức kết nối</th>
+                      <th className="px-3 py-3 text-center font-bold text-slate-900 w-px text-[13px]">Phiên bản</th>
+                      <th className="px-3 py-3 text-left font-bold text-slate-900 text-[13px] min-w-[100px]">Hệ thống nguồn</th>
+                      <th className="px-3 py-3 text-left font-bold text-slate-900 w-px text-[13px]">Người tạo / Ngày tạo</th>
+                      <th className="px-3 py-3 text-center font-bold text-slate-900 w-px text-[13px]">Trạng thái dịch vụ</th>
+                      <th className="px-3 py-3 text-center font-bold text-slate-900 w-px text-[13px]">Trạng thái dữ liệu</th>
+                      <th className="px-2 py-3 text-center font-bold text-slate-900 whitespace-nowrap w-px text-[13px]">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -435,42 +441,39 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                       .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                       .map((service, index) => (
                         <tr key={service.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1}</td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <div className="font-medium text-slate-800 leading-snug break-words text-[13px]" title={service.name}>{service.name}</div>
+                          <td className="px-2 py-3 text-center text-slate-500 font-medium text-[13px]">{index + 1}</td>
+                          <td className="px-3 py-3 text-left text-[13px]">
+                            <ClampedText text={service.name} className="font-semibold text-[#0f172a] leading-snug break-words text-[13px]" />
+                            <ClampedText text={service.code || ''} className="font-mono text-slate-500 font-medium break-all mt-0.5 text-[13px]" />
                             {service.description && <div className="text-slate-500 mt-1 break-words text-[12px]">{service.description}</div>}
                           </td>
-                          <td className="px-4 py-3 text-left font-mono text-[13px] text-slate-600 font-medium break-all w-36 max-w-[150px]" title={service.code}>
-                            {(service.code || '').slice(0, 50)}
-                          </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-3 py-3 text-center">
                             <StatusTag 
                               label={service.source || 'Trong ngành'} 
                               variant={service.source === 'Ngoài ngành' ? 'blue' : 'purple'} 
                             />
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-3 py-3 text-center">
                             <StatusTag
                               label={service.type === 'SOAP' ? 'Cơ sở dữ liệu' : service.type === 'REST' ? 'API' : 'Tải file Excel'}
                               variant={service.type === 'SOAP' ? 'indigo' : service.type === 'REST' ? 'emerald' : 'amber'}
                             />
                           </td>
-                          <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono text-[13px]">{service.version}</td>
-                          <td className="px-4 py-3 text-left">
+                          <td className="px-3 py-3 text-center text-slate-600 font-medium font-mono text-[13px]">{service.version}</td>
+                          <td className="px-3 py-3 text-left">
                             <div className="leading-snug text-slate-900 font-medium text-[13px] max-w-[180px]">{service.managingUnit}</div>
                           </td>
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
-                            {service.updatedAt.split(' ').map((part: string, i: number) => (
-                              <div key={i}>{part}</div>
-                            ))}
+                          <td className="px-3 py-3 text-left text-[13px]">
+                            <div className="text-slate-900 font-medium whitespace-nowrap">{getCreator(service)}</div>
+                            <div className="text-slate-500 font-medium font-mono mt-0.5">{service.updatedAt}</div>
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-3 py-3 text-center">
                             <StatusTag 
                               label={service.status === 'draft' ? 'Bản nháp' : service.status === 'inactive' ? 'Ngưng hoạt động' : 'Hoạt động'} 
                               variant={service.status === 'draft' ? 'slate' : service.status === 'inactive' ? 'gray' : 'green'} 
                             />
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-3 py-3 text-center">
                             {(() => {
                               const dataStatus = service.dataStatus || (service.status === 'success' ? 'DATA_UPDATED' : service.status === 'inactive' ? 'EMPTY' : service.status?.startsWith('failed') ? 'DATA_UPDATE_FAILED' : 'EMPTY');
                               const label = dataStatus === 'EMPTY' ? 'Rỗng' :
@@ -486,7 +489,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                               return <StatusTag label={label} variant={variant as any} />;
                             })()}
                           </td>
-                          <td className="px-4 py-4 text-right">
+                          <td className="px-2 py-4 text-right">
                             <div className="flex items-center justify-end gap-1">
                               {/* Nút ngoài: Maping chi tiết, Quản lý */}
                               <button
@@ -553,6 +556,16 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                                   >
                                     <Eraser className="w-4 h-4 text-orange-500" />
                                     Xóa dữ liệu thu thập
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setShowDeleteStructureConfirmModal(true);
+                                    }}
+                                  >
+                                    <Layers className="w-4 h-4 text-orange-500" />
+                                    Xóa cấu trúc
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-2 py-1">Dịch vụ</DropdownMenuLabel>
@@ -779,6 +792,19 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         title="Thông báo"
         subtitle="Cảnh báo hành động xóa dữ liệu"
         message="Nếu bạn xóa dữ liệu sẽ không thể hoàn tác dữ liệu trong cơ sở dữ liệu. Bạn có chắc chắn muốn xóa dữ liệu không?"
+        confirmText="Đồng ý"
+        cancelText="Hủy bỏ"
+        type="warning"
+      />
+      <ConfirmModal
+        isOpen={showDeleteStructureConfirmModal}
+        onClose={() => setShowDeleteStructureConfirmModal(false)}
+        onConfirm={() => {
+          alert(`Đã xóa cấu trúc của dịch vụ: ${selectedService?.name}`);
+        }}
+        title="Thông báo"
+        subtitle="Cảnh báo hành động xóa cấu trúc"
+        message="Xóa cấu trúc sẽ gỡ bỏ toàn bộ cấu hình mapping của dịch vụ và không thể hoàn tác. Bạn có chắc chắn muốn xóa cấu trúc không?"
         confirmText="Đồng ý"
         cancelText="Hủy bỏ"
         type="warning"

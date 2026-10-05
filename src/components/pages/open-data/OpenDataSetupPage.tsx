@@ -1858,8 +1858,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
         </div>
       </div>
 
-      {/* Main Tab Content */}
-      <div className="p-6">
+      {/* Main Tab Content — bỏ padding ngang vì MainLayout đã có sẵn p-6 */}
+      <div className="py-6">
         {activeTab === 'management' && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
@@ -1977,7 +1977,8 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            {/* collection-table: dùng quy tắc ghi đè có sẵn trong index.css để header in đậm */}
+            <table className="w-full text-left collection-table">
               <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                 <tr>
                   {activeTab === 'approval' && (
@@ -2021,12 +2022,13 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     </>
                   ) : (
                     <>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Mã danh mục</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên danh mục</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Đơn vị chủ trì cung cấp</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Phiên bản</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px]">Trạng thái</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-48">Thao tác</th>
+                      {/* Cột nhãn dùng w-px để co sát nội dung, phần rộng còn lại dồn cho cột Tên danh mục */}
+                      <th className="px-4 py-4 text-left font-semibold text-slate-700 whitespace-nowrap w-px text-[13px]">Mã danh mục</th>
+                      <th className="px-4 py-4 text-left font-semibold text-slate-700 whitespace-nowrap min-w-[220px] text-[13px]">Tên danh mục</th>
+                      <th className="px-4 py-4 text-left font-semibold text-slate-700 min-w-[140px] text-[13px]">Đơn vị chủ trì cung cấp</th>
+                      <th className="px-4 py-4 text-left font-semibold text-slate-700 w-px text-[13px]">Người tạo / Ngày tạo</th>
+                      <th className="px-4 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-px text-[13px]">Trạng thái</th>
+                      <th className="px-4 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-px text-[13px]">Thao tác</th>
                     </>
                   )}
                 </tr>
@@ -2219,7 +2221,10 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{category.dataField}</td>
-                        <td className="px-4 py-3 text-center text-slate-600 font-mono text-[13px]">{category.version ? `v${category.version}` : '--'}</td>
+                        <td className="px-4 py-3 text-left text-[13px]">
+                          <div className="text-slate-900 font-medium whitespace-nowrap">{category.createdBy || '--'}</div>
+                          <div className="text-slate-500 font-medium font-mono mt-0.5 whitespace-nowrap">{category.createdDate || '--'}</div>
+                        </td>
                         <td className="px-4 py-3 text-center text-[13px]">{getApprovalStatusBadge(category.approvalStatus)}</td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
