@@ -558,7 +558,7 @@ export function DataProvisionServiceSetupPage() {
               {/* Grid Table Card */}
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-[13px]">
+                  <table className="w-full text-left border-collapse text-[13px] collection-table">
                     <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
                       <tr className="text-slate-500 uppercase tracking-wider">
                         <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]">Mã / Tên API</th>

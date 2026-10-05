@@ -12,7 +12,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'active',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Nguyễn Văn A',
     version: 1,
     dataSource: 'dldc',
     databaseSystem: 'Cơ sở dữ liệu Hộ tịch'
@@ -28,7 +28,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'active',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Trần Thị Bình',
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý thông tin Dân tộc'
@@ -44,7 +44,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'pending_approval',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Lê Minh Châu',
     version: 1,
     dataSource: 'dldc',
     databaseSystem: 'Cơ sở dữ liệu Quốc tịch / Hộ tịch'
@@ -60,7 +60,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'pending_approval',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Phạm Quốc Dũng',
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý Tôn giáo'
@@ -76,7 +76,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'pending_approval',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Hoàng Thu Hà',
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý Cơ quan hành chính'
@@ -92,7 +92,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'draft',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Nguyễn Văn A',
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Cơ sở dữ liệu Đơn vị hành chính'
@@ -108,7 +108,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'draft',
     createdDate: '20/12/2024',
     updatedDate: '20/12/2024',
-    createdBy: 'Hệ thống',
+    createdBy: 'Trần Thị Bình',
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
@@ -125,7 +125,7 @@ export const defaultEntities: MasterDataEntity[] = [
     createdDate: '10/08/2023',
     updatedDate: '15/03/2025',
     effectiveDate: '01/09/2023',
-    createdBy: 'Hệ thống',
+    createdBy: 'Lê Minh Châu',
     version: 2,
     dataSource: 'manual',
     databaseSystem: 'Cơ sở dữ liệu Hộ tịch điện tử'
@@ -141,7 +141,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'approved',
     createdDate: '15/11/2024',
     updatedDate: '10/01/2025',
-    createdBy: 'Hệ thống',
+    createdBy: 'Phạm Quốc Dũng',
     version: 2,
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý lao động việc làm'
@@ -157,7 +157,7 @@ export const defaultEntities: MasterDataEntity[] = [
     lifecycleStatus: 'rejected',
     createdDate: '01/11/2024',
     updatedDate: '05/01/2025',
-    createdBy: 'Hệ thống',
+    createdBy: 'Hoàng Thu Hà',
     version: 1,
     dataSource: 'manual',
     databaseSystem: 'Hệ thống Quản lý giáo dục quốc dân'

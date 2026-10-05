@@ -161,6 +161,7 @@ const getActionRules = (s: { serviceStatus: ServiceStatus; dataStatus: DataStatu
       || (s.targetDbHasData ? 'CSDL đích còn dữ liệu - xóa dữ liệu chuyển đổi trước' : null),
     toggle: processing || (s.serviceStatus === 'draft' ? 'Dịch vụ đang ở trạng thái Bản nháp' : null),
     deleteService: processing || (s.dataStatus === 'EMPTY' ? null : 'Chỉ xóa được khi dữ liệu Rỗng'),
+    deleteStructure: processing, // (v1.4) chưa có quy tắc riêng — chỉ khóa khi Đang xử lý
   };
 };
 
@@ -178,6 +179,10 @@ const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode
     </span>
   </DropdownMenuItem>
 );
+
+// (v1.4) Người tạo mặc định cho dịch vụ chưa có sẵn createdBy trong dữ liệu mẫu
+const DEFAULT_CREATORS = ['Nguyễn Văn A', 'Trần Thị Bình', 'Lê Minh Châu', 'Phạm Quốc Dũng', 'Hoàng Thu Hà'];
+const getCreator = (service: any) => service.createdBy || DEFAULT_CREATORS[(service.id || 0) % DEFAULT_CREATORS.length];
 
 interface CollectionSetupPageProps {
   onNavigate?: (pageId: string) => void;
@@ -210,6 +215,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
   const [showUpdateSuccessModal, setShowUpdateSuccessModal] = useState(false);
   const [showIntegrateWarningModal, setShowIntegrateWarningModal] = useState(false);
   const [showDeleteDataConfirmModal, setShowDeleteDataConfirmModal] = useState(false);
+  const [showDeleteStructureConfirmModal, setShowDeleteStructureConfirmModal] = useState(false);
   const [inactiveReason, setInactiveReason] = useState('');
   const [selectedService, setSelectedService] = useState<any>(null);
 
@@ -376,7 +382,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto py-6">
         {/* Tab: Thiết lập dịch vụ */}
         {activeTab === 'service-setup' && (
           <div className="space-y-4">
@@ -585,13 +591,12 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                   <thead className="bg-[#F8FAFC] sticky top-0 z-[1]">
                     <tr className="h-[42px]">
                       <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap w-12 text-[13px]">STT</th>
-                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Tên dịch vụ</th>
-                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Mã dịch vụ</th>
+                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px] min-w-[190px]">Tên / Mã dịch vụ</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Loại nguồn</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Phương thức kết nối</th>
                       <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Phiên bản</th>
                       <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Hệ thống nguồn</th>
-                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Ngày tạo</th>
+                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Người tạo / Ngày tạo</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Trạng thái dịch vụ</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Trạng thái dữ liệu</th>
                       <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap text-[13px] sticky right-0 bg-[#F8FAFC] shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]">Thao tác</th>
@@ -605,11 +610,9 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                         return (
                         <tr key={service.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
                           <td className="px-3 py-1 text-center text-black text-[13px] whitespace-nowrap">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                          <td className="px-3 py-1 text-left text-black text-[13px] max-w-[360px]">
+                          <td className="px-3 py-1 text-left text-black text-[13px] max-w-[360px] leading-[18px]">
                             <TruncatedText text={service.name} extra={service.description} />
-                          </td>
-                          <td className="px-3 py-1 text-left text-black text-[13px] max-w-[200px]">
-                            <TruncatedText text={service.code || '-'} />
+                            <TruncatedText text={service.code || '-'} className="text-[#64748B]" />
                           </td>
                           <td className={`px-3 py-1 text-left`}>
                             <Badge label={service.source || 'Trong ngành'} />
@@ -622,9 +625,8 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                             <TruncatedText text={service.managingUnit || '-'} />
                           </td>
                           <td className="px-3 py-1 text-left text-black whitespace-nowrap text-[13px] leading-[18px]">
-                            {service.updatedAt.split(' ').map((part: string, i: number) => (
-                              <div key={i}>{part}</div>
-                            ))}
+                            <div>{getCreator(service)}</div>
+                            <div className="text-[#64748B]">{service.updatedAt}</div>
                           </td>
                           <td className={`px-3 py-1 text-left`}>
                             <Badge label={SERVICE_STATUS_LABEL[service.serviceStatus as ServiceStatus]} />
@@ -686,6 +688,8 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                                   )}
                                   <MenuAction icon={<Eraser className="w-4 h-4" />} label="Xóa dữ liệu thu thập" reason={rules.deleteData} danger
                                     onSelect={() => { setSelectedService(service); setShowDeleteDataConfirmModal(true); }} />
+                                  <MenuAction icon={<Layers className="w-4 h-4" />} label="Xóa cấu trúc" reason={rules.deleteStructure} danger
+                                    onSelect={() => { setSelectedService(service); setShowDeleteStructureConfirmModal(true); }} />
                                   <DropdownMenuSeparator className="bg-[#E2E8F0]" />
                                   <DropdownMenuLabel className="px-3 py-1 text-[12px] font-medium text-[#64748B]">Dịch vụ</DropdownMenuLabel>
                                   {service.serviceStatus === 'inactive' ? (
@@ -915,6 +919,19 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         title="Thông báo"
         subtitle="Cảnh báo hành động xóa dữ liệu"
         message="Nếu bạn xóa dữ liệu sẽ không thể hoàn tác dữ liệu trong cơ sở dữ liệu. Bạn có chắc chắn muốn xóa dữ liệu không?"
+        confirmText="Đồng ý"
+        cancelText="Hủy bỏ"
+        type="warning"
+      />
+      <ConfirmModal
+        isOpen={showDeleteStructureConfirmModal}
+        onClose={() => setShowDeleteStructureConfirmModal(false)}
+        onConfirm={() => {
+          alert(`Đã xóa cấu trúc của dịch vụ: ${selectedService?.name}`);
+        }}
+        title="Thông báo"
+        subtitle="Cảnh báo hành động xóa cấu trúc"
+        message="Xóa cấu trúc sẽ gỡ bỏ toàn bộ cấu hình mapping của dịch vụ và không thể hoàn tác. Bạn có chắc chắn muốn xóa cấu trúc không?"
         confirmText="Đồng ý"
         cancelText="Hủy bỏ"
         type="warning"
