@@ -14,19 +14,15 @@ import { Portal } from '../../common/Portal';
 import { StructureLoadingConfig } from './StructureLoadingConfig';
 import { initialSourceSystems } from './mockSourceSystems';
 import { StatusTag } from '../../common/StatusTag';
+import { toast } from 'sonner';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, tabClass, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, resolveConnectionType } from './collectionUi';
 
 const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => {
   if (!isOpen) return null;
   return (
     <Portal>
       <div 
-        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-        style={{ 
-          zIndex: 99999999,
-          backdropFilter: 'blur(4px)', 
-          WebkitBackdropFilter: 'blur(4px)',
-          fontFamily: 'Inter, system-ui, sans-serif'
-        }}
+        className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 animate-in fade-in duration-200"
         onClick={onClose}
       >
         <div 
@@ -34,19 +30,19 @@ const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boole
           style={{ maxWidth: '450px' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all z-10">
+          <button onClick={onClose} aria-label="Đóng" className={`absolute right-4 top-4 z-10 ${BTN_GHOST_ICON}`}>
             <X className="w-4 h-4"/>
           </button>
           <div className="p-6 pb-4 flex flex-col items-center">
             <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
               <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
-            <h3 className="text-[16px] font-bold text-slate-900 mb-1">Kết nối thành công</h3>
-            <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
+            <h3 className="text-[16px] font-medium text-[#020817] mb-1">Kết nối thành công</h3>
+            <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
           </div>
-          <div className="px-5 py-3.5 flex justify-center gap-3 bg-slate-50 border-t border-slate-100 w-full">
-            <button onClick={onClose} className="px-6 py-2 bg-white border border-[#e2e8f0] text-[#020817] text-[13px] rounded-lg transition-all shadow-sm hover:bg-slate-50 active:scale-95 font-medium">Đóng</button>
-            <button onClick={onContinue} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[13px] rounded-lg transition-all shadow-sm active:scale-95 font-medium">Tiếp tục</button>
+          <div className="px-6 py-4 flex justify-center gap-3 bg-[#F8FAFC] border-t border-[#E2E8F0] w-full">
+            <button onClick={onClose} className={BTN_OUTLINE}>Đóng</button>
+            <button onClick={onContinue} className={BTN_PRIMARY}>Tiếp tục</button>
           </div>
         </div>
       </div>
@@ -59,13 +55,7 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
   return (
     <Portal>
       <div 
-        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-        style={{ 
-          zIndex: 99999999,
-          backdropFilter: 'blur(4px)', 
-          WebkitBackdropFilter: 'blur(4px)',
-          fontFamily: 'Inter, system-ui, sans-serif'
-        }}
+        className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 animate-in fade-in duration-200"
         onClick={onClose}
       >
         <div 
@@ -73,23 +63,23 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
           style={{ maxWidth: '450px' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all z-10">
+          <button onClick={onClose} aria-label="Đóng" className={`absolute right-4 top-4 z-10 ${BTN_GHOST_ICON}`}>
             <X className="w-4 h-4"/>
           </button>
           <div className="p-6 pb-4 flex flex-col items-center">
             <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
               <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
-            <h3 className="text-[13px] font-bold text-slate-900 mb-1">Kết nối thất bại</h3>
-            <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Không thể kết nối đến Hệ thống đích (Destination API).</p>
+            <h3 className="text-[16px] font-medium text-[#020817] mb-1">Kết nối thất bại</h3>
+            <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Không thể kết nối đến Hệ thống đích (Destination API).</p>
             
             <div className="w-full text-left px-5">
-              <p className="text-[13px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Lỗi trả về</p>
+              <p className="text-[13px] font-medium text-[#64748B] mb-1.5">Lỗi trả về</p>
               <div className="bg-red-50/50 text-red-600 px-3 py-2 rounded-lg text-[13px] mb-4 font-medium border border-red-100">
                 Error 401 Unauthorized: Invalid API Key.
               </div>
 
-              <p className="text-[13px] font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+              <p className="text-[13px] font-medium text-[#020817] mb-1.5">Hướng dẫn khắc phục</p>
               <ul className="text-[13px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
                 <li>Kiểm tra lại giá trị <strong>API Key</strong> (tránh dư khoảng trắng).</li>
                 <li>Xác nhận API Key còn hạn hoặc chưa bị thu hồi.</li>
@@ -97,8 +87,8 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
               </ul>
             </div>
           </div>
-          <div className="px-5 py-3.5 flex justify-center bg-slate-50 border-t border-slate-100 w-full">
-            <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[13px] rounded-lg transition-all shadow-sm active:scale-95 font-medium">Đã hiểu & Đóng</button>
+          <div className="px-6 py-4 flex justify-center bg-[#F8FAFC] border-t border-[#E2E8F0] w-full">
+            <button onClick={onClose} className={BTN_PRIMARY}>Đã hiểu & Đóng</button>
           </div>
         </div>
       </div>
@@ -111,13 +101,7 @@ const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
   return (
     <Portal>
       <div 
-        className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-        style={{ 
-          zIndex: 99999999,
-          backdropFilter: 'blur(4px)', 
-          WebkitBackdropFilter: 'blur(4px)',
-          fontFamily: 'Inter, system-ui, sans-serif'
-        }}
+        className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 animate-in fade-in duration-200"
         onClick={onClose}
       >
         <div 
@@ -125,23 +109,23 @@ const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           style={{ maxWidth: '450px' }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={onClose} aria-label="Đóng" className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-1.5 rounded-lg transition-all z-10">
+          <button onClick={onClose} aria-label="Đóng" className={`absolute right-4 top-4 z-10 ${BTN_GHOST_ICON}`}>
             <X className="w-4 h-4"/>
           </button>
           <div className="p-6 pb-4 flex flex-col items-center">
             <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
               <FileX className="w-6 h-6" strokeWidth={2} />
             </div>
-            <h3 className="text-[13px] font-bold text-slate-900 mb-1">Không có dữ liệu</h3>
-            <p className="text-slate-500 text-[13px] mb-4 text-center px-4 leading-relaxed font-medium">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
+            <h3 className="text-[16px] font-medium text-[#020817] mb-1">Không có dữ liệu</h3>
+            <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
             
             <div className="w-full text-left px-5">
-              <p className="text-[13px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Trạng thái kết nối</p>
+              <p className="text-[13px] font-medium text-[#64748B] mb-1.5">Trạng thái kết nối</p>
               <div className="bg-green-50/30 text-green-700 px-3 py-1.5 rounded-lg text-[13px] mb-4 flex items-center gap-1.5 border border-green-100 w-fit">
                 <Check className="w-3 h-3"/> HTTP 200 OK (Thành công)
               </div>
 
-              <p className="text-[13px] font-bold text-slate-800 mb-1.5 uppercase tracking-tight">Hướng dẫn khắc phục</p>
+              <p className="text-[13px] font-medium text-[#020817] mb-1.5">Hướng dẫn khắc phục</p>
               <ul className="text-[13px] text-slate-600 space-y-1.5 mb-2 ml-4 list-disc marker:text-slate-400">
                 <li>Kiểm tra lại format của <strong>Request Sample</strong>.</li>
                 <li>Xác nhận thời điểm yêu cầu có dữ liệu trên nguồn.</li>
@@ -149,8 +133,8 @@ const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
               </ul>
             </div>
           </div>
-          <div className="px-5 py-3.5 flex justify-center bg-slate-50 border-t border-slate-100 w-full">
-            <button onClick={onClose} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[13px] rounded-lg transition-all shadow-sm active:scale-95 font-medium">Đã hiểu & Đóng</button>
+          <div className="px-6 py-4 flex justify-center bg-[#F8FAFC] border-t border-[#E2E8F0] w-full">
+            <button onClick={onClose} className={BTN_PRIMARY}>Đã hiểu & Đóng</button>
           </div>
         </div>
       </div>
@@ -164,8 +148,8 @@ const DataMappingModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () =>
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-slate-50 rounded-xl shadow-2xl w-full max-w-[1000px] h-full max-h-[90vh] overflow-hidden flex flex-col relative border border-slate-200">
         <div className="px-6 py-4 border-b border-slate-200 bg-white flex justify-between items-center z-10 shrink-0">
-          <h2 className="text-[16px] font-bold text-slate-800 uppercase tracking-tight">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
-          <button onClick={onClose} aria-label="Đóng" className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-5 h-5" /></button>
+          <h2 className="text-[16px] font-medium text-[#020817]">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
+          <button onClick={onClose} aria-label="Đóng" className={BTN_GHOST_ICON}><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
           <AdvancedDataMapping onClose={onClose} />
@@ -185,8 +169,13 @@ interface ServiceModalProps {
 type TabType = 'general' | 'contact' | 'connection' | 'mapping' | 'collection';
 
 // Modal Thêm mới phương thức
-export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
-  if (!isOpen) return null;
+// Bọc ngoài để không gọi hook sau lệnh return sớm (quy tắc hook của React)
+export function AddServiceModal(props: ServiceModalProps) {
+  if (!props.isOpen) return null;
+  return <AddServiceModalContent {...props} />;
+}
+
+function AddServiceModalContent({ isOpen, onClose }: ServiceModalProps) {
 
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [dataClassification, setDataClassification] = useState('');
@@ -257,7 +246,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const finalStatus = (testState === 'success' || testState === 'connection_error' || testState === 'data_error') ? testState : 'Bản nháp';
-    alert(`Lưu phương thức thu thập thành công!\nTrạng thái bản ghi: ${finalStatus}`);
+    toast.success('Lưu dịch vụ thu thập thành công', { description: `Trạng thái bản ghi: ${finalStatus}` });
     onClose();
   };
 
@@ -270,44 +259,42 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="bg-white rounded-lg shadow-xl w-2/3 max-h-[95vh] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+        <div className="bg-white rounded-2xl shadow-2xl w-2/3 h-[90vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-            <h2 className="text-[16px] text-slate-900 font-bold uppercase tracking-tight">Thông tin kết nối</h2>
-            <button onClick={onClose} title="Đóng" className="p-1 hover:bg-slate-100 rounded transition-colors">
-              <X className="w-5 h-5 text-slate-500" />
+            <h2 className="text-[16px] font-medium text-[#020817]">Thông tin kết nối</h2>
+            <button onClick={onClose} title="Đóng" aria-label="Đóng" className={BTN_GHOST_ICON}>
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="border-b border-slate-200 bg-slate-50">
-            <div className="flex gap-1 px-6">
+          <div className="border-b border-[#E2E8F0] bg-white">
+            <div className="flex px-6">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-3 text-[13px] transition-colors relative flex items-center gap-2 ${activeTab === tab.id ? 'text-blue-600 bg-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
+                  className={tabClass(activeTab === tab.id)}
                 >
                   {tab.icon}
                   {tab.label}
-                  {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
-            <div className="px-6 py-4">
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar flex flex-col">
+            <div className="flex-1 shrink-0 px-6 py-4">
               {activeTab === 'general' && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="add-name" className="block text-[13px] font-medium text-slate-900 mb-1">Tên dịch vụ <span className="text-red-600">*</span></label>
-                    <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                    <label htmlFor="add-name" className={LABEL_CLS}>Tên dịch vụ <span className={REQUIRED_MARK}>*</span></label>
+                    <input aria-label="Input field" id="add-name" title="Tên dịch vụ" type="text" className={INPUT_CLS} placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2 relative">
-                      <label htmlFor="add-source-system" className="block text-[13px] font-medium text-slate-900 mb-1">Tên hệ thống nguồn <span className="text-red-600">*</span></label>
+                      <label htmlFor="add-source-system" className={LABEL_CLS}>Tên hệ thống nguồn <span className={REQUIRED_MARK}>*</span></label>
                       <input aria-label="Input field"
                         id="add-source-system"
                         title="Tên hệ thống nguồn"
@@ -319,7 +306,7 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                         }}
                         onFocus={() => setShowSourceDropdown(true)}
                         onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
-                        className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={INPUT_CLS}
                         placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..."
                       />
 
@@ -348,8 +335,8 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <label htmlFor="add-security" className="block text-[13px] font-medium text-slate-900 mb-1">Mức độ bảo mật dữ liệu</label>
-                      <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <label htmlFor="add-security" className={LABEL_CLS}>Mức độ bảo mật dữ liệu</label>
+                      <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className={INPUT_CLS}>
                         <option value="">Chọn mức độ bảo mật</option>
                         <option value="Dữ liệu mở">Dữ liệu mở</option>
                         <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -362,13 +349,13 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <label htmlFor="add-data-type" className="block text-[13px] font-medium text-slate-900 mb-1">Loại dữ liệu thu thập <span className="text-red-600">*</span></label>
+                      <label htmlFor="add-data-type" className={LABEL_CLS}>Loại dữ liệu thu thập <span className={REQUIRED_MARK}>*</span></label>
                       <select
                         aria-label="Select box"
                         id="add-data-type"
                         title="Loại dữ liệu thu thập"
                         required
-                        className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={INPUT_CLS}
                         value={collectionDataType}
                         onChange={(e) => setCollectionDataType(e.target.value)}
                       >
@@ -379,14 +366,15 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="desc" className="block text-[13px] font-medium text-slate-900 mb-1">Mô tả</label>
+                    <label htmlFor="desc" className={LABEL_CLS}>Mô tả</label>
                     <textarea aria-label="Text input" id="desc" title="Mô tả" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
                   </div>
                   <div>
-                    <label className="block text-[13px] font-medium text-slate-900 mb-2">Đính kèm văn bản</label>
-                    <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
+                    <label className={`${LABEL_CLS} !mb-2`}>Đính kèm văn bản</label>
+                    <div className="border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] rounded-lg p-6 text-center cursor-pointer hover:border-blue-600 transition-colors">
                       <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                      <p className="text-[13px] text-slate-600">Click để chọn file PDF, DOCX</p>
+                      <p className="text-[13px] font-medium text-[#020817]">Kéo thả file vào đây hoặc <span className="text-blue-600">Tải lên</span></p>
+                      <p className="mt-1 text-[12px] text-[#64748B]">Hỗ trợ: .pdf, .docx</p>
                     </div>
                   </div>
                 </div>
@@ -399,14 +387,14 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
               )}
               {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
             </div>
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+            <div className="sticky bottom-0 z-10 shrink-0 flex items-center justify-between px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC]">
               <div>
-                {activeTab === 'connection' && connectionType !== 'FILE' && (
-                  <button type="button" onClick={handleTestConnection} className="px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Kiểm tra kết nối</button>
+                {activeTab === 'connection' && !['FILE', 'API_RECEIVE_JSON', 'API_RECEIVE_XML'].includes(connectionType) && (
+                  <button type="button" onClick={handleTestConnection} className={BTN_OUTLINE}>Kiểm tra kết nối</button>
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
+                <button type="button" onClick={onClose} className={BTN_OUTLINE}>Hủy</button>
                 {activeTab !== 'collection' ? (
                   <button
                     type="button"
@@ -414,12 +402,12 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
                       const currentIndex = tabs.findIndex(t => t.id === activeTab);
                       if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
                     }}
-                    className="px-4 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                    className={BTN_PRIMARY}
                   >
                     Tiếp tục
                   </button>
                 ) : (
-                  <button type="button" onClick={handleSubmit} className="px-6 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">Thêm</button>
+                  <button type="button" onClick={handleSubmit} className={BTN_PRIMARY}>Thêm</button>
                 )}
               </div>
             </div>
@@ -443,8 +431,12 @@ export function AddServiceModal({ isOpen, onClose }: ServiceModalProps) {
 }
 
 // Cấu phần khác được giữ nguyên cấu trúc
-export function EditServiceModal({ isOpen, onClose, service, initialTab }: ServiceModalProps) {
-  if (!isOpen || !service) return null;
+export function EditServiceModal(props: ServiceModalProps) {
+  if (!props.isOpen || !props.service) return null;
+  return <EditServiceModalContent {...props} />;
+}
+
+function EditServiceModalContent({ isOpen, onClose, service, initialTab }: ServiceModalProps) {
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>(initialTab || 'general');
@@ -455,7 +447,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
     }
   }, [initialTab]);
   const [dataClassification, setDataClassification] = useState('');
-  const [connectionType, setConnectionType] = useState(service.connectionType || 'API');
+  const [connectionType, setConnectionType] = useState(resolveConnectionType(service));
 
   const [showSourceDropdown, setShowSourceDropdown] = useState(false);
   const [sourceSystemName, setSourceSystemName] = useState(service.system || 'Hệ thống quản lý Bộ Tư Pháp Hộ tịch điện tử');
@@ -517,7 +509,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const finalStatus = (testState === 'success' || testState === 'connection_error' || testState === 'data_error') ? testState : 'Bản nháp';
-    alert(`Cập nhật phương thức thu thập thành công!\nTrạng thái bản ghi: ${finalStatus}`);
+    toast.success('Cập nhật dịch vụ thu thập thành công', { description: `Trạng thái bản ghi: ${finalStatus}` });
     // Quay về màn hình chi tiết thay vì đóng modal
     navigate(`/collection-setup/view/${service.id}`);
   };
@@ -530,44 +522,42 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-2/3 max-h-[95vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-2xl shadow-2xl w-2/3 h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-[13px] text-slate-900 font-bold uppercase tracking-tight">Chỉnh sửa kết nối API - {service.name}</h2>
-          <button onClick={onClose} title="Đóng" className="p-1 hover:bg-slate-100 rounded transition-colors">
-            <X className="w-5 h-5 text-slate-500" />
+          <h2 className="text-[16px] font-medium text-[#020817] truncate">Chỉnh sửa kết nối API - {service.name}</h2>
+          <button onClick={onClose} title="Đóng" aria-label="Đóng" className={BTN_GHOST_ICON}>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="border-b border-slate-200 bg-slate-50">
-          <div className="flex gap-1 px-6">
+        <div className="border-b border-[#E2E8F0] bg-white">
+          <div className="flex px-6">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-[13px] transition-colors relative flex items-center gap-2 ${activeTab === tab.id ? 'text-blue-600 bg-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
+                className={tabClass(activeTab === tab.id)}
               >
                 {tab.icon}
                 {tab.label}
-                {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-6 py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar flex flex-col">
+          <div className="flex-1 shrink-0 px-6 py-4">
             {activeTab === 'general' && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="edit-name" className="block text-[13px] font-medium text-slate-900 mb-1">Tên dịch vụ <span className="text-red-600">*</span></label>
-                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
+                  <label htmlFor="edit-name" className={LABEL_CLS}>Tên dịch vụ <span className={REQUIRED_MARK}>*</span></label>
+                  <input aria-label="Input field" id="edit-name" title="Tên dịch vụ" type="text" defaultValue={service.name} className={INPUT_CLS} placeholder="VD: API dịch vụ dữ liệu quốc tịch" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">
-                    <label htmlFor="edit-source-system" className="block text-[13px] font-medium text-slate-900 mb-1">Tên hệ thống nguồn <span className="text-red-600">*</span></label>
+                    <label htmlFor="edit-source-system" className={LABEL_CLS}>Tên hệ thống nguồn <span className={REQUIRED_MARK}>*</span></label>
                     <input aria-label="Input field"
                       id="edit-source-system"
                       title="Tên hệ thống nguồn"
@@ -579,7 +569,7 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                       }}
                       onFocus={() => setShowSourceDropdown(true)}
                       onBlur={() => setTimeout(() => setShowSourceDropdown(false), 200)}
-                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={INPUT_CLS}
                       placeholder="Tìm kiếm hoặc chọn hệ thống nguồn..."
                     />
 
@@ -608,8 +598,8 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label htmlFor="edit-security" className="block text-[13px] font-medium text-slate-900 mb-1">Mức độ bảo mật dữ liệu</label>
-                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label htmlFor="edit-security" className={LABEL_CLS}>Mức độ bảo mật dữ liệu</label>
+                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className={INPUT_CLS}>
                       <option value="">Chọn mức độ bảo mật</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
@@ -622,13 +612,13 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
-                    <label htmlFor="edit-data-type" className="block text-[13px] font-medium text-slate-900 mb-1">Loại dữ liệu thu thập <span className="text-red-600">*</span></label>
+                    <label htmlFor="edit-data-type" className={LABEL_CLS}>Loại dữ liệu thu thập <span className={REQUIRED_MARK}>*</span></label>
                     <select
                       aria-label="Select box"
                       id="edit-data-type"
                       title="Loại dữ liệu thu thập"
                       required
-                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={INPUT_CLS}
                       defaultValue={service.dataType || ''}
                     >
                       <option value="">Chọn loại dữ liệu thu thập</option>
@@ -638,14 +628,15 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="edit-desc" className="block text-[13px] font-medium text-slate-900 mb-1">Mô tả</label>
+                  <label htmlFor="edit-desc" className={LABEL_CLS}>Mô tả</label>
                   <textarea aria-label="Text input" id="edit-desc" title="Mô tả" defaultValue={service.description} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Mô tả chi tiết" />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-900 mb-2">Đính kèm văn bản</label>
-                  <div className="border border-slate-300 rounded-lg p-3 text-center py-6">
+                  <label className={`${LABEL_CLS} !mb-2`}>Đính kèm văn bản</label>
+                  <div className="border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] rounded-lg p-6 text-center cursor-pointer hover:border-blue-600 transition-colors">
                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <p className="text-[13px] text-slate-600">Click để chọn file PDF, DOCX</p>
+                    <p className="text-[13px] font-medium text-[#020817]">Kéo thả file vào đây hoặc <span className="text-blue-600">Tải lên</span></p>
+                      <p className="mt-1 text-[12px] text-[#64748B]">Hỗ trợ: .pdf, .docx</p>
                   </div>
                 </div>
               </div>
@@ -658,14 +649,14 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
             )}
             {activeTab === 'collection' && <DataCollectionConfigSection resetTestState={resetTestState} />}
           </div>
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+          <div className="sticky bottom-0 z-10 shrink-0 flex items-center justify-between px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC]">
             <div>
-              {activeTab === 'connection' && connectionType !== 'FILE' && (
-                <button type="button" onClick={handleTestConnection} className="px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Kiểm tra kết nối</button>
+              {activeTab === 'connection' && !['FILE', 'API_RECEIVE_JSON', 'API_RECEIVE_XML'].includes(connectionType) && (
+                <button type="button" onClick={handleTestConnection} className={BTN_OUTLINE}>Kiểm tra kết nối</button>
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm">Hủy</button>
+              <button type="button" onClick={onClose} className={BTN_OUTLINE}>Hủy</button>
               {activeTab !== 'collection' ? (
                 <button
                   type="button"
@@ -673,12 +664,12 @@ export function EditServiceModal({ isOpen, onClose, service, initialTab }: Servi
                     const currentIndex = tabs.findIndex(t => t.id === activeTab);
                     if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
                   }}
-                  className="px-4 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+                  className={BTN_PRIMARY}
                 >
                   Tiếp tục
                 </button>
               ) : (
-                <button type="button" onClick={handleSubmit} className="px-6 py-2 text-[13px] text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm">Cập nhật</button>
+                <button type="button" onClick={handleSubmit} className={BTN_PRIMARY}>Cập nhật</button>
               )}
             </div>
           </div>
@@ -706,7 +697,7 @@ export function DeleteServiceModal({ isOpen, onClose, service }: ServiceModalPro
       isOpen={isOpen}
       onClose={onClose}
       onConfirm={() => {
-        alert('Đã xóa dịch vụ thành công!');
+        toast.success('Đã xóa dịch vụ thành công');
       }}
       title="Xác nhận xóa thiết lập"
       subtitle="Hành động này không thể hoàn tác"
@@ -730,8 +721,8 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
       maxWidth="max-w-md"
       footer={
         <div className="flex justify-end gap-3 w-full">
-          <button onClick={onClose} className="px-4 py-2 bg-white text-[#020817] border border-[#e2e8f0] rounded-[6px] hover:bg-slate-50 transition-colors font-medium shadow-sm text-[13px]">Đóng</button>
-          <button onClick={() => { alert('Lưu cài đặt thành công'); onClose(); }} className="px-4 py-2 bg-blue-600 text-white flex items-center gap-2 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm text-[13px]">
+          <button onClick={onClose} className={BTN_OUTLINE}>Đóng</button>
+          <button onClick={() => { toast.success('Lưu cài đặt thành công'); onClose(); }} className={BTN_PRIMARY}>
             <CheckCircle className="w-4 h-4" />
             Lưu cài đặt
           </button>
@@ -762,8 +753,8 @@ export function SettingsServiceModal({ isOpen, onClose, service }: ServiceModalP
           </label>
         </div>
         <div className="pt-3 border-t border-slate-100">
-          <label className="block text-[13px] font-medium text-slate-700 mb-1">Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
-          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] bg-slate-50" />
+          <label className={LABEL_CLS}>Cảnh báo khi số bản ghi lỗi vượt quá (%)</label>
+          <input aria-label="Input field" type="number" defaultValue="10" title="Tỉ lệ lỗi (%)" className={INPUT_CLS} />
         </div>
       </div>
     </BaseModal>

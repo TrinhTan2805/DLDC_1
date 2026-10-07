@@ -25,10 +25,19 @@ import {
   RefreshCw,
   Download,
   X,
-  Plus,
-  ChevronLeft,
-  ChevronRight
+  Plus
 } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  TruncatedText, RowIconAction, Pagination, filterBtnClass, INPUT_CLS, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON,
+  ROW_ICON_BTN, TOOLTIP_CLS, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+} from '../collection/collectionUi';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+
+// Bảng theo compomennt.md 5.3 / căn lề 5.3.3
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const ICON_OUTLINE_40 = 'w-10 h-10 shrink-0 rounded-lg border bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC] hover:text-[#020817] transition-colors flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600';
 
 interface StatCard {
   id: string;
@@ -322,7 +331,6 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
   ];
 
   const totalRecordsCount = selectedStat ? (selectedStat.lastMonth + selectedStat.thisMonth) : 3424;
-  const totalPages = Math.ceil(totalRecordsCount / itemsPerPage);
 
   return (
     <DatabasePageTemplate
@@ -331,6 +339,7 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
       onBack={onBack}
       innerSidebarItems={sidebarItems}
       activeId={selectedStat?.id}
+      stretchHeight
       onSelectDataType={(id) => {
         const stat = stats.find(s => s.id === id);
         if (stat) {
@@ -342,70 +351,65 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
       }}
     >
       <div className="flex-1 flex flex-col overflow-hidden bg-transparent">
-        {/* Title on its own row */}
+        {/* Tiêu đề trang (mục 4.4: 20px/700/#2A0F0F) */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-slate-900">{activeTitle}</h2>
+          <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">{activeTitle}</h1>
         </div>
-        
-        {/* Buttons on a separate row aligned to the right */}
-        <div className="flex items-center justify-end gap-3 mb-4">
+
+        {/* Nút thao tác căn phải (mục 5.19) */}
+        <div className="flex items-center justify-end gap-1.5">
           <button
+            type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`px-4 py-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border gap-2 text-[13px] font-medium ${
-              isFilterOpen ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-700 hover:bg-slate-50'
-            }`}
-            title="Bộ lọc"
+            aria-label="Bộ lọc nâng cao"
+            aria-expanded={isFilterOpen}
+            className={filterBtnClass(isFilterOpen)}
+            title="Bộ lọc nâng cao"
           >
             {isFilterOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-            Lọc
           </button>
-          
-          <button 
+
+          <button
+            type="button"
             onClick={() => {
               setIsFilterOpen(false);
               setFilterConditions([]);
               setCurrentPage(1);
             }}
-            className="p-2 border border-[#e2e8f0] bg-white rounded-lg text-slate-700 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" 
+            aria-label="Tải lại"
             title="Tải lại"
+            className={ICON_OUTLINE_40}
           >
             <RefreshCw className="w-5 h-5" />
           </button>
-
-          <button 
-            onClick={() => alert('Đang kết xuất dữ liệu ra file Excel...')}
-            className="px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-          >
-            <Download className="w-5 h-5" />
-            Kết xuất
-          </button>
         </div>
 
-        {/* Filter conditions panel */}
+        {/* Vùng lọc nâng cao: khung xám, cách thanh thao tác 15px */}
         {isFilterOpen && (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-4 shadow-sm animate-in slide-in-from-top-2 duration-200 relative">
-            <div className="absolute -top-2 right-[125px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-            <div className="flex items-center justify-between mb-4 relative z-10">
-              <h4 className="text-[13px] font-semibold text-slate-700">Điều kiện lọc nâng cao</h4>
-              <button 
+          <div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-[14px] font-medium text-[#020817]">Điều kiện lọc nâng cao</h4>
+              <button
+                type="button"
                 onClick={() => {
                   const newId = Date.now().toString();
                   setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
                 }}
-                className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-[13px] font-medium hover:bg-blue-50 transition-all shadow-sm"
+                className={BTN_OUTLINE}
               >
                 <Plus className="w-4 h-4" />
                 Thêm điều kiện
               </button>
             </div>
 
-            <div className="space-y-3 relative z-10">
+            <div className="space-y-2">
               {filterConditions.map((condition, index) => (
-                <div key={condition.id} className="flex items-center gap-3 animate-in fade-in duration-100">
-                  <div className="w-20 flex-shrink-0">
+                <div key={condition.id} className="flex items-center gap-2">
+                  <div className="w-24 flex-shrink-0">
                     {index > 0 && (
                       <select
-                        className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        aria-label="Toán tử logic"
+                        className={INPUT_CLS}
                         value={condition.logic}
                         onChange={(e) => {
                           const newConditions = [...filterConditions];
@@ -418,9 +422,10 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
                       </select>
                     )}
                   </div>
-                  
+
                   <select
-                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                    aria-label="Trường dữ liệu"
+                    className={`${INPUT_CLS} !w-auto flex-1`}
                     value={condition.field}
                     onChange={(e) => {
                       const newConditions = [...filterConditions];
@@ -436,7 +441,8 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
                   </select>
 
                   <select
-                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                    aria-label="Phép so sánh"
+                    className={`${INPUT_CLS} !w-auto flex-1`}
                     value={condition.operator}
                     onChange={(e) => {
                       const newConditions = [...filterConditions];
@@ -449,51 +455,50 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
                     <option value="starts">Bắt đầu</option>
                   </select>
 
-                  <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg bg-white shadow-sm">
-                    <input
-                      type="text"
-                      className="flex-1 bg-transparent border-0 p-0 text-[13px] focus:outline-none text-slate-800"
-                      placeholder="Nhập giá trị..."
-                      value={condition.value}
-                      onChange={(e) => {
-                        const newConditions = [...filterConditions];
-                        newConditions[index].value = e.target.value;
-                        setFilterConditions(newConditions);
-                      }}
-                    />
-                  </div>
+                  <input
+                    aria-label="Giá trị"
+                    type="text"
+                    className={`${INPUT_CLS} !w-auto flex-1`}
+                    placeholder="Nhập giá trị..."
+                    value={condition.value}
+                    onChange={(e) => {
+                      const newConditions = [...filterConditions];
+                      newConditions[index].value = e.target.value;
+                      setFilterConditions(newConditions);
+                    }}
+                  />
 
-                  <button 
-                    type="button"
-                    onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
-                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Xóa điều kiện"
+                        onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
+                        className={`${ROW_ICON_BTN} hover:!text-[#DC2626]`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>Xóa điều kiện</TooltipContent>
+                  </Tooltip>
                 </div>
               ))}
               {filterConditions.length === 0 && (
-                <div className="text-center py-4 text-[13px] text-slate-500">
-                  Chưa có điều kiện lọc nào được thêm.
-                </div>
+                <p className="text-[13px] text-[#64748B]">Chưa có điều kiện lọc nào được thêm.</p>
               )}
             </div>
 
             {filterConditions.length > 0 && (
-              <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-3 relative z-10">
-                <button 
+              <div className="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center gap-3">
+                <button
                   type="button"
-                  onClick={() => alert('Đã áp dụng bộ lọc thành công!')}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-[13px] hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all"
+                  onClick={() => toast.success('Đã áp dụng bộ lọc thành công!')}
+                  className={BTN_PRIMARY}
                 >
                   <CheckCircle className="w-4 h-4" />
                   Áp dụng bộ lọc
                 </button>
-                <button 
-                  type="button"
-                  onClick={() => setFilterConditions([])} 
-                  className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium text-[13px] hover:bg-slate-50 transition-all shadow-sm"
-                >
+                <button type="button" onClick={() => setFilterConditions([])} className={BTN_OUTLINE}>
                   Xóa tất cả
                 </button>
               </div>
@@ -501,40 +506,38 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
           </div>
         )}
 
-        {/* Main Table card */}
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col">
+        {/* Bảng dữ liệu (mục 5.3) */}
+        <div className="mt-4 bg-white border border-[#E2E8F0] rounded-lg overflow-hidden flex-1 flex flex-col">
           <div className="flex-1 overflow-auto bg-white">
-            <table className="w-full border-collapse collection-table" style={{ fontSize: '16px' }}>
-              <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-                <tr>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Họ tên</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Giới tính</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày sinh</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Số đăng ký</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Ngày đăng ký</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
+            <table className="w-full border-collapse collection-table text-[13px]">
+              <thead className="bg-[#F8FAFC] sticky top-0 z-10">
+                <tr className="h-[42px]">
+                  <th className={`${TH} text-center w-12`}>STT</th>
+                  <th className={`${TH} text-left`}>Họ tên</th>
+                  <th className={`${TH} text-left`}>Giới tính</th>
+                  <th className={`${TH} text-left`}>Ngày sinh</th>
+                  <th className={`${TH} text-left`}>Số đăng ký</th>
+                  <th className={`${TH} text-left`}>Ngày đăng ký</th>
+                  <th className={`${TH} text-center w-20`}>Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {mockRecords.map((record, index) => (
-                  <tr key={record.id} className="hover:bg-slate-50 transition-all group">
-                    <td className="px-4 py-3 text-center text-slate-500 font-medium">
+                  <tr key={record.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <td className={`${TD} text-center whitespace-nowrap`}>
                       {((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}
                     </td>
-                    <td className="px-4 py-3 text-center font-semibold text-slate-900">{record.name}</td>
-                    <td className="px-4 py-3 text-center text-slate-600 font-medium">{record.gender}</td>
-                    <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.birthDate}</td>
-                    <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.regNo}</td>
-                    <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.regDate}</td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => setSelectedRecord(record)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
+                    <td className={`${TD} text-left max-w-[360px]`}>
+                      <TruncatedText text={record.name} />
+                    </td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{record.gender}</td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{record.birthDate}</td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{record.regNo}</td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{record.regDate}</td>
+                    <td className={`${TD} text-center`}>
+                      <RowIconAction label="Xem chi tiết" onClick={() => setSelectedRecord(record)}>
+                        <Eye className="w-4 h-4" />
+                      </RowIconAction>
                     </td>
                   </tr>
                 ))}
@@ -542,178 +545,76 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
             </table>
           </div>
 
-          {/* Pagination UI */}
-          <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white flex-wrap gap-4 collection-pagination animate-in fade-in" style={{ fontSize: '16px' }}>
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600">Hiển thị</span>
-              <select
-                className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                title="Số bản ghi trên trang"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-              <span className="text-slate-600">bản ghi/trang</span>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <span className="text-slate-600 font-medium">
-                {totalRecordsCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, totalRecordsCount)} / {totalRecordsCount}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                >
-                  Trước
-                </button>
-                
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  if (totalPages > 5 && currentPage > 3) {
-                    pageNum = currentPage - 3 + i + 1;
-                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                  }
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1.5 border rounded-lg font-medium transition-colors ${
-                        currentPage === pageNum
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-sm shadow-blue-100'
-                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                >
-                  Sau
-                </button>
-              </div>
-            </div>
-          </div>
+          {/* Phân trang (mục 5.14) */}
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPage}
+            totalItems={totalRecordsCount}
+            pageSize={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setItemsPerPage}
+          />
         </div>
       </div>
 
-      {/* Record Details Modal Overlay */}
+      {/* Xem chi tiết bản ghi (mục 5.17: nhãn – giá trị) */}
       {selectedRecord && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" onClick={() => setSelectedRecord(null)}></div>
-          
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-slate-50/50">
-                <h3 className="text-lg font-bold text-slate-900">Chi tiết bản ghi</h3>
-                <button
-                  onClick={() => setSelectedRecord(null)}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-600 transition-colors"
-                  title="Đóng chi tiết"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedRecord(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0">
+              <h3 className="text-[16px] font-medium text-[#020817]">Chi tiết bản ghi</h3>
+              <button type="button" onClick={() => setSelectedRecord(null)} className={BTN_GHOST_ICON} aria-label="Đóng chi tiết" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              {/* Content */}
-              <div className="p-0 flex-1 overflow-auto bg-slate-50/30 text-slate-900">
-                <div className="p-6 space-y-6">
-                  {/* Section: Thông tin hồ sơ */}
-                  <section>
-                    <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-                      Thông tin hồ sơ
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Mã hồ sơ</div>
-                        <div className="text-sm text-slate-900 font-semibold">{selectedRecord.recordCode || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Số đăng ký</div>
-                        <div className="text-sm text-slate-900 font-semibold font-mono">{selectedRecord.regNo || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Số quyển</div>
-                        <div className="text-sm text-slate-900 font-semibold font-mono">{selectedRecord.bookNumber || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Trang số</div>
-                        <div className="text-sm text-slate-900 font-semibold font-mono">{selectedRecord.pageNumber || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Ngày đăng ký</div>
-                        <div className="text-sm text-slate-900 font-semibold font-mono">{selectedRecord.regDate || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Người thực hiện</div>
-                        <div className="text-sm text-slate-900 font-semibold">{selectedRecord.performer || '-'}</div>
-                      </div>
+            <div className="px-6 py-4 overflow-y-auto custom-scrollbar space-y-6">
+              <section>
+                <h4 className={`${SECTION_TITLE} mb-3`}>Thông tin hồ sơ</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  {([
+                    ['Mã hồ sơ', selectedRecord.recordCode],
+                    ['Số đăng ký', selectedRecord.regNo],
+                    ['Số quyển', selectedRecord.bookNumber],
+                    ['Trang số', selectedRecord.pageNumber],
+                    ['Ngày đăng ký', selectedRecord.regDate],
+                    ['Người thực hiện', selectedRecord.performer],
+                  ] as [string, string | undefined][]).map(([label, value]) => (
+                    <div key={label} className="space-y-1">
+                      <div className={FIELD_LABEL}>{label}</div>
+                      <div className={`${FIELD_VALUE} break-words`}>{value || '-'}</div>
                     </div>
-                  </section>
-
-                  {/* Section: Thông tin chi tiết */}
-                  <section>
-                    <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-                      Thông tin chi tiết dữ liệu
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Họ và tên</div>
-                        <div className="text-sm text-slate-900 font-bold">{selectedRecord.name || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Giới tính</div>
-                        <div className="text-sm text-slate-900 font-semibold">{selectedRecord.gender || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Ngày sinh</div>
-                        <div className="text-sm text-slate-900 font-semibold font-mono">{selectedRecord.birthDate || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Số định danh cá nhân</div>
-                        <div className="text-sm text-slate-900 font-semibold font-mono">{selectedRecord.personalId || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Quốc tịch</div>
-                        <div className="text-sm text-slate-900 font-semibold">{selectedRecord.nationality || '-'}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="text-[11px] text-slate-500 font-medium uppercase tracking-tight">Đơn vị chia sẻ</div>
-                        <div className="text-sm text-slate-900 font-semibold">{selectedRecord.agency || '-'}</div>
-                      </div>
-                    </div>
-                  </section>
+                  ))}
                 </div>
-              </div>
+              </section>
 
-              {/* Footer */}
-              <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-end bg-slate-50/50">
-                <button
-                  onClick={() => setSelectedRecord(null)}
-                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-sm shadow-sm transition-all"
-                >
-                  Đóng
-                </button>
-              </div>
+              <section className="border-t border-[#E2E8F0] pt-4">
+                <h4 className={`${SECTION_TITLE} mb-3`}>Thông tin chi tiết dữ liệu</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  {([
+                    ['Họ và tên', selectedRecord.name],
+                    ['Giới tính', selectedRecord.gender],
+                    ['Ngày sinh', selectedRecord.birthDate],
+                    ['Số định danh cá nhân', selectedRecord.personalId],
+                    ['Quốc tịch', selectedRecord.nationality],
+                    ['Đơn vị chia sẻ', selectedRecord.agency],
+                  ] as [string, string | undefined][]).map(([label, value]) => (
+                    <div key={label} className="space-y-1">
+                      <div className={FIELD_LABEL}>{label}</div>
+                      <div className={`${FIELD_VALUE} break-words`}>{value || '-'}</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end flex-shrink-0">
+              <button type="button" onClick={() => setSelectedRecord(null)} className={BTN_OUTLINE}>
+                Đóng
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </DatabasePageTemplate>
   );

@@ -29,7 +29,7 @@ export const initialAgents: Agent[] = [
     callCycle: 30,
     dbAgentId: '7',
     agentKey: '03a7e504b44e272d32afc60d1eec6093',
-    lastDbUpdate: '17:44:54 20-11-2025',
+    lastDbUpdate: '20/11/2025 17:44:54',
     fileAgent: {
       id: 'GS-HienLT52',
       url: 'http://10.86.142.136:1201',
@@ -52,7 +52,7 @@ export const initialAgents: Agent[] = [
     callCycle: 60,
     dbAgentId: '2',
     agentKey: 'b7e2a9c1d0f5g4h3j2k1l0m9n8o7p6q5',
-    lastDbUpdate: '09:15:22 18-11-2025',
+    lastDbUpdate: '18/11/2025 09:15:22',
     fileAgent: {
       id: 'Agent-TH-01',
       url: 'http://192.168.1.100:1201',

@@ -1,5 +1,16 @@
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
+const RadialBarAny = RadialBar as any;
+const PolarAngleAxisAny = PolarAngleAxis as any;
+const BarAny = Bar as any;
+const XAxisAny = XAxis as any;
+const YAxisAny = YAxis as any;
+const TooltipAny = Tooltip as any;
+const LegendAny = Legend as any;
+
+// Tooltip biểu đồ: chữ 12px, viền #E2E8F0, bo 8px, không shadow
+const CHART_TOOLTIP_STYLE = { borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: 'none', fontSize: 12, color: '#64748B' };
+
 // Dữ liệu mở - Quy trình phê duyệt và công bố danh mục dữ liệu mở [Unverified]
 const openDataFunnelStats = {
   totalCreated: 27,
@@ -70,26 +81,26 @@ const maxApiShares = Math.max(...apiSharesByOpenData.map(d => d.shares));
 
 export function OpenDataDashboardPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-[18px] font-bold text-slate-800">Tổng quan dữ liệu mở</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Tổng quan dữ liệu mở</h1>
+        <p className="text-[13px] text-[#64748B] mt-1">
           Tổng hợp quy trình phê duyệt, công bố và lượt chia sẻ theo API của danh mục dữ liệu mở
         </p>
       </div>
 
       {/* Quy trình phê duyệt và công bố (donut) - mỗi bước 1 ô, căn đều 2 bên */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <p className="text-[16px] font-bold text-slate-800 mb-4">
+      <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+        <h3 className="text-[14px] font-medium text-[#020817] mb-3">
           Tỷ lệ xử lý qua từng bước, tính trên tổng {openDataFunnelStats.totalCreated.toLocaleString('vi-VN')} danh mục đã tạo
-        </p>
+        </h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {openDataFunnelSteps.map(step => (
-            <div key={step.label} className="border border-slate-200 rounded-lg p-6 flex flex-col items-center">
+            <div key={step.label} className="border border-[#E2E8F0] rounded-lg p-6 flex flex-col items-center">
               <div className="relative" style={{ width: 160, height: 160 }}>
                 <span
-                  className="absolute -right-6 top-1/2 -translate-y-1/2 text-[13px] font-bold"
+                  className="absolute -right-6 top-1/2 -translate-y-1/2 text-[13px] font-semibold tabular-nums"
                   style={{ color: step.color }}
                 >
                   {step.percent}%
@@ -103,37 +114,42 @@ export function OpenDataDashboardPage() {
                     endAngle={-270}
                     barSize={12}
                   >
-                    <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                    <RadialBar dataKey="value" cornerRadius={20} fill={step.color} background={{ fill: '#f1f5f9' }} />
+                    <PolarAngleAxisAny type="number" domain={[0, 100]} tick={false} />
+                    <RadialBarAny dataKey="value" cornerRadius={20} fill={step.color} background={{ fill: '#F1F5F9' }} />
                   </RadialBarChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold leading-tight" style={{ color: step.color }}>{step.value.toLocaleString('vi-VN')}</span>
-                  <div className="w-6 border-t-2 border-slate-300 my-0.5" />
-                  <span className="text-sm text-slate-400 leading-tight">{step.base.toLocaleString('vi-VN')}</span>
+                  <span className="text-[24px] font-bold leading-tight tabular-nums" style={{ color: step.color }}>{step.value.toLocaleString('vi-VN')}</span>
+                  <div className="w-6 border-t-2 border-[#CBD5E1] my-0.5" />
+                  <span className="text-[14px] text-[#94A3B8] leading-tight tabular-nums">{step.base.toLocaleString('vi-VN')}</span>
                 </div>
               </div>
-              <p className="text-[12px] text-slate-600 text-center mt-3 leading-tight">{step.label}</p>
+              <p className="text-[12px] text-[#475569] text-center mt-3 leading-tight">{step.label}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Lượt chia sẻ theo API */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h4 className="text-[16px] font-bold text-slate-800 mb-4">Lượt chia sẻ theo API của danh mục đã công bố</h4>
-          <div className="overflow-y-auto space-y-3" style={{ maxHeight: 420 }}>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-medium text-[#020817]">Lượt chia sẻ theo API của danh mục đã công bố</h3>
+            <div className="flex items-center gap-3 text-[12px] text-[#64748B] shrink-0">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block bg-cyan-400" />Lượt chia sẻ</span>
+            </div>
+          </div>
+          <div className="overflow-y-auto custom-scrollbar space-y-3" style={{ maxHeight: 420 }}>
             {apiSharesByOpenData.map((item, i) => (
               <div key={item.name}>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold flex items-center justify-center flex-shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-[#F1F5F9] text-[#475569] text-[12px] flex items-center justify-center flex-shrink-0 tabular-nums">
                     {i + 1}
                   </span>
-                  <span className="text-[13px] font-medium text-slate-900 flex-1 truncate" title={item.name}>{item.name}</span>
-                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.shares.toLocaleString('vi-VN')} lượt</span>
+                  <span className="text-[13px] text-[#020817] flex-1 truncate" title={item.name}>{item.name}</span>
+                  <span className="text-[12px] text-[#64748B] whitespace-nowrap tabular-nums">{item.shares.toLocaleString('vi-VN')} lượt</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-[#F1F5F9] overflow-hidden">
                   <div className="h-full rounded-full bg-cyan-400" style={{ width: `${(item.shares / maxApiShares) * 100}%` }} />
                 </div>
               </div>
@@ -142,19 +158,23 @@ export function OpenDataDashboardPage() {
         </div>
 
         {/* Xu hướng biến động số lượng danh mục 6 tháng gần nhất */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h4 className="text-[16px] font-bold text-slate-800 mb-6">Xu hướng biến động số lượng danh mục 6 tháng gần nhất</h4>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+          <h3 className="text-[14px] font-medium text-[#020817] mb-3">Xu hướng biến động số lượng danh mục 6 tháng gần nhất</h3>
           <ResponsiveContainer width="100%" height={420}>
             <BarChart data={openDataCountTrendData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
-              <Tooltip
-                cursor={{ fill: '#f8fafc' }}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+              <XAxisAny dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
+              <YAxisAny axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
+              <TooltipAny
+                cursor={{ fill: '#F8FAFC' }}
+                contentStyle={CHART_TOOLTIP_STYLE}
               />
-              <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-              <Bar dataKey="total" name="Tổng số danh mục" fill="#059669" radius={[4, 4, 0, 0]} barSize={32} />
+              <LegendAny
+                wrapperStyle={{ paddingTop: '20px', fontSize: 12 }}
+                iconType="circle"
+                formatter={(value: string) => <span style={{ color: '#64748B' }}>{value}</span>}
+              />
+              <BarAny dataKey="total" name="Tổng số danh mục" fill="#059669" radius={[4, 4, 0, 0]} barSize={32} />
             </BarChart>
           </ResponsiveContainer>
         </div>

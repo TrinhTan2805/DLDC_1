@@ -1,6 +1,11 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
+import { BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK } from '../../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
+
+const SELECT_CLS = INPUT_CLS + ' cursor-pointer';
 
 interface ProvisionReconciliationApiModalProps {
   isOpen: boolean;
@@ -28,24 +33,20 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
   };
 
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-reconciliation-api-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .provision-reconciliation-api-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-[18px] font-bold text-slate-800" style={{ fontSize: '18px' }}>
+        <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0]">
+          <h2 className="text-[16px] font-medium text-[#020817]">
             {apiData ? 'Cập nhật API Đối soát' : 'Thêm mới API Đối soát'}
           </h2>
-          <button 
+          <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className={BTN_GHOST_ICON}
             title="Đóng"
+            aria-label="Đóng"
           >
             <X className="w-5 h-5" />
           </button>
@@ -53,44 +54,44 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               <div className="md:col-span-2">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
-                  Tên tiến trình đối soát <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Tên tiến trình đối soát <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
                   name="name"
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] font-medium"
+                  className={INPUT_CLS}
                   placeholder="Nhập tên tiến trình đối soát..."
                   defaultValue={apiData ? apiData.name : ''}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
-                  Hệ thống đối tác đối soát <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Hệ thống đối tác đối soát <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
                   name="targetSystem"
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px]"
+                  className={INPUT_CLS}
                   placeholder="Ví dụ: Hệ thống Bộ Tư pháp, Bộ Tài chính..."
                   defaultValue={apiData ? apiData.targetSystem : ''}
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
-                  Lịch trình chạy đối soát <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Lịch trình chạy đối soát <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   name="schedule"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px]"
+                  className={SELECT_CLS}
                   defaultValue={apiData ? apiData.schedule : 'Định kỳ (Hàng ngày) / Theo yêu cầu'}
                 >
                   <option value="Định kỳ (Hàng ngày) / Theo yêu cầu">Định kỳ (Hàng ngày) / Theo yêu cầu</option>
@@ -101,12 +102,12 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
-                  Trạng thái hoạt động <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Trạng thái hoạt động <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   name="status"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] font-medium"
+                  className={SELECT_CLS}
                   defaultValue={apiData ? apiData.status : 'active'}
                 >
                   <option value="active">Kích hoạt (Hoạt động)</option>
@@ -115,12 +116,12 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   API Cung cấp dữ liệu liên kết đối soát
                 </label>
                 <select
                   name="linkedApi"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px]"
+                  className={SELECT_CLS}
                   defaultValue={apiData ? apiData.linkedApi : 'Lấy danh sách Hộ tịch'}
                 >
                   <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch (/api/v1/hotich/list)</option>
@@ -134,19 +135,19 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50">
+          <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium text-[13px]"
+              className={BTN_OUTLINE}
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium text-[13px]"
+              className={BTN_PRIMARY}
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-4 h-4" />
               {apiData ? 'Lưu thay đổi' : 'Tạo mới'}
             </button>
           </div>

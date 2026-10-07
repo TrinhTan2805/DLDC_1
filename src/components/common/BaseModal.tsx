@@ -1,6 +1,7 @@
 import React, { ReactNode, MouseEvent, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Portal } from './Portal';
+import { BTN_GHOST_ICON } from '../pages/collection/collectionUi';
 
 interface BaseModalProps {
   isOpen: boolean;
@@ -70,25 +71,26 @@ export function BaseModal({
           className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[95vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out ${className}`}
           onClick={(e: MouseEvent) => e.stopPropagation()}
         >
-          {/* Header Section */}
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 shadow-sm shadow-slate-900/5">
-            <div className="flex items-center">
+          {/* Header (compomennt.md 5.4): tiêu đề 16px/500 #020817, phụ đề 13px #64748B, viền dưới #E2E8F0, nút X kiểu ghost */}
+          <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 bg-white sticky top-0 z-10">
+            <div className="flex items-center min-w-0">
               {customHeaderIcon}
-              <div>
-                <h3 className="font-bold text-slate-800 leading-tight" style={{ fontSize: '18px' }}>{title}</h3>
-                {subtitle && <p className="text-[12px] text-slate-500 mt-1 font-medium">{subtitle}</p>}
+              <div className="min-w-0">
+                <h3 className="text-[16px] font-medium text-[#020817] leading-6">{title}</h3>
+                {subtitle && <p className="text-[13px] text-[#64748B] mt-0.5 leading-5">{subtitle}</p>}
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {headerActions}
               {showCloseButton && (
-                <button 
+                <button
                   type="button"
                   onClick={onClose}
-                  className="p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all active:scale-95 group"
+                  className={BTN_GHOST_ICON}
+                  aria-label="Đóng"
                   title="Đóng"
                 >
-                  <X className="w-6 h-6 transition-transform group-hover:rotate-90 duration-300" />
+                  <X className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -101,7 +103,7 @@ export function BaseModal({
 
           {/* Modal Footer (Sticky) */}
           {footer && (
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3 sticky bottom-0 z-10">
+            <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 sticky bottom-0 z-10">
               {footer}
             </div>
           )}

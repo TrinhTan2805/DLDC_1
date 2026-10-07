@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { InnerSidebar } from '../collection/InnerSidebar';
 import { CategoryPage, CategoryPublishStatus } from './CategoryPage';
+import { BTN_GHOST_ICON } from '../collection/collectionUi';
 
 const CATEGORIES: { id: string; label: string; status: CategoryPublishStatus }[] = [
   { id: 'category-a-1', label: 'Dữ liệu Danh mục giới tính', status: 'published' },
@@ -77,12 +78,13 @@ export function CategoryAListPage() {
     return (
       <div className="h-full min-h-[calc(100vh-140px)]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[18px] font-bold text-slate-800">{selected.label}</h2>
+          <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">{selected.label}</h1>
           <button
             type="button"
             onClick={() => navigate('/category-report')}
-            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            className={BTN_GHOST_ICON}
             title="Đóng và quay lại Khai thác báo cáo"
+            aria-label="Đóng và quay lại Khai thác báo cáo"
           >
             <X className="w-5 h-5" />
           </button>

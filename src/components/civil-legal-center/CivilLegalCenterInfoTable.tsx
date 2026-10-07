@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eye } from 'lucide-react';
+import { TruncatedText, RowIconAction, Pagination, Badge } from '../pages/collection/collectionUi';
 
 export interface CivilLegalCenterRecord {
   id: string;
@@ -27,6 +28,10 @@ interface CivilLegalCenterInfoTableProps {
   colSyncDateLabel?: string;
 }
 
+// Bảng theo compomennt.md 5.3: tiêu đề 42px 700 đen nền #F8FAFC, hàng 48px kẻ #E0E0E0; căn lề 5.3.3
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+
 export function CivilLegalCenterInfoTable({
   records,
   currentPage,
@@ -40,119 +45,62 @@ export function CivilLegalCenterInfoTable({
   colNumberLabel = 'Số công văn / Mã hồ sơ',
   colSyncDateLabel = 'Ngày đồng bộ',
 }: CivilLegalCenterInfoTableProps) {
-  const totalPages = Math.ceil(totalRecords / itemsPerPage);
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex-1 overflow-auto bg-white">
-        <table className="w-full border-collapse collection-table" style={{ fontSize: '16px' }}>
-          <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-            <tr>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap w-12">STT</th>
-              <th className="px-4 py-3 text-left font-semibold text-slate-500 whitespace-nowrap">{colNameLabel}</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">{colTypeLabel}</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">{colNumberLabel}</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">{colSyncDateLabel}</th>
-              <th className="px-4 py-3 text-center font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
+        <table className="w-full border-collapse collection-table text-[13px]">
+          <thead className="bg-[#F8FAFC] sticky top-0 z-10">
+            <tr className="h-[42px]">
+              <th className={`${TH} text-center w-12`}>STT</th>
+              <th className={`${TH} text-left`}>{colNameLabel}</th>
+              <th className={`${TH} text-left`}>{colTypeLabel}</th>
+              <th className={`${TH} text-left`}>{colNumberLabel}</th>
+              <th className={`${TH} text-left`}>{colSyncDateLabel}</th>
+              <th className={`${TH} text-center w-20`}>Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody>
             {records.map((record, index) => (
-              <tr key={record.id} className="hover:bg-slate-50 transition-all group">
-                <td className="px-4 py-3 text-center text-slate-500 font-medium">
+              <tr key={record.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                <td className={`${TD} text-center whitespace-nowrap`}>
                   {((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}
                 </td>
-                <td className="px-4 py-3 text-left">
-                  <div className="font-semibold text-slate-900">{record.name}</div>
+                <td className={`${TD} text-left max-w-[360px]`}>
+                  <TruncatedText text={record.name} />
                 </td>
-                <td className="px-4 py-3 text-center">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                    record.type.includes('Mới') || record.type.includes('mới') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                  }`}>
-                    {record.type}
-                  </span>
+                <td className={`${TD} text-left whitespace-nowrap`}>
+                  <Badge
+                    label={record.type}
+                    variant={record.type.includes('Mới') || record.type.includes('mới') ? 'blue' : 'green'}
+                  />
                 </td>
-                <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.number}</td>
-                <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono">{record.syncDate}</td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => onViewRecord(record)}
-                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
-                    title="Xem chi tiết"
-                  >
-                    <Eye className="w-5 h-5" />
-                  </button>
+                <td className={`${TD} text-left whitespace-nowrap`}>{record.number}</td>
+                <td className={`${TD} text-left whitespace-nowrap`}>{record.syncDate}</td>
+                <td className={`${TD} text-center`}>
+                  <RowIconAction label="Xem chi tiết" onClick={() => onViewRecord(record)}>
+                    <Eye className="w-4 h-4" />
+                  </RowIconAction>
                 </td>
               </tr>
             ))}
+            {records.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-3 py-16 text-center text-[13px] text-[#64748B]">Không tìm thấy kết quả phù hợp</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-white flex-wrap gap-4 collection-pagination" style={{ fontSize: '16px' }}>
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị</span>
-          <select
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            value={itemsPerPage}
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600">bản ghi/trang</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600">
-            {totalRecords > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, totalRecords)} / {totalRecords}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Trước
-            </button>
-
-            {Array.from({ length: Math.min(5, Math.max(1, totalPages)) }, (_, i) => {
-              let pageNum = i + 1;
-              if (totalPages > 5 && currentPage > 3) {
-                pageNum = currentPage - 3 + i + 1;
-                if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-              }
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-1.5 border rounded-lg font-medium transition-colors ${
-                    currentPage === pageNum
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Phân trang (mục 5.14) */}
+      <Pagination
+        className="border-t border-[#E2E8F0]"
+        currentPage={currentPage}
+        totalItems={totalRecords}
+        pageSize={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setItemsPerPage}
+      />
     </div>
   );
 }

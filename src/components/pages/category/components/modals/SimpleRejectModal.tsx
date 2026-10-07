@@ -1,7 +1,10 @@
 import { ChangeEvent, useState } from 'react';
-import { XCircle, AlertCircle, ChevronRight, FileText } from 'lucide-react';
+import { XCircle, AlertCircle } from 'lucide-react';
 import { MasterDataEntity } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
+import { BTN_DESTRUCTIVE, BTN_OUTLINE, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE } from '../../../collection/collectionUi';
+
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
 
 interface SimpleRejectModalProps {
   isOpen: boolean;
@@ -39,52 +42,44 @@ export function SimpleRejectModal({
       maxWidth="max-w-lg"
       footer={
         <>
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[13px]"
-          >
+          <button onClick={onClose} className={BTN_OUTLINE}>
             Hủy
           </button>
-          <button
-            onClick={handleConfirm}
-            className="px-6 py-2.5 bg-red-500 text-white rounded-xl flex items-center gap-2 hover:bg-red-600 transition-all text-[13px] shadow-lg shadow-red-100"
-          >
-            <XCircle className="w-5 h-5" />
+          <button onClick={handleConfirm} className={BTN_DESTRUCTIVE}>
+            <XCircle className="w-4 h-4" />
             Từ chối
           </button>
         </>
       }
     >
-      <div className="space-y-6">
-        {/* Info Banner - Red/Pink */}
-        <div className="bg-red-50/50 border border-red-100 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-lg border-2 border-red-600 flex items-center justify-center mt-0.5">
-              <ChevronRight className="w-3 h-3 text-red-600 stroke-[3]" />
+      <div className="space-y-4">
+        {/* Thông tin danh mục */}
+        <div className="rounded-2xl border border-[#E2E8F0] p-4">
+          <div className={SECTION_TITLE}>Thông tin danh mục</div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <div className={FIELD_LABEL}>Tên danh mục</div>
+              <div className={`${FIELD_VALUE} mt-1`}>{entity.name}</div>
             </div>
-            <div className="space-y-1">
-              <div className="text-[13px] text-red-700 font-medium uppercase tracking-tight">Thông tin danh mục</div>
-              <div className="text-[13px] font-bold text-red-900">{entity.name}</div>
-              <div className="text-[13px] text-red-600">Đơn vị chủ quản: {entity.managingAgency}</div>
+            <div>
+              <div className={FIELD_LABEL}>Đơn vị chủ quản</div>
+              <div className={`${FIELD_VALUE} mt-1`}>{entity.managingAgency}</div>
             </div>
           </div>
         </div>
 
         {/* Nội dung trình duyệt */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
-            <FileText className="w-4 h-4 text-slate-400" />
-            Nội dung trình duyệt
-          </label>
-          <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
-            {submissionContent ?? <span className="text-slate-400 italic">Chưa cập nhật</span>}
+        <div>
+          <div className={LABEL_CLS}>Nội dung trình duyệt</div>
+          <div className="px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] min-h-10 whitespace-pre-wrap">
+            {submissionContent ?? <span className="text-[#94A3B8]">Chưa cập nhật</span>}
           </div>
         </div>
 
         {/* Input field */}
-        <div className="space-y-2">
-          <label className="block text-[13px] font-semibold text-slate-700">
-            Lý do từ chối <span className="text-red-500">*</span>
+        <div>
+          <label className={LABEL_CLS}>
+            Lý do từ chối <span className={REQUIRED_MARK}>*</span>
           </label>
           <textarea
             rows={4}
@@ -94,17 +89,14 @@ export function SimpleRejectModal({
               if (e.target.value.trim()) setError(false);
             }}
             placeholder="Nhập lý do từ chối phê duyệt... Ví dụ: Danh mục chưa đầy đủ thông tin về cấu trúc dữ liệu. Đề nghị bổ sung các trường dữ liệu bắt buộc theo quy định."
-            className={`w-full px-4 py-3 border rounded-xl bg-white text-[13px] focus:ring-2 transition-all outline-none ${
-              error ? 'border-red-500 focus:ring-red-500/10' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-            }`}
+            className={`${TEXTAREA_CLS} ${error ? '!border-[#DC2626]' : ''}`}
           />
           {error && (
-            <div className="text-[13px] text-red-500 flex items-center gap-1.5 mt-1 animate-in slide-in-from-top-1">
+            <div className="mt-1 text-[12px] text-[#DC2626] flex items-center gap-1.5">
               <AlertCircle className="w-4 h-4" /> Vui lòng nhập lý do từ chối
             </div>
           )}
         </div>
-
       </div>
     </BaseModal>
   );

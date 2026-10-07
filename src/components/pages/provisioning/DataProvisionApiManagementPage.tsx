@@ -1,17 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
   Server, GitCompare, Shield, History, Search, Filter, Plus,
   Trash2, Edit, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power, FileText, Users, KeyRound, RefreshCw, Lock, Unlock, Copy,
-  ChevronDown, X, Eye
+  ChevronDown, X, Eye, MoreVertical
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import { ConfirmModal } from '../../common/ConfirmModal';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON,
+  ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch
+} from '../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
 import { ProvisionApiModal } from './modals/ProvisionApiModal';
 import { ProvisionReconciliationApiModal } from './modals/ProvisionReconciliationApiModal';
 import { ProvisionAccessControlModal } from './modals/ProvisionAccessControlModal';
 import { ProvisionVersionHistoryModal } from './modals/ProvisionVersionHistoryModal';
 import { ProvisionAccountModal } from './modals/ProvisionAccountModal';
+
+// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2) — giống CollectionSetupPage
+const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason?: string | null; danger?: boolean; onSelect: () => void }) => (
+  <DropdownMenuItem
+    disabled={!!reason}
+    onClick={reason ? undefined : onSelect}
+    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
+  >
+    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
+    <span className="flex flex-col">
+      <span>{label}</span>
+      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
+    </span>
+  </DropdownMenuItem>
+);
+
+// Nút ⋯ mở menu thao tác khác (tooltip chỉ hiện khi hover)
+const MoreActionsTrigger = () => (
+  <Tooltip>
+    <TooltipTrigger asChild onFocus={(e: { preventDefault: () => void }) => e.preventDefault()}>
+      <span className="inline-flex">
+        <DropdownMenuTrigger asChild>
+          <button type="button" aria-label="Thao tác khác" className={ROW_ICON_BTN}>
+            <MoreVertical className="w-4 h-4" />
+          </button>
+        </DropdownMenuTrigger>
+      </span>
+    </TooltipTrigger>
+    <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>Thao tác khác</TooltipContent>
+  </Tooltip>
+);
+
+// Ngày + giờ hiển thị 2 dòng (mục 5.3.3)
+const DateTimeCell = ({ value }: { value: string }) => {
+  const [d, t] = formatDateTime(value).split(' ');
+  return (
+    <>
+      <div>{d}</div>
+      {t && <div className="text-[#64748B]">{t}</div>}
+    </>
+  );
+};
+
+const TH = 'px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]';
+const TH_ACTION = `${TH.replace('text-left', 'text-center')} w-px sticky right-0 z-[1] bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`;
+const TR = 'group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TD = 'px-3 py-1 text-left text-[13px] text-black';
+const TD_ACTION = 'px-3 py-1 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]';
+const EMPTY_TD = 'py-16 text-center text-[13px] text-[#64748B]';
+const TABLE_WRAP = 'bg-white rounded-lg border border-[#E2E8F0] overflow-hidden';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '';
@@ -61,6 +122,7 @@ export function DataProvisionApiManagementPage() {
   const handleTabChange = (tab: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan') => {
     setActiveTab(tab);
     setSearchTerm('');
+    setApplied(prev => ({ ...prev, searchTerm: '' }));
     setCurrentPage(1);
     const params = new URLSearchParams(location.search);
     params.set('tab', tab);
@@ -88,6 +150,11 @@ export function DataProvisionApiManagementPage() {
   const [filterReconSchedule, setFilterReconSchedule] = useState<string>('All');
   const [filterReconApi, setFilterReconApi] = useState<string>('All');
 
+  // Bộ điều kiện đã áp dụng — chỉ cập nhật khi bấm Tìm kiếm hoặc Enter (mục 5.19)
+  const [applied, setApplied] = useState({
+    searchTerm: '', filterMethod: 'All', filterStatus: 'All', filterVersion: 'All', filterReconSchedule: 'All', filterReconApi: 'All'
+  });
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -99,6 +166,12 @@ export function DataProvisionApiManagementPage() {
     setFilterReconSchedule('All');
     setFilterReconApi('All');
     setSearchTerm('');
+    setApplied({ searchTerm: '', filterMethod: 'All', filterStatus: 'All', filterVersion: 'All', filterReconSchedule: 'All', filterReconApi: 'All' });
+    setCurrentPage(1);
+  };
+
+  const runSearch = () => {
+    setApplied({ searchTerm, filterMethod, filterStatus, filterVersion, filterReconSchedule, filterReconApi });
     setCurrentPage(1);
   };
 
@@ -128,12 +201,13 @@ export function DataProvisionApiManagementPage() {
   } | null>(null);
 
   const [deleteConfirmApi, setDeleteConfirmApi] = useState<{ id: string; name: string } | null>(null);
+  // Xác nhận thu hồi quyền / xóa tài khoản (thay window.confirm bằng ConfirmModal dùng chung)
+  const [revokePermissionId, setRevokePermissionId] = useState<string | null>(null);
+  const [deleteAccountId, setDeleteAccountId] = useState<string | null>(null);
 
-  // Success message toast
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Thông báo thành công (sonner)
   const triggerToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    toast.success(msg);
   };
 
   const [apis, setApis] = useState<any[]>(() => {
@@ -170,7 +244,7 @@ export function DataProvisionApiManagementPage() {
     // Auto fill missing permissions
     setPermissions(prev => {
       const missingPermissions: any[] = [];
-      defaultUnits.forEach(unit => {
+      defaultUnits.forEach((unit: string) => {
         const exists = prev.some(p => p.apiName === selectedApiForAccess && p.organization === unit);
         if (!exists) {
           missingPermissions.push({
@@ -194,7 +268,7 @@ export function DataProvisionApiManagementPage() {
     // Auto fill missing accounts
     setAccounts(prev => {
       const missingAccounts: any[] = [];
-      defaultUnits.forEach(unit => {
+      defaultUnits.forEach((unit: string) => {
         const exists = prev.some(a => a.apiName === selectedApiForAccess && a.organization === unit);
         if (!exists) {
           let prefix = 'org';
@@ -346,222 +420,146 @@ export function DataProvisionApiManagementPage() {
   };
 
   const handleDeletePermission = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn thu hồi quyền truy cập này?')) {
-      setPermissions(permissions.filter(item => item.id !== id));
-      triggerToast('Thu hồi quyền truy cập thành công!');
-    }
+    setRevokePermissionId(id);
   };
 
+  const confirmRevokePermission = (id: string) => {
+    setPermissions(permissions.filter(item => item.id !== id));
+    triggerToast('Thu hồi quyền truy cập thành công!');
+  };
+
+  const confirmDeleteAccount = (id: string) => {
+    setAccounts(accounts.filter(a => a.id !== id));
+    triggerToast('Đã xóa tài khoản thành công!');
+  };
+
+  const appliedTerm = normalizeSearch(applied.searchTerm);
+  const matchTerm = (...values: (string | undefined)[]) => appliedTerm === '' || values.some(v => normalizeSearch(v || '').includes(appliedTerm));
+
   const filteredApis = apis.filter(api => {
-    const matchesSearch = api.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      api.endpoint.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (api.code && api.code.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesMethod = filterMethod === 'All' || api.method === filterMethod;
-    const matchesStatus = filterStatus === 'All' || api.status === filterStatus;
-    const matchesVersion = filterVersion === 'All' || api.version === filterVersion;
+    const matchesSearch = matchTerm(api.name, api.endpoint, api.code);
+    const matchesMethod = applied.filterMethod === 'All' || api.method === applied.filterMethod;
+    const matchesStatus = applied.filterStatus === 'All' || api.status === applied.filterStatus;
+    const matchesVersion = applied.filterVersion === 'All' || api.version === applied.filterVersion;
     return matchesSearch && matchesMethod && matchesStatus && matchesVersion;
   });
 
   const filteredRecons = recons.filter(recon => {
-    const matchesSearch = recon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recon.targetSystem.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'All' ||
-      (filterStatus === 'Hoạt động' && recon.status === 'active') ||
-      (filterStatus === 'Tạm ngưng' && recon.status === 'inactive');
-    const matchesSchedule = filterReconSchedule === 'All' ||
-      (filterReconSchedule === 'Hàng ngày' && recon.schedule.includes('Hàng ngày')) ||
-      (filterReconSchedule === 'Hàng tuần' && recon.schedule.includes('Hàng tuần')) ||
-      (filterReconSchedule === 'Theo yêu cầu' && recon.schedule.includes('Theo yêu cầu'));
-    const matchesApi = filterReconApi === 'All' || recon.linkedApi === filterReconApi;
+    const matchesSearch = matchTerm(recon.name, recon.targetSystem);
+    const matchesStatus = applied.filterStatus === 'All' ||
+      (applied.filterStatus === 'Hoạt động' && recon.status === 'active') ||
+      (applied.filterStatus === 'Tạm ngưng' && recon.status === 'inactive');
+    const matchesSchedule = applied.filterReconSchedule === 'All' ||
+      (applied.filterReconSchedule === 'Hàng ngày' && recon.schedule.includes('Hàng ngày')) ||
+      (applied.filterReconSchedule === 'Hàng tuần' && recon.schedule.includes('Hàng tuần')) ||
+      (applied.filterReconSchedule === 'Theo yêu cầu' && recon.schedule.includes('Theo yêu cầu'));
+    const matchesApi = applied.filterReconApi === 'All' || recon.linkedApi === applied.filterReconApi;
     return matchesSearch && matchesStatus && matchesSchedule && matchesApi;
   });
 
   const filteredPermissions = permissions.filter(p => {
     if (p.apiName !== selectedApiForAccess) return false;
-    if (searchTerm.trim() !== '') {
-      const term = searchTerm.toLowerCase();
-      return p.organization.toLowerCase().includes(term) || p.scopes.toLowerCase().includes(term);
-    }
-    return true;
+    return matchTerm(p.organization, p.scopes);
   });
 
-  const filteredAccounts = accounts.filter(acc => {
-    if (searchTerm.trim() !== '') {
-      const term = searchTerm.toLowerCase();
-      return acc.username.toLowerCase().includes(term) || acc.organization.toLowerCase().includes(term) || acc.apiName.toLowerCase().includes(term);
-    }
-    return true;
-  });
+  const filteredAccounts = accounts.filter(acc => matchTerm(acc.username, acc.organization, acc.apiName));
 
   const paginatedApis = filteredApis.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const paginatedRecons = filteredRecons.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const paginatedPermissions = filteredPermissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const paginatedAccounts = filteredAccounts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const renderPagination = (totalItems: number) => {
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-    return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị</span>
-          <select aria-label="Select record count" 
-            value={itemsPerPage}
-            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600">bản ghi/trang</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600">
-            {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Trước
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                  currentPage === page
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+  const renderPagination = (totalItems: number) => (
+    <Pagination
+      className="border-t border-[#E2E8F0]"
+      currentPage={currentPage}
+      totalItems={totalItems}
+      pageSize={itemsPerPage}
+      onPageChange={setCurrentPage}
+      onPageSizeChange={setItemsPerPage}
+    />
+  );
 
-            <button
-              onClick={() => {
-                if (currentPage < totalPages) {
-                  setCurrentPage(currentPage + 1);
-                }
-              }}
-              disabled={currentPage === totalPages || totalItems === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // Khung modal tự dựng (createPortal, z-index 999999, không đóng khi bấm nền) — giao diện theo mục 5.4
+  const MODAL_OVERLAY = 'fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200';
+  const MODAL_BOX = 'bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200';
+  const MODAL_HEADER = 'px-6 py-4 border-b border-[#E2E8F0] flex items-start gap-3';
+  const MODAL_TITLE = 'flex-1 min-w-0 pt-2 text-[16px] font-medium text-[#020817] leading-6';
+  const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar text-[13px] text-[#020817] leading-5';
+  const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
+
+  const tabs: { key: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan'; label: string; icon: ReactNode }[] = [
+    { key: 'api_cung_cap', label: 'API Cung cấp dữ liệu', icon: <Server className="w-4 h-4" /> },
+    { key: 'api_doi_soat', label: 'API Đối soát dữ liệu', icon: <GitCompare className="w-4 h-4" /> },
+    { key: 'phan_quyen', label: 'Phân quyền truy cập', icon: <Shield className="w-4 h-4" /> },
+    { key: 'danh_sach_tai_khoan', label: 'Danh sách tài khoản', icon: <Users className="w-4 h-4" /> },
+  ];
 
   return (
-    <div className="api-management-page-root" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <style dangerouslySetInnerHTML={{__html: `
-        .api-management-page-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="h-full flex flex-col bg-slate-50 min-h-screen animate-in fade-in duration-300">
+    <div className="api-management-page-root">
+      <div className="h-full flex flex-col bg-[#F8FAFC] min-h-screen animate-in fade-in duration-300">
 
-        {/* Toast Notification Alert */}
-        {toastMessage && (
-          <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-emerald-600 text-white px-5 py-3 rounded-lg shadow-xl border border-emerald-500 animate-in fade-in slide-in-from-top-4 duration-300 font-semibold text-sm">
-            <CheckCircle2 className="w-5 h-5 text-emerald-100" />
-            {toastMessage}
-          </div>
-        )}
-
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-slate-200 px-6">
-          <div className="flex gap-6">
-            <button
-              onClick={() => handleTabChange('api_cung_cap')}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'api_cung_cap'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Server className="w-5 h-5" />
-              API Cung cấp dữ liệu
-            </button>
-            <button
-              onClick={() => handleTabChange('api_doi_soat')}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'api_doi_soat'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <GitCompare className="w-5 h-5" />
-              API Đối soát dữ liệu
-            </button>
-            <button
-              onClick={() => handleTabChange('phan_quyen')}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'phan_quyen'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Shield className="w-5 h-5" />
-              Phân quyền truy cập
-            </button>
-            <button
-              onClick={() => handleTabChange('danh_sach_tai_khoan')}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'danh_sach_tai_khoan'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              Danh sách tài khoản
-            </button>
+        {/* Navigation Tabs (mục 5.9) */}
+        <div className="bg-white border-b border-[#E2E8F0] px-6">
+          <div className="flex">
+            {tabs.map(t => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => handleTabChange(t.key)}
+                className={`${tabClass(activeTab === t.key)} whitespace-nowrap`}
+              >
+                {t.icon}
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Content Container */}
         <div className="flex-1 overflow-auto p-6">
-          <div className="space-y-6">
-            
-            {/* Filters and Actions */}
+          <div className="space-y-4">
+
+            {/* Filters and Actions (mục 5.19) */}
             {activeTab !== 'phan_quyen' && (
-              <div className="mb-6">
+              <div>
                 <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 flex items-center gap-3">
+                  <div className="flex-1 flex items-center gap-1.5">
                     <div className="relative flex-1">
                       <input
                         type="text"
+                        aria-label="Tìm kiếm"
                         placeholder={
                           activeTab === 'api_cung_cap'
                             ? "Tìm kiếm API cung cấp theo tên, mã hoặc endpoint..."
                             : activeTab === 'api_doi_soat'
                             ? "Tìm kiếm API đối soát theo tên hoặc hệ thống..."
-                            : activeTab === 'phan_quyen'
+                            : (activeTab as string) === 'phan_quyen'
                             ? "Tìm kiếm quyền truy cập theo đơn vị..."
                             : "Tìm kiếm tài khoản theo username hoặc đơn vị..."
                         }
-                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                        className={SEARCH_INPUT_CLS}
                         value={searchTerm}
-                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
                       />
                     </div>
-                    <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+                    <button
+                      type="button"
+                      aria-label="Tìm kiếm"
+                      title="Tìm kiếm"
+                      onClick={runSearch}
+                      className={SEARCH_BTN_CLS}
+                    >
                       <Search className="w-5 h-5" />
                     </button>
                     {(activeTab === 'api_cung_cap' || activeTab === 'api_doi_soat') && (
                       <button
+                        type="button"
+                        aria-label="Bộ lọc"
+                        aria-expanded={showFilters}
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+                        className={filterBtnClass(showFilters)}
                         title="Bộ lọc"
                       >
                         {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
@@ -569,15 +567,16 @@ export function DataProvisionApiManagementPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
                     {activeTab === 'api_cung_cap' && (
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedApi(null);
                           setApiModalMode('edit');
                           setShowApiModal(true);
                         }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
+                        className={`${BTN_PRIMARY} whitespace-nowrap`}
                         title="Tạo API Cung cấp mới"
                       >
                         <Plus className="w-4 h-4" />
@@ -586,11 +585,12 @@ export function DataProvisionApiManagementPage() {
                     )}
                     {activeTab === 'api_doi_soat' && (
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedRecon(null);
                           setShowReconModal(true);
                         }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
+                        className={`${BTN_PRIMARY} whitespace-nowrap`}
                         title="Tạo API Đối soát mới"
                       >
                         <Plus className="w-4 h-4" />
@@ -600,11 +600,12 @@ export function DataProvisionApiManagementPage() {
 
                     {activeTab === 'danh_sach_tai_khoan' && (
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedAccount(null);
                           setShowAccountModal(true);
                         }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
+                        className={`${BTN_PRIMARY} whitespace-nowrap`}
                         title="Tạo tài khoản mới"
                       >
                         <Plus className="w-4 h-4" />
@@ -614,18 +615,18 @@ export function DataProvisionApiManagementPage() {
                   </div>
                 </div>
 
-                {/* Row 2: Filters Panel */}
+                {/* Row 2: Filters Panel — áp dụng khi bấm Tìm kiếm / Enter */}
                 {showFilters && (activeTab === 'api_cung_cap' || activeTab === 'api_doi_soat') && (
-                  <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative z-20">
-                    <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+                  <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
                     {activeTab === 'api_cung_cap' && (
                       <>
                         <div>
-                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Phương thức kết nối</label>
+                          <label className={FILTER_LABEL}>Phương thức kết nối</label>
                           <select
+                            aria-label="Phương thức kết nối"
                             value={filterMethod}
-                            onChange={(e) => { setFilterMethod(e.target.value); setCurrentPage(1); }}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                            onChange={(e) => setFilterMethod(e.target.value)}
+                            className={`${INPUT_CLS} cursor-pointer`}
                           >
                             <option value="All">Tất cả phương thức</option>
                             <option value="GET">GET</option>
@@ -635,11 +636,12 @@ export function DataProvisionApiManagementPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái API</label>
+                          <label className={FILTER_LABEL}>Trạng thái API</label>
                           <select
+                            aria-label="Trạng thái API"
                             value={filterStatus}
-                            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className={`${INPUT_CLS} cursor-pointer`}
                           >
                             <option value="All">Tất cả trạng thái</option>
                             <option value="Hoạt động">Hoạt động (Active)</option>
@@ -647,11 +649,12 @@ export function DataProvisionApiManagementPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Phiên bản API</label>
+                          <label className={FILTER_LABEL}>Phiên bản API</label>
                           <select
+                            aria-label="Phiên bản API"
                             value={filterVersion}
-                            onChange={(e) => { setFilterVersion(e.target.value); setCurrentPage(1); }}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                            onChange={(e) => setFilterVersion(e.target.value)}
+                            className={`${INPUT_CLS} cursor-pointer`}
                           >
                             <option value="All">Tất cả phiên bản</option>
                             <option value="v1.0">v1.0</option>
@@ -665,11 +668,12 @@ export function DataProvisionApiManagementPage() {
                     {activeTab === 'api_doi_soat' && (
                       <>
                         <div>
-                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Tần suất đối soát</label>
+                          <label className={FILTER_LABEL}>Tần suất đối soát</label>
                           <select
+                            aria-label="Tần suất đối soát"
                             value={filterReconSchedule}
-                            onChange={(e) => { setFilterReconSchedule(e.target.value); setCurrentPage(1); }}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                            onChange={(e) => setFilterReconSchedule(e.target.value)}
+                            className={`${INPUT_CLS} cursor-pointer`}
                           >
                             <option value="All">Tất cả tần suất</option>
                             <option value="Hàng ngày">Hàng ngày (Daily)</option>
@@ -678,11 +682,12 @@ export function DataProvisionApiManagementPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái đối soát</label>
+                          <label className={FILTER_LABEL}>Trạng thái đối soát</label>
                           <select
+                            aria-label="Trạng thái đối soát"
                             value={filterStatus}
-                            onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className={`${INPUT_CLS} cursor-pointer`}
                           >
                             <option value="All">Tất cả trạng thái</option>
                             <option value="Hoạt động">Hoạt động (Active)</option>
@@ -690,11 +695,12 @@ export function DataProvisionApiManagementPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">API liên kết đối soát</label>
+                          <label className={FILTER_LABEL}>API liên kết đối soát</label>
                           <select
+                            aria-label="API liên kết đối soát"
                             value={filterReconApi}
-                            onChange={(e) => { setFilterReconApi(e.target.value); setCurrentPage(1); }}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                            onChange={(e) => setFilterReconApi(e.target.value)}
+                            className={`${INPUT_CLS} cursor-pointer`}
                           >
                             <option value="All">Tất cả API liên kết</option>
                             <option value="Lấy danh sách Hộ tịch">Lấy danh sách Hộ tịch</option>
@@ -711,94 +717,92 @@ export function DataProvisionApiManagementPage() {
 
             {/* TAB 1: API CUNG CẤP DỮ LIỆU */}
             {activeTab === 'api_cung_cap' && (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className={TABLE_WRAP}>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse table-auto">
-                    <thead>
-                      <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                        <th className="py-3 px-4 text-left font-semibold">Mã / Tên API</th>
-                        <th className="py-3 px-4 text-center font-semibold">Phiên bản</th>
-                        <th className="py-3 px-4 text-left font-semibold">Loại dữ liệu chia sẻ</th>
-                        <th className="py-3 px-4 text-left font-semibold">Đầu mối tiếp nhận</th>
-                        <th className="py-3 px-4 text-left font-semibold">Thời gian</th>
-                        <th className="py-3 px-4 text-left font-semibold">Tài liệu</th>
-                        <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
-                        <th className="py-3 px-4 text-center font-semibold">Thao tác</th>
+                  <table className={TABLE_CLS}>
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={`${TH} min-w-[220px]`}>Mã / Tên API</th>
+                        <th className={TH}>Phiên bản</th>
+                        <th className={TH}>Loại dữ liệu chia sẻ</th>
+                        <th className={TH}>Đầu mối tiếp nhận</th>
+                        <th className={TH}>Thời gian</th>
+                        <th className={`${TH} text-center`}>Tài liệu</th>
+                        <th className={TH}>Trạng thái</th>
+                        <th className={TH_ACTION}>Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
+                    <tbody>
                       {paginatedApis.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="py-8 text-center text-slate-500 font-medium">
+                          <td colSpan={8} className={EMPTY_TD}>
                             Không tìm thấy API cung cấp dữ liệu nào.
                           </td>
                         </tr>
                       ) : (
                         paginatedApis.map(api => (
-                          <tr key={api.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100 group">
-                            <td className="py-3 px-4 text-left">
-                              <div className="font-semibold text-slate-900 leading-snug">{api.name}</div>
-                              <div className="text-xs font-mono text-slate-500 mt-1">{api.code || 'SVC-HOTICH-001'}</div>
+                          <tr key={api.id} className={TR}>
+                            <td className={`${TD} max-w-[360px] leading-[18px]`}>
+                              <TruncatedText text={api.name} />
+                              <TruncatedText text={api.code || 'SVC-HOTICH-001'} className="text-[#64748B]" />
                             </td>
-                            <td className="py-3 px-4 text-center">
-                              <span className="font-mono text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">{api.version}</span>
+                            <td className={`${TD} whitespace-nowrap`}>{api.version}</td>
+                            <td className={`${TD} max-w-[220px]`}>
+                              <TruncatedText text={api.dataType || 'Hộ tịch điện tử'} />
                             </td>
-                            <td className="py-3 px-4 text-left text-slate-600">{api.dataType || 'Hộ tịch điện tử'}</td>
-                            <td className="py-3 px-4 text-left text-slate-500 text-xs">{api.receiverPoint || 'Nguyễn Văn A - 0987654321'}</td>
-                            <td className="py-3 px-4 text-left font-mono text-slate-400 text-xs">{formatDateTime(api.time || '2026-05-24 08:00:00')}</td>
-                            <td className="py-3 px-4 text-left">
-                              <button
+                            <td className={`${TD} max-w-[220px]`}>
+                              <TruncatedText text={api.receiverPoint || 'Nguyễn Văn A - 0987654321'} />
+                            </td>
+                            <td className={`${TD} whitespace-nowrap leading-[18px]`}>
+                              <DateTimeCell value={api.time || '2026-05-24 08:00:00'} />
+                            </td>
+                            <td className={`${TD} text-center`}>
+                              <RowIconAction
+                                label="Xem Tài liệu Đặc tả kỹ thuật API (PDF)"
                                 onClick={() => window.open(`/preview-api-docs?apiId=${api.code || 'SVC-HOTICH-001'}&apiUrl=https://api.dldc.gov.vn${api.endpoint}&consumerUnit=${encodeURIComponent(api.consumerUnit || 'Bộ Kế hoạch và Đầu tư')}`, '_blank')}
-                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[6px] transition-colors cursor-pointer inline-flex items-center justify-center border border-red-200 bg-red-50/50"
-                                title="Xem Tài liệu Đặc tả kỹ thuật API (PDF)"
                               >
                                 <FileText className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                             </td>
-                            <td className="py-3 px-4 text-left">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-normal ${api.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
-                                }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${api.status === 'Hoạt động' ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
-                                {api.status}
-                              </span>
+                            <td className={TD}>
+                              <Badge label={api.status} variant={api.status === 'Hoạt động' ? 'green' : 'slate'} />
                             </td>
-                            <td className="py-3 px-4 text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <button
+                            <td className={TD_ACTION}>
+                              {/* 5 thao tác → 2 icon (Xem chi tiết + Sửa) + menu ⋯ (mục 5.3.2) */}
+                              <div className="inline-flex items-center justify-center gap-1">
+                                <RowIconAction
+                                  label="Xem chi tiết API"
                                   onClick={() => { setSelectedApi(api); setApiModalMode('view'); setShowApiModal(true); }}
-                                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Xem chi tiết API"
                                 >
-                                  <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
+                                  <Eye className="w-4 h-4" />
+                                </RowIconAction>
+                                <RowIconAction
+                                  label="Sửa thông tin API"
                                   onClick={() => { setSelectedApi(api); setApiModalMode('edit'); setShowApiModal(true); }}
-                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Sửa thông tin API"
                                 >
-                                  <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedApiForHistory(api); setShowHistoryModal(true); }}
-                                  className="p-1.5 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Xem lịch sử phiên bản"
-                                >
-                                  <History className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
-                                  onClick={() => handleToggleApiStatus(api.id, api.status, api.name)}
-                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title={api.status === 'Hoạt động' ? "Tạm ngưng API" : "Kích hoạt API"}
-                                >
-                                  <Power className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteApi(api.id, api.name)}
-                                  className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Xóa API"
-                                >
-                                  <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
+                                  <Edit className="w-4 h-4" />
+                                </RowIconAction>
+                                <DropdownMenu>
+                                  <MoreActionsTrigger />
+                                  <DropdownMenuContent align="end" className="w-56 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1">
+                                    <MenuAction
+                                      icon={<History className="w-4 h-4" />}
+                                      label="Xem lịch sử phiên bản"
+                                      onSelect={() => { setSelectedApiForHistory(api); setShowHistoryModal(true); }}
+                                    />
+                                    <MenuAction
+                                      icon={<Power className="w-4 h-4" />}
+                                      label={api.status === 'Hoạt động' ? "Tạm ngưng API" : "Kích hoạt API"}
+                                      onSelect={() => handleToggleApiStatus(api.id, api.status, api.name)}
+                                    />
+                                    <MenuAction
+                                      icon={<Trash2 className="w-4 h-4" />}
+                                      label="Xóa API"
+                                      danger
+                                      onSelect={() => handleDeleteApi(api.id, api.name)}
+                                    />
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </td>
                           </tr>
@@ -813,68 +817,69 @@ export function DataProvisionApiManagementPage() {
 
             {/* TAB 2: API ĐỐI SOÁT DỮ LIỆU */}
             {activeTab === 'api_doi_soat' && (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className={TABLE_WRAP}>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse table-auto">
-                    <thead>
-                      <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                        <th className="py-3 px-4 text-left font-semibold">Mã đối soát</th>
-                        <th className="py-3 px-4 text-left font-semibold">Tên tiến trình đối soát</th>
-                        <th className="py-3 px-4 text-left font-semibold">Hệ thống đối tác</th>
-                        <th className="py-3 px-4 text-left font-semibold">Tần suất đối soát</th>
-                        <th className="py-3 px-4 text-left font-semibold">API liên kết</th>
-                        <th className="py-3 px-4 text-left font-semibold">Tài liệu</th>
-                        <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
-                        <th className="py-3 px-4 text-center font-semibold">Thao tác</th>
+                  <table className={TABLE_CLS}>
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={TH}>Mã đối soát</th>
+                        <th className={`${TH} min-w-[220px]`}>Tên tiến trình đối soát</th>
+                        <th className={TH}>Hệ thống đối tác</th>
+                        <th className={TH}>Tần suất đối soát</th>
+                        <th className={TH}>API liên kết</th>
+                        <th className={`${TH} text-center`}>Tài liệu</th>
+                        <th className={TH}>Trạng thái</th>
+                        <th className={TH_ACTION}>Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
+                    <tbody>
                       {paginatedRecons.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="py-8 text-center text-slate-500 font-medium">
+                          <td colSpan={8} className={EMPTY_TD}>
                             Không tìm thấy API đối soát dữ liệu nào.
                           </td>
                         </tr>
                       ) : (
                         paginatedRecons.map(recon => (
-                          <tr key={recon.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100 group">
-                            <td className="py-3 px-4 text-left font-mono text-slate-500">UC-{recon.id}</td>
-                            <td className="py-3 px-4 text-left font-semibold text-slate-800">{recon.name}</td>
-                            <td className="py-3 px-4 text-left text-slate-600 text-xs">{recon.targetSystem}</td>
-                            <td className="py-3 px-4 text-left text-slate-500 text-xs">{recon.schedule}</td>
-                            <td className="py-3 px-4 text-left text-indigo-600 font-medium text-xs">{recon.linkedApi}</td>
-                            <td className="py-3 px-4 text-left">
-                              <button
+                          <tr key={recon.id} className={TR}>
+                            <td className={`${TD} whitespace-nowrap`}>UC-{recon.id}</td>
+                            <td className={`${TD} max-w-[360px]`}>
+                              <TruncatedText text={recon.name} />
+                            </td>
+                            <td className={`${TD} max-w-[220px]`}>
+                              <TruncatedText text={recon.targetSystem} />
+                            </td>
+                            <td className={`${TD} max-w-[220px]`}>
+                              <TruncatedText text={recon.schedule} />
+                            </td>
+                            <td className={`${TD} max-w-[220px]`}>
+                              <TruncatedText text={recon.linkedApi} />
+                            </td>
+                            <td className={`${TD} text-center`}>
+                              <RowIconAction
+                                label="Xem Tài liệu Đặc tả kỹ thuật API (PDF)"
                                 onClick={() => window.open(`/preview-api-docs?apiId=UC-${recon.id}&apiUrl=https://api.dldc.gov.vn/recon/${recon.id}`, '_blank')}
-                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[6px] transition-colors cursor-pointer inline-flex items-center justify-center border border-red-200 bg-red-50/50"
-                                title="Xem Tài liệu Đặc tả kỹ thuật API (PDF)"
                               >
                                 <FileText className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                             </td>
-                            <td className="py-3 px-4 text-left">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-normal ${recon.status === 'active' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-slate-50 text-slate-500 border border-slate-200'
-                                }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${recon.status === 'active' ? 'bg-purple-500 animate-pulse' : 'bg-slate-400'}`}></span>
-                                {recon.status === 'active' ? 'Hoạt động' : 'Tạm ngưng'}
-                              </span>
+                            <td className={TD}>
+                              <Badge label={recon.status === 'active' ? 'Hoạt động' : 'Tạm ngưng'} variant={recon.status === 'active' ? 'green' : 'slate'} />
                             </td>
-                            <td className="py-3 px-4 text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <button
+                            <td className={TD_ACTION}>
+                              <div className="inline-flex items-center justify-center gap-1">
+                                <RowIconAction
+                                  label="Sửa thông tin đối soát"
                                   onClick={() => { setSelectedRecon(recon); setShowReconModal(true); }}
-                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Sửa thông tin đối soát"
                                 >
-                                  <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
+                                  <Edit className="w-4 h-4" />
+                                </RowIconAction>
+                                <RowIconAction
+                                  label={recon.status === 'active' ? "Tạm ngưng tiến trình đối soát" : "Kích hoạt tiến trình đối soát"}
                                   onClick={() => handleToggleReconStatus(recon.id, recon.status, recon.name)}
-                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title={recon.status === 'active' ? "Tạm ngưng tiến trình đối soát" : "Kích hoạt tiến trình đối soát"}
                                 >
-                                  <Power className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
+                                  <Power className="w-4 h-4" />
+                                </RowIconAction>
                               </div>
                             </td>
                           </tr>
@@ -889,104 +894,113 @@ export function DataProvisionApiManagementPage() {
 
             {/* TAB 3: PHÂN QUYỀN TRUY CẬP */}
             {activeTab === 'phan_quyen' && (
-              <div className="grid grid-cols-12 gap-6">
-                
-                {/* Left pane: API List */}
-                <div className="col-span-12 lg:col-span-3 border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100 bg-white shadow-sm">
-                  <div className="bg-slate-50 p-4 border-b border-slate-200">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Danh sách dịch vụ API</h4>
-                  </div>
-                  
-                  {/* Search API Input */}
-                  <div className="p-2 bg-slate-50/50 border-b border-slate-100">
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm dịch vụ API..."
-                      className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
-                      value={apiSearchTerm}
-                      onChange={(e) => setApiSearchTerm(e.target.value)}
-                    />
+              <div className="space-y-4">
+
+                {/* Khối 1: Danh sách dịch vụ API — bố cục dọc, rộng hết chiều ngang (PM 07/10/2026) */}
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[#E2E8F0]">
+                    <h4 className="text-[14px] font-medium text-[#020817]">Danh sách dịch vụ API</h4>
                   </div>
 
-                  <div className="p-2 space-y-1 custom-scrollbar" style={{ maxHeight: '180px', overflowY: 'scroll' }}>
+                  {/* Search API Input — lọc ngay khi gõ (không có nút áp dụng) */}
+                  <div className="p-2 border-b border-[#E2E8F0]">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
+                      <input
+                        type="text"
+                        aria-label="Tìm kiếm dịch vụ API"
+                        placeholder="Tìm kiếm dịch vụ API..."
+                        className={`${INPUT_CLS} pl-9`}
+                        value={apiSearchTerm}
+                        onChange={(e) => setApiSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-2 space-y-1 custom-scrollbar max-h-[180px] overflow-y-scroll">
                     {apis
-                      .filter(api => api.name.toLowerCase().includes(apiSearchTerm.toLowerCase()))
+                      .filter(api => normalizeSearch(api.name).includes(normalizeSearch(apiSearchTerm)))
                       .map(api => (
                       <button
                         key={api.id}
+                        type="button"
                         onClick={() => setSelectedApiForAccess(api.name)}
-                        className={`w-full text-left p-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-between ${selectedApiForAccess === api.name
-                          ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                          : 'text-slate-600 hover:bg-slate-50'
+                        title={api.name}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors flex items-center justify-between gap-2 cursor-pointer ${selectedApiForAccess === api.name
+                          ? 'bg-[#EAF3FF] text-[#155DFC] font-medium border-l-4 border-blue-600'
+                          : 'text-[#334155] hover:bg-[#F8FAFC]'
                           }`}
                       >
-                        <span className="truncate mr-2">{api.name}</span>
-                        <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">{api.version}</span>
+                        <span className="truncate">{api.name}</span>
+                        <span className="text-[12px] text-[#64748B] shrink-0">{api.version}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Right pane: Beneficiaries with active permissions */}
-                <div className="col-span-12 lg:col-span-9 space-y-4">
-                  <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl flex items-center justify-between shadow-sm">
-                    <div>
-                      <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block">API đang quản lý phân quyền</span>
-                      <span className="text-base font-bold text-slate-800 mt-1 block">{selectedApiForAccess}</span>
+                {/* Khối 2: Đơn vị được cấp quyền của API đang chọn */}
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+                  <div className="px-4 py-3 bg-[#F8FAFC] border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <span className="text-[13px] text-[#155DFC] font-medium block">API đang quản lý phân quyền</span>
+                      <span className="text-[16px] font-medium text-[#020817] mt-1 block truncate">{selectedApiForAccess}</span>
                     </div>
                     <button
+                      type="button"
                       onClick={() => setShowAccessModal(true)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-xs flex items-center transition-colors shadow-sm"
+                      className={`${BTN_PRIMARY} whitespace-nowrap shrink-0`}
                     >
-                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      <Plus className="w-4 h-4" />
                       Cấp quyền mới
                     </button>
                   </div>
 
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-4">
+                  <div className={TABLE_WRAP}>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse table-auto">
-                        <thead>
-                          <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                            <th className="py-3 px-4 text-left font-semibold">Đơn vị được cấp quyền</th>
-                            <th className="py-3 px-4 text-left font-semibold">Tài khoản (Username)</th>
-                            <th className="py-3 px-4 text-left font-semibold">IP Whitelist</th>
-                            <th className="py-3 px-4 text-left font-semibold">Thời hạn hiệu lực</th>
-                            <th className="py-3 px-4 text-center font-semibold">Thu hồi</th>
+                      <table className={TABLE_CLS}>
+                        <thead className="bg-[#F8FAFC]">
+                          <tr className="h-[42px]">
+                            <th className={TH}>Đơn vị được cấp quyền</th>
+                            <th className={TH}>Tài khoản (Username)</th>
+                            <th className={TH}>IP Whitelist</th>
+                            <th className={TH}>Thời hạn hiệu lực</th>
+                            <th className={TH_ACTION}>Thu hồi</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
+                        <tbody>
                           {paginatedPermissions.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
+                              <td colSpan={5} className={EMPTY_TD}>
                                 Chưa có đơn vị nào được cấp quyền khai thác API này.
                               </td>
                             </tr>
                           ) : (
                             paginatedPermissions.map(perm => (
-                              <tr key={perm.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100">
-                                <td className="py-3.5 px-4 font-semibold text-slate-800">{perm.organization}</td>
-                                <td className="py-3.5 px-4 text-xs font-semibold text-slate-600">
+                              <tr key={perm.id} className={TR}>
+                                <td className={`${TD} max-w-[280px]`}>
+                                  <TruncatedText text={perm.organization} />
+                                </td>
+                                <td className={`${TD} whitespace-nowrap`}>
                                   {(() => {
                                     const acc = accounts.find(a => a.organization === perm.organization && a.apiName === perm.apiName);
                                     return acc ? acc.username : '-';
                                   })()}
                                 </td>
-                                <td className="py-3.5 px-4 font-mono text-xs text-slate-500">{perm.ipWhitelist}</td>
-                                <td className="py-3.5 px-4 text-slate-600 text-xs">
+                                <td className={`${TD} whitespace-nowrap`}>{perm.ipWhitelist}</td>
+                                <td className={`${TD} whitespace-nowrap`}>
                                   <div className="flex items-center gap-1.5">
-                                    <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    <Calendar className="w-4 h-4 text-[#94A3B8] shrink-0" />
                                     <span>{perm.validFrom} ~ {perm.validTo}</span>
                                   </div>
                                 </td>
-                                <td className="py-3.5 px-4 text-center">
-                                  <button
+                                <td className={TD_ACTION}>
+                                  <RowIconAction
+                                    label="Thu hồi quyền truy cập"
                                     onClick={() => handleDeletePermission(perm.id)}
-                                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-[6px] transition-colors"
-                                    title="Thu hồi quyền truy cập"
                                   >
-                                    <Trash2 className="w-4 h-4 mx-auto" />
-                                  </button>
+                                    <Trash2 className="w-4 h-4" />
+                                  </RowIconAction>
                                 </td>
                               </tr>
                             ))
@@ -996,6 +1010,7 @@ export function DataProvisionApiManagementPage() {
                     </div>
                     {renderPagination(filteredPermissions.length)}
                   </div>
+                  </div>
                 </div>
 
               </div>
@@ -1003,87 +1018,88 @@ export function DataProvisionApiManagementPage() {
 
             {/* TAB 4: DANH SÁCH TÀI KHOẢN */}
             {activeTab === 'danh_sach_tai_khoan' && (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className={TABLE_WRAP}>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse table-auto">
-                    <thead>
-                      <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                        <th className="py-3 px-4 text-left font-semibold">Tài khoản (Username)</th>
-                        <th className="py-3 px-4 text-left font-semibold">Đơn vị được cấp quyền</th>
-                        <th className="py-3 px-4 text-left font-semibold">Client ID / App Key</th>
-                        <th className="py-3 px-4 text-left font-semibold">Ngày tạo</th>
-                        <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
-                        <th className="py-3 px-4 text-center font-semibold">Thao tác</th>
+                  <table className={TABLE_CLS}>
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={TH}>Tài khoản (Username)</th>
+                        <th className={TH}>Đơn vị được cấp quyền</th>
+                        <th className={TH}>Client ID / App Key</th>
+                        <th className={TH}>Ngày tạo</th>
+                        <th className={TH}>Trạng thái</th>
+                        <th className={TH_ACTION}>Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
+                    <tbody>
                       {paginatedAccounts.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
+                          <td colSpan={6} className={EMPTY_TD}>
                             Chưa có tài khoản nào được tạo.
                           </td>
                         </tr>
                       ) : (
                         paginatedAccounts.map(acc => (
-                          <tr key={acc.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100 group">
-                            <td className="py-3.5 px-4 text-left">
+                          <tr key={acc.id} className={TR}>
+                            <td className={`${TD} whitespace-nowrap`}>
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                  <KeyRound className="w-4 h-4 text-slate-500" />
+                                <div className="w-8 h-8 rounded-full bg-[#F1F5F9] flex items-center justify-center shrink-0">
+                                  <KeyRound className="w-4 h-4 text-[#64748B]" />
                                 </div>
-                                <span className="font-semibold text-slate-900">{acc.username}</span>
+                                <span>{acc.username}</span>
                               </div>
                             </td>
-                            <td className="py-3.5 px-4 text-left font-medium text-slate-600">{acc.organization}</td>
-                            <td className="py-3.5 px-4 text-left font-mono text-xs text-slate-500">{acc.clientId}</td>
-                            <td className="py-3.5 px-4 text-left text-slate-400 font-mono text-xs">{formatDateTime(acc.createdAt)}</td>
-                            <td className="py-3.5 px-4 text-left">
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-normal ${acc.status === 'Hoạt động' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
-                                {acc.status === 'Hoạt động' ? <Unlock className="w-3.5 h-3.5 text-green-500 shrink-0" /> : <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                {acc.status}
-                              </span>
+                            <td className={`${TD} max-w-[280px]`}>
+                              <TruncatedText text={acc.organization} />
                             </td>
-                            <td className="py-3.5 px-4 text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <button
+                            <td className={`${TD} whitespace-nowrap`}>{acc.clientId}</td>
+                            <td className={`${TD} whitespace-nowrap leading-[18px]`}>
+                              <DateTimeCell value={acc.createdAt} />
+                            </td>
+                            <td className={TD}>
+                              <Badge
+                                label={acc.status}
+                                variant={acc.status === 'Hoạt động' ? 'green' : 'slate'}
+                                icon={acc.status === 'Hoạt động' ? <Unlock className="w-3.5 h-3.5 shrink-0" /> : <Lock className="w-3.5 h-3.5 shrink-0" />}
+                              />
+                            </td>
+                            <td className={TD_ACTION}>
+                              {/* 4 thao tác → 2 icon (Chỉnh sửa + Làm mới App Key) + menu ⋯ (mục 5.3.2) */}
+                              <div className="inline-flex items-center justify-center gap-1">
+                                <RowIconAction
+                                  label="Chỉnh sửa tài khoản"
                                   onClick={() => {
                                     setSelectedAccount(acc);
                                     setShowAccountModal(true);
                                   }}
-                                  className="p-1.5 text-black hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center group cursor-pointer"
-                                  title="Chỉnh sửa tài khoản"
                                 >
-                                  <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                </button>
-                                <button
+                                  <Edit className="w-4 h-4" />
+                                </RowIconAction>
+                                <RowIconAction
+                                  label="Làm mới App Key (Refresh Token)"
                                   onClick={() => setConfirmRefreshAccountId(acc.id)}
-                                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-colors"
-                                  title="Làm mới App Key (Refresh Token)"
                                 >
                                   <RefreshCw className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setAccounts(accounts.map(a => a.id === acc.id ? { ...a, status: a.status === 'Hoạt động' ? 'Đã khóa' : 'Hoạt động' } : a));
-                                    triggerToast(acc.status === 'Hoạt động' ? 'Đã khóa tài khoản!' : 'Đã mở khóa tài khoản!');
-                                  }}
-                                  className={`p-1.5 rounded-[6px] transition-colors ${acc.status === 'Hoạt động' ? 'text-slate-400 hover:text-orange-600 hover:bg-orange-50' : 'text-slate-400 hover:text-green-600 hover:bg-green-50'}`}
-                                  title={acc.status === 'Hoạt động' ? "Khóa tài khoản" : "Mở khóa tài khoản"}
-                                >
-                                  <Power className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (window.confirm('Bạn có chắc chắn muốn xóa tài khoản này? Thao tác này không thể hoàn tác.')) {
-                                      setAccounts(accounts.filter(a => a.id !== acc.id));
-                                      triggerToast('Đã xóa tài khoản thành công!');
-                                    }
-                                  }}
-                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-[6px] transition-colors"
-                                  title="Xóa tài khoản"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                </RowIconAction>
+                                <DropdownMenu>
+                                  <MoreActionsTrigger />
+                                  <DropdownMenuContent align="end" className="w-56 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1">
+                                    <MenuAction
+                                      icon={acc.status === 'Hoạt động' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                                      label={acc.status === 'Hoạt động' ? "Khóa tài khoản" : "Mở khóa tài khoản"}
+                                      onSelect={() => {
+                                        setAccounts(accounts.map(a => a.id === acc.id ? { ...a, status: a.status === 'Hoạt động' ? 'Đã khóa' : 'Hoạt động' } : a));
+                                        triggerToast(acc.status === 'Hoạt động' ? 'Đã khóa tài khoản!' : 'Đã mở khóa tài khoản!');
+                                      }}
+                                    />
+                                    <MenuAction
+                                      icon={<Trash2 className="w-4 h-4" />}
+                                      label="Xóa tài khoản"
+                                      danger
+                                      onSelect={() => setDeleteAccountId(acc.id)}
+                                    />
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </td>
                           </tr>
@@ -1158,30 +1174,63 @@ export function DataProvisionApiManagementPage() {
         }}
       />
 
+      {/* Thu hồi quyền truy cập (trước đây dùng window.confirm) */}
+      <ConfirmModal
+        isOpen={!!revokePermissionId}
+        onClose={() => setRevokePermissionId(null)}
+        onConfirm={() => { if (revokePermissionId) confirmRevokePermission(revokePermissionId); }}
+        title="Thu hồi quyền truy cập"
+        subtitle=""
+        message="Bạn có chắc chắn muốn thu hồi quyền truy cập này?"
+        confirmText="Thu hồi"
+        cancelText="Hủy bỏ"
+        type="delete"
+      />
+
+      {/* Xóa tài khoản (trước đây dùng window.confirm) */}
+      <ConfirmModal
+        isOpen={!!deleteAccountId}
+        onClose={() => setDeleteAccountId(null)}
+        onConfirm={() => { if (deleteAccountId) confirmDeleteAccount(deleteAccountId); }}
+        title="Xóa tài khoản"
+        subtitle=""
+        message="Bạn có chắc chắn muốn xóa tài khoản này? Thao tác này không thể hoàn tác."
+        confirmText="Xóa tài khoản"
+        cancelText="Hủy bỏ"
+        type="delete"
+      />
+
       {/* Confirm Refresh Token Modal */}
       {confirmRefreshAccountId && createPortal(
-        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-3 bg-amber-50 text-amber-700">
-              <RefreshCw className="w-5 h-5" />
-              <h3 className="font-bold text-[15px]">Xác nhận làm mới App Key</h3>
+        <div style={{ zIndex: 999999 }} className={MODAL_OVERLAY}>
+          <div className={MODAL_BOX}>
+            <div className={MODAL_HEADER}>
+              <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-[#FFF7ED] text-[#D97706]">
+                <RefreshCw className="w-5 h-5" />
+              </div>
+              <h3 className={MODAL_TITLE}>Xác nhận làm mới App Key</h3>
+              <button type="button" onClick={() => setConfirmRefreshAccountId(null)} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="p-6">
-              <p className="text-slate-600 text-[13px] leading-relaxed">
+            <div className={MODAL_BODY}>
+              <p>
                 Bạn có chắc chắn muốn làm mới App Key cho tài khoản này? <br/><br/>
-                <strong className="text-red-600">Lưu ý quan trọng:</strong> App Key cũ sẽ bị vô hiệu hóa ngay lập tức. Các hệ thống đối tác đang sử dụng Key cũ sẽ không thể gọi API được nữa cho đến khi được cập nhật Key mới.
+                <strong className="font-medium text-[#DC2626]">Lưu ý quan trọng:</strong> App Key cũ sẽ bị vô hiệu hóa ngay lập tức. Các hệ thống đối tác đang sử dụng Key cũ sẽ không thể gọi API được nữa cho đến khi được cập nhật Key mới.
               </p>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setConfirmRefreshAccountId(null)}
-                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                className={BTN_OUTLINE}
               >
                 Hủy bỏ
               </button>
               <button
+                type="button"
                 onClick={() => executeRefreshToken(confirmRefreshAccountId)}
-                className="px-4 py-2 text-[13px] font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-colors"
+                className={BTN_DESTRUCTIVE}
               >
                 Xác nhận Làm mới
               </button>
@@ -1192,34 +1241,42 @@ export function DataProvisionApiManagementPage() {
 
       {/* New Token Result Modal */}
       {newTokenResult && createPortal(
-        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-3 bg-green-50 text-green-700">
-              <KeyRound className="w-5 h-5" />
-              <h3 className="font-bold text-[15px]">Làm mới thành công</h3>
+        <div style={{ zIndex: 999999 }} className={MODAL_OVERLAY}>
+          <div className={MODAL_BOX}>
+            <div className={MODAL_HEADER}>
+              <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-[#F0FDF4] text-[#16A34A]">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <h3 className={MODAL_TITLE}>Làm mới thành công</h3>
+              <button type="button" onClick={() => setNewTokenResult(null)} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="p-6 space-y-4">
-              <p className="text-slate-600 text-[13px]">
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <p>
                 App Key mới đã được khởi tạo. Vui lòng sao chép và lưu trữ an toàn vì nó sẽ không được hiển thị đầy đủ ở các màn hình khác.
               </p>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                <code className="flex-1 text-sm font-bold text-slate-800 break-all">{newTokenResult.token}</code>
+              <div className="flex items-center gap-2 p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg">
+                <span className="flex-1 text-[13px] text-[#020817] break-all">{newTokenResult.token}</span>
                 <button
+                  type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(newTokenResult.token);
                     triggerToast('Đã sao chép App Key!');
                   }}
-                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors shrink-0"
+                  className={`${BTN_GHOST_ICON} shrink-0`}
+                  aria-label="Sao chép"
                   title="Sao chép"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setNewTokenResult(null)}
-                className="px-6 py-2 text-[13px] font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                className={BTN_PRIMARY}
               >
                 Đã lưu & Đóng
               </button>
@@ -1229,35 +1286,40 @@ export function DataProvisionApiManagementPage() {
       , document.body)}
 
       {statusConfirmData && createPortal(
-        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-3 bg-blue-50 text-blue-700">
-              <AlertTriangle className="w-5 h-5 shrink-0" />
-              <h3 className="font-bold text-[18px] uppercase" style={{ fontSize: '18px' }}>
+        <div style={{ zIndex: 999999 }} className={MODAL_OVERLAY}>
+          <div className={MODAL_BOX}>
+            <div className={MODAL_HEADER}>
+              <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-[#EAF3FF] text-[#155DFC]">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className={MODAL_TITLE}>
                 Xác nhận {statusConfirmData.action} {statusConfirmData.type === 'api' ? 'API' : 'tiến trình đối soát'}
               </h3>
+              <button type="button" onClick={() => setStatusConfirmData(null)} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="p-6">
-              <div className="text-slate-600 text-[13px] leading-relaxed">
-                Bạn có chắc chắn muốn <span className="font-semibold text-slate-900">{statusConfirmData.action}</span> {statusConfirmData.type === 'api' ? 'API cung cấp' : 'tiến trình đối soát'}:
-                <span className="font-bold text-blue-600 block mt-2 text-[13px]" style={{ fontSize: '13px' }}>{statusConfirmData.name}</span>
-                <div className="mt-4">
-                  {statusConfirmData.action === 'tạm ngưng' ? (
-                    <span className="text-red-500 font-medium">Lưu ý: Hệ thống đối tác sẽ không thể kết nối hoặc đối soát thông tin qua dịch vụ này cho đến khi được kích hoạt lại.</span>
-                  ) : (
-                    <span className="text-slate-500">Dịch vụ này sẽ quay trở lại trạng thái Hoạt động bình thường.</span>
-                  )}
-                </div>
+            <div className={MODAL_BODY}>
+              Bạn có chắc chắn muốn <span className="font-medium">{statusConfirmData.action}</span> {statusConfirmData.type === 'api' ? 'API cung cấp' : 'tiến trình đối soát'}:
+              <span className="font-medium text-blue-600 block mt-2">{statusConfirmData.name}</span>
+              <div className="mt-4">
+                {statusConfirmData.action === 'tạm ngưng' ? (
+                  <span className="text-[#DC2626]">Lưu ý: Hệ thống đối tác sẽ không thể kết nối hoặc đối soát thông tin qua dịch vụ này cho đến khi được kích hoạt lại.</span>
+                ) : (
+                  <span className="text-[#64748B]">Dịch vụ này sẽ quay trở lại trạng thái Hoạt động bình thường.</span>
+                )}
               </div>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setStatusConfirmData(null)}
-                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                className={BTN_OUTLINE}
               >
                 Hủy bỏ
               </button>
               <button
+                type="button"
                 onClick={() => {
                   const { id, type, action, currentStatus } = statusConfirmData;
                   if (type === 'api') {
@@ -1273,7 +1335,7 @@ export function DataProvisionApiManagementPage() {
                   }
                   setStatusConfirmData(null);
                 }}
-                className="px-4 py-2 text-[13px] font-medium text-white rounded-lg shadow-sm transition-colors cursor-pointer bg-blue-600 hover:bg-blue-700"
+                className={BTN_PRIMARY}
               >
                 Xác nhận
               </button>
@@ -1283,40 +1345,43 @@ export function DataProvisionApiManagementPage() {
       , document.body)}
 
       {deleteConfirmApi && createPortal(
-        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-red-50">
-              <div className="flex items-center gap-3 text-red-700">
-                <Trash2 className="w-5 h-5 shrink-0" />
-                <h3 className="font-bold text-[15px] uppercase">Xác nhận xóa API</h3>
+        <div style={{ zIndex: 999999 }} className={MODAL_OVERLAY}>
+          <div className={MODAL_BOX}>
+            <div className={MODAL_HEADER}>
+              <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-[#FEF2F2] text-[#DC2626]">
+                <Trash2 className="w-5 h-5" />
               </div>
+              <h3 className={MODAL_TITLE}>Xác nhận xóa API</h3>
               <button
+                type="button"
                 onClick={() => setDeleteConfirmApi(null)}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                className={BTN_GHOST_ICON}
+                aria-label="Đóng"
+                title="Đóng"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6">
-              <div className="text-slate-600 text-[13px] leading-relaxed">
-                Bạn có chắc chắn muốn xóa API:
-                <span className="font-bold text-blue-600 block mt-2 text-sm">{deleteConfirmApi.name}</span>
-                <div className="mt-4 flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span className="text-amber-700 font-medium text-[13px]">Cảnh báo: Xóa API sẽ đồng thời xóa tất cả quyền truy cập đã cấp cho API này. Thao tác này không thể hoàn tác.</span>
-                </div>
+            <div className={MODAL_BODY}>
+              Bạn có chắc chắn muốn xóa API:
+              <span className="font-medium text-blue-600 block mt-2">{deleteConfirmApi.name}</span>
+              <div className="mt-4 flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg">
+                <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
+                <span className="text-[13px] text-[#020817]">Cảnh báo: Xóa API sẽ đồng thời xóa tất cả quyền truy cập đã cấp cho API này. Thao tác này không thể hoàn tác.</span>
               </div>
             </div>
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setDeleteConfirmApi(null)}
-                className="px-4 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                className={BTN_OUTLINE}
               >
                 Hủy bỏ
               </button>
               <button
+                type="button"
                 onClick={() => confirmDeleteApi(deleteConfirmApi.id)}
-                className="px-4 py-2 text-[13px] font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors cursor-pointer"
+                className={BTN_DESTRUCTIVE}
               >
                 Xóa API
               </button>

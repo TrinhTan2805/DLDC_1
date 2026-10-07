@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, User, Building2, Phone, Mail, Link, FileText, Eye, Download, Upload } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK, SECTION_TITLE } from '../../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
+
+const ICON_INPUT_CLS = INPUT_CLS + ' pl-9';
+const INPUT_ICON_WRAP = 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]';
+const ICON_BTN_CLS = BTN_OUTLINE + ' w-10 px-0 shrink-0';
 
 const getTodayFormatted = () => {
   const today = new Date();
@@ -193,7 +201,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (agencyUnits.length === 0) {
-      alert('Vui lòng chọn ít nhất một cơ quan/đơn vị nhận!');
+      toast.error('Vui lòng chọn ít nhất một cơ quan/đơn vị nhận!');
       return;
     }
     if (onSave) {
@@ -228,37 +236,29 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
   if (!isOpen) return null;
 
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 transition-all duration-300 text-slate-800 provision-api-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .provision-api-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col border border-slate-200 overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
-        
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-900">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center gap-4">
+          <h2 className="text-[16px] font-medium text-[#020817]">
             {isViewMode ? 'Chi tiết API cung cấp' : (apiData ? 'Cập nhật cấu hình API cung cấp' : 'Tạo mới API cung cấp')}
           </h2>
-          <button title="Đóng" aria-label="Đóng"
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all cursor-pointer"
-          >
+          <button type="button" title="Đóng" aria-label="Đóng" onClick={onClose} className={BTN_GHOST_ICON}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar text-sm">
-          
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar text-[13px] text-[#020817]">
+
           {/* Service Dropdown */}
           <div>
-            <label className="block font-medium text-slate-700 mb-1.5">Dịch vụ API được cấp <span className="text-red-500">*</span></label>
+            <label className={LABEL_CLS}>Dịch vụ API được cấp <span className={REQUIRED_MARK}>*</span></label>
             <select
               required
               disabled={isViewMode}
-              className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-semibold ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white cursor-pointer'}`}
+              className={`${INPUT_CLS} ${isViewMode ? '' : 'cursor-pointer'}`}
               value={selectedServiceCode}
               onChange={(e) => handleServiceChange(e.target.value)}
             >
@@ -272,20 +272,13 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
           {/* Agency Multi-select (Combobox) -> Changed to Read-only Badge list */}
           <div>
-            <label className="block font-medium text-slate-700 mb-1.5">Cơ quan/Đơn vị nhận <span className="text-red-500">*</span></label>
-            <div 
-              className="w-full min-h-[42px] px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg flex flex-wrap gap-1.5 items-center cursor-not-allowed select-none opacity-90"
-            >
+            <label className={LABEL_CLS}>Cơ quan/Đơn vị nhận <span className={REQUIRED_MARK}>*</span></label>
+            <div className="w-full min-h-10 px-3 py-[6px] bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] rounded-lg flex flex-wrap gap-1.5 items-center cursor-not-allowed select-none">
               {agencyUnits.length === 0 ? (
-                <span className="text-slate-400 text-[13px] pl-1">-- Vui lòng chọn dịch vụ API phía trên --</span>
+                <span className="text-[#94A3B8] text-[13px]">-- Vui lòng chọn dịch vụ API phía trên --</span>
               ) : (
                 agencyUnits.map(unit => (
-                  <span 
-                    key={unit} 
-                    className="inline-flex items-center bg-slate-200 text-slate-700 text-[12px] font-semibold px-2.5 py-0.5 rounded-md border border-slate-300"
-                  >
-                    {unit}
-                  </span>
+                  <span key={unit} className="inline-flex items-center h-[26px] px-2 rounded-2xl border border-[rgba(0,0,0,0.26)] bg-white text-[13px] text-[#000000] whitespace-nowrap">{unit}</span>
                 ))
               )}
             </div>
@@ -293,11 +286,11 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
           {/* Target System */}
           <div>
-            <label className="block font-medium text-slate-700 mb-1.5">Hệ thống đích tích hợp API</label>
+            <label className={LABEL_CLS}>Hệ thống đích tích hợp API</label>
             <input
               type="text"
               disabled={isViewMode}
-              className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+              className={INPUT_CLS}
               placeholder="Nhập tên hệ thống đích tích hợp..."
               value={targetSystem}
               onChange={(e) => setTargetSystem(e.target.value)}
@@ -305,22 +298,22 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
           </div>
 
           {/* Section: Contacts */}
-          <div className="space-y-4 pt-2">
-            <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-2">Thông tin Đầu mối chủ quản dữ liệu</h3>
-            
+          <div className="rounded-2xl border border-[#E2E8F0] p-4">
+            <h3 className={SECTION_TITLE}>Thông tin Đầu mối chủ quản dữ liệu</h3>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Receiver Name */}
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5">Họ và tên <span className="text-red-500">*</span></label>
+                <label className={LABEL_CLS}>Họ và tên <span className={REQUIRED_MARK}>*</span></label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <div className={INPUT_ICON_WRAP}>
                     <User className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
                     required
                     disabled={isViewMode}
-                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                    className={ICON_INPUT_CLS}
                     placeholder="Trần Văn Đạo"
                     value={receiverName}
                     onChange={(e) => setReceiverName(e.target.value)}
@@ -330,15 +323,15 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
               {/* Receiver Dept */}
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5">Phòng / Đơn vị công tác</label>
+                <label className={LABEL_CLS}>Phòng / Đơn vị công tác</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <div className={INPUT_ICON_WRAP}>
                     <Building2 className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
                     disabled={isViewMode}
-                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                    className={ICON_INPUT_CLS}
                     placeholder="Cục Quản lý Đăng ký Kinh doanh"
                     value={receiverDept}
                     onChange={(e) => setReceiverDept(e.target.value)}
@@ -348,15 +341,15 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
               {/* Receiver Phone */}
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5">Số điện thoại</label>
+                <label className={LABEL_CLS}>Số điện thoại</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <div className={INPUT_ICON_WRAP}>
                     <Phone className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
                     disabled={isViewMode}
-                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                    className={ICON_INPUT_CLS}
                     placeholder="0912345678"
                     value={receiverPhone}
                     onChange={(e) => setReceiverPhone(e.target.value)}
@@ -366,15 +359,15 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
               {/* Receiver Email */}
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5">Email</label>
+                <label className={LABEL_CLS}>Email</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <div className={INPUT_ICON_WRAP}>
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
                     type="email"
                     disabled={isViewMode}
-                    className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                    className={ICON_INPUT_CLS}
                     placeholder="daotv@mpi.gov.vn"
                     value={receiverEmail}
                     onChange={(e) => setReceiverEmail(e.target.value)}
@@ -386,15 +379,15 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
           {/* URL Endpoint */}
           <div>
-            <label className="block font-medium text-slate-700 mb-1.5">URL Endpoint cung cấp dữ liệu</label>
+            <label className={LABEL_CLS}>URL Endpoint cung cấp dữ liệu</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <div className={INPUT_ICON_WRAP}>
                 <Link className="w-4 h-4" />
               </div>
               <input
                 type="text"
                 disabled={isViewMode}
-                className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                className={ICON_INPUT_CLS}
                 placeholder="https://api.dldc.gov.vn/api/v1/hotich/search"
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
@@ -404,17 +397,17 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
           {/* Document File / URL */}
           <div>
-            <label className="block font-medium text-slate-700 mb-1.5">Tài liệu API chia sẻ</label>
+            <label className={LABEL_CLS}>Tài liệu API chia sẻ</label>
             <div className="flex gap-2">
-              <div 
-                className="relative flex-1 cursor-pointer group"
+              <div
+                className={`relative flex-1 min-w-0 group ${isViewMode ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 onClick={() => { if (!isViewMode) fileInputRef.current?.click(); }}
               >
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-hover:text-blue-500 transition-colors">
+                <div className={`${INPUT_ICON_WRAP} transition-colors ${isViewMode ? '' : 'group-hover:text-blue-600'}`}>
                   <FileText className="w-4 h-4" />
                 </div>
-                <div className={`w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-medium truncate min-h-[42px] flex items-center ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white group-hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20'}`}>
-                  {docFile ? docFile.name : (docUrl || 'Nhấn để đính kèm file tài liệu hướng dẫn...')}
+                <div className={`w-full h-10 pl-9 pr-3 border rounded-lg text-[13px] flex items-center ${isViewMode ? 'bg-[#F0F0F0] border-[rgba(0,0,0,0.26)]' : 'bg-white border-[#E2E8F0] group-hover:border-[#94A3B8]'} ${(docFile || docUrl) ? (isViewMode ? 'text-[#000000]' : 'text-[#020817]') : 'text-[#94A3B8]'}`}>
+                  <span className="truncate">{docFile ? docFile.name : (docUrl || 'Nhấn để đính kèm file tài liệu hướng dẫn...')}</span>
                 </div>
                 <input
                   type="file"
@@ -432,8 +425,9 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
                 type="button"
                 disabled={isViewMode}
                 onClick={() => { if (!isViewMode) fileInputRef.current?.click(); }}
-                className={`px-3 py-2 border border-slate-300 rounded-lg transition-colors text-slate-600 ${isViewMode ? 'bg-slate-50 cursor-not-allowed opacity-50' : 'bg-slate-100 hover:bg-slate-200 cursor-pointer'}`}
+                className={ICON_BTN_CLS}
                 title="Đính kèm tài liệu"
+                aria-label="Đính kèm tài liệu"
               >
                 <Upload className="w-4 h-4" />
               </button>
@@ -452,8 +446,9 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
                   }
                 }}
                 disabled={!docFile && !docUrl}
-                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={ICON_BTN_CLS}
                 title="Tải về tài liệu"
+                aria-label="Tải về tài liệu"
               >
                 <Download className="w-4 h-4" />
               </button>
@@ -461,18 +456,18 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
           </div>
 
           {/* Section: Status & Times */}
-          <div className="space-y-4 pt-2">
-            <h3 className="font-bold text-slate-900 border-b border-slate-100 pb-2">Thời gian & Trạng thái</h3>
-            
+          <div className="rounded-2xl border border-[#E2E8F0] p-4">
+            <h3 className={SECTION_TITLE}>Thời gian & Trạng thái</h3>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Start Date */}
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5">Ngày bắt đầu hiệu lực <span className="text-red-500">*</span></label>
+                <label className={LABEL_CLS}>Ngày bắt đầu hiệu lực <span className={REQUIRED_MARK}>*</span></label>
                 <input
                   type="text"
                   required
                   disabled={isViewMode}
-                  className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                  className={INPUT_CLS}
                   placeholder="dd/mm/yyyy"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
@@ -481,11 +476,11 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
               {/* End Date */}
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5">Ngày kết thúc hiệu lực</label>
+                <label className={LABEL_CLS}>Ngày kết thúc hiệu lực</label>
                 <input
                   type="text"
                   disabled={isViewMode}
-                  className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 font-mono ${isViewMode ? 'bg-slate-50 cursor-not-allowed' : 'bg-white'}`}
+                  className={INPUT_CLS}
                   placeholder="dd/mm/yyyy"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
@@ -496,29 +491,17 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50">
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
           {isViewMode ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-bold cursor-pointer shadow-md text-[13px]"
-            >
+            <button type="button" onClick={onClose} className={BTN_OUTLINE}>
               Đóng
             </button>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-              >
+              <button type="button" onClick={onClose} className={BTN_OUTLINE}>
                 Hủy bỏ
               </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-bold cursor-pointer shadow-md"
-              >
+              <button type="button" onClick={handleSubmit} className={BTN_PRIMARY}>
                 Lưu cấu hình
               </button>
             </>

@@ -62,8 +62,9 @@ export function MeritoriousGroupPage({ mode = 'thu thập', context = 'thu thậ
       innerSidebarItems={sidebarItems}
       activeId={selectedId}
       onSelectDataType={(id) => setSelectedId(id)}
+      stretchHeight
     >
-      <div className="mt-4">
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
         <MeritoriousModal
           isOpen={true}
           onClose={() => {}}

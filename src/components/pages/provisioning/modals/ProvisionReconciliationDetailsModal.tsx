@@ -1,7 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Download, Server, DownloadCloud, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import { ReconciliationHistoryEntry, reconciliationData } from '../../../../data/provisionReconciliationData';
+import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE } from '../../collection/collectionUi';
 
 interface ProvisionReconciliationDetailsModalProps {
   isOpen: boolean;
@@ -39,71 +41,74 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
   const reconStatus = !entry.totalSent ? 'Chưa đối soát' : (entry.discrepancies === 0 ? 'Khớp dữ liệu' : 'Không khớp');
   const saiLech = entry.totalSent - entry.totalMatched;
   const hasDiff = saiLech !== 0;
-  const barColor = reconStatus === 'Khớp dữ liệu' ? 'bg-emerald-500' : reconStatus === 'Không khớp' ? 'bg-rose-500' : 'bg-blue-500';
-  const pctColor = reconStatus === 'Khớp dữ liệu' ? 'text-emerald-600' : reconStatus === 'Không khớp' ? 'text-rose-600' : 'text-blue-600';
+  const barColor = reconStatus === 'Khớp dữ liệu' ? 'bg-[#10B981]' : reconStatus === 'Không khớp' ? 'bg-[#DC2626]' : 'bg-blue-600';
+  const pctColor = reconStatus === 'Khớp dữ liệu' ? 'text-[#15803D]' : reconStatus === 'Không khớp' ? 'text-[#B91C1C]' : 'text-blue-600';
 
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" style={{ fontSize: '13px' }}>
-        
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
           <div>
-            <h2 className="text-[18px] font-bold text-slate-800" style={{ fontSize: '18px' }}>Chi tiết kết quả đối soát</h2>
-            <p className="text-[13px] text-slate-500 mt-0.5 font-mono" style={{ fontSize: '13px' }}>Mã phiên: {entry.id.toUpperCase()}</p>
+            <h2 className="text-[16px] font-medium text-[#020817]">Chi tiết kết quả đối soát</h2>
+            <p className="text-[13px] text-[#64748B] mt-1 leading-5">Mã phiên: {entry.id.toUpperCase()}</p>
           </div>
-          <button 
+          <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+            className={BTN_GHOST_ICON}
+            aria-label="Đóng chi tiết kết quả đối soát"
+            title="Đóng"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5 overflow-y-auto">
-          
+        <div className="px-6 py-4 space-y-6 overflow-y-auto custom-scrollbar">
+
           {/* 2 cards: Tên tiến trình đối soát + API liên kết đối soát */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-slate-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-[13px] font-medium text-slate-500 mb-2">
+            <div className="rounded-2xl border border-[#E2E8F0] p-4 space-y-1">
+              <div className={`${FIELD_LABEL} flex items-center gap-2`}>
                 <Server className="w-4 h-4 text-blue-600" /> Tên tiến trình đối soát
               </div>
-              <div className="text-[14px] font-semibold text-slate-900">{processName}</div>
-              <div className="text-[12px] text-slate-500 mt-1 font-mono">Mã quy trình: PROC-PRV-{entry.processId}</div>
+              <div className={`${FIELD_VALUE} break-words`}>{processName}</div>
+              <div className="text-[13px] text-[#64748B]">Mã quy trình: PROC-PRV-{entry.processId}</div>
             </div>
 
-            <div className="border border-slate-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-[13px] font-medium text-slate-500 mb-2">
+            <div className="rounded-2xl border border-[#E2E8F0] p-4 space-y-1">
+              <div className={`${FIELD_LABEL} flex items-center gap-2`}>
                 <DownloadCloud className="w-4 h-4 text-blue-600" /> API liên kết đối soát
               </div>
-              <div className="text-[14px] font-semibold text-slate-900">{apiName}</div>
-              <div className="text-[12px] text-slate-500 mt-1 font-mono">{apiEndpoint}</div>
+              <div className={`${FIELD_VALUE} break-words`}>{apiName}</div>
+              <div className="text-[13px] text-[#020817] bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1 break-all">{apiEndpoint}</div>
             </div>
           </div>
 
           {/* Kết quả đối soát */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[13px] font-semibold text-slate-900 uppercase tracking-tight">Kết quả đối soát</h3>
-              <span className="text-[12px] text-slate-500">Ngày gọi: {entry.totalSent ? entry.runDate : '—'}</span>
+          <div className="border-t border-[#E2E8F0] pt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`${SECTION_TITLE} !mb-0`}>Kết quả đối soát</h3>
+              <span className="text-[13px] text-[#64748B]">Ngày gọi: {entry.totalSent ? entry.runDate : '—'}</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="border border-slate-200 rounded-lg p-3 text-center">
-                <p className="text-[12px] text-slate-500">Số bản ghi cung cấp</p>
-                <p className="text-xl font-bold text-slate-900">{entry.totalSent.toLocaleString()}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Kho DLDC gửi đi</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <p className="text-[13px] text-[#64748B]">Số bản ghi cung cấp</p>
+                <p className="text-[16px] font-semibold text-[#0F172A] tabular-nums mt-1">{entry.totalSent.toLocaleString()}</p>
+                <p className="text-[12px] text-[#64748B] mt-0.5">Kho DLDC gửi đi</p>
               </div>
-              <div className="border border-slate-200 rounded-lg p-3 text-center">
-                <p className="text-[12px] text-slate-500">Số bản ghi nhận</p>
-                <p className="text-xl font-bold text-slate-900">{entry.totalMatched.toLocaleString()}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Đích nhận trùng khớp</p>
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <p className="text-[13px] text-[#64748B]">Số bản ghi nhận</p>
+                <p className="text-[16px] font-semibold text-[#0F172A] tabular-nums mt-1">{entry.totalMatched.toLocaleString()}</p>
+                <p className="text-[12px] text-[#64748B] mt-0.5">Đích nhận trùng khớp</p>
               </div>
-              <div className={`rounded-lg p-3 text-center border ${hasDiff ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'}`}>
-                <p className={`text-[12px] ${hasDiff ? 'text-rose-600' : 'text-emerald-600'}`}>Sai lệch</p>
-                <p className={`text-xl font-bold ${hasDiff ? 'text-rose-700' : 'text-emerald-700'}`}>{saiLech.toLocaleString()}</p>
-                <p className={`text-[11px] mt-0.5 ${hasDiff ? 'text-rose-500' : 'text-emerald-500'}`}>
+              <div className={`rounded-2xl border p-4 ${hasDiff ? 'border-[#FEE2E2] bg-[#FEF2F2]' : 'border-[#DCFCE7] bg-[#F0FDF4]'}`}>
+                <p className={`text-[13px] ${hasDiff ? 'text-[#B91C1C]' : 'text-[#15803D]'}`}>Sai lệch</p>
+                <p className={`text-[16px] font-semibold tabular-nums mt-1 ${hasDiff ? 'text-[#B91C1C]' : 'text-[#15803D]'}`}>{saiLech.toLocaleString()}</p>
+                <p className={`text-[12px] mt-0.5 ${hasDiff ? 'text-[#B91C1C]' : 'text-[#15803D]'}`}>
                   {hasDiff ? 'Chênh lệch' : 'Trùng khớp'}
                 </p>
               </div>
@@ -111,13 +116,13 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
           </div>
 
           {/* Tỷ lệ khớp + trạng thái */}
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 flex items-center gap-4 flex-wrap">
+          <div className="bg-[#F8FAFC] rounded-lg p-4 border border-[#E2E8F0] flex items-center gap-4 flex-wrap">
             <div className="flex-1 min-w-[200px]">
               <div className="flex justify-between text-[13px] mb-1.5">
-                <span className="text-slate-600">Tỷ lệ khớp dữ liệu</span>
-                <span className={`font-semibold ${pctColor}`}>{matchRate.toFixed(2)}%</span>
+                <span className="text-[#020817]">Tỷ lệ khớp dữ liệu</span>
+                <span className={`font-semibold tabular-nums ${pctColor}`}>{matchRate.toFixed(2)}%</span>
               </div>
-              <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-[#E2E8F0] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                   style={{ width: `${matchRate}%` }}
@@ -126,35 +131,27 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
             </div>
             <div className="flex flex-col gap-2">
               {reconStatus === 'Khớp dữ liệu' ? (
-                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> Khớp dữ liệu
-                </span>
+                <Badge label="Khớp dữ liệu" variant="green" icon={<CheckCircle2 className="w-4 h-4" />} />
               ) : reconStatus === 'Không khớp' ? (
-                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-rose-50 text-rose-700 border-rose-200 flex items-center justify-center gap-2">
-                  <AlertTriangle className="w-4 h-4" /> Không khớp
-                </span>
+                <Badge label="Không khớp" variant="red" icon={<AlertTriangle className="w-4 h-4" />} />
               ) : (
-                <span className="px-4 py-2 text-[13px] font-semibold rounded-lg border bg-blue-50 text-blue-700 border-blue-200 flex items-center justify-center gap-2">
-                  <Clock className="w-4 h-4" /> Chưa đối soát
-                </span>
+                <Badge label="Chưa đối soát" variant="blue" icon={<Clock className="w-4 h-4" />} />
               )}
             </div>
           </div>
-          
+
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3 flex-wrap">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm cursor-pointer font-medium"
-          >
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end gap-3 flex-wrap flex-shrink-0">
+          <button type="button" onClick={onClose} className={BTN_OUTLINE}>
             Đóng
           </button>
           {reconStatus === 'Không khớp' && (
             <button
-              onClick={() => alert('Đang thực hiện yêu cầu đồng bộ & đối soát lại dữ liệu cung cấp...')}
-              className="px-4 py-2 text-[13px] border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+              type="button"
+              onClick={() => toast.info('Đang thực hiện yêu cầu đồng bộ & đối soát lại dữ liệu cung cấp...')}
+              className={BTN_PRIMARY}
             >
               <RefreshCw className="w-4 h-4" />
               Đồng bộ lại

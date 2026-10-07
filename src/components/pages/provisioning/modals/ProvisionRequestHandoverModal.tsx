@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Upload, FileText, Download } from 'lucide-react';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE } from '../../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
 interface ProvisionRequestHandoverModalProps {
   isOpen: boolean;
@@ -26,77 +29,89 @@ export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, on
 
   return createPortal(
     <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-          <h2 className="text-base font-bold text-slate-800">Bàn giao dữ liệu</h2>
-          <button aria-label="Đóng" onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header (mục 5.4) */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
+          <h2 className="text-[16px] font-medium text-[#020817]">Bàn giao dữ liệu</h2>
+          <button type="button" aria-label="Đóng" title="Đóng" onClick={onClose} className={BTN_GHOST_ICON}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-2">Thông tin yêu cầu</h3>
-            <p className="text-[13px] text-slate-600 mb-1"><span className="font-semibold text-slate-700">Mã YC:</span> {requestData?.id}</p>
-            <p className="text-[13px] text-slate-600 mb-1"><span className="font-semibold text-slate-700">Cơ quan yêu cầu:</span> {requestData?.org}</p>
-            <p className="text-[13px] text-slate-600 mb-1"><span className="font-semibold text-slate-700">Loại dữ liệu:</span> {requestData?.dataType}</p>
-            <div className="mt-3 pt-3 border-t border-slate-200">
-              <p className="text-[13px] font-semibold text-slate-700 mb-2">File dữ liệu đã kết xuất:</p>
-              <div className="flex items-center justify-between bg-white border border-slate-200 p-2.5 rounded-lg shadow-sm">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-emerald-600" />
-                  <span className="text-[13px] font-medium text-slate-700">data_export_{requestData?.id?.toLowerCase() || 'file'}.{requestData?.format || 'csv'}</span>
+        <div className="px-6 py-4 space-y-6 overflow-y-auto custom-scrollbar">
+          <div className="rounded-2xl border border-[#E2E8F0] p-4">
+            <h3 className={SECTION_TITLE}>Thông tin yêu cầu</h3>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <div className="space-y-1">
+                <div className={FIELD_LABEL}>Mã YC</div>
+                <div className={FIELD_VALUE}>{requestData?.id}</div>
+              </div>
+              <div className="space-y-1">
+                <div className={FIELD_LABEL}>Cơ quan yêu cầu</div>
+                <div className={`${FIELD_VALUE} break-words`}>{requestData?.org}</div>
+              </div>
+              <div className="space-y-1 col-span-2">
+                <div className={FIELD_LABEL}>Loại dữ liệu</div>
+                <div className={`${FIELD_VALUE} break-words`}>{requestData?.dataType}</div>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
+              <p className={`${FIELD_LABEL} mb-2`}>File dữ liệu đã kết xuất:</p>
+              <div className="flex items-center justify-between gap-3 bg-[#F8FAFC] border border-[#E2E8F0] p-2.5 rounded-lg">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-5 h-5 text-[#16A34A] shrink-0" />
+                  <span className="text-[13px] text-[#020817] break-all">data_export_{requestData?.id?.toLowerCase() || 'file'}.{requestData?.format || 'csv'}</span>
                 </div>
-                <button type="button" className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded flex items-center font-medium transition-colors border border-emerald-200 cursor-pointer">
-                  <Download className="w-3.5 h-3.5 mr-1" /> Tải về
+                <button type="button" className={`${BTN_OUTLINE} !h-8 !px-3 shrink-0`}>
+                  <Download className="w-4 h-4" /> Tải về
                 </button>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-[13px] font-medium text-slate-700 mb-2">Đơn vị nhận bàn giao <span className="text-red-500">*</span></label>
-            <input 
-              type="text" 
+            <label className={LABEL_CLS}>Đơn vị nhận bàn giao <span className={REQUIRED_MARK}>*</span></label>
+            <input
+              type="text"
               value={receivingUnit}
               onChange={(e) => setReceivingUnit(e.target.value)}
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-              placeholder="Nhập tên đơn vị nhận bàn giao" 
+              className={INPUT_CLS}
+              placeholder="Nhập tên đơn vị nhận bàn giao"
             />
           </div>
 
           <div>
-            <label className="block text-[13px] font-medium text-slate-700 mb-2">Tên người nhận bàn giao</label>
-            <input 
-              type="text" 
+            <label className={LABEL_CLS}>Tên người nhận bàn giao</label>
+            <input
+              type="text"
               value={receiverName}
               onChange={(e) => setReceiverName(e.target.value)}
-              className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-              placeholder="Nhập tên người nhận bàn giao (không bắt buộc)" 
+              className={INPUT_CLS}
+              placeholder="Nhập tên người nhận bàn giao (không bắt buộc)"
             />
           </div>
 
           <div>
-            <label className="block text-[13px] font-medium text-slate-700 mb-2">Biên bản bàn giao <span className="text-red-500">*</span></label>
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 flex flex-col items-center justify-center text-center bg-slate-50 hover:bg-slate-100 transition-colors">
-              <input 
-                type="file" 
+            <label className={LABEL_CLS}>Biên bản bàn giao <span className={REQUIRED_MARK}>*</span></label>
+            <div className="border-2 border-dashed border-[#CBD5E1] rounded-lg p-6 flex flex-col items-center justify-center text-center bg-[#F8FAFC] hover:bg-[#F1F5F9] transition-colors">
+              <input
+                type="file"
                 id="handover-file"
-                className="hidden" 
+                className="hidden"
                 onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
               />
               <label htmlFor="handover-file" className="cursor-pointer flex flex-col items-center w-full">
                 {selectedFile ? (
                   <>
-                    <FileText className="w-10 h-10 text-emerald-500 mb-2" />
-                    <span className="text-[13px] font-medium text-slate-800 text-center max-w-full overflow-hidden text-ellipsis whitespace-nowrap px-4">{selectedFile.name}</span>
-                    <span className="text-xs text-slate-500 mt-1">Nhấn để thay đổi file</span>
+                    <FileText className="w-10 h-10 text-[#16A34A] mb-2" />
+                    <span className="text-[13px] font-medium text-[#020817] text-center max-w-full overflow-hidden text-ellipsis whitespace-nowrap px-4">{selectedFile.name}</span>
+                    <span className="text-[12px] text-[#64748B] mt-1">Nhấn để thay đổi file</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-10 h-10 text-slate-400 mb-2" />
+                    <Upload className="w-10 h-10 text-[#94A3B8] mb-2" />
                     <span className="text-[13px] font-medium text-blue-600">Tải lên tệp biên bản</span>
-                    <span className="text-xs text-slate-500 mt-1">Hỗ trợ PDF, DOCX, JPG (Tối đa 10MB)</span>
+                    <span className="text-[12px] text-[#64748B] mt-1">Hỗ trợ PDF, DOCX, JPG (Tối đa 10MB)</span>
                   </>
                 )}
               </label>
@@ -104,9 +119,11 @@ export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, on
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-xl">
-          <button aria-label="Hủy bỏ" onClick={onClose} className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm">Hủy bỏ</button>
+        {/* Footer (mục 5.4) */}
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 flex-shrink-0">
+          <button type="button" aria-label="Hủy bỏ" onClick={onClose} className={BTN_OUTLINE}>Hủy bỏ</button>
           <button
+            type="button"
             aria-label="Xác nhận"
             disabled={!receivingUnit || !selectedFile}
             onClick={() => {
@@ -115,7 +132,7 @@ export function ProvisionRequestHandoverModal({ isOpen, onClose, requestData, on
               }
               onClose();
             }}
-            className="px-4 py-2 text-white bg-blue-600 rounded-lg font-medium text-[13px] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className={BTN_PRIMARY}
           >
             Xác nhận bàn giao
           </button>

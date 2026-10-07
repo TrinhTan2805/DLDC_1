@@ -1,5 +1,9 @@
 import React from 'react';
-import { Filter, Plus, Trash2, CheckCircle, X, RefreshCw } from 'lucide-react';
+import { Filter, Plus, Trash2, CheckCircle, X, RefreshCw, Search } from 'lucide-react';
+import {
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, INPUT_CLS, BTN_PRIMARY, BTN_OUTLINE, ROW_ICON_BTN, TOOLTIP_CLS,
+} from '../pages/collection/collectionUi';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 interface CivilRegistryInfoSearchFilterProps {
   isFilterOpen: boolean;
@@ -7,8 +11,18 @@ interface CivilRegistryInfoSearchFilterProps {
   filterConditions: any[];
   setFilterConditions: (conditions: any[]) => void;
   onRefresh?: () => void;
+  /** Nút Tùy chọn cột (ColumnPicker) — đặt trước nút Bộ lọc */
+  columnPicker?: React.ReactNode;
   isInline?: boolean;
+  // Tìm kiếm (mục 5.19): chỉ chạy khi bấm nút Tìm kiếm hoặc Enter
+  searchText?: string;
+  setSearchText?: (text: string) => void;
+  onSearch?: () => void;
+  searchPlaceholder?: string;
 }
+
+// Nút icon 40×40 nền trắng có tooltip (mục 5.1 – Icon outline)
+const ICON_OUTLINE_40 = 'w-10 h-10 shrink-0 rounded-lg border bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC] hover:text-[#020817] transition-colors flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600';
 
 export function CivilRegistryInfoSearchFilter({
   isFilterOpen,
@@ -16,81 +30,95 @@ export function CivilRegistryInfoSearchFilter({
   filterConditions,
   setFilterConditions,
   onRefresh,
-  isInline = false
+  columnPicker,
+  isInline = false,
+  searchText = '',
+  setSearchText,
+  onSearch,
+  searchPlaceholder = 'Tìm kiếm theo họ và tên, số đăng ký',
 }: CivilRegistryInfoSearchFilterProps) {
+  const updateCondition = (index: number, key: string, value: string) => {
+    const newConditions = [...filterConditions];
+    newConditions[index] = { ...newConditions[index], [key]: value };
+    setFilterConditions(newConditions);
+  };
+
   return (
-    <div className={`flex-shrink-0 ${isInline ? 'mb-4' : 'px-6 py-4 border-b border-slate-200 bg-white'}`}>
-      <div className="flex items-center justify-end gap-3">
-        <button
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className={`px-4 py-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border gap-2 text-[13px] font-medium ${
-            isFilterOpen ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-700 hover:bg-slate-50'
-          }`}
-          title="Bộ lọc"
-        >
-          {isFilterOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-          Lọc
-        </button>
-        
-        {onRefresh && (
-          <button 
-            onClick={onRefresh}
-            className="p-2 border border-[#e2e8f0] bg-white rounded-lg text-slate-700 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" 
-            title="Tải lại"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
+    <div className={`flex-shrink-0 ${isInline ? 'mb-4' : 'px-6 py-4 border-b border-[#E2E8F0] bg-white'}`}>
+      {/* Thanh công cụ: (ô tìm kiếm → nút Tìm kiếm) → nút Tùy chọn cột → nút Bộ lọc → nút Tải lại, cách nhau 6px */}
+      <div className="flex items-center gap-1.5">
+        {setSearchText && (
+          <>
+            <input
+              aria-label="Tìm kiếm bản ghi"
+              type="text"
+              placeholder={searchPlaceholder}
+              className={SEARCH_INPUT_CLS}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') onSearch?.(); }}
+            />
+            <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={onSearch} className={SEARCH_BTN_CLS}>
+              <Search className="w-5 h-5" />
+            </button>
+          </>
         )}
+        <div className={setSearchText ? 'contents' : 'ml-auto flex items-center gap-1.5'}>
+          {columnPicker}
+          <button
+            type="button"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            aria-label="Bộ lọc nâng cao"
+            aria-expanded={isFilterOpen}
+            className={filterBtnClass(isFilterOpen)}
+            title="Bộ lọc nâng cao"
+          >
+            {isFilterOpen ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+          </button>
+
+          {onRefresh && (
+            <button type="button" onClick={onRefresh} aria-label="Tải lại" title="Tải lại" className={ICON_OUTLINE_40}>
+              <RefreshCw className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Vùng lọc nâng cao: khung xám, cách thanh tìm kiếm 15px (mục 5.19) */}
       {isFilterOpen && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4 shadow-sm animate-in slide-in-from-top-2 duration-200 relative">
-          <div className="absolute -top-2 left-[50%] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <h4 className="text-[13px] font-semibold text-slate-700">Điều kiện lọc nâng cao</h4>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => {
-                  const newId = Date.now().toString();
-                  setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
-                }}
-                className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-[13px] font-medium hover:bg-blue-50 transition-all shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Thêm điều kiện
-              </button>
-            </div>
+        <div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg animate-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-[14px] font-medium text-[#020817]">Điều kiện lọc nâng cao</h4>
+            <button
+              type="button"
+              onClick={() => {
+                const newId = Date.now().toString();
+                setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+              }}
+              className={BTN_OUTLINE}
+            >
+              <Plus className="w-4 h-4" />
+              Thêm điều kiện
+            </button>
           </div>
 
-          <div className="space-y-3 relative z-10">
+          {filterConditions.length === 0 && (
+            <p className="text-[13px] text-[#64748B]">Chưa có điều kiện lọc. Bấm "Thêm điều kiện" để bắt đầu.</p>
+          )}
+
+          <div className="space-y-2">
             {filterConditions.map((condition, index) => (
-              <div key={condition.id} className="flex items-center gap-3">
-                <div className="w-20 flex-shrink-0">
+              <div key={condition.id} className="flex items-center gap-2">
+                <div className="w-24 flex-shrink-0">
                   {index > 0 && (
-                    <select
-                      className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                      value={condition.logic}
-                      onChange={(e) => {
-                        const newConditions = [...filterConditions];
-                        newConditions[index].logic = e.target.value;
-                        setFilterConditions(newConditions);
-                      }}
-                    >
+                    <select aria-label="Toán tử logic" className={INPUT_CLS} value={condition.logic} onChange={(e) => updateCondition(index, 'logic', e.target.value)}>
                       <option value="AND">AND</option>
                       <option value="OR">OR</option>
                     </select>
                   )}
                 </div>
-                
-                <select
-                  className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  value={condition.field}
-                  onChange={(e) => {
-                    const newConditions = [...filterConditions];
-                    newConditions[index].field = e.target.value;
-                    setFilterConditions(newConditions);
-                  }}
-                >
+
+                <select aria-label="Trường dữ liệu" className={`${INPUT_CLS} !w-auto flex-1`} value={condition.field} onChange={(e) => updateCondition(index, 'field', e.target.value)}>
                   <option value="">Chọn trường dữ liệu</option>
                   <option value="name">Họ tên</option>
                   <option value="number">Số đăng ký</option>
@@ -98,59 +126,45 @@ export function CivilRegistryInfoSearchFilter({
                   <option value="address">Địa chỉ / Nơi đăng ký</option>
                 </select>
 
-                <select
-                  className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  value={condition.operator}
-                  onChange={(e) => {
-                    const newConditions = [...filterConditions];
-                    newConditions[index].operator = e.target.value;
-                    setFilterConditions(newConditions);
-                  }}
-                >
+                <select aria-label="Phép so sánh" className={`${INPUT_CLS} !w-auto flex-1`} value={condition.operator} onChange={(e) => updateCondition(index, 'operator', e.target.value)}>
                   <option value="=">Bằng (=)</option>
                   <option value="contains">Chứa</option>
                   <option value="starts">Bắt đầu</option>
                 </select>
 
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg bg-white shadow-sm">
-                  <input
-                    type="text"
-                    className="flex-1 bg-transparent border-0 p-0 text-[13px] focus:outline-none"
-                    placeholder="Nhập giá trị..."
-                    value={condition.value}
-                    onChange={(e) => {
-                      const newConditions = [...filterConditions];
-                      newConditions[index].value = e.target.value;
-                      setFilterConditions(newConditions);
-                    }}
-                  />
-                </div>
+                <input
+                  aria-label="Giá trị"
+                  type="text"
+                  className={`${INPUT_CLS} !w-auto flex-1`}
+                  placeholder="Nhập giá trị..."
+                  value={condition.value}
+                  onChange={(e) => updateCondition(index, 'value', e.target.value)}
+                />
 
-                <button 
-                  type="button"
-                  onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
-                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Xóa điều kiện"
+                      onClick={() => setFilterConditions(filterConditions.filter(c => c.id !== condition.id))}
+                      className={`${ROW_ICON_BTN} hover:!text-[#DC2626]`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>Xóa điều kiện</TooltipContent>
+                </Tooltip>
               </div>
             ))}
           </div>
 
           {filterConditions.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-3 relative z-10">
-              <button 
-                type="button"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-[13px] hover:bg-blue-700 flex items-center gap-2 shadow-sm transition-all"
-              >
+            <div className="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center gap-3">
+              <button type="button" className={BTN_PRIMARY}>
                 <CheckCircle className="w-4 h-4" />
                 Áp dụng bộ lọc
               </button>
-              <button 
-                type="button"
-                onClick={() => setFilterConditions([])} 
-                className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg font-medium text-[13px] hover:bg-slate-50 transition-all shadow-sm"
-              >
+              <button type="button" onClick={() => setFilterConditions([])} className={BTN_OUTLINE}>
                 Xóa tất cả
               </button>
             </div>

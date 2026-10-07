@@ -34,6 +34,9 @@ const PieAny = Pie as any;
 const CellAny = Cell as any;
 const LabelAny = Label as any;
 
+// Tooltip biểu đồ: chữ 12px, viền #E2E8F0, bo 8px, không shadow
+const CHART_TOOLTIP_STYLE = { borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: 'none', fontSize: 12, color: '#64748B' };
+
 
 export function CategoryDashboardPage() {
   // Mock Data cho Dashboard [Unverified]
@@ -97,91 +100,93 @@ export function CategoryDashboardPage() {
 
   // Thị phần danh mục dùng chung theo nguồn dữ liệu [Unverified] - tổng khớp với stats.totalCategories
   const categorySourceShare = [
-    { name: 'Đồng bộ từ TTDLQG', value: 57, color: '#3b82f6' },
-    { name: 'Kho DLDC', value: 47, color: '#10b981' },
-    { name: 'Tự cập nhật trực tiếp', value: 20, color: '#f59e0b' },
+    { name: 'Đồng bộ từ TTDLQG', value: 57, color: '#155DFC' },
+    { name: 'Kho DLDC', value: 47, color: '#10B981' },
+    { name: 'Tự cập nhật trực tiếp', value: 20, color: '#D97706' },
   ];
   const categorySourceTotal = categorySourceShare.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[18px] font-bold text-slate-800">Tổng quan danh mục</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Tổng quan danh mục</h1>
+          <p className="text-[13px] text-[#64748B] mt-1">
             Giám sát số liệu và hoạt động quản trị danh mục
           </p>
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards (compomennt.md 5.6.1) */}
+      {/* Thẻ header màn tổng quan: giữ kích thước lớn để cân với biểu đồ bên dưới (compomennt.md 5.6.1 – ngoại lệ màn Tổng quan) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
               <FolderTree className="w-6 h-6" />
             </div>
-            <span className="flex items-center gap-1 text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+            <span className="flex items-center gap-1 text-[13px] font-medium text-[#16A34A] bg-[#F0FDF4] px-2 py-1 rounded-full">
               <TrendingUp className="w-4 h-4" /> +12%
             </span>
           </div>
-          <h3 className="text-3xl font-bold text-slate-800">{stats.totalCategories}</h3>
-          <p className="text-sm font-medium text-slate-500 mt-1">Tổng số danh mục</p>
+          <h3 className="text-[30px] leading-9 font-bold text-[#0F172A]">{stats.totalCategories}</h3>
+          <p className="text-[14px] font-medium text-[#64748B] mt-1">Tổng số danh mục</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
             </div>
           </div>
-          <h3 className="text-3xl font-bold text-slate-800">{stats.activeCategories}</h3>
-          <p className="text-sm font-medium text-slate-500 mt-1">Danh mục đang hoạt động</p>
+          <h3 className="text-[30px] leading-9 font-bold text-[#0F172A]">{stats.activeCategories}</h3>
+          <p className="text-[14px] font-medium text-[#64748B] mt-1">Danh mục đang hoạt động</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
               <Clock className="w-6 h-6" />
             </div>
           </div>
-          <h3 className="text-3xl font-bold text-slate-800">{stats.pendingApprovals}</h3>
-          <p className="text-sm font-medium text-slate-500 mt-1">Yêu cầu chờ phê duyệt</p>
+          <h3 className="text-[30px] leading-9 font-bold text-[#0F172A]">{stats.pendingApprovals}</h3>
+          <p className="text-[14px] font-medium text-[#64748B] mt-1">Yêu cầu chờ phê duyệt</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
               <Database className="w-6 h-6" />
             </div>
           </div>
-          <h3 className="text-3xl font-bold text-slate-800">{stats.apisInUse}</h3>
-          <p className="text-sm font-medium text-slate-500 mt-1">Số API đang khai thác</p>
+          <h3 className="text-[30px] leading-9 font-bold text-[#0F172A]">{stats.apisInUse}</h3>
+          <p className="text-[14px] font-medium text-[#64748B] mt-1">Số API đang khai thác</p>
         </div>
+
       </div>
 
       {/* Charts Row 1: Ranked list + Thị phần theo nguồn dữ liệu */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         {/* Ranked list: Lượt truy cập API theo danh mục */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[800px]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[16px] font-semibold text-slate-800">Lượt truy cập API theo danh mục</h3>
-            <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: 'rgb(6, 182, 212)' }} />Lượt truy cập</span>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4 flex flex-col h-[800px]">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-medium text-[#020817]">Lượt truy cập API theo danh mục</h3>
+            <div className="flex items-center gap-3 text-[12px] text-[#64748B] shrink-0">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block bg-[#06B6D4]" />Lượt truy cập</span>
             </div>
           </div>
-          <div className="overflow-y-auto space-y-3 flex-1 min-h-0">
+          <div className="overflow-y-auto custom-scrollbar space-y-3 flex-1 min-h-0">
             {categoryCombinedData.map((item, i) => (
               <div key={item.category}>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold flex items-center justify-center flex-shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-[#F1F5F9] text-[#475569] text-[12px] flex items-center justify-center flex-shrink-0 tabular-nums">
                     {i + 1}
                   </span>
-                  <span className="text-[13px] font-medium text-slate-900 flex-1 truncate" title={item.category}>{item.category}</span>
-                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{item.accessCount.toLocaleString('vi-VN')} lượt</span>
+                  <span className="text-[13px] text-[#020817] flex-1 truncate" title={item.category}>{item.category}</span>
+                  <span className="text-[12px] text-[#64748B] whitespace-nowrap tabular-nums">{item.accessCount.toLocaleString('vi-VN')} lượt</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${(item.accessCount / maxAccessCount) * 100}%`, backgroundColor: 'rgb(6, 182, 212)' }} />
+                <div className="h-1.5 rounded-full bg-[#F1F5F9] overflow-hidden">
+                  <div className="h-full rounded-full bg-[#06B6D4]" style={{ width: `${(item.accessCount / maxAccessCount) * 100}%` }} />
                 </div>
               </div>
             ))}
@@ -189,9 +194,9 @@ export function CategoryDashboardPage() {
         </div>
 
         {/* Cột phải: Thị phần theo nguồn dữ liệu + Tần suất cập nhật & Tạo mới */}
-        <div className="flex flex-col gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <h3 className="text-[16px] font-semibold text-slate-800 mb-4">Tỷ lệ danh mục theo nguồn dữ liệu</h3>
+        <div className="flex flex-col gap-4">
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4 flex flex-col">
+          <h3 className="text-[14px] font-medium text-[#020817] mb-3">Tỷ lệ danh mục theo nguồn dữ liệu</h3>
           <ResponsiveContainerAny width="100%" height={240}>
             <PieChartAny margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
               <PieAny
@@ -219,8 +224,8 @@ export function CategoryDashboardPage() {
                       fill={color}
                       textAnchor={x > cx ? 'start' : 'end'}
                       dominantBaseline="central"
-                      fontSize={14}
-                      fontWeight={700}
+                      fontSize={12}
+                      fontWeight={600}
                     >
                       {`${Math.round(percent * 100)}%`}
                     </text>
@@ -236,10 +241,10 @@ export function CategoryDashboardPage() {
                     const { cx, cy } = viewBox;
                     return (
                       <g>
-                        <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={12}>
+                        <text x={cx} y={cy - 12} textAnchor="middle" dominantBaseline="central" fill="#64748B" fontSize={12}>
                           Tổng số
                         </text>
-                        <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0f172a" fontSize={22} fontWeight={700}>
+                        <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill="#0F172A" fontSize={20} fontWeight={600}>
                           {categorySourceTotal.toLocaleString('vi-VN')}
                         </text>
                       </g>
@@ -247,12 +252,15 @@ export function CategoryDashboardPage() {
                   }}
                 />
               </PieAny>
-              <TooltipAny formatter={(value: number) => value.toLocaleString('vi-VN')} />
+              <TooltipAny
+                formatter={(value: number) => value.toLocaleString('vi-VN')}
+                contentStyle={CHART_TOOLTIP_STYLE}
+              />
             </PieChartAny>
           </ResponsiveContainerAny>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[13px]">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-2 text-[12px]">
             {categorySourceShare.map(item => (
-              <span key={item.name} className="flex items-center gap-1.5 text-slate-600">
+              <span key={item.name} className="flex items-center gap-1.5 text-[#64748B]">
                 <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: item.color }} />
                 {item.name}
               </span>
@@ -261,23 +269,27 @@ export function CategoryDashboardPage() {
         </div>
 
         {/* Xu hướng biến động số lượng danh mục 6 tháng gần nhất */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-[16px] font-semibold text-slate-800 mb-6">Xu hướng biến động số lượng danh mục 6 tháng gần nhất</h3>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+          <h3 className="text-[14px] font-medium text-[#020817] mb-3">Xu hướng biến động số lượng danh mục 6 tháng gần nhất</h3>
           <div className="h-[320px]">
             <ResponsiveContainerAny width="100%" height={320}>
               <BarChartAny
                 data={categoryCountTrendData}
                 margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
               >
-                <CartesianGridAny strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxisAny dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} dy={10} />
-                <YAxisAny axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                <CartesianGridAny strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxisAny dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
+                <YAxisAny axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
                 <TooltipAny
-                  cursor={{fill: '#f8fafc'}}
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  cursor={{ fill: '#F8FAFC' }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
-                <LegendAny wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-                <BarAny dataKey="total" name="Tổng số danh mục" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={32} />
+                <LegendAny
+                  wrapperStyle={{ paddingTop: '20px', fontSize: 12 }}
+                  iconType="circle"
+                  formatter={(value: string) => <span style={{ color: '#64748B' }}>{value}</span>}
+                />
+                <BarAny dataKey="total" name="Tổng số danh mục" fill="#155DFC" radius={[4, 4, 0, 0]} barSize={32} />
               </BarChartAny>
             </ResponsiveContainerAny>
           </div>

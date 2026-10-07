@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, History, Calendar } from 'lucide-react';
+import { X, History, GitCompare } from 'lucide-react';
+import { Badge, BTN_GHOST_ICON, ROW_ICON_BTN } from '../../collection/collectionUi';
 import { ApiVersionCompareModal } from './ApiVersionCompareModal';
 
 const formatDateTime = (dateStr: string) => {
@@ -64,32 +65,31 @@ export function ProvisionVersionHistoryModal({ isOpen, onClose, apiData }: Provi
 
   if (!isOpen) return null;
 
+  const TH = 'px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]';
+  const TD = 'px-3 py-1 text-left text-[13px] text-black';
+
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-version-history-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .provision-version-history-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-7xl flex flex-col border border-slate-200 overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-sky-100 text-sky-600 rounded-lg">
-              <History className="w-5 h-5" />
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl flex flex-col overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
+
+        {/* Header (mục 5.4) */}
+        <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-[#E2E8F0]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-blue-50 rounded-lg shrink-0">
+              <History className="w-5 h-5 text-blue-600" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">
+            <div className="min-w-0">
+              <h2 className="text-[16px] font-medium text-[#020817] leading-6">
                 Lịch sử phiên bản
               </h2>
-              <p className="text-xs text-slate-500 font-medium">API: {apiData?.name}</p>
+              <p className="text-[13px] text-[#64748B] truncate">API: {apiData?.name}</p>
             </div>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className={BTN_GHOST_ICON}
+            aria-label="Đóng"
             title="Đóng"
           >
             <X className="w-5 h-5" />
@@ -97,55 +97,55 @@ export function ProvisionVersionHistoryModal({ isOpen, onClose, apiData }: Provi
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
-          <div className="border border-slate-200 rounded-xl overflow-x-auto bg-white shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 text-slate-500 text-xs border-b border-slate-200 uppercase tracking-wider whitespace-nowrap">
-                  <th className="py-3 px-4 font-bold">Dịch vụ API</th>
-                  <th className="py-3 px-4 font-bold">Phiên bản</th>
-                  <th className="py-3 px-4 font-bold">Người cập nhật</th>
-                  <th className="py-3 px-4 font-bold">Ngày phát hành</th>
-                  <th className="py-3 px-4 font-bold">Ghi chú thay đổi</th>
-                  <th className="py-3 px-4 font-bold">Trạng thái</th>
-                  <th className="py-3 px-4 font-bold text-center">So sánh phiên bản</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm divide-y divide-slate-100">
-                {versions.map((ver, index) => (
-                  <tr key={ver.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-4 px-4 font-semibold text-slate-800 whitespace-nowrap">{ver.apiName}</td>
-                    <td className="py-4 px-4">
-                      <span className="font-mono text-xs font-extrabold text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded border border-indigo-100 whitespace-nowrap">
-                        {ver.id}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-slate-700 font-medium whitespace-nowrap">{ver.createdBy}</td>
-                    <td className="py-4 px-4 text-slate-600 text-xs">
-                      <div className="flex items-center gap-1.5 whitespace-nowrap">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{formatDateTime(ver.releaseDate)}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-slate-500 text-xs max-w-sm leading-relaxed whitespace-pre-wrap">{ver.note}</td>
-                    <td className="py-4 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold whitespace-nowrap ${ver.status === 'Kích hoạt' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
-                        }`}>
-                        {ver.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <button
-                        onClick={() => handleViewDiff(index)}
-                        className="px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded font-bold text-xs transition-colors whitespace-nowrap cursor-pointer"
-                      >
-                        Xem chi tiết
-                      </button>
-                    </td>
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
+          <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse collection-table text-[13px]">
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={TH}>Dịch vụ API</th>
+                    <th className={TH}>Phiên bản</th>
+                    <th className={TH}>Người cập nhật</th>
+                    <th className={TH}>Ngày phát hành</th>
+                    <th className={TH}>Ghi chú thay đổi</th>
+                    <th className={TH}>Trạng thái</th>
+                    <th className={`${TH} text-center`}>So sánh phiên bản</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {versions.map((ver, index) => {
+                    const [d, t] = formatDateTime(ver.releaseDate).split(' ');
+                    return (
+                      <tr key={ver.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                        <td className={`${TD} whitespace-nowrap`}>{ver.apiName}</td>
+                        <td className={`${TD} whitespace-nowrap`}>{ver.id}</td>
+                        <td className={`${TD} whitespace-nowrap`}>{ver.createdBy}</td>
+                        <td className={`${TD} whitespace-nowrap leading-[18px]`}>
+                          <div>{d}</div>
+                          {t && <div className="text-[#64748B]">{t}</div>}
+                        </td>
+                        <td className={`${TD} max-w-[360px] leading-[18px] whitespace-pre-wrap`}>{ver.note}</td>
+                        <td className={TD}>
+                          <Badge label={ver.status} variant={ver.status === 'Kích hoạt' ? 'green' : 'slate'} />
+                        </td>
+                        <td className={`${TD} text-center`}>
+                          {/* Modal z-index 999999 cao hơn lớp tooltip chung (z-300) → dùng title thay tooltip */}
+                          <button
+                            type="button"
+                            onClick={() => handleViewDiff(index)}
+                            className={ROW_ICON_BTN}
+                            aria-label="Xem chi tiết"
+                            title="Xem chi tiết"
+                          >
+                            <GitCompare className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

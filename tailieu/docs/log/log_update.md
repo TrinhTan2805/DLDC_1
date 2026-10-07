@@ -1,5 +1,1172 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Chuẩn hóa giao diện — Quản trị & vận hành › Danh mục đơn vị quản lý dữ liệu (Ngày thực hiện: 07/10/2026) — 150
+
+**Nội dung (PM yêu cầu):** sửa giao diện mục Danh mục đơn vị quản lý dữ liệu theo `compomennt.md` (Quản lý kết nối + Quản lý CSDL đích); giữ nội dung, dữ liệu, logic.
+
+**Quản lý kết nối** (`pages/collection/`): ConnectionManagementPage (3 tab chuẩn 5.9), UnitManagementPage, SourceSystemManagementPage, SourceSystemModal, SourceSystemDetailModal, SourceSystemDeleteConfirmModal, AgentManagementPage, AgentModal, AgentDetailModal, AgentDeleteConfirmModal.
+- Tiêu đề trang H1 chuẩn + mô tả; tìm kiếm áp dụng khi bấm Tìm kiếm/Enter (không dấu); bảng 5.3 (cắt chữ + tooltip, cột Thao tác ghim phải, Badge cho loại/trạng thái, ngày giờ 2 dòng); phân trang chuẩn; công tắc trạng thái `role="switch"`.
+- Modal 5.4 (tiêu đề 16px/500, nút X, footer #F8FAFC); xem chi tiết theo Nhãn – Giá trị 5.17, tiêu đề khối có vạch xanh; modal xóa theo kiểu ConfirmModal.
+- Xóa đơn vị: `window.confirm` → ConfirmModal (thêm tiêu đề "Xác nhận xóa"); `alert()` → toast.
+- Bộ lọc trạng thái Agent chuyển vào bảng lọc nâng cao, áp dụng khi bấm Tìm kiếm (thêm nhãn "Trạng thái").
+
+**Quản lý CSDL đích** (`pages/processing/`): TargetDatabaseManagementPage, TargetDatabaseDetailPage, TargetDatabaseModal.
+- Danh sách: H1 chuẩn, tìm kiếm + bộ lọc áp dụng khi bấm, bảng 5.3 (Badge Kiểu, cập nhật 2 dòng, công tắc chuẩn), 3 nút thao tác ghim phải, **phân trang thật** (thêm state trang; trước là khối phân trang giả).
+- Chi tiết: bỏ gradient; Thông tin kết nối dạng Nhãn – Giá trị; danh sách bảng 13px, mục chọn nền #EAF3FF + vạch xanh, tìm bảng không dấu; Cấu trúc/Dữ liệu dùng tabClass; bảng cấu trúc & lưới dữ liệu 5.3 (số căn phải, ngày dd/mm/yyyy khi hiển thị, cắt chữ + tooltip); bộ lọc/sắp xếp theo ô 40px; "Ẩn/Hiện cột" chuyển thành popover; modal xóa bảng/xóa dữ liệu kiểu ConfirmModal; modal kết xuất header trắng, nút "Thực hiện" xanh chính (trước xanh lục); `alert()` → toast.
+- Modal thêm/sửa CSDL đích: 5.4, ô 40px, footer chuẩn.
+
+**Chờ PM quyết định:** xóa CSDL đích vẫn dùng `window.confirm` (chuyển sang ConfirmModal?); "Ẩn/Hiện cột" có dùng Tùy chọn cột đầy đủ (sắp xếp + lưu) không; nút "Áp dụng" của bộ lọc/sắp xếp dữ liệu chưa có xử lý (từ trước); tìm kiếm Agent theo IP như gợi ý trong ô; chú thích ghi chú trống "-" thay "Không có ghi chú nào."; tooltip "Xóa" cho nút ⊖ (chưa có xử lý) ở chi tiết Agent.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (4 lỗi cũ ở TargetDatabaseDetailPage/TargetDatabaseModal có từ trước); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Cung cấp dữ liệu theo yêu cầu — cột Thao tác đủ nút + mock đủ trạng thái (Ngày thực hiện: 07/10/2026) — 149
+
+**Nội dung (PM yêu cầu):**
+1. Tab **Tra cứu & kết xuất**: cột Thao tác luôn đủ 3 nút — Xem chi tiết, Tiếp nhận & phê duyệt (icon ✓), Thiết lập kết xuất. Đã bàn giao / Đã công khai / Hủy công khai / Từ chối: chỉ Xem chi tiết; Đã phê duyệt: Xem + Thiết lập kết xuất; Chờ xử lý: Xem + Phê duyệt.
+2. Mock dữ liệu đầy đủ.
+3. Tab **Bàn giao dữ liệu**: hiển thị đủ các nút Xem chi tiết, Hủy công khai, Công khai, Bàn giao dữ liệu trên cột thao tác.
+
+**File sửa:** `provisioning/DataProvisionRequestPage.tsx`
+- Tra cứu & kết xuất: luôn render 3 nút; nút không áp dụng **bị khóa** + tooltip lý do ("Chỉ phê duyệt yêu cầu ở trạng thái Chờ xử lý", "Chỉ thiết lập kết xuất khi yêu cầu đã được phê duyệt"). Trước đây tab này không có nút Xem chi tiết. Trạng thái **Đã kết xuất** (PM chưa nêu) giữ như trước: được Thiết lập kết xuất.
+- Bàn giao dữ liệu: luôn hiện 4 nút theo thứ tự Xem chi tiết, Hủy công khai (đỏ khi bấm được), Công khai, Bàn giao dữ liệu — bỏ menu ⋯. Xem chi tiết mở chi tiết bàn giao (Đã bàn giao) / chi tiết công khai (Đã công khai, Đã hủy công khai) / chi tiết yêu cầu (còn lại). Hủy công khai chỉ bấm được khi Đã công khai; Công khai và Bàn giao chỉ bấm được khi Đã kết xuất (như trước).
+- Mock: 3 → 9 yêu cầu, đủ 7 trạng thái (2 Chờ xử lý, 2 Đã phê duyệt, Đã kết xuất, Từ chối có lý do, Đã bàn giao có đơn vị/người nhận/ngày, Đã công khai có nền tảng/lý do/ngày, Đã hủy công khai có lý do + ngày hủy); mỗi yêu cầu có nội dung yêu cầu, khoảng thời gian dữ liệu, định dạng.
+
+**Lưu ý quy chuẩn:** tab Bàn giao có 4 nút hiện trực tiếp theo yêu cầu PM (mục 5.3.2 quy định ≥4 thao tác dùng menu ⋯).
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Quản lý API cung cấp & đối soát — tab Phân quyền truy cập bố cục dọc (Ngày thực hiện: 07/10/2026) — 148
+
+**Nội dung (PM yêu cầu):** tab Phân quyền truy cập đổi từ 2 cột ngang (danh sách API bên trái 3/12, bảng quyền bên phải 9/12) sang bố cục dọc như ảnh PM gửi.
+
+**File sửa:** `provisioning/DataProvisionApiManagementPage.tsx`
+- Khối 1 **Danh sách dịch vụ API** rộng hết chiều ngang: tiêu đề, ô tìm kiếm có icon kính lúp, danh sách API (cuộn khi dài, cao tối đa 180px), mục đang chọn nền #EAF3FF + vạch xanh.
+- Khối 2 nằm dưới: header nền #F8FAFC "API đang quản lý phân quyền" + tên API + nút **Cấp quyền mới**; bảng đơn vị được cấp quyền + phân trang nằm trong khối.
+- Giữ nguyên nội dung: các cột bảng (Đơn vị được cấp quyền, Tài khoản, IP Whitelist, Thời hạn hiệu lực, Thu hồi), dữ liệu, tìm kiếm, hành vi.
+
+**Khác ảnh (chờ PM quyết định):** ảnh có nhãn Công khai/Hạn chế cạnh tên API, bảng có cột STT, "Thời hạn hiệu lực từ"/"đến" tách 2 cột, Thao tác Sửa + Xóa — hiện chưa đổi vì là nội dung; tiêu đề "API ĐANG QUẢN LÝ PHÂN QUYỀN" viết hoa trong ảnh giữ chữ thường theo 5.17.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Thiết lập điều phối dữ liệu — nút Từ chối/Phê duyệt cho mọi trạng thái, đổi tên thẻ KPI (Ngày thực hiện: 07/10/2026) — 147
+
+**Nội dung (PM yêu cầu):**
+1. Tab Kiểm tra & Phê duyệt: thêm nút Từ chối / Phê duyệt cạnh nút Kiểm tra — PM chọn **hiện trên thẻ cho mọi trạng thái**.
+2. Thẻ KPI đầu tab Thiết lập dịch vụ: nội dung và số thẻ theo ảnh PM.
+
+**File sửa:** `provisioning/DataProvisionServiceSetupPage.tsx`
+- Trước: nút Từ chối (Destructive) / Phê duyệt (Primary) chỉ hiện với dịch vụ **Chờ phê duyệt**. Sau: hiện với mọi dịch vụ; dịch vụ không ở trạng thái chờ → nút bị khóa (kiểu khóa chuẩn 5.1) + tooltip "Dịch vụ không ở trạng thái chờ phê duyệt". Bấm mở modal Từ chối / Phê duyệt dịch vụ cung cấp như hiện tại.
+- Thẻ KPI: đủ 6 thẻ như ảnh (Tổng số API, Đang công khai, Chờ phê duyệt, Cần chỉnh sửa, Đã duyệt, Bản nháp); đổi tên thẻ "Đã từ chối" → **"Cần chỉnh sửa"** (vẫn đếm dịch vụ trạng thái từ chối). Số liệu lấy theo dữ liệu mẫu hiện có.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (lỗi cũ `ProvisionServicePublishModal` props ở dòng ~779); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Modal dịch vụ cung cấp — rộng hơn, tiêu đề theo tên bước, Trường gốc có tìm kiếm (Ngày thực hiện: 07/10/2026) — 146
+
+**Nội dung (PM yêu cầu):**
+1. Tăng chiều ngang modal cho vừa bảng "Chọn trường dữ liệu chia sẻ".
+2. Bước Thiết kế cấu trúc gói tin thêm tiêu đề khối như các bước khác; tiêu đề khối mỗi bước **trùng tên bước**.
+3. Cột "Nguồn dữ liệu" không cho chọn, chỉ hiển thị; cột "Trường gốc" cho tìm kiếm trong danh sách trường.
+4. Thanh bước bên trái: giữ nguyên icon các bước đã qua (không đổi sang dấu ✓).
+5. Bỏ khối **Giới hạn lưu lượng (Rate Limit)** ở bước Cấu hình API & Giao thức (bỏ phần hiển thị; biến trạng thái giữ lại, không ảnh hưởng chức năng khác).
+
+**File sửa:**
+- `provisioning/modals/ProvisionServiceModal.tsx`:
+  - Modal `max-w-6xl` (1152px) → `max-w-[1440px]`.
+  - Tiêu đề khối: "Thông tin định danh dịch vụ" → **Thông tin chung**; "Thiết lập kết nối & Bảo mật" → **Cấu hình API & Giao thức**; thêm **Thiết kế cấu trúc gói tin**; "Kiểm soát quyền hạn & Cấp phát Key" → **Phân quyền truy cập**.
+  - Nguồn dữ liệu (Table): chữ chỉ đọc (tên bảng + dòng phụ Gốc/Liên kết/Mở), tự gán theo trường gốc đã chọn.
+  - Trường gốc (Column): ô chọn có ô "Tìm trường dữ liệu..." (tìm không dấu); danh sách gồm cột của bảng gốc và bảng liên kết (ghi kèm tên bảng); chọn cột tự gán bảng nguồn + giữ cơ chế tự điền tên trường API/kiểu/mô tả.
+  - Bỏ đổi icon sang ✓ ở bước đã qua.
+- `collection/collectionUi.tsx` (dùng chung, chỉ thêm): `SearchableSelect` thêm tùy chọn `placeholder`, `disabled`, `contentClassName` (để danh sách nổi trên modal z-index cao). Nơi đang dùng (bộ lọc Hệ thống nguồn) không đổi.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Modal Thêm mới dịch vụ cung cấp — bố cục thanh bước dọc (Ngày thực hiện: 07/10/2026) — 145
+
+**Nội dung (PM yêu cầu):** Cung cấp dữ liệu › Thiết lập điều phối dữ liệu — màn thêm mới dịch vụ cung cấp theo thiết kế PM gửi; giữ nguyên nội dung; theo component chung.
+
+**File sửa:** `provisioning/modals/ProvisionServiceModal.tsx` (đã `[x]`).
+- Bỏ header + thanh tab ngang → **thanh bước dọc bên trái** (rộng 256px, nền #F8FAFC, kẻ phải #E2E8F0): ô icon (nền #EAF3FF), tiêu đề "Dịch vụ Mới" / "Cấu hình Dịch vụ" / "Xem chi tiết Dịch vụ" 16px/500, dòng phụ "Điều phối dữ liệu"; 4 bước Thông tin chung → Cấu hình API & Giao thức → Thiết kế cấu trúc gói tin → Phân quyền truy cập; bước đang chọn nền #EAF3FF + vạch xanh bên trái, bước đã qua icon ✓ xanh; chỉ báo tiến độ "Step x of 4" chuyển xuống đáy thanh bên.
+- Nút X đóng ở góc phải vùng nội dung; tiêu đề khối có vạch xanh bên trái.
+- Footer toàn chiều rộng, nút căn phải: Lưu tạm, Hủy bỏ, (Quay lại), Tiếp tục / Trình duyệt — giữ nguyên hành vi; chế độ xem chỉ có Đóng.
+- Thêm `role="dialog"`, `aria-modal`, `role="tablist"` dọc.
+- Modal dùng chung ở Kiểm soát & giám sát cung cấp, Thiết lập dịch vụ (điều phối) → các nơi đó cũng đổi bố cục.
+
+**Giữ nguyên nội dung:** dòng phụ "Điều phối dữ liệu" (ảnh mẫu ghi "API Provisioning Engine"), ô "Chia sẻ dữ liệu mở" giữ dạng hiện tại (ảnh mẫu là ô chọn "Loại dữ liệu chia sẻ").
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Rà soát modal Xem chi tiết — Công bố dữ liệu mở (Ngày thực hiện: 07/10/2026) — 144
+
+**Nội dung (PM yêu cầu):** kiểm tra các modal xem chi tiết của Dữ liệu mở › Công bố dữ liệu mở (`open-data/OpenDataPublishedListPage.tsx`) theo `compomennt.md`; chỉ sửa giao diện.
+
+**Đã sửa:**
+- **Chi tiết Yêu cầu công bố:** giá trị trống "N/A"/"—"/để trống → "-" (Từ khóa, Định dạng chia sẻ, Tần suất, Chủ đề, Mô tả, Ý kiến phê duyệt, Kho dữ liệu, Bảng chính, Người phê duyệt, Người tạo, Ngày tạo, Danh mục, Đơn vị chủ trì, Giấy phép); nhãn ô tích "Công bố dữ liệu ngay…" màu #020817; bảng trường dữ liệu: tiêu đề 42px, hàng 48px, chữ dài cắt "…" + tooltip, cột "Che dấu" (Badge) căn trái.
+- **Phê duyệt yêu cầu công bố:** giá trị trống → "-" (tương tự, kể cả Định dạng chia sẻ trước không hiện gì); thẻ "Xem metadata" và "Xem trước dữ liệu dòng đầu": bảng 42px/48px, cắt chữ + tooltip, cột Badge căn trái; danh sách "Sau khi phê duyệt / từ chối" màu chữ #020817. Nút giữ nguyên (đã đúng: 1 nút chính).
+- Ngày tạo bản ghi mới (2 chỗ) `7/10/2026` → `07/10/2026`.
+- Modal Yêu cầu, Lịch, Gửi duyệt, Từ chối hàng loạt, Xóa lịch: không có chế độ xem → không sửa.
+
+**Chờ PM quyết định:** chữ thay cho "-" ("Không có tên tệp", "Chưa cập nhật", "Không có mô tả"); modal Phê duyệt chưa có nút "Đóng" ở footer (chỉ đóng bằng X); Tần suất cập nhật trống mặc định hiện "Hàng tháng"; 2 modal khác tên cột ("Che dấu" Có/Không vs "Bảo mật (Mask)" Bảo mật/Không) và kiểu hiển thị Kiểu dữ liệu; Bảng liên kết (Join) dạng thẻ thay vì bảng; thẻ "Xem metadata" có thanh cuộn lồng trong modal.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Rà soát modal Xem chi tiết — Thiết lập danh mục dữ liệu mở (Ngày thực hiện: 07/10/2026) — 143
+
+**Nội dung (PM yêu cầu):** kiểm tra các modal xem chi tiết của Dữ liệu mở › Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`) theo `compomennt.md`; chỉ sửa giao diện.
+
+**Đã đúng chuẩn:** khung modal (z-[110], bo 16px, tiêu đề 16px/500, nút X, thân cuộn, footer #F8FAFC), 1 nút chính, Badge trạng thái, lưới Nhãn – Giá trị.
+
+**Đã sửa:**
+- **Chi tiết Metadata:** bỏ chữ nghiêng ở các dòng trống ("Không có mô tả", "Chưa chọn"…); nhãn phụ "CSDL đích"/"Bảng chính" dùng kiểu nhãn chuẩn; bảng JOIN hàng 48px, chữ dài cắt "…" + tooltip; "--" → "-".
+- **Xem chi tiết giấy phép:** ô bị khóa theo 5.2 (chữ đen, nền #F0F0F0, viền rgba(0,0,0,0.26)) — chỉ ở chế độ xem; footer đổi thứ tự thành [Đóng] [Chỉnh sửa] (nút chính bên phải).
+- **Chi tiết danh mục:** giá trị trống hiện "-" (trước để trống hoặc "--"); "Nội dung trình duyệt" hiển thị dạng giá trị thường (trước là khung xám giống ô nhập); Mô tả giữ xuống dòng; bỏ chữ nghiêng "Không có ghi chú".
+- **Trình duyệt danh mục:** khối thông tin dùng kiểu Nhãn – Giá trị chuẩn, bỏ chữ đậm ở giá trị.
+- Ngày tạo/cập nhật sinh khi thao tác (8 chỗ) `7/10/2026` → `07/10/2026` (`formatDateVN`).
+
+**Chờ PM quyết định:** chữ thay cho "-" ("Không có mô tả", "Chưa chọn", "Chưa cấu hình", "Không có bảng JOIN", "Không có từ khóa", "Không có ghi chú"); ô Alias trống "—"; Ngày tạo giấy phép trống "--"; cùng trường `dataField` nhưng modal Từ chối ghi "Lĩnh vực" còn các modal khác ghi "Đơn vị chủ trì cung cấp"; nhãn "Ngừng hoạt động" vs chuẩn "Ngưng hoạt động"; modal Trình duyệt danh mục chưa có nút X.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Chuẩn hóa định dạng ngày dd/mm/yyyy — Thiết lập danh mục (Ngày thực hiện: 07/10/2026) — 142
+
+**Nội dung (PM yêu cầu):** kiểm tra định dạng các trường ngày tháng trong Danh mục dùng chung › Thiết lập danh mục (chuẩn `compomennt.md`: dd/mm/yyyy, giờ HH:mm(:ss)).
+
+**Đã đúng:** dữ liệu mẫu ngày gửi/ngày tạo (`dd/mm/yyyy HH:mm`), ngày cập nhật quan hệ, bảng tab Thiết lập và Phê duyệt.
+
+**Đã sửa:**
+- `CategorySetupPage.tsx`: 17 chỗ ghi ngày duyệt/từ chối/tạo/cập nhật dùng `toLocaleDateString('vi-VN')` → ra `7/10/2026` (thiếu số 0) → `07/10/2026` (`formatDateVN`); 2 chỗ ngày gửi yêu cầu hết hiệu lực / lịch sử dùng `toLocaleString('vi-VN')` (giờ đứng trước ngày) → `dd/mm/yyyy HH:mm`; mốc "hôm nay" để tự chuyển Hiệu lực dùng giờ địa phương (trước dùng UTC, lệch 1 ngày trước 7h sáng).
+- `CategoryWizardModal.tsx`: ô **Ngày hiệu lực** trước là ô chữ tự do (gợi ý "VD: 20/12/2024" nhưng dữ liệu lưu `yyyy-mm-dd`, nên hiện `2025-01-10`) → ô chọn ngày `DateInput` dd/mm/yyyy (chế độ xem hiện dd/mm/yyyy ở ô khóa); ngày hiệu lực phiên bản và thời điểm hết hiệu lực hiển thị dd/mm/yyyy (trước dùng `new Date(iso).toLocaleDateString`).
+- `ExpireApproveModal.tsx`: Thời điểm hết hiệu lực hiển thị dd/mm/yyyy.
+- `ApprovalRequestModal.tsx` (Gửi phê duyệt › Hiệu lực) và `ExpireRequestModal.tsx` (Thời điểm hết hiệu lực): ô `type="date"` của trình duyệt → `DateInput` dd/mm/yyyy (giá trị/kiểm tra dữ liệu không đổi). Tự mở khóa `[x]` 2 mục trong `stauts.md`.
+
+**Ngoài phạm vi (chưa sửa):** `CreateVersionModal`, `PublishConfigModal` (dùng ở màn Biên tập/Công khai danh mục), tab Lịch sử phiên bản (đang ẩn) vẫn dùng ô ngày của trình duyệt.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Phê duyệt danh mục — Xem chi tiết dùng chung màn của Thiết lập danh mục (Ngày thực hiện: 07/10/2026) — 141
+
+**Nội dung (PM yêu cầu):** tab Phê duyệt › Phê duyệt danh mục, bấm Xem chi tiết → hiển thị giống màn Xem chi tiết ở Thiết lập danh mục.
+
+**File sửa:**
+- `category/CategorySetupPage.tsx`: Xem chi tiết yêu cầu **danh mục** mở Wizard chế độ xem (`Chi tiết danh mục dùng chung`, 3 bước Thông tin chung / Cấu trúc / Quan hệ) thay cho `CategoryInfoViewModal`. Phê duyệt cấu trúc, phiên bản, hết hiệu lực giữ modal cũ. Xem chi tiết từ tab Thiết lập không đổi.
+- `category/components/modals/CategoryWizardModal.tsx`: thêm prop tùy chọn `approvalActions` — khi mở từ yêu cầu **đang chờ** thì footer có thêm **Từ chối** (Destructive) và **Phê duyệt** (Primary); nút "Tiếp tục" chuyển sang Outline để chỉ còn 1 nút chính. Bấm Phê duyệt/Từ chối mở modal phê duyệt/từ chối hiện có (nhập ghi chú, thông báo chuyển sang phê duyệt cấu trúc vẫn hoạt động). Yêu cầu đã duyệt/từ chối: chỉ xem.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Thanh thẻ con trong tab Phê duyệt — Thiết lập danh mục (Ngày thực hiện: 07/10/2026) — 140
+
+**Nội dung (PM yêu cầu):** thanh thẻ Phê duyệt danh mục / cấu trúc / phiên bản / hết hiệu lực đổi theo thiết kế PM gửi (ảnh 2).
+
+**File sửa:** `category/components/tabs/ApprovalTab.tsx`
+- Trước: thẻ gạch chân 48px 14px/600 (`tabClass`) + đường kẻ dưới cả thanh.
+- Sau: thẻ dạng nút gọn, cao 32px, bo 6px, chữ 13px/500, khoảng cách 4px; **đang chọn** nền `#EAF3FF` chữ/icon `#155DFC`; **thường** chữ `#475569`, di chuột nền `#F1F5F9`; bỏ đường kẻ dưới. Thêm `role="tablist"/"tab"`, `aria-selected`.
+- Icon 2 thẻ đầu đổi từ ô tích sang bút (`SquarePen`) theo ảnh; giữ nguyên chữ, thứ tự và hành vi (đổi thẻ vẫn reset bộ lọc trạng thái).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Rà soát modal Xem chi tiết — Thiết lập danh mục (Ngày thực hiện: 07/10/2026) — 139
+
+**Nội dung (PM yêu cầu):** kiểm tra các modal xem chi tiết của Danh mục dùng chung › Thiết lập danh mục theo `compomennt.md`; chỉ sửa giao diện, giữ nội dung và dữ liệu.
+
+**Đã đúng chuẩn (không sửa):** Xem chi tiết yêu cầu danh mục (`CategoryInfoViewModal`), Xem cấu trúc (`CategoryStructureViewModal`).
+
+**Đã sửa:**
+- `ReviewResultCard.tsx` (khung kết quả phê duyệt/từ chối trong modal xem): dạng banner nền nhạt cùng tông, tiêu đề FIELD_LABEL, nội dung FIELD_VALUE, bỏ chữ nghiêng/slate. *Dùng chung với `master-data/MasterDataScaleManagementPage.tsx` → màn đó cũng đổi giao diện khung này.*
+- `CategoryVersionChangeModal.tsx`: khối phiên bản bo `rounded-2xl` (4.3); tiêu đề khối 14px/500 #020817 (GROUP_TITLE); giá trị trống "—" → "-" (5.17).
+- `ExpireApproveModal.tsx`: giá trị trống "--" → "-".
+- `ReviewApprovalModal.tsx`: mỗi thẻ yêu cầu trước có nút Phê duyệt (Primary) + Từ chối (Destructive) riêng → nhiều nút chính trong 1 modal (sai 5.1). Nút trong thẻ đổi sang Outline có icon xanh/đỏ; footer giữ duy nhất "Phê duyệt tất cả" (Primary) và "Từ chối tất cả" (Destructive). Tiêu đề yêu cầu GROUP_TITLE; giá trị trống "-"; Mô tả giữ xuống dòng.
+- `CategoryWizardModal.tsx` (chế độ Xem chi tiết): ô bị khóa theo 5.2 (VIEW_FIELD_CLS — chữ đen, nền #F0F0F0, viền rgba(0,0,0,0.26)); ô "Nội dung trình duyệt" cùng kiểu; giá trị trống "-". **Bước 3 (Quan hệ) ở chế độ xem trước đây vẫn hiện nút "Thêm mới quan hệ" và Sửa/Xóa** → nay truyền `readOnlyRelations` để chỉ còn "Xem chi tiết quan hệ" (chế độ chỉnh sửa không đổi).
+- `tabs/RelationshipsTab.tsx` (modal Chi tiết quan hệ danh mục): giá trị trống "--" → "-". Tự mở khóa `[x]` trong `stauts.md`.
+
+**stauts.md:** tự mở khóa `[x]` CategoryWizardModal, ReviewApprovalModal, ExpireApproveModal, RelationshipsTab.
+
+**Chờ PM quyết định:** chữ "Chưa cập nhật"/"Không có ghi chú" thay cho "-"; ô trống trong bảng ("--", "—"); dấu * ở nhãn bước 1 khi xem; ô chọn danh mục ở tab Quan hệ khi xem; chữ "N/A" và ngoặc kép ở "Ghi chú yêu cầu"; modal chi tiết trong tab Lịch sử phiên bản (tab đang ẩn, chưa chuẩn).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (lỗi cũ `__activeModalsCount` ở Wizard, import `MouseEvent` ở RelationshipsTab); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Chuyển nhanh giữa Phê duyệt danh mục ↔ Phê duyệt cấu trúc — Thiết lập danh mục (Ngày thực hiện: 07/10/2026) — 138
+
+**Nội dung (PM duyệt phương án B):** sau khi phê duyệt danh mục, có nút chuyển sang phê duyệt cấu trúc của danh mục đó; nghiệp vụ không bắt buộc thứ tự nên làm cả chiều ngược lại (cấu trúc → danh mục).
+
+**Hoạt động:**
+- Phê duyệt danh mục / cấu trúc (duyệt từng dòng, modal xem chi tiết, Phê duyệt nhanh, Phê duyệt tất cả) → thông báo "Đã phê duyệt …".
+- Nếu cùng danh mục còn yêu cầu loại kia **đang chờ**: thông báo ghi số yêu cầu đang chờ + nút **"Chuyển sang phê duyệt cấu trúc" / "Chuyển sang phê duyệt danh mục"** (giữ 8 giây). Bấm → chuyển thẻ tương ứng, lọc trạng thái "Chờ phê duyệt" và **lọc sẵn danh mục**; hiện chip "Đang lọc theo danh mục: DM-… ✕" để bỏ lọc. Tự đổi thẻ thủ công cũng bỏ lọc.
+- Không còn yêu cầu chờ → chỉ thông báo đã phê duyệt.
+- Modal phê duyệt đơn: tiêu đề "Phê duyệt danh mục dữ liệu mở" → **"Phê duyệt danh mục"**.
+
+**Dữ liệu mẫu bổ sung (để thử):** mock cũ không có yêu cầu cấu trúc nào đang chờ (yêu cầu cấu trúc DM-GIOITINH #9 là *Từ chối*) nên thông báo không có nút chuyển. Thêm 3 yêu cầu cấu trúc **Chờ phê duyệt**: #20 DM-GIOITINH, #21 DM-HC (cùng có yêu cầu danh mục đang chờ → có nút chuyển), #22 DM-QUOCGIA (chỉ có cấu trúc chờ). DM-DANTOC chỉ có yêu cầu danh mục chờ.
+
+**File sửa:** `category/CategorySetupPage.tsx`, `category/components/tabs/ApprovalTab.tsx`, `category/components/modals/SimpleApproveModal.tsx` (tự mở khóa `[x]` 3 mục trong `stauts.md`). Không đổi logic phê duyệt cũ.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (lỗi cũ `setShowEditModal`, `defaultAttribute` ở CategorySetupPage có từ trước); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Ô tìm kiếm trong bộ lọc Hệ thống nguồn — Thiết lập thu thập (Ngày thực hiện: 07/10/2026) — 137
+
+**Nội dung (PM yêu cầu):** bộ lọc nâng cao màn danh sách Thiết lập thu thập — ô **Hệ thống nguồn** có ô tìm kiếm bên trong danh sách (theo ảnh PM).
+
+**File sửa:**
+- `src/components/pages/collection/collectionUi.tsx` (dùng chung, chỉ thêm): component `SearchableSelect` (Combobox mục 5.11) — nút chọn cùng kiểu ô nhập 40px; mở ra có ô "Tìm …" ở đầu danh sách; tìm không phân biệt dấu/hoa thường; mục đang chọn tô xanh + dấu ✓; ↑ ↓ / Enter / Esc; không có kết quả → "Không tìm thấy kết quả phù hợp".
+- `src/components/pages/collection/CollectionSetupPage.tsx`: ô Hệ thống nguồn dùng `SearchableSelect` (placeholder "Tìm hệ thống nguồn..."), giữ nguyên 9 lựa chọn và logic lọc (áp dụng khi bấm Tìm kiếm).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Chuẩn hóa định dạng ngày dd/mm/yyyy — Quản lý thu thập (Ngày thực hiện: 07/10/2026) — 136
+
+**Nội dung (PM yêu cầu):** rà toàn bộ trường ngày tháng và bộ lọc ngày của module Quản lý thu thập, chỗ nào chưa đúng thì đưa về một định dạng. PM chốt **dd/mm/yyyy** (đúng `compomennt.md` mục 5.3, 5.3.3, 5.10).
+
+**Nguyên nhân chính:** các ô lọc ngày dùng `<input type="date">` của trình duyệt → hiển thị theo ngôn ngữ trình duyệt (trình duyệt tiếng Anh hiện mm/dd/yyyy).
+
+**Thành phần dùng chung mới** (`pages/collection/collectionUi.tsx`, chỉ thêm, không đổi phần cũ):
+- `DateInput`: ô ngày luôn hiển thị **dd/mm/yyyy** (gõ tay tự chèn "/", báo viền đỏ khi ngày không hợp lệ, icon lịch mở bộ chọn ngày). Giá trị vào/ra vẫn là ISO `yyyy-mm-dd` → không đổi logic lọc.
+- `isoToDisplayDate`, `displayToIsoDate`, `formatDateVN`, `toLocalIsoDate` (ISO theo giờ địa phương).
+
+**Đã sửa:**
+- Ô lọc ngày → `DateInput`: Tổng quan thu thập (`collection/CollectionDashboard.tsx`, giữ giới hạn min/max 31 ngày), Thiết lập thu thập (`CollectionSetupPage.tsx`), Quản lý nhật ký (`LogManagement.tsx`), Đối soát — danh sách (`ReconciliationTemplate.tsx`) và Lịch sử đối soát (`ReconciliationHistoryTab.tsx`), modal Xem chi tiết Agent — tab Lịch sử (`AgentDetailModal.tsx`).
+- Ngày hiển thị dạng `yyyy-mm-dd` → `dd/mm/yyyy` (giữ dữ liệu mock ISO để bộ lọc vẫn đúng): bảng Đối soát, Lịch sử đối soát, Nhật ký đối soát, Thiết lập dịch vụ đối soát, "Nguồn gọi" ở modal chi tiết đối soát.
+- Lịch sử hoạt động (modal Xem chi tiết dịch vụ): `09-10-2025 15:06:34` → `09/10/2025 15:06:34` (7 dòng).
+- Agent: `11/20/2025` (mm/dd) → `20/11/2025`; `17:44:54 20-11-2025` → `20/11/2025 17:44:54` (`mockAgents.ts`).
+- Thông báo gửi hệ thống nguồn (Thiết lập thu thập): `toLocaleString('vi-VN')` (giờ trước ngày) → `dd/mm/yyyy HH:mm:ss`.
+- Sửa lệch 1 ngày do `toISOString()` (UTC) ở ngày mặc định của Tổng quan thu thập, Thiết lập thu thập và ngày gọi cuối khi thêm cấu hình đối soát.
+
+**Giữ nguyên (cấu hình / dữ liệu mẫu cố ý):** định dạng ngày gửi API `yyyy-MM-dd'T'HH:mm:ss` (Cấu hình kết nối), JSON mẫu API nhận, các ví dụ dữ liệu sai định dạng dùng để minh họa lỗi (`mockCollectionServices`, `ServiceDataDetailPage`), ô giờ `type="time"` ở Cấu hình thu thập. Màn Xem dữ liệu thu thập (các CSDL) đã đúng dd/mm/yyyy.
+
+**stauts.md:** tự mở khóa `[x]` CollectionSetupPage, LogManagement, ViewServiceModal › Tab Lịch sử hoạt động, ReconciliationTemplate, Internal/ExternalCategories/ExternalCourtJudgment ReconciliationPage, ReconciliationServiceSetupTab/HistoryTab/LogTab, ReconciliationDetailModal.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (còn lỗi cũ kiểu recharts ở CollectionDashboard); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Tính năng mới — Lịch sử phiên bản bản ghi (Xem dữ liệu thu thập › Hộ tịch) (Ngày thực hiện: 07/10/2026) — 135
+
+**Nội dung (PM yêu cầu):** cột Thao tác thêm nút **Lịch sử phiên bản**; bấm mở modal **Lịch sử phiên bản** (nội dung theo ảnh PM, giao diện theo `compomennt.md`).
+
+**File sửa / thêm:**
+- `src/components/civil-registry/CivilRegistryInfoTable.tsx`: nút icon `History` 32×32 (tooltip "Lịch sử phiên bản") cạnh nút Xem chi tiết; cột Thao tác rộng thêm cho 2 nút.
+- `src/components/civil-registry/CivilRegistryInfoModal.tsx`: mở modal phiên bản cho bản ghi được chọn.
+- **Mới** `src/components/civil-registry/CivilRegistryVersionHistoryModal.tsx`:
+  - Tiêu đề "Lịch sử phiên bản" + chú giải: mỗi dòng là một lần thay đổi (mới nhất trên cùng); ô tô vàng = giá trị khác phiên bản gần nhất trước đó có cột này (di chuột xem giá trị cũ); viền đỏ = dòng đã bị xóa ở nguồn sau phiên bản này; "—" = cột không có trong cấu trúc ở phiên bản đó.
+  - Bảng: **Phiên bản** (vN, badge "Mới nhất", "n trường thay đổi" / "Bản đầu tiên", badge "Đã xóa" + thời điểm, "Cấu trúc đổi: thêm …"), **Thời điểm lưu vào kho**, rồi các cột dữ liệu **theo Tùy chọn cột đang hiển thị**. 2 cột đầu cố định khi cuộn ngang; tiêu đề bảng cố định khi cuộn dọc.
+  - Phân trang (5.14); footer nút **Đóng** (Outline).
+  - Dữ liệu phiên bản là **mock** sinh từ bản ghi hiện tại (3–5 phiên bản, mỗi phiên bản đổi 1 trường, cột cuối được thêm ở v3, một số bản ghi có phiên bản "Đã xóa").
+
+**Kiểm tra:** tsc không phát sinh lỗi mới ở file sửa (lỗi cũ ở `civil-registry-change/CivilRegistryChangeTable.tsx`); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xem chi tiết dịch vụ thu thập — bỏ khung trạng thái kết nối (Ngày thực hiện: 07/10/2026) — 134
+
+**Nội dung (PM yêu cầu):** tab Cấu hình kết nối (modal Xem chi tiết) bỏ khung "Kết nối đang hoạt động tốt / Kiểm tra lần cuối" với các phương thức **API, API nhận (XML), API nhận (JSON), Tải file**.
+
+**File sửa:** `src/components/pages/collection/ViewServiceModal.tsx` — khung trạng thái chỉ còn hiển thị với **Cơ sở dữ liệu** (giữ nguyên nội dung, gồm cả các trạng thái lỗi/tạm ngưng).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công.
+
+## Gộp tiêu đề nhóm (H3) vào H2 (Ngày thực hiện: 07/10/2026) — 133
+
+**Nội dung (PM chốt):** bỏ cấp Tiêu đề nhỏ (H3, 13px); tiêu đề nhóm dùng chung cỡ H2 **14px / 500 / #020817**.
+
+**File sửa:**
+- `tailieu/docs/compomennt.md` mục 1: bỏ dòng H3; H2 ghi rõ áp dụng cho cả tiêu đề khối và tiêu đề nhóm (tiêu đề khối có vạch xanh — `SECTION_TITLE`; tiêu đề nhóm không vạch — `GROUP_TITLE`).
+- `src/components/pages/collection/collectionUi.tsx` (dùng chung): thêm hằng `GROUP_TITLE`, không đổi hằng cũ.
+- `ConnectionConfigSection.tsx`: "Phân trang gửi nguồn", "Vị trí phân trang trong response", "Hiệu năng & điều tiết" 13px/600 → 14px/500.
+- `ViewServiceModal.tsx`: "① API dữ liệu", "② API danh sách xóa" 13px/600 → 14px/500.
+
+**Phạm vi:** các màn khác còn tiêu đề nhóm 13px viết rời sẽ sửa dần khi chuẩn hóa từng màn.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công.
+
+## Xem chi tiết dịch vụ thu thập — tab Cấu hình kết nối theo từng phương thức (Ngày thực hiện: 07/10/2026) — 132
+
+**Nội dung (PM yêu cầu):** modal Xem chi tiết › tab **Cấu hình kết nối** hiển thị nội dung tương ứng từng phương thức (theo ảnh PM gửi), giao diện theo `compomennt.md`; **Cơ sở dữ liệu giữ nguyên**.
+
+**File sửa:**
+- `src/components/pages/collection/ViewServiceModal.tsx` (tự mở khóa `[x]` "Tab Cấu hình kết nối" trong `stauts.md`). Giữ nguyên khung trạng thái kết nối phía trên.
+  - Phương thức kết nối hiển thị bằng **Badge** (mục 5.8) cho mọi loại.
+  - **API:** Loại thu thập, Method, URL, Máy chủ thực thi, Trạm kết nối; khối **① API dữ liệu** (thẻ Params / Authorization / Headers 3 / Body chỉ đọc; data path, định dạng ngày, totalPages, totalElements); khối **② API danh sách xóa** (URL, thẻ yêu cầu, deleted path).
+  - **API nhận (JSON):** Tách bảng con từ mảng lồng; Dữ liệu JSON mẫu (khung code cuộn được + nút Sao chép); ghi chú nguồn PUSH.
+  - **API nhận (XML):** Tách bảng con từ mảng lồng, Danh mục dùng chung; Dữ liệu XML mẫu (thẻ tệp `dauGiaVien.xml` + Tải xuống); ghi chú nguồn PUSH.
+  - **Tải file:** Máy chủ thực thi, Trạm kết nối; Tệp đính kèm `nhan-vien.csv` (1 KB) + Tải xuống.
+  - **Cơ sở dữ liệu:** giữ nguyên các trường.
+  - Trường Bật/Tắt hiển thị dạng Nhãn – Giá trị (5.17) thay vì checkbox mờ; ghi chú PUSH chữ thường (5.17 không dùng in nghiêng); bảng Params/Headers dạng chữ (5.3) thay vì ô nhập bị khóa.
+- **Sửa lỗi:** modal Xem chi tiết và Chỉnh sửa trước đây đọc `service.connectionType` (không có trong dữ liệu danh sách) nên mọi dịch vụ đều hiện là API. Thêm `resolveConnectionType` trong `collectionUi.tsx` để quy đổi từ `connectionMethod` (API / API nhận (JSON) / API nhận (XML) / Cơ Sở Dữ Liệu / File). File dùng chung `collectionUi.tsx` chỉ thêm hàm mới, không đổi hàm cũ.
+
+**Dữ liệu mẫu (mock) mới:** JSON 5 bản ghi (HS001–HS005), nội dung tệp XML/CSV khi tải xuống, 3 Headers (Content-Type, Accept, x-client-id), Authorization "No Authen", Body "-".
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công.
+
+## Form API nhận (JSON/XML), Tải file + chiều cao cố định modal — Thiết lập thu thập (Ngày thực hiện: 07/10/2026) — 131
+
+**Nội dung (PM yêu cầu):** tab Cấu hình kết nối — làm 3 form API nhận (JSON), API nhận (XML), Tải file theo mockup PM; 3 form này không có nút Kiểm tra kết nối; modal Thêm mới giữ chiều cao cố định, cuộn bên trong khi cần.
+
+**File sửa:**
+- `src/components/pages/collection/ConnectionConfigSection.tsx`
+  - **API nhận (JSON):** "Dữ liệu JSON mẫu *" — radio *Tải lên file JSON* / *Nhập raw JSON*; ô chọn tệp "Click để chọn file JSON mẫu" + gợi ý "File phải chứa mảng data[] và object duLieuTiepNhan"; raw JSON có nút "Định dạng JSON" (báo lỗi khi sai); checkbox **Tách bảng con từ mảng lồng** (i).
+  - **API nhận (XML):** tương tự với XML ("Click để chọn file XML mẫu"); checkbox **Tách bảng con từ mảng lồng** (i) và **Danh mục dùng chung**.
+  - **Tải file:** chỉ còn "Tập tin tải lên *" — "Click để chọn file CSV, XLS, XLSX".
+  - Chọn tệp xong hiển thị tên tệp + nút Xóa (mục 5.13).
+  - Bỏ các trường cũ của 3 form: Tên api, URL, Headers1, Máy chủ thực thi, Trạm kết nối, Method, Authorization, Body, Thông tin mở rộng (API nhận); Tên File CSDL, Máy chủ thực thi, Trạm kết nối (Tải file).
+- `src/components/pages/collection/ServiceModals.tsx` (tự mở khóa `[x]` AddServiceModal, EditServiceModal trong `stauts.md`)
+  - Nút **Kiểm tra kết nối** chỉ hiện với API và Cơ sở dữ liệu (ẩn với API nhận JSON/XML và Tải file).
+  - Modal Thêm mới và Chỉnh sửa: chiều cao cố định `90vh` (trước: co giãn theo nội dung, tối đa 95vh); thân modal cuộn bên trong (custom-scrollbar).
+  - **Footer cố định** (Kiểm tra kết nối / Hủy / Tiếp tục): luôn nằm sát đáy modal, không trôi theo nội dung (`sticky bottom-0`; nội dung ngắn vẫn đẩy footer xuống đáy).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (còn lỗi cũ `AdvancedDataMapping` ở ServiceModals.tsx, `ServiceModals_Old.tsx`); `npm run build` thành công.
+
+## Thiết kế lại tab Cấu hình kết nối — Thiết lập thu thập (Ngày thực hiện: 07/10/2026) — 130
+
+**Nội dung (PM yêu cầu):** modal Thêm mới / Chỉnh sửa dịch vụ thu thập › tab **Cấu hình kết nối**: mỗi phương thức kết nối một giao diện riêng; **API** làm theo mockup PM gửi; toàn tab chuẩn hóa theo `compomennt.md`.
+
+**File sửa:** `src/components/pages/collection/ConnectionConfigSection.tsx` (tự mở khóa `[x]` trong `stauts.md` dòng 52). Dùng chung cho Thêm mới và Chỉnh sửa (`ServiceModals.tsx` không đổi).
+
+**Phương thức API (mới, theo mockup):**
+- **Loại thu thập *** (thẻ chọn): *Kéo 1 lần* — Gọi 1 lần, không phân trang / *Theo mẫu (đồng bộ)* — Full-load phân trang + delta.
+- **Nhóm tham số** (select + nút 👁 xem, khóa khi chưa chọn) + gợi ý "+ tham số".
+- *Theo mẫu*: **Cấu hình cho API nào?** — API dữ liệu / API danh sách xóa (mỗi API giữ cấu hình yêu cầu riêng).
+- **Yêu cầu *** = Method + URL; thẻ phụ **Params / Authorization / Headers (số lượng) / Body**:
+  - Params, Headers: bảng STT/Key/Value/Thao tác + Thêm mới (Headers mặc định `Content-Type: application/json`).
+  - Authorization: No Authen / Basic Authen (Tài khoản, Mật khẩu) / Bearer Token (Nhập token) trong khung "Thông tin mở rộng" thu gọn được.
+  - Body: raw (JSON) có nút "Định dạng JSON" (báo lỗi khi sai JSON) / form-data / x-www-form-urlencoded (bảng Key–Value).
+- **Đường dẫn dữ liệu (data path)** (bắt buộc ở Theo mẫu), toggle **Tách bảng con từ mảng lồng**, *Kéo 1 lần* thêm toggle **Đồng bộ xóa theo khóa**.
+- *Theo mẫu › API dữ liệu*: Định dạng ngày (mặc định `yyyy-MM-dd'T'HH:mm:ss`), Phân trang gửi nguồn (page khởi tạo 0, pageSize 1000), Vị trí phân trang trong response * (totalPages, totalElements), Hiệu năng & điều tiết (SEQUENTIAL/PARALLEL + số luồng, khóa khi SEQUENTIAL).
+- *Theo mẫu › API danh sách xóa*: Yêu cầu (API danh sách xóa) + **Đường dẫn khóa bị xóa (deleted path) ***.
+- Bỏ các trường cũ của API: Tên api, Máy chủ thực thi, Trạm kết nối, Body dạng ô 1 dòng, Loại token "Lấy token từ API".
+
+**API nhận (JSON/XML), Cơ sở dữ liệu, Tải file:** giữ nguyên nội dung, chỉ chuẩn hóa giao diện (ô 40px, nhãn 13px/500 đen, * đỏ, bảng 5.3, nút Xóa dạng icon trong bảng, toggle 5.12, dropzone 5.13). PM cho biết API nhận XML/JSON sẽ có mẫu riêng — chờ PM gửi.
+
+**Chuẩn component:** nút Thêm mới trong bảng dùng Outline (mỗi màn chỉ 1 Primary — "Tiếp tục"); nút Xóa trong bảng dùng icon 32×32 có tooltip; thẻ phụ cao 40px 13px/600 cùng màu Tabs 5.9.
+
+**Nội dung mới chờ PM duyệt:** 2 lựa chọn mẫu của Nhóm tham số ("Nhóm tham số ngày đồng bộ", "Nhóm tham số xác thực"); tooltip "Đồng bộ xóa theo khóa": "Xóa bản ghi tại kho khi khóa không còn trong dữ liệu nguồn"; lựa chọn PARALLEL (mặc định 4 luồng).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (còn lỗi cũ `AdvancedDataMapping` ở ServiceModals.tsx, `ServiceModals_Old.tsx`); `npm run build` thành công.
+
+## Cập nhật menu — Đối soát dữ liệu (Ngày thực hiện: 07/10/2026) — 129
+
+**Nội dung (PM yêu cầu):** Sidebar › Quản lý thu thập › Đối soát dữ liệu: đổi tên 2 nhóm cấp 2 và đưa CSDL Trong ngành lên trên cho đồng bộ với các mục khác.
+- "Đối soát dữ liệu từ Bộ trong ngành" → **CSDL Trong ngành** (lên trên).
+- "Đối soát dữ liệu từ Bộ ngoài ngành" → **CSDL Ngoài ngành** (xuống dưới).
+- Giữ nguyên id route và các mục con.
+
+**File sửa:** `src/components/layout/Sidebar.tsx` (thứ tự + nhãn), `src/components/layout/MainLayout.tsx` (breadcrumb 17 route đối soát).
+
+**Chưa sửa:** `src/components/pages/admin/menuStructure.ts` (cây menu dùng cho Quản trị › phân quyền) vẫn để tên/thứ tự cũ — chờ PM xác nhận (module Quản trị đang tạm hoãn).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới ở file sửa; `npm run build` thành công.
+
+## Tính năng mới — Điều hướng tới CSDL làm sạch từ Xử lý dữ liệu (Ngày thực hiện: 07/10/2026) — 128
+
+**Nội dung (PM yêu cầu):** sau khi xử lý dữ liệu xong, cho phép điều hướng tới CSDL đích để xem dữ liệu sau xử lý. PM chốt: chỉ thêm 1 dòng **CSDL làm sạch** dưới dòng Nguồn dữ liệu / Dữ liệu, kèm nút xem dữ liệu; bấm thì chuyển sang màn Chi tiết CSDL đích, **không** hiển thị dải thông tin "đang xem dữ liệu sau xử lý" (nhiều bảng xử lý có thể đổ về 1 bảng đích).
+
+**File sửa:** `src/components/pages/processing/GenericProcessingPage.tsx` (tự mở khóa `[x]` trong `stauts.md`).
+- Dòng `CSDL làm sạch: <tên CSDL>` + nút chữ "Xem dữ liệu ↗" (icon mũi tên chéo ArrowUpRight đặt sau chữ, màu #155DFC — PM đổi từ icon mắt) → `navigateToPage('target-database-detail-{id}')`.
+- Tên CSDL lấy từ CSDL đích chọn khi cấu hình ánh xạ; chưa cấu hình thì mặc định CSDL đích đầu tiên trong mock (`CSDL Kho DLDC`).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới ở file sửa; `npm run build` thành công.
+
+## Tính năng mới — Sắp xếp thứ tự cột (Ngày thực hiện: 07/10/2026) — 127
+
+**Nội dung (PM yêu cầu):** "Sắp xếp được thứ tự hiển thị các trường dữ liệu". Hiện tại khi xem dữ liệu thu thập, thứ tự cột không giống thứ tự lúc nạp cấu trúc (một vài trường hợp). PM duyệt **phương án A**: tích hợp sắp xếp vào nút Tùy chọn cột. Làm thử trên **Xem dữ liệu thu thập › CSDL Hộ tịch**.
+
+**Thay đổi:**
+- `pages/collection/collectionUi.tsx`:
+  - `useVisibleColumns` lưu thêm **thứ tự** (`{ order, visible }`).
+    - Có hàm `move(từ, đến)`; `visibleColumns` trả theo thứ tự đã sắp.
+    - Cột mới chưa có trong dữ liệu đã lưu được nối cuối.
+    - Đọc được dữ liệu lưu dạng cũ (mảng).
+    - `isDefault` xét cả thứ tự. `reset` trả cả ẩn/hiện lẫn thứ tự.
+  - `ColumnPicker` chuyển từ DropdownMenu sang **Popover**, vì khung cần nhiều nút tương tác trong cùng một dòng. Mỗi dòng gồm:
+    - Tay cầm kéo `⋮⋮` (kéo-thả HTML5 có sẵn, **không thêm thư viện**); vạch xanh `#155DFC` báo vị trí thả, dòng đang kéo mờ 50%.
+    - Ô tích ẩn/hiện.
+    - Nút ↑ ↓ (hiện khi rê chuột/focus, khóa ở dòng đầu/cuối).
+  - Tiêu đề khung đổi thành "Hiển thị & sắp xếp cột", kèm dòng hướng dẫn.
+- `civil-registry/CivilRegistryInfoModal.tsx`: truyền thêm `order`, `onMove`. Thứ tự mặc định = thứ tự khai báo cột (coi như thứ tự nạp cấu trúc).
+- `compomennt.md` mục 5.20: bổ sung quy chuẩn sắp xếp.
+
+**Lưu ý:** PM chưa cung cấp thứ tự chuẩn của bộ Khai sinh theo cấu trúc. Thứ tự mặc định đang giữ như hiện tại; khi có thứ tự chuẩn chỉ cần đổi thứ tự khai báo cột.
+
+**Kiểm tra (chạy app):**
+0. Lựa chọn đã lưu theo định dạng cũ vẫn đọc đúng.
+1. Mặc định 4 cột; khung "Hiển thị & sắp xếp cột", 15 dòng có tay cầm.
+2. ↓ "Họ và tên": bảng đổi ngay thành Giới tính | Họ và tên…, khung vẫn mở.
+3. ↑ "Họ và tên": trả lại như cũ.
+4. Kéo "Mã hồ sơ" lên đầu: có vạch xanh khi kéo, danh sách đổi.
+5. Bật "Mã hồ sơ": cột hiện ở vị trí đầu; nút có chấm xanh.
+6. Tải lại trang: giữ cả thứ tự lẫn ẩn/hiện.
+7. Khôi phục mặc định: về 4 cột thứ tự gốc; nút Khôi phục bị khóa.
+- Không lỗi/cảnh báo console. `tsc` không lỗi. `vite build` thành công.
+
+## Tính năng mới — Tùy chọn cột (Ngày thực hiện: 07/10/2026) — 126
+
+**Nội dung (PM yêu cầu):** "Ẩn hiện danh sách khi xem dữ liệu thu thập — bổ sung chức năng cho phép chọn các trường muốn xem tại màn hình danh sách". PM duyệt **phương án A** (nút Tùy chọn cột) và yêu cầu làm thử trên màn **Xem dữ liệu thu thập › CSDL Hộ tịch**.
+
+**Thay đổi:**
+- `pages/collection/collectionUi.tsx` (dùng chung, chỉ thêm mới):
+  - Kiểu `ColumnDef<T>` mô tả một cột.
+  - Hook `useVisibleColumns(storageKey, columns)`: lưu/khôi phục lựa chọn trong `localStorage` theo từng bộ dữ liệu, luôn giữ cột khóa, giữ đúng thứ tự cột.
+  - Component `ColumnPicker`: nút 40×40 + danh sách thả xuống (Radix DropdownMenu, hiện nổi không bị khung bảng cắt) gồm ô tích, Chọn tất cả, Khôi phục mặc định, bộ đếm cột; có chấm xanh khi khác mặc định.
+- `civil-registry/CivilRegistryInfoTable.tsx`: bảng vẽ cột theo danh sách `columns` truyền vào thay vì 4 cột cố định. STT và Thao tác luôn hiện; cột Thao tác ghim phải khi cuộn ngang; cột văn bản dài cắt `…` kèm tooltip.
+- `civil-registry/CivilRegistryInfoSearchFilter.tsx`: thêm chỗ đặt nút Tùy chọn cột (trước nút Bộ lọc).
+- `civil-registry/CivilRegistryInfoModal.tsx`:
+  - Khai báo cột cho từng bộ dữ liệu:
+    - 4 cột mặc định như cũ: Họ và tên (khóa), Giới tính/Loại hình, Số đăng ký, Ngày đăng ký.
+    - Thêm Địa chỉ/Nơi đăng ký, Trạng thái (Badge), Thời gian đồng bộ.
+    - Toàn bộ trường chi tiết của bộ đó (VD Khai sinh: Mã hồ sơ, Số quyển, Trang số, Nơi sinh, Dân tộc, Quốc tịch, Họ tên Cha, Họ tên Mẹ; Kết hôn: Chồng, Vợ, Nơi đăng ký…).
+  - Chuyển lệnh `return null` khi modal đóng xuống sau các hook (đúng quy tắc hook của React).
+- `compomennt.md`: thêm **mục 5.20 Tùy chọn cột**.
+
+**Mặc định được chọn (PM chưa chốt 2 điểm, áp dụng theo đề xuất):** danh sách gồm cả trường trong popup chi tiết; lưu lựa chọn theo trình duyệt.
+
+**Kiểm tra (chạy app):**
+1. Thanh công cụ: Tùy chọn cột → Bộ lọc nâng cao → Tải lại (đều 40×40). Mặc định 4 cột như cũ, danh sách báo "Hiển thị cột 4/15" với 15 trường.
+2. Bật "Địa chỉ", tắt "Giới tính": bảng đổi ngay, danh sách vẫn mở. Bấm "Họ và tên" (khóa) không đổi. Nút có chấm xanh.
+3. Tải lại trang: vẫn giữ lựa chọn.
+4. Chuyển sang bộ Kết hôn: danh sách cột riêng (Họ tên Chồng & Vợ, Loại hình, Chồng, Vợ, Nơi đăng ký…) và lựa chọn riêng.
+5. Chọn tất cả: 17 cột (gồm STT, Thao tác), bảng cuộn ngang, cột Thao tác `sticky`.
+6. Khôi phục mặc định: về 4 cột.
+- Đóng danh sách bằng Esc hoặc bấm ra ngoài: tooltip không còn treo (đã chặn mở tooltip khi focus quay lại nút).
+- Không lỗi/cảnh báo console. `tsc` không lỗi. `vite build` thành công.
+
+## Cập nhật giao diện & tài liệu (Ngày thực hiện: 07/10/2026) — 125
+
+**Nội dung (PM kiểm tra lại mục 124, đối chiếu trang Bộ Tư pháp):** Ô bị khóa ở màn Xem chi tiết (module Cung cấp dữ liệu) còn lệch chuẩn:
+- Viền `#E2E8F0`, cần `rgba(0,0,0,0.26)`.
+- Chữ `#64748B` / `#020817`, cần `#000000`.
+- Nền: BTP hiển thị `#F0F0F0`, localhost đang là `#F1F5F9`.
+
+**Nguyên nhân còn sót sau mục 124:**
+1. Màu chữ dùng `#020817` thay vì `#000000`; nền dùng `#F1F5F9` thay vì `#F0F0F0`.
+2. Ô "Cơ quan/Đơn vị nhận" (Chi tiết API) là `div` tự dựng, viền `#E2E8F0`, chip chữ `#64748B`.
+3. "Xem chi tiết Dịch vụ" (`ProvisionServiceModal`) không khóa ô, chỉ chặn click (`pointer-events-none`), nên ô vẫn nền trắng, viền `#E2E8F0`. Ô "API Context Path" dùng class riêng.
+4. "Xem chi tiết cấu trúc trường dữ liệu chia sẻ" dùng ô `readOnly` (không `disabled`).
+
+**Thay đổi:**
+- `VIEW_FIELD_CLS` đổi thành `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Textarea cục bộ và ô giả lập "Tài liệu API chia sẻ" theo cùng màu.
+- `ProvisionApiModal`: khung "Cơ quan/Đơn vị nhận" nền `#F0F0F0`, viền `rgba(0,0,0,0.26)`; chip chữ đen `#000000`, viền `rgba(0,0,0,0.26)`.
+- `ProvisionServiceModal`:
+  - Vùng form bọc `<fieldset disabled={isViewMode}>`, nên ở chế độ xem mọi ô tự nhận kiểu ô bị khóa; chế độ thêm/sửa không đổi.
+  - Ô "API Context Path" ghép thêm `VIEW_FIELD_CLS`.
+- `SharedFieldsConfigModal`: ô tên trường API thêm `disabled={readOnly}` ở chế độ xem.
+- `compomennt.md` mục 5.2: cập nhật thông số (chữ `#000000`, nền `#F0F0F0`) và cách dùng `fieldset disabled`.
+
+**Kiểm tra (chạy app, 4 modal xem chi tiết: API, Dịch vụ, Yêu cầu kết xuất, Cấu trúc trường chia sẻ):**
+- Mọi ô/khung: chữ `rgb(0,0,0)`, nền `rgb(240,240,240)`, viền `rgba(0,0,0,0.26)`. Placeholder ô trống `rgb(148,163,184)`.
+- Chế độ **Sửa** dịch vụ vẫn giữ kiểu ô bình thường: nền trắng, viền `#E2E8F0`, chữ `#020817`.
+- Không lỗi console. `tsc` không lỗi mới. `vite build` thành công.
+
+## Cập nhật giao diện & tài liệu (Ngày thực hiện: 07/10/2026) — 124
+
+**Nội dung (PM yêu cầu, kèm thông số):** Ở các màn **Xem chi tiết** của module Cung cấp dữ liệu, ô bị khóa (disabled) đang có giá trị phải hiển thị **chữ đen**; ô trống hiển thị **placeholder xám**. Thông số do PM cung cấp:
+- Placeholder `#94A3B8`, 13px / 400.
+- Nền ô `#F1F5F9`.
+- Viền `rgba(0,0,0,0.26)`.
+
+**Phạm vi:** PM chốt chỉ áp dụng cho ô **disabled** ở màn xem chi tiết, không áp cho ô nhập bình thường.
+
+**Nguyên nhân:** `INPUT_CLS` có `disabled:text-[#94A3B8]` nên ở chế độ xem, cả giá trị đã nhập cũng bị tô xám như placeholder.
+
+**Thay đổi:**
+- `collectionUi.tsx`: thêm hằng `VIEW_FIELD_CLS` = `disabled:!text-[#020817] disabled:!bg-[#F1F5F9] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8] disabled:placeholder:font-normal`. Chỉ thêm mới, **không đổi `INPUT_CLS`**, nên các module khác không bị ảnh hưởng.
+- 19 file trong `provisioning/` dùng `INPUT_CLS` = `INPUT_CLS` gốc + `VIEW_FIELD_CLS`. Textarea cục bộ (`ProvisionServiceModal`, `ProvisionDataRequestModal`) dùng cùng quy tắc.
+- `ProvisionApiModal`: ô giả lập "Tài liệu API chia sẻ" (dạng `div`) trước đây tô xám giá trị ở chế độ xem. Nay có giá trị thì chữ đen, trống thì chữ xám; ở chế độ xem dùng nền `#F1F5F9` và viền `rgba(0,0,0,0.26)`.
+- `compomennt.md` mục 5.2: thêm quy định "Ô bị khóa ở màn Xem chi tiết".
+
+**Kiểm tra (chạy app):**
+- Modal "Chi tiết API cung cấp" và "Chi tiết yêu cầu":
+  - Ô disabled có giá trị: chữ `rgb(2,8,23)`, nền `rgb(241,245,249)`, viền `rgba(0,0,0,0.26)`.
+  - Ô disabled trống (dd/mm/yyyy, "Nhập nội dung yêu cầu..."): placeholder `rgb(148,163,184)`.
+  - Ô "Tài liệu API chia sẻ" có giá trị hiện chữ đen.
+- Ô nhập bình thường (ô tìm kiếm) giữ nguyên nền trắng, viền `#E2E8F0`.
+- Không lỗi console. `tsc` không lỗi mới. `vite build` thành công.
+
+## Cập nhật giao diện (Ngày thực hiện: 07/10/2026) — 123
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện mục **Cung cấp dữ liệu** theo `compomennt.md`, giữ nguyên nội dung, dữ liệu và logic. Mục Quản trị & vận hành làm sau.
+
+**File đã sửa (27, trong `provisioning/`):**
+- Trang: `DataProvisionMonitoringPage`, `DataProvisionServiceSetupPage`, `DataProvisionApiManagementPage`, `DataProvisionRequestPage`, `DataProvisionServicesPage` (dùng chung cho các mục CSDL Trong ngành / Ngoài ngành / Dữ liệu mở / Dữ liệu chủ), `DataReconciliationPage` (Quy trình đối soát).
+- Tab: `tabs/AuditLogsTab`.
+- Modal (20):
+  - Dịch vụ: `ProvisionServiceModal`, `ProvisionServicePublishModal`, `ProvisionServiceUnpublishModal`, `ProvisionServiceApprovalModal`, `SubmitApprovalModal`, `ProvisionServicePublicDetailsModal`.
+  - API: `ProvisionApiModal`, `ProvisionApiDetailModal`, `ProvisionReconciliationApiModal`, `ProvisionAccessControlModal`, `ProvisionVersionHistoryModal`, `ApiVersionCompareModal`, `ProvisionAccountModal`.
+  - Yêu cầu dữ liệu: `ProvisionDataRequestModal`, `ProvisionRequestApprovalModal`, `ProvisionRequestExportModal`, `ProvisionRequestHandoverModal`, `ProvisionHandoverDetailModal`, `ProvisionPublishDetailModal`.
+  - Khác: `ProvisionExportReportModal`, `SharedFieldsConfigModal`, `ProvisionReconciliationDetailsModal`, `ProvisionReconciliationHistoryModal`.
+
+**Thay đổi chính:**
+- **Bỏ ép cỡ chữ:** bỏ các khối `<style>` ép mọi chữ về 13px `!important` và style inline font. Cỡ chữ giờ theo class chuẩn của từng phần tử.
+- **Tab và thẻ:** tab dùng `tabClass`. Thẻ thống kê nhỏ theo mục 5.6.1.
+- **Tìm kiếm và lọc:**
+  - Thanh tìm kiếm và vùng lọc theo mục 5.19. Tìm kiếm/lọc **chỉ chạy khi bấm Tìm kiếm/Enter**; ô lọc nhanh không có nút áp dụng vẫn lọc ngay.
+  - Nút "Lọc nâng cao" ở Nhật ký khai thác trước đây không làm gì, nay mở vùng lọc trạng thái.
+- **Bảng:**
+  - Theo mục 5.3, bỏ `font-mono`/`uppercase`. Ngày giờ hiện 2 dòng. Số căn phải `tabular-nums`. Badge cho trạng thái/phương thức.
+  - Cột Thao tác ghim phải. Phân trang dùng thanh chung.
+- **Menu ⋯** (từ 4 thao tác trở lên):
+  - Quản lý API: Lịch sử phiên bản, Tạm ngưng/Kích hoạt, Xóa API.
+  - Tài khoản: Khóa/Mở khóa, Xóa tài khoản.
+  - Yêu cầu dữ liệu (dòng Đã công khai): Công khai, Hủy công khai.
+- **Modal:**
+  - Khung chuẩn mục 5.4, giữ cơ chế portal, z-index và hành vi bấm nền cũ.
+  - Modal dịch vụ: thanh tab dọc chuyển thành hàng tab ngang theo mẫu `ServiceModals`.
+  - Nội dung code/JSON/SQL/token/endpoint: chữ thường 13px trong ô nền `#F8FAFC`, không dùng `font-mono`.
+- **Biểu đồ giám sát:** nằm trong thẻ bo 16px, giữ màu series. Vùng gradient chuyển thành màu đặc độ mờ 0.12.
+- `alert()` / toast tự dựng → `sonner`. `window.confirm` (thu hồi quyền, xóa tài khoản) → `ConfirmModal`.
+- **Sửa 3 lỗi `tsc` có từ trước** ở `DataProvisionApiManagementPage` (kiểu tham số `unit`, phép so sánh tab).
+
+**Kiểm tra (chạy app, 7 màn):**
+- Kiểm soát & giám sát, Thiết lập điều phối, Quản lý API, Yêu cầu dữ liệu, CSDL Hộ tịch (Trong ngành), Dữ liệu mở, Đối soát `reconciliation-662`.
+- Tiêu đề cột 13px/700 đen, cao 42px; hàng 48px; căn lề đúng (đã sửa tiêu đề "Thao tác" căn giữa ở Quản lý API). Ô nhập 40px. Không còn chữ < 12px hay `font-mono`.
+- Modal Xem chi tiết (Dịch vụ, Yêu cầu kết xuất, Cấu trúc trường, Kết quả đối soát) có tiêu đề 16px/500.
+- Không lỗi console. `vite build` thành công. `tsc` không lỗi mới.
+
+**Lỗi có từ trước, chưa sửa:**
+- `DataProvisionServiceSetupPage` truyền `service`/`onPublish` cho `ProvisionServicePublishModal`, nhưng modal chỉ nhận `requestData`/`onConfirmPublish` (đã có ở HEAD).
+- Bảng Yêu cầu dữ liệu không lọc theo tab. Ngày yêu cầu mới lưu dạng dd/mm/yyyy nên lọc theo ngày không khớp.
+
+**Chữ mới cần PM duyệt:**
+- Lý do khóa: "Không thể xóa dịch vụ ở trạng thái này" (lấy lại từ chữ cũ), "Dịch vụ đã được công khai", "Yêu cầu đã phê duyệt hoặc đã kết xuất", "Chỉ áp dụng cho yêu cầu Đã kết xuất".
+- Tiêu đề hộp xác nhận: "Thu hồi quyền truy cập", "Xóa tài khoản".
+- Nhãn lọc "Trạng thái" (Nhật ký khai thác).
+
+**Chuẩn bị cho Quản trị & vận hành:** đã mở khóa `[x]` 24 mục trong `stauts.md` (Hệ thống nguồn, Agent, CSDL đích, Người dùng/Nhóm/Vai trò/Chức năng, Cấu hình bảo mật, Lưu trữ nhật ký, Sao lưu, 5 trang nhật ký, Thống kê). Chưa sửa code.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 122
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện **Cập nhật dữ liệu chủ** và **Báo cáo tìm kiếm dữ liệu chủ** theo `compomennt.md`, giữ nguyên nội dung, dữ liệu và logic.
+
+**File đã sửa (3):** `master-data/MasterDataUpdatePage.tsx`, `MasterDataUpdateItemPage.tsx`, `MasterDataReportsPage.tsx`. Các export dùng chung giữa 2 màn (`ApprovalBadge`, `COLUMNS`, `MOCK_BY_CATEGORY`…) giữ nguyên tên và kiểu.
+
+**Cập nhật dữ liệu chủ:**
+- **Tab:** Dữ liệu / Phê duyệt dùng `tabClass`. Bộ đếm chờ duyệt 12px.
+- **Thanh công cụ:**
+  - Màn có ô tìm kiếm nên dùng thanh tìm kiếm chuẩn mục 5.19.
+  - Đang hoạt động / Đã xóa là chip lọc nhanh. Gửi duyệt, Công khai, Hủy công khai là nút viền.
+  - Lịch sử đồng bộ (viền) đứng trước Đồng bộ dữ liệu (Primary, ngoài cùng phải).
+- **Tìm kiếm và lọc:** chỉ chạy khi bấm Tìm kiếm/Enter, không phân biệt dấu.
+- **Bảng:**
+  - Theo chuẩn mục 5.3. Badge cho trạng thái dữ liệu, phê duyệt, công khai. Ngày giờ hiện 2 dòng.
+  - Cột Thao tác ghim phải. Hàng được chọn nền `#EAF3FF`. Phân trang luôn hiển thị.
+- **Thao tác:**
+  - Tab Dữ liệu: để ngoài Xem chi tiết, Rà soát; menu ⋯ gồm Phiên bản, Trình duyệt, Công khai/Hủy công khai, Xóa bản ghi (đỏ, cuối). Mục bị khóa có dòng lý do.
+  - Tab Phê duyệt: để ngoài Xem chi tiết, Phê duyệt; menu ⋯ gồm Từ chối, Hủy phê duyệt.
+- **Modal (12):**
+  - Khung chuẩn, giữ cơ chế không đóng khi bấm nền và giữ z-index cũ cho modal chồng nhau.
+  - Hủy phê duyệt chuyển sang nút Destructive.
+- `alert()` → toast (14 chỗ).
+
+**Báo cáo tìm kiếm dữ liệu chủ:**
+- **Tra cứu:**
+  - Thanh tìm kiếm và vùng lọc chuẩn. Trước đây nút Tìm kiếm chỉ ghi log, **nay lọc thật** theo từ khóa, loại dữ liệu, trạng thái và khoảng ngày khi bấm Tìm kiếm/Enter.
+  - Bảng chuẩn, cột Thao tác ghim phải, phân trang chung.
+- **Báo cáo sử dụng:**
+  - Vùng lọc và nút "Truy xuất báo cáo" như các báo cáo Danh mục. Kết quả chỉ đổi khi bấm Truy xuất (trước đây đổi ngay khi chọn).
+  - Biểu đồ nằm trong thẻ bo 16px, **giữ màu series cũ**. Bảng có cột số căn phải, tỷ lệ API ổn định dạng Badge.
+- **Vòng đời:** banner cảnh báo chuẩn, 3 thẻ nhỏ, bảng chuẩn, cột Vòng đời dạng Badge.
+- **Modal (2):** khung chuẩn `z-[110]`. Thanh bước màu `#155DFC`.
+
+**Kiểm tra (chạy app):**
+- Cập nhật: tiêu đề cột 13px/700 đen; hàng 48px; căn lề đúng. Menu ⋯ đúng thứ tự, có lý do khóa. Modal "Chi tiết bản ghi" 16px/500. Tab Phê duyệt đúng chuẩn.
+- Báo cáo:
+  - 3 tab đúng chuẩn. Tìm "zzz": gõ chưa lọc, nhấn Enter ra "không tìm thấy".
+  - Loại "Thống kê": biểu đồ đường và 8 cột màu cũ hiển thị đủ. Loại "Truy cập" và "Tiêu thụ" hiện bảng.
+- Không còn chữ < 12px hay `font-mono`. Không lỗi console. `tsc` không lỗi mới (còn 2 lỗi `many-to-one` có từ trước). `vite build` thành công.
+
+**Chữ mới cần PM duyệt:**
+- Lý do khóa: "Chỉ trình duyệt bản ghi Chưa phê duyệt, Rà soát hoặc Từ chối", "Chỉ công khai bản ghi đã phê duyệt".
+- Dòng trống: "Không tìm thấy bản ghi phù hợp".
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 121
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện **Quản lý dữ liệu chủ › Mô hình dữ liệu chủ** theo `compomennt.md`, giữ nguyên nội dung, dữ liệu và logic. Màn tham chiếu: các màn tương ứng đã duyệt bên Danh mục dùng chung.
+
+**File đã sửa (7):** trong `master-data/`:
+- `MasterDataScaleManagementPage.tsx` (trang chính, tab Thiết lập thực thể)
+- `MasterDataWizard.tsx` (Wizard 7 bước)
+- `AttributesManagementTab.tsx` (Thiết lập thuộc tính)
+- `MergeRulesManagementTab.tsx` (Thiết lập quy tắc hợp nhất)
+- `EntityRelationshipsTab.tsx` (Thiết lập quan hệ thực thể)
+- `UniqueIdentifierRulesTab.tsx` (Quy tắc định danh duy nhất)
+- `ApprovalTab.tsx` (Phê duyệt)
+
+**Thay đổi chính:**
+- **Tab và thẻ:**
+  - 6 tab dùng `tabClass` (14px/600, cao 48px).
+  - Thẻ thống kê nhỏ theo mục 5.6.1 (5 thẻ ở Thiết lập thực thể, 4 thẻ ở Phê duyệt), bỏ gradient.
+- **Tìm kiếm:**
+  - Thanh tìm kiếm theo mục 5.19. Tìm kiếm chỉ chạy khi bấm Tìm kiếm/Enter (Thiết lập thực thể, Phê duyệt, tìm quan hệ trong Wizard).
+  - Ô chọn thực thể vẫn lọc ngay vì là ô chọn, không phải ô tìm kiếm.
+- **Bảng:**
+  - Theo mục 5.3, bỏ chữ `font-mono`/`<code>`.
+  - Tên và mã xếp 2 dòng. Ngưỡng/Trọng số (%) căn phải `tabular-nums`.
+  - Badge cho trạng thái, loại quan hệ, kiểu so khớp, chiến lược, PK/FK/Bắt buộc.
+  - Cột Thao tác ghim phải. Phân trang dùng thanh chung.
+- **Thiết lập thực thể** có 4 thao tác: để ngoài Xem chi tiết, Chỉnh sửa; menu ⋯ gồm Gửi trình duyệt (khóa kèm lý do "Chỉ gửi được bản ghi đang soạn thảo"), Xóa (đỏ, cuối).
+- **Wizard:**
+  - Khung modal chuẩn, tiêu đề 16px/500.
+  - Thanh 7 bước: bước hiện tại và đã xong dùng `#155DFC`, bước chưa tới `#E2E8F0`.
+  - Ô nhập 40px. Chân modal nền `#F8FAFC`. Lưu nháp kiểu Outline, Tiếp theo/Gửi phê duyệt kiểu Primary.
+- **Modal:** dùng `BaseModal` chuẩn, bỏ icon trang trí ở header. Modal tự dựng đưa về `z-[110]` + khung chuẩn. Thông tin chỉ đọc dạng nhãn – giá trị.
+- **Mã định danh mẫu:** chữ thường 13px trong ô nền `#F8FAFC`, không dùng `font-mono`.
+- `alert()` → toast. Xóa quy tắc định danh: hộp `confirm()` của trình duyệt được thay bằng modal xác nhận (nút này đang ẩn bằng cờ `SHOW_EDIT_DELETE_ACTIONS`).
+
+**Kiểm tra (chạy app):**
+- Danh sách: tiêu đề cột 13px/700 đen cao 42px; hàng 48px; căn lề đúng.
+- Tìm "zzz": gõ chưa lọc, nhấn Enter còn 1 hàng ("không tìm thấy").
+- Menu ⋯ đúng thứ tự và có lý do khóa.
+- Modal "Xem chi tiết thực thể dữ liệu chủ" và Wizard "Tạo mới dữ liệu chủ" có tiêu đề 16px/500, ô nhập 40px.
+- 5 tab còn lại hiển thị đúng chuẩn.
+- Không còn chữ < 12px hay `font-mono`. Không lỗi console. `tsc` không lỗi. `vite build` thành công.
+
+**Cần PM duyệt:**
+- Chữ mới: lý do khóa trong menu ⋯; tiêu đề modal "Xóa quy tắc định danh"; một số tooltip "Xóa", "Bỏ trường".
+- Thẻ kết quả kiểm thử (tab Quy tắc hợp nhất và Wizard) có thêm icon vì thẻ chuẩn mục 5.6.1 có ô icon.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 120
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện mục **Dữ liệu mở** theo `compomennt.md`, giữ nguyên nội dung, dữ liệu và logic.
+
+**File đã sửa (6):**
+- `open-data/OpenDataDashboardPage.tsx` (Tổng quan dữ liệu mở)
+- `open-data/OpenDataSetupPage.tsx` (Thiết lập danh mục dữ liệu mở)
+- `open-data/OpenDataPublishedListPage.tsx` (Công bố dữ liệu mở)
+- `open-data-category/OpenDataCategoryPage.tsx` + `components/tabs/FilesTab.tsx` (Danh sách danh mục dữ liệu mở)
+- `open-data-report/OpenDataReportPage.tsx` (Thống kê dữ liệu mở)
+
+**Thay đổi chính:**
+- **Tổng quan:**
+  - H1 20px/700 `#2A0F0F`.
+  - Trang không có hàng thẻ KPI nên không áp dụng ngoại lệ thẻ header lớn. Khối 4 vòng tiến trình phê duyệt nằm trong thẻ chuẩn.
+  - **Giữ màu** các series: vòng tròn `#3b82f6`/`#22c55e`/`#f59e0b`/`#a855f7`, thanh xếp hạng cyan, cột `#059669`.
+  - Trục, chú giải, tooltip 12px `#64748B`. Bỏ chữ 11px.
+- **Tab và thẻ:** tab theo `tabClass`. Thẻ thống kê nhỏ theo mục 5.6.1, bỏ nền gradient (tab Phê duyệt).
+- **Tìm kiếm và lọc:** thanh tìm kiếm và vùng lọc theo mục 5.19. Tìm kiếm **chỉ chạy khi bấm Tìm kiếm/Enter** ở mọi tab có ô tìm kiếm; nút lọc nhanh theo trạng thái vẫn lọc ngay. Tab Phê duyệt được thêm nút Tìm kiếm.
+- **Bảng:**
+  - Theo mục 5.3; cột Thao tác ghim phải. Badge trạng thái căn trái. Ngày giờ hiện 2 dòng. Số căn phải `tabular-nums` (Thống kê).
+  - Phân trang dùng thanh chung.
+  - Thiết lập danh mục › Quản lý danh mục có 4 thao tác: để ngoài Xem chi tiết, Chỉnh sửa; menu ⋯ chứa Gửi duyệt, Xóa (đỏ, cuối).
+- **Modal:** khoảng 35 modal nội tuyến đưa về khung chuẩn mục 5.4 (`z-[110]`, header 16px/500, nút X, chân nền `#F8FAFC`). Modal dùng portal giữ cơ chế cũ. Thông tin chỉ đọc dạng nhãn – giá trị. Nút Primary/Outline/Destructive.
+- **Khác:**
+  - `alert()` → toast (17 chỗ ở Công bố, 12 ở Danh sách danh mục, 4 ở Thống kê, 3 ở Thiết lập).
+  - `FilesTab` tự dựng thanh công cụ, bảng và phân trang theo chuẩn. 4 component cũ `OpenDataCategoryFilters/Actions/Grid/Pagination` không còn được dùng (chưa xóa).
+
+**Kiểm tra (chạy app, 5 màn):**
+- Tiêu đề cột 13px/700 đen cao 42px, hàng 48px, căn lề đúng, ô nhập 40px. Không còn chữ < 12px hay `font-mono`.
+- Modal Xem chi tiết (Thiết lập, Công bố, Danh sách danh mục) có tiêu đề 16px/500.
+- Tổng quan: 4 vòng tiến trình, danh sách xếp hạng và 6 cột `#059669` hiển thị đủ.
+- Không lỗi console. `tsc` không lỗi mới. `vite build` thành công.
+
+**Chưa xử lý / cần PM duyệt:**
+- Cổng thông tin dữ liệu mở công khai (`OpenDataPublicPortal.tsx`) đang khóa `[ ]`.
+- Chữ mới do agent thêm:
+  - Lý do khóa trong menu/tooltip: "Đã phê duyệt", "Đang chờ duyệt", "Đã bị từ chối", "Chỉ gửi duyệt yêu cầu ở trạng thái Bản nháp".
+  - Chú giải "Lượt chia sẻ" ở Tổng quan.
+  - Mô tả toast "Định dạng: …", "Nội dung: …", "Lý do: …".
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 119
+
+**Nội dung (PM yêu cầu, kèm ảnh mẫu):** Tab **Dữ liệu** của Danh mục trong ngành / Danh mục ngoài ngành:
+- Bỏ thanh tìm kiếm.
+- Bảng luôn có thanh phân trang.
+- Nút Lọc, Sắp xếp căn trái theo ảnh.
+- Bổ sung nút **Cập nhật**.
+
+**Thay đổi (`CategoryPage.tsx`, dùng chung cho cả 2 mục):**
+- **Thanh công cụ trái:**
+  - Cập nhật là nút icon 40×40 viền `#CBD5E1` (`RefreshCw`, tooltip "Cập nhật"). Khi bấm: về trang 1 và hiện toast "Đã cập nhật dữ liệu".
+  - Lọc và Sắp xếp là nút viền có chữ + icon. Khi panel đang mở, nút chuyển sang tông xanh `#EAF3FF`. Có chấm xanh khi đang áp dụng điều kiện.
+  - Thanh phải giữ nguyên: Gửi duyệt, Thêm bản ghi mới.
+- **Bỏ ô tìm kiếm + nút Tìm kiếm.** Danh sách tab Dữ liệu không còn lọc theo từ khóa. Ô tìm kiếm ở các tab khác giữ nguyên.
+- **Vùng Lọc:** thêm nút **"Áp dụng bộ lọc"** (Primary) vì không còn nút Tìm kiếm. Nhấn Enter ở ô giá trị cũng áp dụng. "Xóa bộ lọc" giữ nguyên.
+- **Phân trang luôn hiển thị**, kể cả khi không có bản ghi ("Hiển thị 0-0/0").
+
+**Kiểm tra (chạy app, cả 2 mục):**
+- Không còn ô tìm kiếm. Hàng nút trái gồm Cập nhật 40×40 → Lọc 81×40 → Sắp xếp 108×40, thẳng mép trái với bảng.
+- Bấm Cập nhật hiện toast.
+- Lọc Mã = "KHONG_TON_TAI" → Áp dụng: bảng báo "Không tìm thấy dữ liệu", phân trang "Hiển thị 0-0/0". Xóa bộ lọc trả lại 7 hàng.
+- Không lỗi console. `tsc` không lỗi mới. `vite build` thành công.
+
+## Cập nhật giao diện & menu (Ngày thực hiện: 06/10/2026) — 118
+
+**Nội dung (PM yêu cầu):**
+1. Biểu đồ "Lượt truy cập API theo danh mục" (Tổng quan danh mục) **giữ màu cũ** cho các thanh.
+2. Nhóm **Biên tập & Công khai**: tách mục "Biên tập danh mục" thành 2 mục cấp 2 là **Danh mục trong ngành** (đặt trên) và **Danh mục ngoài ngành**. Bên trong giữ thiết kế như màn Biên tập danh mục hiện tại.
+
+**Thay đổi:**
+- `CategoryDashboardPage.tsx`: thanh và chấm chú giải trả về màu cũ `#06B6D4` (= `rgb(6,182,212)`).
+- `layout/Sidebar.tsx`: thứ tự nhóm Biên tập & Công khai là Danh mục trong ngành (id `category-list`) → Danh mục ngoài ngành (id mới `category-list-external`) → Đơn vị thuộc BTP.
+- `layout/MainLayout.tsx`:
+  - Thêm route `category-list-external`, dùng chung màn `CategoryAListPage`.
+  - Thêm cấu hình tiêu đề trang cho route mới.
+  - Breadcrumb: "Danh mục dùng chung / Biên tập & Công khai / Danh mục trong ngành | Danh mục ngoài ngành".
+- Giữ id `category-list` cho Danh mục trong ngành để các liên kết sẵn có vẫn hoạt động (từ Khai thác báo cáo và Thiết lập danh mục: `/category-list?category=…`).
+
+**Kiểm tra (chạy app):**
+- Màu thanh `rgb(6,182,212)`.
+- Mở menu: Danh mục trong ngành (y=390) → Danh mục ngoài ngành (y=422) → Đơn vị thuộc BTP (y=454). Bấm Danh mục ngoài ngành: URL `/category-list-external`, mục được tô xanh, breadcrumb đúng.
+- Cả 2 màn hiện đủ 4 tab và 7 bản ghi. Không lỗi console. `tsc` không lỗi mới. `vite build` thành công.
+
+**Lưu ý:** hai mục hiện dùng **cùng dữ liệu mock** (chưa tách danh mục trong ngành và ngoài ngành). Khung trái vẫn ghi tiêu đề "Biên tập danh mục". Sơ đồ màn hình `ScreenFlowDiagram.tsx` chưa cập nhật.
+
+## Cập nhật giao diện & tài liệu (Ngày thực hiện: 06/10/2026) — 117
+
+**Nội dung (PM yêu cầu):** Trả **thẻ header** ở Tổng quan danh mục về kích thước cũ. **Chốt quy định:** các màn **Tổng quan** giữ kích thước lớn của thẻ header để cân bằng với biểu đồ bên dưới.
+
+**Thay đổi:**
+- `CategoryDashboardPage.tsx`: 4 thẻ header trở lại bố cục cũ.
+  - Padding 24px. Ô icon 48×48, icon 24px.
+  - Số **30px/700**, nhãn 14px/500 nằm dưới số. "+12%" dạng viên ở góc phải.
+  - Lưới `gap-6`.
+  - Màu, viền, bo góc vẫn theo chuẩn: viền `#E2E8F0`, bo 16px, không bóng, chữ `#0F172A`/`#64748B`, xu hướng `#16A34A` trên `#F0FDF4`.
+- `compomennt.md` mục 5.6.1: thêm **"Ngoại lệ – Thẻ header màn Tổng quan (Dashboard)"** gồm bảng thông số và code mẫu.
+
+**Kiểm tra (chạy app):** 4 thẻ 308×175px; số 30px/700; nhãn 14px/500. Biểu đồ vẫn hiển thị đủ. Không lỗi console. `tsc` không lỗi. `vite build` thành công.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 116
+
+**Nội dung (PM yêu cầu):**
+1. Chuẩn hóa khung modal dùng chung `common/BaseModal.tsx` theo **phương án A**. Ảnh hưởng 35 file / 52 chỗ gọi, gồm cả Master data và Xử lý dữ liệu; PM đồng ý.
+2. Chuẩn hóa **Tổng quan danh mục** (`CategoryDashboardPage.tsx`), PM đã mở khóa.
+
+**Thay đổi `BaseModal.tsx` (props giữ nguyên, không sửa file gọi):**
+- Tiêu đề **16px/500 `#020817`** (trước: 18px/700 `slate-800`, style inline). Phụ đề 13px/400 `#64748B` (trước: 12px/500).
+- Header viền dưới `#E2E8F0`, bỏ bóng.
+- Nút X dùng `BTN_GHOST_ICON` (icon 20px, bo 8px, có `aria-label`), bỏ hiệu ứng xoay.
+- Chân modal nền `#F8FAFC`, viền `#E2E8F0`.
+- **Giữ:** padding thân `p-6`, z-index 9000+ tăng dần, bấm nền để đóng, prop `customHeaderIcon` và `headerActions` (các màn Master data / Xử lý dữ liệu vẫn truyền icon).
+
+**Thay đổi `CategoryDashboardPage.tsx`:**
+- Tiêu đề trang 20px/700 `#2A0F0F`.
+- 4 thẻ thống kê theo mục 5.6.1. Xu hướng "+12%" 12px `#16A34A`.
+- 3 biểu đồ/danh sách xếp hạng nằm trong thẻ bo 16px, tiêu đề 14px/500.
+- Màu series theo bảng màu: `#155DFC`, `#10B981`, `#D97706`. Trục, chú giải, tooltip 12px `#64748B`. Bỏ chữ 11px.
+
+**Kiểm tra:**
+- `tsc`: `BaseModal` vẫn 6 lỗi có từ trước, không có lỗi mới. `CategoryDashboardPage` không lỗi.
+- `vite build` thành công.
+- **Kiểm tra trên trình duyệt (PM cho phép chạy):**
+  - 3 modal dùng BaseModal ("Quản lý phiên bản danh mục", "Thông tin chung danh mục", "Từ chối phê duyệt danh mục"): tiêu đề 16px/500 `#020817`, viền header `#E2E8F0`, không bóng, nút X 32px đóng được, chân `#F8FAFC`.
+  - Tổng quan danh mục: H1 20px/700 `#2A0F0F`, 7 thẻ bo 16px, không còn chữ < 12px. Biểu đồ tròn có 3 phần màu `#155DFC`/`#10B981`/`#D97706`, biểu đồ cột có 6 cột `#155DFC`.
+  - Không lỗi console.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 115
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện các mục còn lại của **Quản lý Danh mục dùng chung** và các modal chưa có trong `stauts.md`. PM chốt từ nay file chưa có trong `stauts.md` thì được sửa luôn. Giữ nguyên nội dung, dữ liệu và logic.
+
+**File đã sửa (24):**
+- Biên tập danh mục: `CategoryAListPage.tsx`, `CategoryPage.tsx`.
+- Đơn vị thuộc BTP: `CategoryMojUnitsPage.tsx`, `MojUnitDeleteConfirmModal.tsx`.
+- Khai thác báo cáo: `CategoryReportPage.tsx`.
+- Báo cáo:
+  - `reports/CategoryReportListPage.tsx`, `CategoryReportExploitationPage.tsx`, `CategoryReportStatusPage.tsx`, `CategoryReportVersionPage.tsx`.
+  - Phần dùng chung: `CategoryTrendAndStatsSection.tsx`, `CategorySystemExploitationTable.tsx`.
+- Modal:
+  - `BulkApproveModal`, `BulkRejectModal`.
+  - `CategoryInfoViewModal`, `CategoryStructureViewModal`, `CategoryVersionChangeModal`. Ba modal này dùng chung với Dữ liệu mở › Danh sách đã công bố.
+  - `CreateVersionModal`, `ArchiveRecordModal`, `RecordFormModal`, `UpdateApprovalModal`.
+  - `EntityVersionHistoryModal`, `EntityVersionDiffModal`.
+
+**Thay đổi chính:**
+- **Tiêu đề và tab:** H1 trang 20px/700 `#2A0F0F` (màn Đơn vị BTP). Tab và tab con dùng `tabClass`. Thẻ thống kê theo mục 5.6.1.
+- **Tìm kiếm và lọc:**
+  - Thanh tìm kiếm theo mục 5.19. Tìm kiếm và bộ lọc **chỉ chạy khi bấm Tìm kiếm/Enter** ở các màn: Biên tập danh mục, Đơn vị BTP, Khai thác báo cáo, Báo cáo phiên bản.
+  - Các bộ lọc không có nút áp dụng vẫn lọc ngay.
+  - Bộ lọc điều kiện AND/OR ở Biên tập danh mục giữ dạng hàng, đặt trong khung xám.
+- **Bảng:**
+  - Theo chuẩn mục 5.3, bỏ chữ `font-mono` và chữ < 12px.
+  - Cột số căn phải `tabular-nums`. Badge cho trạng thái/loại. Ngày giờ hiện 2 dòng.
+  - Cột Thao tác ghim phải khi cuộn ngang (Biên tập danh mục). Phân trang dùng thanh chung.
+- **Biểu đồ (báo cáo):** mỗi biểu đồ nằm trong một thẻ bo 16px, tiêu đề 14px/500. Trục và chú giải 12px `#64748B`. Màu series theo bảng màu (bỏ gradient).
+- **Nút:** Xuất file kiểu Outline. Phê duyệt kiểu Primary. Từ chối/Hủy công khai/Lưu trữ kiểu Destructive.
+- **Modal:** khung chuẩn mục 5.4 (14 modal trong `CategoryPage` đưa về `z-[110]`). Ô nhập 40px. Thông tin chỉ đọc dạng nhãn – giá trị.
+- **So sánh phiên bản:** phần bị xóa nền `#FEF2F2`/chữ `#B91C1C`, phần thêm nền `#F0FDF4`/chữ `#15803D`, phần sửa nền `#FFF7ED`.
+- `alert()` → toast.
+
+**Kiểm tra (chạy app, 7 màn):**
+- Biên tập danh mục, Đơn vị BTP, Khai thác báo cáo và 4 báo cáo:
+  - Tiêu đề cột 13px/700 đen, cao 42px; hàng 48px; căn lề đúng.
+  - Ô nhập 40px; không còn chữ < 12px hay `font-mono`.
+- Báo cáo danh sách/trạng thái/khai thác: bấm "Truy xuất dữ liệu" hiện đủ biểu đồ và bảng.
+- Modal Chi tiết bản ghi có tiêu đề 16px/500.
+- Không lỗi console. `tsc` không có lỗi mới. `vite build` thành công.
+
+**Chưa xử lý:**
+- Tổng quan danh mục (`CategoryDashboardPage.tsx`) đang khóa `[ ]`.
+- Khung header các modal dùng `common/BaseModal.tsx` (vd "Quản lý phiên bản danh mục" 18px/700) chờ PM chọn phương án.
+- Các chữ/nhãn do agent tự thêm chờ PM quyết định (xem mục 114).
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 114
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện **Danh mục dùng chung › Thiết lập danh mục** theo `compomennt.md`. Chỉ sửa các file PM đã mở khóa; giữ nguyên nội dung, dữ liệu và logic.
+
+**File đã sửa (13):**
+- `CategorySetupPage.tsx`
+- Tab: `SetupTab.tsx`, `AttributesTab.tsx`, `RelationshipsTab.tsx`, `ApprovalTab.tsx`
+- Modal: `CategoryWizardModal.tsx`, `AttributeFormModal.tsx`, `ApprovalRequestModal.tsx`, `ReviewApprovalModal.tsx`, `SimpleApproveModal.tsx`, `SimpleRejectModal.tsx`, `ExpireRequestModal.tsx`, `ExpireApproveModal.tsx`
+
+**Thay đổi chính:**
+- **Tab:**
+  - 4 tab chính và 4 tab con của Phê duyệt dùng `tabClass` (14px/600, cao 48px).
+  - Thẻ thống kê theo mục 5.6.1, bỏ nền gradient của tab Phê duyệt.
+- **Tìm kiếm:** ô tìm kiếm 40px, nút Tìm kiếm xanh lá, nút Bộ lọc dạng viền. Tìm kiếm **chỉ chạy khi bấm Tìm kiếm hoặc nhấn Enter**, không phân biệt dấu. Các nút lọc nhanh của tab Phê duyệt vẫn lọc ngay khi bấm.
+- **Bảng:**
+  - Theo chuẩn mục 5.3 (tiêu đề 42px, hàng 48px).
+  - Bỏ chữ `font-mono`; tên và mã xếp 2 dòng, chữ dài cắt kèm tooltip.
+  - Ngày giờ hiện 2 dòng; trạng thái, PK/FK và loại quan hệ dạng Badge; cột số căn phải.
+  - Phân trang dùng thanh chung.
+- **Cột thao tác tab Thiết lập danh mục** (6 thao tác, mục 5.3.2):
+  - Bên ngoài để Xem chi tiết và Sửa.
+  - Menu ⋯ gồm Xem dữ liệu, Trình duyệt, Hết hiệu lực, Xóa (cuối, màu đỏ).
+  - Mục bị khóa ghi lý do ngay trong menu.
+- **Tab Phê duyệt:** cột Thao tác ghim bên phải khi bảng cuộn ngang.
+- **Modal:**
+  - Ô nhập 40px; thông tin chỉ đọc dạng nhãn – giá trị; banner thông tin/cảnh báo theo bảng màu.
+  - Nút: Phê duyệt kiểu Primary, Từ chối kiểu Destructive, Hủy/Đóng kiểu Outline.
+  - Wizard dùng header chuẩn, thanh bước màu `#155DFC`.
+- `alert()` trong `CategorySetupPage` được đổi thành toast.
+
+**Kiểm tra (chạy app):**
+- Cả 4 tab: tab 14px/600 cao 48px; tiêu đề cột 13px/700 đen; hàng 48px; căn lề đúng.
+- Tìm "dan toc": gõ chưa lọc, nhấn Enter ra 1 kết quả.
+- Menu ⋯ đúng thứ tự và có lý do cho mục bị khóa.
+- Wizard có tiêu đề 16px/500, ô nhập 40px.
+- Đã mở các modal Trình duyệt, Chi tiết quan hệ, Phê duyệt, Từ chối, Phê duyệt hết hiệu lực.
+- Không lỗi console. `tsc` không có lỗi mới (các lỗi còn lại có từ trước). `vite build` thành công.
+
+**Chưa xử lý:**
+- Khung (header 18px/700, nút X, chân) của các modal dùng `common/BaseModal.tsx` vẫn theo kiểu cũ. File này dùng chung cho 35 file / 52 chỗ gọi, chờ PM quyết định.
+- 5 modal chưa có trong `stauts.md` không sửa: `BulkApproveModal`, `BulkRejectModal`, `CategoryInfoViewModal`, `CategoryStructureViewModal`, `CategoryVersionChangeModal`.
+- Một số dòng lý do trong menu ⋯ và tooltip là chữ mới, cần PM duyệt:
+  - "Đang chờ hết hiệu lực"
+  - "Chỉ áp dụng cho danh mục đang hiệu lực"
+  - "Trường đồng bộ từ Kho DLDC, không thể chỉnh sửa / không thể xóa"
+- Một số modal thêm nhãn cho lưới nhãn – giá trị: "Tên danh mục", "Mã", "Mã yêu cầu", "Loại". Dòng "BẢNG LIÊN KẾT #n" đổi thành "Bảng liên kết #n" (bỏ viết hoa).
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 113
+
+**Nội dung (PM yêu cầu, phương án A):** Chuẩn hóa hộp thoại xác nhận dùng chung `common/ConfirmModal.tsx` theo `compomennt.md`.
+
+**Phạm vi:** 9 hộp thoại trong 5 file dùng component này, gồm Thiết lập thu thập (`CollectionSetupPage`, `ServiceModals`), Thiết lập danh mục (`CategorySetupPage`, `RelationshipsTab`) và `DataCollectionList`. Các file gọi không phải sửa vì props giữ nguyên.
+
+**Thay đổi:**
+- Tiêu đề **16px/500/`#020817`** (trước là 18px/700). Phụ đề 13px/400 `#64748B`.
+- Thêm **nút X** đóng ở góc trên phải (mục 5.4). Thêm `role="alertdialog"`.
+- Bố cục chuẩn: header, thân và chân nền `#F8FAFC`. Nút căn phải theo thứ tự Hủy → Xác nhận (trước là 2 nút chia đôi chiều ngang).
+- Nút dùng bộ chuẩn: Hủy kiểu `BTN_OUTLINE`; xác nhận kiểu `BTN_DESTRUCTIVE` (`#DC2626`) cho delete/warning và `BTN_PRIMARY` (`#155DFC`) cho info/success. Nút cao 40px, có viền focus bàn phím, bỏ bóng.
+- Hộp nội dung bo 8px (trước 12px), nền `#F8FAFC`, viền `#E2E8F0`, chữ `#020817`.
+- Icon dùng màu trong bảng màu: delete `#DC2626`, warning `#D97706`, info `#155DFC`, success `#16A34A`.
+- **Giữ:** z-index 9100+ tăng dần để modal chồng nhau không bị che (lệch so với mục 4.2 nhưng cố ý giữ); bấm ra ngoài thì đóng; bấm xác nhận gọi `onConfirm()` rồi đóng.
+- `warning` vẫn dùng nút đỏ vì đang dùng cho cảnh báo xóa dữ liệu/xóa cấu trúc.
+
+**Kiểm tra (chạy app, Thiết lập thu thập):**
+- Cả 3 kiểu warning (Xóa dữ liệu thu thập, Xóa cấu trúc), info (Hoạt động) và delete (Xóa dịch vụ): tiêu đề 16px/500 `#020817`, khung bo 16px, nền mờ 50%. Nút Hủy/xác nhận cao 40px; nút đỏ `rgb(220,38,38)`, nút xanh `#155DFC`.
+- Nút X đóng được. Không lỗi console. `tsc`: số lỗi có sẵn trong file giảm từ 6 xuống 5 (còn `__activeModalsCount` có từ trước). `vite build` thành công.
+
+**Lưu ý nội dung (chưa sửa):** hộp "Kích hoạt lại dịch vụ" đang hiện phụ đề mặc định "Hành động này không thể hoàn tác". Chỗ gọi không truyền `subtitle` nên dùng mặc định.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 112
+
+**Nội dung (PM yêu cầu):** Màn Đối soát dữ liệu bỏ nút **Đồng bộ thủ công** và dòng **Tổng hợp** trong bảng.
+
+**Thay đổi:** `ReconciliationTemplate.tsx`:
+- Xóa nút "Đồng bộ thủ công" và phần mô phỏng đồng bộ chỉ nút này dùng (`syncStatuses`, `handleManualSync`).
+- Prop `hideManualSync` vẫn giữ để không phải sửa các trang đang truyền prop này; prop không còn tác dụng.
+- Xóa dòng "Tổng hợp (n bộ dữ liệu)" cuối bảng.
+- Thẻ thống kê "Tỷ lệ khớp" vẫn giữ nguyên cách tính.
+
+**Kiểm tra (chạy app):** kiểm tra 4 màn (Hộ tịch, Thi hành án, Danh mục ngoài ngành, Bản án). Không còn nút Đồng bộ thủ công và không còn dòng Tổng hợp. Bảng chỉ còn các dòng dữ liệu, các màn có nút "Xuất Excel" vẫn giữ nút này. Không lỗi console. `tsc` không lỗi mới. `vite build` thành công.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 111
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện các màn **Đối soát dữ liệu** (Quản lý thu thập → Đối soát dữ liệu) theo `compomennt.md`, giữ nguyên nội dung và dữ liệu. PM đã mở khóa `[x]` các file trong `stauts.md` mục 4.
+
+**Phạm vi:** 14 màn dùng chung `ReconciliationTemplate` (Danh mục Bộ ngoài ngành, Bản án/quyết định, các CSDL trong ngành).
+
+**Thay đổi:**
+- `ReconciliationTemplate.tsx`:
+  - Tab chuẩn 48px 14px/600 (`tabClass`). Thẻ thống kê chuẩn 5.6.1 (bo 16px, nhãn và số 16px).
+  - Thanh tìm kiếm 40px với nút Tìm kiếm xanh `#10B981`, nút Bộ lọc icon outline. Tìm kiếm và bộ lọc **chỉ áp dụng khi bấm Tìm kiếm/Enter**, không phân biệt dấu.
+  - Vùng lọc khung xám, ô 40px, nhãn 13px/600.
+  - Nút "Đồng bộ thủ công" kiểu Primary, "Xuất Excel" kiểu Outline.
+  - Bảng chuẩn (tiêu đề 42px, hàng 48px). Cột số căn phải `tabular-nums`; trạng thái là Badge căn trái; ngày giờ hiện 2 dòng.
+  - Cột Thu thập có tên và mã, cắt chữ kèm tooltip. 2 nút thao tác dạng icon có tooltip. Dòng Tổng hợp nền `#F8FAFC`.
+  - Phân trang dùng component chung. Modal Lịch sử đối soát theo chuẩn mục 5.4.
+- `ReconciliationDetailModal.tsx`: modal chuẩn. Phần thông tin hiển thị dạng nhãn – giá trị, thẻ số liệu bo 16px, trạng thái dạng Badge, nút Đóng kiểu Outline.
+- `ReconciliationHistoryTab.tsx`: bảng, Badge, phân trang, tìm kiếm và bộ lọc theo chuẩn.
+- Tab ẩn (`hideSetupTab`/`hideLogTab` = true ở cả 3 trang):
+  - `ReconciliationServiceSetupTab.tsx` và `ReconciliationLogTab.tsx`: chuẩn hóa thẻ, tìm kiếm, bảng, Badge. Thêm phân trang chung (trước đây không có).
+  - `AddServiceConfigModal.tsx` và `DeleteConfirmModal.tsx`: modal chuẩn, ô nhập 40px, nút Primary/Outline/Destructive.
+- Không sửa `common/StatusTag.tsx` (dùng chung). Trong các file đối soát, StatusTag được thay bằng Badge.
+
+**Kiểm tra (chạy app):**
+- 3 trang đại diện: tiêu đề cột 13px/700 đen cao 42px, hàng 48px. Căn lề: STT giữa, số phải, badge và ngày trái, thao tác giữa.
+- Modal Chi tiết và modal Lịch sử hiển thị đúng chuẩn.
+- Tìm "thang 12": gõ xong chưa lọc, nhấn Enter ra 1 kết quả.
+- 2 tab ẩn và 2 modal được kiểm tra trên server phụ bật tạm các tab này (không sửa code): ô nhập 40px, modal z 110, tiêu đề 16px/500.
+- Không lỗi console. `tsc` không có lỗi mới. `vite build` thành công.
+
+**Lưu ý:**
+- Dữ liệu ngày giữ nguyên định dạng `yyyy-MM-dd`.
+- Dữ liệu mock của `InternalReconciliationPage` dùng số ngẫu nhiên (có từ trước), nên số liệu đổi sau mỗi lần tải trang.
+- Prop `title` của template chưa được hiển thị (giữ nguyên như cũ).
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 110
+
+**Nội dung (PM yêu cầu):** Chuẩn hóa giao diện màn **CSDL Thông tin Bản án, quyết định từ TAND tối cao** (Xem dữ liệu thu thập) theo quy chuẩn chung, giữ nguyên dữ liệu mock.
+
+**Cách làm:** Màn này trước đây dùng khung chung `pages/DatabaseTemplate.tsx` + `DataDetailModal.tsx` (dùng chung cho ~23 trang và các màn đang khóa: InternalDataPage, Master data, ServiceDataDetail…). Để không ảnh hưởng các màn khác, tách giao diện riêng cho Bản án; **không sửa** 2 file dùng chung.
+- Mới: `src/components/court-judgment/courtJudgmentMock.ts` — sao chép nguyên trạng 7 bản ghi mock và kiểu `DetailRecord` từ `DataDetailModal.tsx`.
+- Mới: `src/components/court-judgment/CourtJudgmentView.tsx` — giao diện chuẩn: H1 20px/700/`#2A0F0F`; Bộ lọc nâng cao + Tải lại 40×40 căn phải (bỏ ô tìm kiếm và nút Sắp xếp như các màn khác); bộ lọc khung xám, ô 40px, giữ nguyên danh sách trường/phép so sánh và điều kiện mặc định; bảng chuẩn 42/48px, căn trái (STT, Thao tác căn giữa), Phân loại dạng Badge, cột Thao tác cố định bên phải khi cuộn ngang (mục 5.3.2); phân trang chung (số liệu thật 1-7/7 thay cho dòng cố định "1-10 / 12"); bỏ nút "Đóng" ở chân bảng; popup chi tiết chuẩn nhãn–giá trị 2 cột, giữ nguyên 17 trường và phần "Chi tiết lỗi dữ liệu" (Mô tả lỗi, Trường phát hiện lỗi, Trạng thái xử lý, Ghi chú bổ sung) dạng Badge.
+- Sửa: `src/components/pages/external/CourtJudgmentPage.tsx` — dùng `DatabasePageTemplate` (stretchHeight, thẻ trắng bo 16px) + `CourtJudgmentView`. Chế độ "xử lý" giữ nguyên.
+
+**Kiểm tra (chạy app):** H1 20px/700/`rgb(42,15,15)`; th 13px/700 đen; hàng 48px; 7 bản ghi hiển thị đủ; bộ lọc mở/thêm điều kiện bình thường; popup chi tiết đủ 17 trường; bản ghi lỗi (hàng 3, 4, 7) hiển thị đúng phần lỗi; cột Thao tác cố định bên phải; không lỗi console; `tsc` không lỗi mới; `vite build` thành công.
+
+**Lưu ý:** màn Cung cấp dữ liệu → Bản án (`provision-external-court-judgment`) dùng cùng trang nên cũng nhận giao diện mới.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 109
+
+**Nội dung (PM yêu cầu):** Bỏ tất cả nút **Kết xuất** ở các màn Xem dữ liệu thu thập.
+
+**Thay đổi:** Xóa nút Kết xuất tại 8 màn: Báo cáo viên pháp luật (`FamilyBaseSearchFilter.tsx`), Đấu giá tài sản (`AuctionSearchFilter.tsx`), Điều ước quốc tế (`InternationalSearchFilter.tsx`), Nhóm danh mục (`CategoryGroupSearchFilter.tsx`), Nhóm bảo hiểm xã hội (`SocialSecuritySearchFilter.tsx`), Nhóm người có công (`MeritoriousSearchFilter.tsx`), Nhóm trẻ em (`ChildrenSearchFilter.tsx`), Phần mềm thống kê ngành tư pháp (`LegalCenterPage.tsx`). Các màn còn lại vốn không có nút này. Thanh thao tác còn: Bộ lọc nâng cao + Tải lại.
+
+**Kiểm tra (chạy app, 15 màn):** không còn nút Kết xuất; thanh thao tác = Bộ lọc nâng cao + Tải lại; không lỗi console; `tsc` không lỗi mới; `vite build` thành công.
+
+## Cập nhật giao diện (Ngày thực hiện: 06/10/2026) — 108
+
+**Nội dung (PM yêu cầu):** Áp dụng quy chuẩn giao diện đã chốt trên màn CSDL Hộ tịch (thí điểm) cho **toàn bộ các màn còn lại trong "Xem dữ liệu thu thập"**. Giữ nguyên dữ liệu mock, chỉ sửa giao diện.
+
+**Màn đã chuẩn hóa (14):** Quốc tịch, Thi hành án dân sự, Biện pháp bảo đảm, CSDL quốc gia về PL, TT Tư pháp dân sự, Trợ giúp pháp lý (civil-legal-info), Phần mềm thống kê ngành tư pháp (LegalCenterPage), Báo cáo viên/Hòa giải (family-base), Đấu giá tài sản, Điều ước quốc tế, Nhóm danh mục, Nhóm bảo hiểm xã hội, Nhóm người có công, Nhóm trẻ em.
+
+**Thay đổi (giống màn Hộ tịch):**
+- Tiêu đề H1 20px/700/`#2A0F0F`, cao dòng 32px; dòng phụ "Tích hợp / Thuộc đơn vị" giá trị in đậm (màn nào vốn có).
+- Thanh thao tác căn phải: nút Bộ lọc 40×40 (`filterBtnClass`), Tải lại 40×40 icon outline, Kết xuất kiểu Outline (bỏ nền xanh lá). Không có ô tìm kiếm.
+- Bộ lọc nâng cao: khung xám `#F8FAFC`, ô nhập 40px, nút xóa điều kiện có tooltip, "Áp dụng bộ lọc" Primary, "Thêm điều kiện"/"Xóa tất cả" Outline; bỏ mũi tên trang trí.
+- Bảng: tiêu đề 42px 13px/700 đen nền `#F8FAFC`; hàng 48px kẻ `#E0E0E0`; STT và Thao tác căn giữa, còn lại căn trái; tên dài cắt + tooltip; nút Xem chi tiết dạng icon có tooltip; badge chuẩn (cột Phân loại); dòng rỗng "Không tìm thấy kết quả phù hợp".
+- Phân trang dùng component chung `Pagination` (mục 5.14).
+- Popup chi tiết: nền mờ 50%, bo 16px, tiêu đề 16px/500, nhãn–giá trị 13px (nhãn 500, giá trị 400, `#020817`), tiêu đề nhóm `SECTION_TITLE`, chân popup nút "Đóng" Outline; trạng thái dùng Badge.
+- `alert()` → toast (sonner).
+- Bố cục: 8 trang (Đấu giá, Báo cáo viên, Điều ước, Thống kê ngành, 4 trang Nhóm) bổ sung `stretchHeight` để nằm trong thẻ trắng bo 16px như các màn khác, bảng giãn hết chiều cao.
+
+**Kiểm tra (chạy app, 15 màn):** H1 20px/700/`rgb(42,15,15)`; th 13px/700 đen cao 42; hàng 48px; td 13px/400 đen; căn lề đúng quy tắc; nút lọc 40×40; ô bộ lọc 40px; trang hiện tại 32×32 nền `#E6F4FF` chữ `#0091FF`; popup z 110, nền đen 50%, bo 16px, tiêu đề 16px/500, nhãn–giá trị đúng chuẩn, nút Đóng 40px; không lỗi console. `tsc` không phát sinh lỗi mới; `vite build` thành công.
+
+**File bị ảnh hưởng:** `src/components/{nationality-acquisition (NationalityInfo*), civil-judgment, security-measures, legal-national, civil-legal-center, civil-legal-info, family-base, auction, international, category-group, social-security, meritorious, children}/*Modal|*SearchFilter|*Table.tsx`; `src/components/pages/internal/{LegalCenterPage, AuctionPage, FamilyBasePage, InternationalPage}.tsx`; `src/components/pages/external/{CategoryGroupPage, SocialSecurityGroupPage, MeritoriousGroupPage, ChildrenGroupPage}.tsx`.
+
+**Chưa xử lý:** CSDL Bản án (`CourtJudgmentPage`) dùng khung chung `pages/DatabaseTemplate.tsx` — khung này dùng cho ~23 trang khác, chờ PM quyết định.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 06/10/2026) — 107
+
+**Nội dung (PM yêu cầu):** Thay thanh phân trang theo mẫu PM cung cấp (MUI `Pagination` outlined / medium / rounded, số đo PM gửi) và **chốt thành quy định chung** (`compomennt.md` mục 5.14).
+
+**Quy chuẩn:** khối bọc padding 13px, chữ 14px/400 `#555555`; ô chọn số dòng 70×36 nền `#F0F0F0`; "Hiển thị **1-10/1622**" (số in đậm); nút trang 32×32, padding 0 6px, margin 0 3px, bo 8px, chữ 13px/700; trang thường nền `#F0F0F0` chữ đen; trang hiện tại nền `#E6F4FF` chữ `#0091FF` viền 1px `rgba(37,99,235,0.5)`; mũi tên ‹ › trong suốt `#020817`, vô hiệu ở trang đầu/cuối; dấu "…" 32×19 bo 16px; rút gọn `1 2 3 4 5 … N` / `1 … c-1 c c+1 … N` / `1 … N-4 … N`.
+
+**Thay đổi:**
+- `collectionUi.tsx`: thêm component dùng chung `Pagination` + hàm `getPageItems`.
+- Thay phân trang cũ tại: Danh sách dịch vụ (`CollectionSetupPage.tsx`), Quản lý nhật ký (`LogManagement.tsx`), CSDL Hộ tịch (`civil-registry/CivilRegistryInfoTable.tsx`), modal Xem chi tiết – tab Lịch sử (`ViewServiceModal.tsx`, 2 khối). Bỏ class `collection-pagination` (CSS cũ ép 13px).
+- `compomennt.md`: viết lại mục 5.14 (bảng quy chuẩn + code + ví dụ); mục 2 thêm nhóm màu phân trang; mục 5.1 bỏ "Trước/Sau, số trang" khỏi kiểu Outline.
+
+**Kiểm tra (chạy app):** khối pad 13px chữ 14px/400 `#555555`; trang hiện tại 32×32 13px/700 `#0091FF` nền `#E6F4FF` viền `rgba(37,99,235,0.5)` bo 8px; trang thường nền `#F0F0F0` chữ đen; ô chọn 70×36; Hộ tịch: `‹(vô hiệu) 1 2 3 4 5 … 125 ›` → bấm 5: `1 … 4 5 6 … 125` → bấm 125: `1 … 121–125`, › vô hiệu, "Hiển thị 1241-1250/1250"; Danh sách chọn 20 dòng → 20 hàng, 2 trang; Nhật ký 1 trang (‹ › vô hiệu); tab Lịch sử có phân trang mới; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/collectionUi.tsx`, `CollectionSetupPage.tsx`, `LogManagement.tsx`, `ViewServiceModal.tsx`, `src/components/civil-registry/CivilRegistryInfoTable.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 06/10/2026) — 106
+
+**Nội dung (PM yêu cầu):** Tiêu đề trang (H1) tăng độ đậm **500 → 700 (Bold)**.
+- `civil-registry/CivilRegistryInfoModal.tsx`: H1 20px/700/`#2A0F0F`, cao dòng 32px.
+- `compomennt.md` mục 1 và `GEMINI.md`: H1 Bold (700).
+
+**Kiểm tra (chạy app):** "Hồ sơ đăng ký khai sinh" 20px/700/`#2A0F0F` cao 32px; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/civil-registry/CivilRegistryInfoModal.tsx`, `tailieu/docs/compomennt.md`, `GEMINI.md`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 06/10/2026) — 105
+
+**Màn hình:** Xem dữ liệu thu thập → CSDL Hộ tịch điện tử (`civil-registry/CivilRegistryInfoModal.tsx`).
+
+**Nội dung thay đổi (PM yêu cầu):**
+- Tiêu đề trang (H1) theo thông số mẫu: **20px / 500 / `#2A0F0F`, cao dòng 32px**.
+- Dòng phụ trả về giá trị mock cũ, giữ kiểu nhãn thường – giá trị đậm: "Tích hợp: **{tên tập dữ liệu}**" / "Thuộc đơn vị: **Cục Hành chính tư pháp**".
+- Tiêu đề modal giữ 16px.
+- `compomennt.md` mục 1: tách "Tiêu đề trang (H1)" 20px / cao dòng 32px / `#2A0F0F` và "Tiêu đề modal" 16px / 500 / `#020817`; mục 2 thêm màu `#2A0F0F`. `GEMINI.md`: cập nhật bảng tóm tắt.
+
+**Kiểm tra (chạy app):** H1 20px/500/`#2A0F0F` cao 32px ở tập Khai sinh và Kết hôn; dòng phụ đổi theo tập dữ liệu; tiêu đề modal "Chi tiết bản ghi hộ tịch" 16px/500; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/civil-registry/CivilRegistryInfoModal.tsx`, `tailieu/docs/compomennt.md`, `GEMINI.md`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 06/10/2026) — 104
+
+**Màn hình:** Xem dữ liệu thu thập → CSDL Hộ tịch điện tử (`civil-registry/CivilRegistryInfoModal.tsx`).
+
+**Nội dung thay đổi (PM yêu cầu):**
+- Bỏ ô tìm kiếm và nút Tìm kiếm (giữ nút Bộ lọc nâng cao và Tải lại, căn phải); bỏ logic lọc theo từ khóa đi kèm.
+- Tiêu đề khối (tên tập dữ liệu) đổi thành **H1 20px / 500 / `#020817`**.
+- Dòng phụ theo mẫu: "Tích hợp: **mysql0210**" / "Thuộc đơn vị: **Hộ tịch**" — nhãn 13px `#64748B`, giá trị 13px/600 `#020817` (trước: "Tích hợp: {tên tập dữ liệu}. / Thuộc đơn vị: Cục Hành chính tư pháp.").
+- `compomennt.md` mục 1: **H1 16px → 20px**; `GEMINI.md` bảng tóm tắt: H1 20px.
+
+**Kiểm tra (chạy app):** H1 "Hồ sơ đăng ký khai sinh" 20px/500/`#020817`; dòng phụ 13px, giá trị đậm 600; không còn ô/nút tìm kiếm, còn nút Bộ lọc nâng cao và Tải lại; bảng 5 bản ghi; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/civil-registry/CivilRegistryInfoModal.tsx`, `tailieu/docs/compomennt.md`, `GEMINI.md`.
+
+## Cập nhật giao diện — làm thử (Ngày thực hiện: 06/10/2026) — 103
+
+**Màn hình:** Quản lý thu thập → Xem dữ liệu thu thập → **CSDL Hộ tịch điện tử** (phương án C — làm thử 1 màn trước khi nhân rộng). PM đã mở khóa `collection/DatabasePageTemplate.tsx`.
+
+**Nội dung thay đổi:**
+- `DatabasePageTemplate.tsx` (khung dùng chung 14 màn): thẻ nội dung bo 16px, viền `#E2E8F0`, bỏ shadow.
+- `InnerSidebar.tsx` (sidebar phụ "Danh mục dữ liệu", dùng chung): ô tìm kiếm và ô chọn cao 40px, viền `#E2E8F0`, nền trắng.
+- `civil-registry/CivilRegistryInfoModal.tsx`: tiêu đề khối 16px/500, mô tả 13px `#64748B`; **thêm thanh tìm kiếm** (logic tìm đã có nhưng thiếu ô nhập) — chỉ tìm khi bấm Tìm kiếm / Enter, không phân biệt dấu; modal "Chi tiết bản ghi hộ tịch": bo 16px, header/footer chuẩn, nhãn – giá trị theo mục 5.17 (bỏ uppercase, bỏ chữ đậm/mono/xanh ở giá trị), nút Đóng ở footer, bấm nền để đóng.
+- `civil-registry/CivilRegistryInfoSearchFilter.tsx`: thanh tìm kiếm theo mục 5.19 (ô 40px đệm 16px, nút Tìm kiếm `#10B981`, nút Bộ lọc nền trắng, nút Tải lại icon 40×40, cách nhau 6px); vùng điều kiện lọc nâng cao khung xám, ô 40px, nút Thêm điều kiện / Xóa tất cả (Outline), Áp dụng bộ lọc (Primary), nút xóa điều kiện có tooltip.
+- `civil-registry/CivilRegistryInfoTable.tsx`: bảng tiêu đề 42px 700 đen, hàng 48px kẻ `#E0E0E0`, căn lề theo 5.3.3 (STT, Thao tác giữa; còn lại trái), bỏ font mono, tên dài cắt `…` + tooltip; nút Xem chi tiết 32×32 có tooltip; phân trang theo 5.14; cỡ chữ 16px → 13px.
+
+**Kiểm tra (chạy app):** bảng 42px/48px/`#E0E0E0`; tìm "nguyen": gõ chưa Enter vẫn 5 hàng → Enter còn 1 ("Nguyễn Văn An"); bộ lọc nâng cao 2 điều kiện: mọi ô 40px; modal chi tiết 12 cặp nhãn 13px/500 – giá trị 13px/400 `#020817`; ô tìm sidebar phụ 40px; màn Đấu giá (dùng chung khung) vẫn hiển thị bảng bình thường; không lỗi console.
+
+**Chưa xử lý:** tổng số bản ghi ở phân trang là số mock cố định 1250 (hiển thị "1 - 10 / 1250" dù chỉ có vài bản ghi); nút "Áp dụng bộ lọc" chưa có chức năng (giữ nguyên như trước).
+
+**File bị ảnh hưởng:** `src/components/pages/collection/DatabasePageTemplate.tsx`, `src/components/pages/collection/InnerSidebar.tsx`, `src/components/civil-registry/CivilRegistryInfoModal.tsx`, `CivilRegistryInfoSearchFilter.tsx`, `CivilRegistryInfoTable.tsx`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 06/10/2026) — 102
+
+**Màn hình:** Thiết lập thu thập — Danh sách dịch vụ và tab Quản lý nhật ký.
+
+**Nội dung thay đổi (PM yêu cầu):**
+- Nút **Bộ lọc** về **nền trắng** (viền `#CBD5E1`, icon `#475569`, hover `#F8FAFC`); đang mở: nền `#EAF3FF`, viền `#BFDBFE`, icon `#155DFC` + icon X. Bỏ kiểu nền xanh `#EFF6FF`/icon `#3B82F6` của BTP (`filterBtnClass(open)` trong `collectionUi.tsx`).
+- Vùng bộ lọc nâng cao: lưới `auto-fill` → **`auto-fit`** — các ô lọc tự giãn đều lấp đủ chiều ngang khung (trước đó tab Nhật ký 4 ô vẫn chừa cột trống bên phải).
+- `compomennt.md`: mục 2 bỏ màu `#3B82F6`; mục 5.1 gộp nút Bộ lọc vào kiểu Icon outline; mục 5.19 cập nhật màu nút Bộ lọc và quy tắc ô lọc tự giãn đều.
+
+**Kiểm tra (chạy app):** nút Bộ lọc đóng nền trắng / mở nền `#EAF3FF` ở cả 2 tab; 1600px: Danh sách 6 ô × 205px, Nhật ký 4 ô × 311px, sát đều 2 bên (lệch 0px); 1280px: Nhật ký 4 ô đầy hàng, Danh sách xuống 2 hàng (4 + 2 ô cùng độ rộng cột); không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/collectionUi.tsx`, `CollectionSetupPage.tsx`, `LogManagement.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 101
+
+**Màn hình:** Thiết lập thu thập — Danh sách dịch vụ và tab Quản lý nhật ký.
+
+**Nội dung thay đổi (PM yêu cầu):**
+- Khôi phục **khung xám** bao vùng bộ lọc: nền `#F8FAFC`, viền 1px `#E2E8F0`, bo 8px, đệm 16px, cách thanh tìm kiếm 15px (`FILTER_GRID_CLS` trong `collectionUi.tsx`, dùng chung cho 2 tab).
+- Thanh tìm kiếm không còn "dính lề": nguyên nhân là vùng cuộn `overflow-auto` không có lề ngang nên viền focus 2px của ô tìm kiếm (và nút sát mép phải) bị cắt. Vùng cuộn nới 2px mỗi bên (`-mx-0.5 px-0.5`) — viền focus hiển thị đủ, nội dung vẫn thẳng hàng với tab và thẻ thống kê (x=274).
+- `compomennt.md` mục 5.19: vùng bộ lọc có khung xám; thêm quy tắc chừa chỗ cho viền focus.
+
+**Kiểm tra (chạy app):** cả 2 tab — ô tìm x=274, vùng cuộn x=272 (chừa 2px), viền focus hiển thị đủ; khung lọc nền `#F8FAFC` viền `#E2E8F0` bo 8px đệm 16px cách thanh 15px; nhãn 13px/600/`#0E0D0D`; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/collectionUi.tsx`, `CollectionSetupPage.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 100
+
+**Tài liệu (`compomennt.md`):** thêm mục **5.19 Tìm kiếm và Bộ lọc** theo số đo trang chuẩn BTP; PM chốt: mọi ô nhập cao **40px**, nhãn bộ lọc theo BTP (13px/600/`#0E0D0D`), nút Bộ lọc theo BTP (nền `#EFF6FF`, viền `#BFDBFE`, icon `#3B82F6`), không thêm nút X trong ô tìm kiếm; chỉ ra kết quả khi bấm Tìm kiếm / Enter.
+- Mục 1: thêm dòng nhãn bộ lọc. Mục 2: thêm màu `#0E0D0D`, `#3B82F6` (+ hover `#DBEAFE`). Mục 5.1: tách dòng "Nút Bộ lọc". Mục 5.2: ô nhập 35px → 40px cho mọi ô. Mục 7.2: thêm mục kiểm tra.
+
+**Màn hình:** Thiết lập thu thập — Danh sách dịch vụ (`CollectionSetupPage.tsx`), tab Quản lý nhật ký (`LogManagement.tsx`); kèm `ViewServiceModal.tsx`, `layout/Sidebar.tsx`, `collectionUi.tsx`:
+- Tìm kiếm + bộ lọc chỉ áp dụng khi bấm nút Tìm kiếm hoặc Enter (tách giá trị đang nhập / đã áp dụng); so khớp không phân biệt hoa thường và dấu tiếng Việt; tìm xong về trang 1.
+- Ô tìm kiếm cao 40px, đệm 16px; placeholder theo mẫu "Tìm kiếm theo …" (danh sách bổ sung "mã dịch vụ"; nhật ký "tên đăng nhập, họ và tên, hành động"); khoảng cách nút 6px.
+- Nút Bộ lọc theo màu BTP. Vùng bộ lọc bỏ khung bao, lưới ô ~193px cách 8px, cách thanh tìm kiếm 15px; nhãn 13px/600/`#0E0D0D` cách ô 2px; ô lọc / ô ngày 40px.
+- `INPUT_CLS` 40px (form Thêm mới/Chỉnh sửa tự áp dụng); ô tìm bảng/trường ở tab Cấu trúc và ô tìm menu sidebar 40px.
+
+**Kiểm tra (chạy app, cửa sổ 1534px):** gõ "ho tich" chưa bấm vẫn 36 dịch vụ → bấm Tìm kiếm còn 3 → xóa + Enter về 36; nhật ký "dang nhap" 10 → 2; lọc Bản nháp chỉ áp dụng sau khi bấm (36 → 2); ô tìm 40px pad 16; khoảng cách 6px/6px; nút Bộ lọc đúng màu; nhãn bộ lọc 13px/600/`#0E0D0D` cao 20, thanh → nhãn 15px, nhãn → ô 2px, ô 199×40 cách 8px; mọi ô nhập (danh sách, sidebar, Thêm mới, chi tiết) cao 40px; không lỗi console.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`, `src/components/pages/collection/collectionUi.tsx`, `CollectionSetupPage.tsx`, `LogManagement.tsx`, `ViewServiceModal.tsx`, `src/components/layout/Sidebar.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 99
+
+**Màn hình:** Thiết lập thu thập → tab **Quản lý nhật ký** (`LogManagement.tsx`) — áp dụng `compomennt.md`.
+
+**Nội dung thay đổi:**
+- Thanh công cụ: ô tìm kiếm cao 35px; nút Tìm kiếm nền `#10B981` 40×40; nút Bộ lọc viền `#CBD5E1`, đang mở nền `#EAF3FF` (đổi icon thành X).
+- Bộ lọc nâng cao: khung bo 16px; nhãn theo kiểu nhãn trường chung (13px/500/`#020817`, bỏ `uppercase`); ô chọn / ô ngày cao 35px.
+- Bảng: tiêu đề 42px 700 đen nền `#F8FAFC`; hàng 48px kẻ `#E0E0E0`; căn lề theo mục 5.3.3 (STT, Thao tác giữa; còn lại trái); Người dùng và Hành động 2 dòng (dòng phụ `#64748B`), mỗi dòng cắt `…` + tooltip; Thời gian `dd/MM/yyyy` + giờ xuống dòng; badge trạng thái chuẩn (thay `StatusTag`); nút Xem chi tiết 32×32 có tooltip (thay nút tròn `title`).
+- Phân trang theo mục 5.14 (bỏ `opacity-50`); cỡ chữ vùng bảng 16px → 13px.
+- Modal Chi tiết nhật ký: bo 16px, z-index 100, bấm nền để đóng; tiêu đề 16px/500; nhãn – giá trị theo mục 5.17 (lưới 2 cột, trống hiển thị `-`); footer `#F8FAFC` nút Đóng (Outline).
+- `alert()` kết xuất → Toast.
+- **Sửa lỗi bộ lọc ngày:** trước dùng phép "hoặc" nên chọn cả Từ ngày và Đến ngày vẫn ra bản ghi ngoài khoảng; nay lọc theo cả hai mốc (tính cả ngày cuối).
+
+**Kiểm tra (chạy app):** bảng 42px/48px/`#E0E0E0`, không còn nút/badge lệch chuẩn; ô nhập/chọn 35px; lọc 19/12/2023–19/12/2023 → 8/10 bản ghi, chỉ còn ngày 19/12/2023; tooltip "Xem chi tiết"; modal chi tiết 8 cặp nhãn 13px/500 – giá trị 13px/400 `#020817`; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/LogManagement.tsx`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 98
+
+**Nội dung:** PM yêu cầu nhãn trường (form Thêm mới/Chỉnh sửa) và tên trường (Xem chi tiết) đổi sang **màu đen**, giữ độ đậm Medium (500).
+- `collectionUi.tsx`: `FIELD_LABEL` `#64748B` → `#020817`.
+- `compomennt.md` mục 1, 5.2, 5.17 (kèm code mẫu và ví dụ hiển thị): màu nhãn/tên trường `#020817`; ghi chú tên trường và giá trị cùng màu, phân biệt bằng độ đậm 500/400.
+
+**Kiểm tra (chạy app):** nhãn Thêm mới (6), Chỉnh sửa (6), tên trường Xem chi tiết (15) đều 13px/500/`#020817`; giá trị 13px/400/`#020817` (email giữ màu liên kết); không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/collectionUi.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật tài liệu & giao diện (Ngày thực hiện: 05/10/2026) — 97
+
+**Tài liệu (`compomennt.md`):** đồng bộ **một kiểu nhãn trường** cho form Thêm mới/Chỉnh sửa và tên trường ở Xem chi tiết: **13px / Medium (500) / `#64748B`**; giá trị / chữ nhập 13px/400 `#020817`.
+- Mục 1 Typography: gộp dòng "Nhãn (Label) form" thành "Nhãn trường" dùng chung; "Ô nhập liệu / Giá trị trường".
+- Mục 5.2: nhãn `#64748B`; ô nhập vô hiệu dùng nền `#F1F5F9` + chữ `#94A3B8` (bỏ `opacity-50`, thống nhất với nút mục 5.1); dấu `*`, viền lỗi, chữ lỗi dùng mã `#DC2626` (thay class `red-600`).
+- Mục 5.17: tên trường cùng kiểu với nhãn form; giá trị `#020817`; ghi màu bằng mã hex thay tên Tailwind.
+
+**Màn hình:** Thiết lập thu thập — `ServiceModals.tsx` (Thêm mới, Chỉnh sửa, Cài đặt nâng cao) và `ViewServiceModal.tsx` (Xem chi tiết, modal Ngừng hoạt động):
+- Thêm hằng `FIELD_LABEL`, `LABEL_CLS`, `FIELD_VALUE`, `REQUIRED_MARK` trong `collectionUi.tsx`; `INPUT_CLS` vô hiệu theo quy tắc mới.
+- 13 nhãn form + 47 tên trường + 41 giá trị chuyển sang hằng chung; 7 dấu `*` dùng `#DC2626`.
+
+**Kiểm tra (chạy app):** nhãn Thêm mới (6), Chỉnh sửa (6) và tên trường Xem chi tiết (15/8/5 ở 3 tab) đều 13px/500/`#64748B`; giá trị 13px/400/`#020817` (email giữ màu primary vì là liên kết); dấu `*` `#DC2626`; không lỗi console.
+
+**Chưa áp dụng:** nhãn trong tab Cấu hình kết nối / Cấu hình thu thập / Nạp cấu trúc của form (component `[ ]` đang khóa); nhãn panel Bộ lọc ở danh sách.
+
+**File bị ảnh hưởng:** `tailieu/docs/compomennt.md`, `src/components/pages/collection/collectionUi.tsx`, `ServiceModals.tsx`, `ViewServiceModal.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 96
+
+**Màn hình:** Thiết lập thu thập → modal **Xem chi tiết dịch vụ** (`ViewServiceModal.tsx`).
+
+**Nội dung thay đổi:**
+- Thêm **footer cố định** ở đáy modal (`px-6 py-4`, nền `#F8FAFC`, viền trên `#E2E8F0`), không cuộn theo nội dung.
+- Tab Thông tin chung / Cấu hình kết nối / Cấu hình thu thập: nút **Chỉnh sửa** chuyển từ cuối nội dung tab xuống footer (bên phải).
+- Tab Cấu trúc: 3 nút chuyển từ đầu nội dung xuống footer — **Xóa cấu trúc** (Destructive, bên trái); **Nạp cấu trúc** (Outline), **Sửa cấu trúc** (Primary) bên phải.
+- Tab Lịch sử hoạt động: không có thao tác → không hiển thị footer.
+
+**Kiểm tra (chạy app):** modal 1024×800 ở cả 5 tab, footer sát đáy modal; không còn nút thao tác trong vùng nội dung; nút Chỉnh sửa giữ nguyên vị trí khi cuộn nội dung; bấm Chỉnh sửa → `/collection-setup/edit/1?tab=general`, Sửa cấu trúc → `?tab=mapping`; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/ViewServiceModal.tsx`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 95
+
+**Màn hình:** Thiết lập thu thập → modal **Xem chi tiết dịch vụ** (`ViewServiceModal.tsx`).
+
+**Nội dung thay đổi:**
+- Cố định kích thước modal **1024 × 800px**, căn giữa màn hình; màn hình nhỏ hơn thì thu theo khung (`max-w-full`, `max-h-full`, lề 16px).
+- Header (breadcrumb, tên dịch vụ, badge) và thanh tab đứng yên; **chỉ vùng nội dung tab cuộn bên trong modal** (`overflow-y-auto`, thanh cuộn `custom-scrollbar`). Lớp phủ nền không còn cuộn.
+- Bỏ `min-h-[500px]` và `sticky` của thanh tab (không còn cần vì header không cuộn).
+
+**Kiểm tra (chạy app):** khổ 1600×1000 — modal 1024×800 ở cả 5 tab; khổ 1280×720 — modal 1024×688 vừa khung; tab Thông tin chung / Cấu trúc (và Cấu hình kết nối, Lịch sử ở khổ nhỏ) có thanh cuộn bên trong; cuộn chuột: nội dung cuộn 506px, tiêu đề modal đứng yên; lớp phủ không cuộn; không lỗi console.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/ViewServiceModal.tsx`.
+
+## Cập nhật giao diện toàn hệ thống (Ngày thực hiện: 05/10/2026) — 94
+
+**Phạm vi:** Sidebar, Header, Breadcrumb dùng chung (`layout/Sidebar.tsx`, `layout/TopBar.tsx`) — PM chọn phương án 1: sửa theo `compomennt.md` mục 4.4, 5.15, 5.18; đổi tên logo; **giữ** vị trí "Xử lý dữ liệu" và cấu trúc breadcrumb 3 cấp.
+
+**Nội dung thay đổi:**
+- Sidebar: rộng 288px → **250px** (thu gọn giữ 80px), viền phải `#E2E8F0`; nút thu gọn chuyển thành nút tròn 24px đè mép phải.
+- Logo: "Kho DLDC" 16px/700 → **"Kho Dữ liệu dùng chung"** 13px/600 `#020817`; dòng phụ "Hệ thống quản lý Bộ Tư Pháp" 10px/700 → **"Thuộc quản lý của Bộ Tư pháp"** 12px/400 `#64748B`; chữ cách mép trái 54px.
+- Ô tìm menu: cao 35px, 13px/400, nền trắng, viền `#E2E8F0`.
+- Menu cấp 1: cao 35px, bo 10px, cách mép 6px; hàng cha `#475569`, mục lá `#020817`, hover `#F1F5F9`. Menu cấp 2–4: cao 30px, bo 10px, chữ `#020817`.
+- Mục đang chọn (mọi cấp): nền `#EAF3FF`, chữ `#155DFC`, đậm 500 (trước: `blue-50`/`blue-700`/400).
+- Đổi tên menu: "Tổng quan thu thập" → **Dashboard**; "Dữ liệu chủ" (cấp 1) → **Quản lý dữ liệu chủ**.
+- Số phiên bản cuối sidebar: v2.4.6 → **v2.6.24**.
+- Header: viền dưới `#E2E8F0`; nút chuông 36×36 bo 8px → **40×40 tròn**, icon `#475569`.
+- Breadcrumb: 14px, mục trước `slate-500`, mục cuối `slate-900`/500 → **12px/400 `#020817`** cho mọi mục và dấu `/` (giữ 3 cấp).
+- `compomennt.md` 4.4 / 5.18: cập nhật ghi chú sidebar và tên menu.
+
+**Kiểm tra (chạy app):** sidebar 250px, logo x=54 không bị cắt chữ, ô tìm 35px, cấp 1 cao 35px x=6 bo 10px, cấp 2 cao 30px x=22, mục "Thiết lập thu thập" đang chọn nền `#EAF3FF` chữ `#155DFC` 500; breadcrumb 12px/400 `#020817`; chuông 40×40 tròn; thu gọn 80px ↔ mở 250px; không lỗi console; build thành công.
+
+**Chưa đổi:** nhãn breadcrumb/tiêu đề trang của các màn liên quan vẫn ghi "Tổng quan thu thập", "Dữ liệu chủ" (giữ nguyên breadcrumb theo yêu cầu). Lỗi TS có sẵn ở `TopBar.tsx` dòng 60–62 (`useRef` null) — không thuộc thay đổi này.
+
+**File bị ảnh hưởng:** `src/components/layout/Sidebar.tsx`, `src/components/layout/TopBar.tsx`, `tailieu/docs/compomennt.md`.
+
+## Cập nhật giao diện (Ngày thực hiện: 05/10/2026) — 93
+
+**Màn hình:** Thiết lập thu thập → modal **Thêm mới**, **Chỉnh sửa** (`ServiceModals.tsx`) và **Xem chi tiết** (`ViewServiceModal.tsx`) — áp dụng `compomennt.md`.
+
+**Nội dung thay đổi:**
+- Tách bộ class/thành phần chuẩn dùng chung trong mục Thu thập ra file mới `collection/collectionUi.tsx` (nút Primary/Outline/Destructive/Page/Ghost icon, Badge, Tab, Input, tiêu đề khối, thẻ, tooltip, cắt chữ); `CollectionSetupPage.tsx` dùng lại từ file này. `Badge` nhận thêm `variant` để thay `StatusTag`.
+- **Thêm mới / Chỉnh sửa:** khung modal bo 16px, z-index 100 (modal con 110), bỏ hiệu ứng blur; tiêu đề 16px/500 không uppercase; tab 48px 14px/600; ô nhập/chọn cao 35px; vùng đính kèm viền nét đứt theo mục 5.13; nút footer Hủy/Kiểm tra kết nối (Outline), Tiếp tục/Thêm/Cập nhật (Primary) cao 40px bo 8px; 3 modal kết quả kiểm tra kết nối và modal Cài đặt nâng cao chuẩn hóa tiêu đề, nút, header/footer; `alert()` → Toast.
+- **Xem chi tiết:** header (breadcrumb 12px, H1 16px/500), badge trạng thái theo trạng thái đã chuẩn hóa (khớp danh sách); tab 48px 14px/600; thẻ khối bo 16px viền `#E2E8F0`, tiêu đề khối 14px/500; 13 `StatusTag` → `Badge` (viền 1px, 13px/400, cao 26px); nút Chỉnh sửa/Sửa cấu trúc (Primary), Nạp cấu trúc/Xuất CSV (Outline), Xóa cấu trúc (Destructive); phân trang theo mục 5.14; ô tìm/chọn 35px; bảng tiêu đề 42px 700, hàng 48px kẻ `#E0E0E0`; modal Ngừng hoạt động bên trong chuẩn hóa, `alert()` → Toast; bỏ toàn bộ `uppercase`, `opacity-50`, `rounded-md`.
+- **Sửa lỗi:**
+  - Mở Xem chi tiết / Chỉnh sửa từ URL dùng dữ liệu chưa chuẩn hóa → trạng thái khác danh sách (VD #5). Nay dùng `normalizeService`.
+  - `AddServiceModal` / `EditServiceModal` gọi `return null` trước hook (vi phạm quy tắc hook, sinh cảnh báo React) → tách hàm bọc ngoài.
+
+**Kiểm tra (chạy app, đo computed style):** Thêm mới, Chỉnh sửa, 5 tab Xem chi tiết — không còn nút/ô nhập/badge lệch chuẩn; bảng 42px/48px/`#E0E0E0`; header #5 hiển thị "Ngưng hoạt động" khớp danh sách; không lỗi console; danh sách vẫn đúng logic 10/10; build thành công.
+
+**Chưa sửa (ngoài phạm vi/khóa):** nội dung tab Cấu hình kết nối / Cấu hình thu thập / Nạp cấu trúc trong form (component `[ ]`); `ConfirmModal`, `BaseModal` dùng chung.
+
+**File bị ảnh hưởng:** `src/components/pages/collection/collectionUi.tsx` (mới), `ServiceModals.tsx`, `ViewServiceModal.tsx`, `CollectionSetupPage.tsx`.
+
 ## Gộp nhánh nhalt8/kdlbtp_v1.4 (Ngày thực hiện: 05/10/2026) — 92
 
 **Nội dung:** Gộp `origin/main` (đã chứa PR #10 — `nhalt8/kdlbtp_v1.4`, commit `8c2fcd58`) vào `main` sau phiên bản v2.6.24. Sao lưu trước khi gộp: nhánh `backup/v2.6.24-truoc-merge`.

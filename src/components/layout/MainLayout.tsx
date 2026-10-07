@@ -287,8 +287,12 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     description: 'Thiết lập và quản lý danh mục dữ liệu'
   },
   'category-list': {
-    title: 'Biên tập danh mục dùng chung',
-    description: 'Biên tập và quản lý các danh mục dùng chung'
+    title: 'Biên tập danh mục trong ngành',
+    description: 'Biên tập và quản lý các danh mục dùng chung trong ngành'
+  },
+  'category-list-external': {
+    title: 'Biên tập danh mục ngoài ngành',
+    description: 'Biên tập và quản lý các danh mục dùng chung ngoài ngành'
   },
   'collection-setup': {
     title: 'Thiết lập thu thập',
@@ -526,6 +530,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'category-dashboard' && <CategoryDashboardPage />}
             {currentPage === 'category-setup' && <CategorySetupPage userRole={userRole} />}
             {currentPage === 'category-list' && <CategoryAListPage />}
+            {currentPage === 'category-list-external' && <CategoryAListPage key="external" />}
             {currentPage === 'category-moj-units' && <CategoryMojUnitsPage />}
             {currentPage === 'category-b' && <CategoryBPage />}
             {currentPage === 'category-c' && <CategoryCPage />}
@@ -1033,26 +1038,26 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     'collection-reconciliation': ['Quản lý thu thập', 'Đối soát dữ liệu'],
 
     // Reconciliation - External Ministry
-    'reconciliation-external-ministry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ ngoài ngành'],
-    'reconciliation-external-categories': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ ngoài ngành', 'Đối soát tổng hợp các danh mục từ Bộ ngành ngoài (qua Trung tâm dữ liệu Quốc gia)'],
-    'reconciliation-external-court-judgment': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ ngoài ngành', 'Đối soát tổng hợp dữ liệu về Thông tin Bản án, quyết định'],
+    'reconciliation-external-ministry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Ngoài ngành'],
+    'reconciliation-external-categories': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Ngoài ngành', 'Đối soát tổng hợp các danh mục từ Bộ ngành ngoài (qua Trung tâm dữ liệu Quốc gia)'],
+    'reconciliation-external-court-judgment': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Ngoài ngành', 'Đối soát tổng hợp dữ liệu về Thông tin Bản án, quyết định'],
 
     // Reconciliation - Internal Ministry
-    'reconciliation-internal-ministry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành'],
-    'reconciliation-internal-civil-registry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL Hộ tịch điện tử'],
-    'reconciliation-internal-registry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'HT quản lý hồ sơ QT (3)'],
-    'reconciliation-internal-civil-judgment': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL thi hành án dân sự (16)'],
-    'reconciliation-internal-security-measures': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL về biện pháp BD (4)'],
-    'reconciliation-internal-legal-national': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL quốc gia về PL (5)'],
-    'reconciliation-internal-civil-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL TT Tư Pháp dân sự (2)'],
-    'reconciliation-internal-civil-legal-info': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'HTTT trợ giúp pháp lý (6)'],
-    'reconciliation-internal-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở'],
-    'reconciliation-internal-family-base': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL PB, GĐ và HG cơ sở (16)'],
-    'reconciliation-internal-auction': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL quản lý đấu giá TS (24)'],
+    'reconciliation-internal-ministry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành'],
+    'reconciliation-internal-civil-registry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL Hộ tịch điện tử'],
+    'reconciliation-internal-registry': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'HT quản lý hồ sơ QT (3)'],
+    'reconciliation-internal-civil-judgment': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL thi hành án dân sự (16)'],
+    'reconciliation-internal-security-measures': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL về biện pháp BD (4)'],
+    'reconciliation-internal-legal-national': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL quốc gia về PL (5)'],
+    'reconciliation-internal-civil-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL TT Tư Pháp dân sự (2)'],
+    'reconciliation-internal-civil-legal-info': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'HTTT trợ giúp pháp lý (6)'],
+    'reconciliation-internal-legal-center': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'Phần mềm tk ngành tư pháp phục vụ chia sẻ dữ liệu mở'],
+    'reconciliation-internal-family-base': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL PB, GĐ và HG cơ sở (16)'],
+    'reconciliation-internal-auction': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL quản lý đấu giá TS (24)'],
     'reconciliation-internal-international': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liu từ Bộ trong ngành', 'CSDL Hợp tác quốc tế (6)'],
-    'reconciliation-internal-statistics': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'Thu thập số liệu thống kê'],
-    'reconciliation-internal-notary': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'HTTT các tổ chức hành nghề công chứng'],
-    'reconciliation-internal-authentication': ['Quản lý thu thập', 'Đối soát dữ liệu', 'Đối soát dữ liệu từ Bộ trong ngành', 'CSDL chứng thực'],
+    'reconciliation-internal-statistics': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'Thu thập số liệu thống kê'],
+    'reconciliation-internal-notary': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'HTTT các tổ chức hành nghề công chứng'],
+    'reconciliation-internal-authentication': ['Quản lý thu thập', 'Đối soát dữ liệu', 'CSDL Trong ngành', 'CSDL chứng thực'],
 
     // Processing
     'processed-data': ['Xử lý dữ liệu', 'Dữ liệu đã xử lý'],
@@ -1079,7 +1084,8 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
 
     // Category
     'category-setup': ['Danh mục dùng chung', 'Thiết lập danh mục'],
-    'category-list': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Biên tập danh mục'],
+    'category-list': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Danh mục trong ngành'],
+    'category-list-external': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Danh mục ngoài ngành'],
     'category-moj-units': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Đơn vị thuộc BTP'],
     'category-a': ['Danh mục dùng chung', 'Biên tập & Công khai', 'Biên tập danh mục', 'Biên tập danh mục A'],
     'category-published-list': ['Danh mục dùng chung', 'Công khai danh mục'],

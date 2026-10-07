@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, SECTION_TITLE } from './collectionUi';
 
 interface AgentModalProps {
   isOpen: boolean;
@@ -46,128 +47,115 @@ export function AgentModal({ isOpen, onClose, onSave, editingData }: AgentModalP
   };
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 font-sans backdrop-blur-sm">
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white rounded-t-lg">
-            <h2 className="text-base font-bold uppercase tracking-tight text-slate-900">
-              {editingData ? 'Cập nhật trạm kết nối' : 'Thêm trạm kết nối'}
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
-              title="Đóng"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+    <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+      <div role="dialog" aria-modal="true" aria-labelledby="agent-modal-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+          <h2 id="agent-modal-title" className="text-[16px] font-medium text-[#020817]">
+            {editingData ? 'Cập nhật trạm kết nối' : 'Thêm trạm kết nối'}
+          </h2>
+          <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="space-y-4">
-              {/* Tên agent */}
-              <div>
-                <label className="block text-[13px] font-bold text-slate-700 mb-1.5">
-                  Tên trạm kết nối <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Tên trạm kết nối"
-                  required
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
+          <div className="px-6 py-4 overflow-y-auto custom-scrollbar space-y-4">
+            {/* Tên agent */}
+            <div>
+              <label className={LABEL_CLS}>
+                Tên trạm kết nối <span className={REQUIRED_MARK}>*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Tên trạm kết nối"
+                required
+                className={INPUT_CLS}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
 
-              {/* Trạng thái agent */}
-              <div>
-                <label className="block text-[13px] font-bold text-slate-700 mb-1.5">
-                  Trạng thái trạm kết nối <span className="text-red-500">*</span>
-                </label>
-                <select
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                >
-                  <option value="active">Kích hoạt</option>
-                  <option value="inactive">Không kích hoạt</option>
-                </select>
-              </div>
+            {/* Trạng thái agent */}
+            <div>
+              <label className={LABEL_CLS}>
+                Trạng thái trạm kết nối <span className={REQUIRED_MARK}>*</span>
+              </label>
+              <select
+                aria-label="Trạng thái trạm kết nối"
+                className={INPUT_CLS}
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              >
+                <option value="active">Kích hoạt</option>
+                <option value="inactive">Không kích hoạt</option>
+              </select>
+            </div>
 
-              {/* Chu kỳ gọi */}
-              <div>
-                <label className="block text-[13px] font-bold text-slate-700 mb-1.5">
-                  Chu kỳ gọi (giây) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  placeholder="Chu kỳ gọi"
-                  required
-                  className="w-full px-3 py-2 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                  value={formData.callCycle}
-                  onChange={(e) => setFormData({ ...formData, callCycle: e.target.value })}
-                />
-              </div>
+            {/* Chu kỳ gọi */}
+            <div>
+              <label className={LABEL_CLS}>
+                Chu kỳ gọi (giây) <span className={REQUIRED_MARK}>*</span>
+              </label>
+              <input
+                type="number"
+                placeholder="Chu kỳ gọi"
+                required
+                className={INPUT_CLS}
+                value={formData.callCycle}
+                onChange={(e) => setFormData({ ...formData, callCycle: e.target.value })}
+              />
+            </div>
 
-              {/* DIP - File Agent Section */}
-              <div className="border border-slate-200 rounded-lg p-4 bg-slate-50/30">
-                <h3 className="text-[13px] font-bold text-slate-800 mb-4 uppercase tracking-wider">DIP - File Trạm kết nối</h3>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <label className="w-12 text-[13px] font-bold text-slate-700">ID</label>
-                    <input
-                      type="text"
-                      placeholder="Example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                      value={formData.fileAgentId}
-                      onChange={(e) => setFormData({ ...formData, fileAgentId: e.target.value })}
-                    />
-                  </div>
+            {/* DIP - File Agent Section */}
+            <div className="rounded-2xl border border-[#E2E8F0] p-4">
+              <h3 className={SECTION_TITLE}>
+                <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                DIP - File Trạm kết nối
+              </h3>
 
-                  <div className="flex items-center gap-4">
-                    <label className="w-12 text-[13px] font-bold text-slate-700">URL</label>
-                    <input
-                      type="text"
-                      placeholder="Example: http://127.0.0.1:1201"
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                      value={formData.fileAgentUrl}
-                      onChange={(e) => setFormData({ ...formData, fileAgentUrl: e.target.value })}
-                    />
-                  </div>
+              <div className="space-y-4">
+                <div>
+                  <label className={LABEL_CLS}>ID</label>
+                  <input
+                    type="text"
+                    placeholder="Example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                    className={INPUT_CLS}
+                    value={formData.fileAgentId}
+                    onChange={(e) => setFormData({ ...formData, fileAgentId: e.target.value })}
+                  />
+                </div>
 
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="px-4 py-2 border border-slate-300 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-100 transition-colors bg-white shadow-sm animate-all"
-                    >
-                      Kiểm tra kết nối
-                    </button>
-                  </div>
+                <div>
+                  <label className={LABEL_CLS}>URL</label>
+                  <input
+                    type="text"
+                    placeholder="Example: http://127.0.0.1:1201"
+                    className={INPUT_CLS}
+                    value={formData.fileAgentUrl}
+                    onChange={(e) => setFormData({ ...formData, fileAgentUrl: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <button type="button" className={BTN_OUTLINE}>
+                    Kiểm tra kết nối
+                  </button>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Footer Buttons */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-2 text-[13px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
-              >
-                Đóng
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm text-[13px] font-medium"
-              >
-                {editingData ? 'Cập nhật' : 'Thêm'}
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Footer Buttons */}
+          <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
+            <button type="button" onClick={onClose} className={BTN_OUTLINE}>
+              Đóng
+            </button>
+            <button type="submit" className={BTN_PRIMARY}>
+              {editingData ? 'Cập nhật' : 'Thêm'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { ReconciliationProcess, ReconciliationHistoryEntry } from '../../../../data/provisionReconciliationData';
-import { StatusTag } from '../../../common/StatusTag';
+import { Badge, TruncatedText, Pagination, BTN_GHOST_ICON, BTN_OUTLINE } from '../../collection/collectionUi';
 
 interface ProvisionReconciliationHistoryModalProps {
   isOpen: boolean;
@@ -42,29 +42,27 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
     currentPage * itemsPerPage
   );
 
+  const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 provision-reconciliation-history-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .provision-reconciliation-history-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-[20px] shadow-2xl w-full max-w-5xl flex flex-col border border-slate-200 overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
-        
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-reconciliation-history-modal-root">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden max-h-[90vh] animate-in zoom-in-95 duration-200">
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
           <div className="flex flex-col">
-            <h2 className="text-[18px] font-bold text-slate-800" style={{ fontSize: '18px' }}>
+            <h2 className="text-[16px] font-medium text-[#020817]">
               Lịch sử đối soát dữ liệu cung cấp
             </h2>
-            <p className="text-[13px] text-slate-500 font-medium mt-1">
-              Bộ dữ liệu: <span className="text-slate-800 font-semibold">{getDatasetCode(process.id, process.group)}</span>
+            <p className="text-[13px] text-[#64748B] mt-1 leading-5">
+              Bộ dữ liệu: <span className="text-[#020817] font-medium">{getDatasetCode(process.id, process.group)}</span>
             </p>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            className={BTN_GHOST_ICON}
+            aria-label="Đóng lịch sử đối soát"
             title="Đóng"
           >
             <X className="w-5 h-5" />
@@ -72,135 +70,84 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
-          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-            <table className="w-full text-left border-collapse table-auto">
-              <thead>
-                <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight whitespace-nowrap">
-                  <th className="py-3 px-4 font-semibold text-center w-16">STT</th>
-                  <th className="py-3 px-4 font-semibold">Thời gian</th>
-                  <th className="py-3 px-4 font-semibold">Đơn vị khai thác</th>
-                  <th className="py-3 px-4 font-semibold text-right">Số bản ghi cung cấp</th>
-                  <th className="py-3 px-4 font-semibold text-right">Số bản ghi nhận</th>
-                  <th className="py-3 px-4 font-semibold text-right">Chênh lệch</th>
-                  <th className="py-3 px-4 font-semibold text-center w-32">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((entry, index) => {
-                    const stt = (currentPage - 1) * itemsPerPage + index + 1;
-                    const timeSplit = entry.runDate.split(' ');
-                    const datePart = timeSplit[0];
-                    const timePart = timeSplit[1] || '00:00:00';
-                    const reconStatus = getReconStatus(entry);
-
-                    return (
-                      <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-3.5 px-4 text-center font-medium text-slate-500">{stt}</td>
-                        <td className="py-3.5 px-4 text-slate-600">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-slate-700">{datePart}</span>
-                            <span className="text-[12px] text-slate-400 mt-0.5">{timePart}</span>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-600 font-medium">{entry.targetSystem}</td>
-                        <td className="py-3.5 px-4 text-right font-medium text-slate-800">
-                          {entry.totalSent.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-medium text-emerald-600">
-                          {entry.totalMatched.toLocaleString()}
-                        </td>
-                        <td className={`py-3.5 px-4 text-right font-bold ${entry.discrepancies > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
-                          {entry.discrepancies.toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <StatusTag
-                            label={reconStatus}
-                            variant={reconStatus === 'Khớp dữ liệu' ? 'green' : reconStatus === 'Không khớp' ? 'red' : 'blue'}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-500">
-                      Không tìm thấy lịch sử đối soát phù hợp.
-                    </td>
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
+          <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse collection-table text-[13px]">
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={`${TH} text-center w-16`}>STT</th>
+                    <th className={`${TH} text-left`}>Thời gian</th>
+                    <th className={`${TH} text-left`}>Đơn vị khai thác</th>
+                    <th className={`${TH} text-right`}>Số bản ghi cung cấp</th>
+                    <th className={`${TH} text-right`}>Số bản ghi nhận</th>
+                    <th className={`${TH} text-right`}>Chênh lệch</th>
+                    <th className={`${TH} text-left w-32`}>Trạng thái</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {paginatedData.length > 0 ? (
+                    paginatedData.map((entry, index) => {
+                      const stt = (currentPage - 1) * itemsPerPage + index + 1;
+                      const timeSplit = entry.runDate.split(' ');
+                      const datePart = timeSplit[0];
+                      const timePart = timeSplit[1] || '00:00:00';
+                      const reconStatus = getReconStatus(entry);
 
-            {/* Pagination inside table block */}
-            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-600">Hiển thị</span>
-                <select 
-                  aria-label="Select record count per page"
-                  value={itemsPerPage}
-                  onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                  className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer font-medium"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-                <span className="text-slate-600">bản ghi/trang</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <span className="text-slate-600">
-                  {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                  >
-                    Trước
-                  </button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
-                        currentPage === page
-                          ? 'bg-blue-600 border-blue-600 text-white'
-                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-
-                  <button
-                    onClick={() => {
-                      if (currentPage < totalPages) {
-                        setCurrentPage(currentPage + 1);
-                      }
-                    }}
-                    disabled={currentPage === totalPages || totalItems === 0}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                  >
-                    Sau
-                  </button>
-                </div>
-              </div>
+                      return (
+                        <tr key={entry.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                          <td className="px-3 py-1 text-[13px] text-black text-center">{stt}</td>
+                          <td className="px-3 py-1 text-[13px] text-black whitespace-nowrap leading-[18px]">
+                            <div>{datePart}</div>
+                            <div className="text-[#64748B]">{timePart}</div>
+                          </td>
+                          <td className="px-3 py-1 text-[13px] text-black max-w-[360px]">
+                            <TruncatedText text={entry.targetSystem} />
+                          </td>
+                          <td className="px-3 py-1 text-[13px] text-black text-right tabular-nums">
+                            {entry.totalSent.toLocaleString()}
+                          </td>
+                          <td className="px-3 py-1 text-[13px] text-[#15803D] text-right tabular-nums">
+                            {entry.totalMatched.toLocaleString()}
+                          </td>
+                          <td className={`px-3 py-1 text-[13px] text-right tabular-nums ${entry.discrepancies > 0 ? 'text-[#D97706]' : 'text-[#94A3B8]'}`}>
+                            {entry.discrepancies.toLocaleString()}
+                          </td>
+                          <td className="px-3 py-1 text-[13px] text-black">
+                            <Badge
+                              label={reconStatus}
+                              variant={reconStatus === 'Khớp dữ liệu' ? 'green' : reconStatus === 'Không khớp' ? 'red' : 'blue'}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="py-16 text-center text-[13px] text-[#64748B]">
+                        Không tìm thấy lịch sử đối soát phù hợp.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
+
+            <Pagination
+              className="border-t border-[#E2E8F0]"
+              currentPage={currentPage}
+              totalItems={totalItems}
+              pageSize={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setItemsPerPage}
+              pageSizeOptions={[10, 20, 50]}
+            />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
-          <button 
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold transition-colors shadow-sm cursor-pointer"
-          >
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 flex-shrink-0">
+          <button type="button" onClick={onClose} className={BTN_OUTLINE}>
             Đóng
           </button>
         </div>

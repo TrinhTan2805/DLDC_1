@@ -1,4 +1,5 @@
 import { X, AlertTriangle } from 'lucide-react';
+import { BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON } from '../collection/collectionUi';
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -7,49 +8,44 @@ interface DeleteConfirmModalProps {
   itemName?: string;
 }
 
+// Hộp thoại xác nhận xóa (compomennt.md mục 5.4)
 export function DeleteConfirmModal({ isOpen, onClose, onConfirm, itemName }: DeleteConfirmModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden flex flex-col">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between">
+    <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-3 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+            <div className="w-10 h-10 bg-[#FEF2F2] rounded-full flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-[#DC2626]" />
             </div>
             <div>
-              <h2 className="text-lg text-slate-900">Xác nhận xóa</h2>
-              <p className="text-sm text-slate-500 mt-1">Xóa cấu hình API</p>
+              <h2 className="text-[16px] font-medium text-[#020817]">Xác nhận xóa</h2>
+              <p className="text-[13px] text-[#64748B] mt-1 leading-5">Xóa cấu hình API</p>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            title="Đóng"
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
-          >
+          <button type="button" onClick={onClose} title="Đóng" aria-label="Đóng" className={BTN_GHOST_ICON}>
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-6">
-          <p className="text-sm text-slate-600">
-            Bạn có chắc chắn muốn xóa cấu hình {itemName ? <span className="font-semibold text-slate-900">{itemName}</span> : 'này'} không?
+        <div className="px-6 py-4 overflow-y-auto custom-scrollbar">
+          <p className="text-[13px] text-[#334155] leading-5">
+            Bạn có chắc chắn muốn xóa cấu hình {itemName ? <span className="font-semibold text-[#020817]">{itemName}</span> : 'này'} không?
             Hành động này không thể hoàn tác.
           </p>
         </div>
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 text-sm"
-          >
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 flex-shrink-0">
+          <button type="button" onClick={onClose} className={BTN_OUTLINE}>
             Hủy
           </button>
           <button
+            type="button"
             onClick={() => {
               onConfirm();
               onClose();
             }}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+            className={BTN_DESTRUCTIVE}
           >
             Xác nhận xóa
           </button>

@@ -3,7 +3,9 @@ import { Settings, Search, Filter, Play, GitCompare, Calendar, History, CheckCir
 import { reconciliationData, reconciliationHistoryData, ReconciliationHistoryEntry } from '../../../data/provisionReconciliationData';
 import { ProvisionReconciliationDetailsModal } from './modals/ProvisionReconciliationDetailsModal';
 import { ProvisionReconciliationHistoryModal } from './modals/ProvisionReconciliationHistoryModal';
-import { StatusTag } from '../../common/StatusTag';
+import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch } from '../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 export function ProvisionReconciliationPage({ processId }: { processId?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<ReconciliationHistoryEntry | null>(null);
@@ -53,34 +55,36 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
   const matchedRows = history.filter(h => getReconStatus(h) === 'Khớp dữ liệu').length;
   const mismatchedRows = history.filter(h => getReconStatus(h) === 'Không khớp').length;
   const overallMatchRate = history.length > 0 ? (matchedRows / history.length) * 100 : 0;
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm Tìm kiếm hoặc Enter (mục 5.19)
+  const [applied, setApplied] = useState({ searchTerm: '', status: 'all', startDate: '', endDate: '' });
+  const runSearch = () => {
+    setApplied({ searchTerm, status: filterStatus, startDate: filterStartDate, endDate: filterEndDate });
+    setCurrentPage(1);
+  };
+
   const filteredHistory = history.filter((entry) => {
     let matchesSearch = true;
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      matchesSearch = (
-        entry.runDate.toLowerCase().includes(term) ||
-        entry.runType.toLowerCase().includes(term) ||
-        entry.targetSystem.toLowerCase().includes(term) ||
-        entry.status.toLowerCase().includes(term) ||
-        (entry.note || '').toLowerCase().includes(term)
-      );
+    const term = normalizeSearch(applied.searchTerm);
+    if (term) {
+      matchesSearch = [entry.runDate, entry.runType, entry.targetSystem, entry.status, entry.note || '']
+        .some(v => normalizeSearch(v).includes(term));
     }
 
     let matchesStatus = true;
-    if (filterStatus !== 'all') {
-      matchesStatus = entry.status === filterStatus;
+    if (applied.status !== 'all') {
+      matchesStatus = entry.status === applied.status;
     }
 
     let matchesDate = true;
-    if (filterStartDate || filterEndDate) {
+    if (applied.startDate || applied.endDate) {
       const datePart = entry.runDate.split(' ')[0];
       const entryDate = new Date(datePart);
-      if (filterStartDate) {
-        const startDate = new Date(filterStartDate);
+      if (applied.startDate) {
+        const startDate = new Date(applied.startDate);
         if (entryDate < startDate) matchesDate = false;
       }
-      if (filterEndDate) {
-        const endDate = new Date(filterEndDate);
+      if (applied.endDate) {
+        const endDate = new Date(applied.endDate);
         if (entryDate > endDate) matchesDate = false;
       }
     }
@@ -93,196 +97,120 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
     currentPage * itemsPerPage
   );
 
-  const renderPagination = (totalItems: number) => {
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-    return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị</span>
-          <select aria-label="Select record count" 
-            value={itemsPerPage}
-            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600">bản ghi/trang</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600">
-            {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
-                  currentPage === page
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => {
-                if (currentPage < totalPages) {
-                  setCurrentPage(currentPage + 1);
-                }
-              }}
-              disabled={currentPage === totalPages || totalItems === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (!process) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-slate-500">
-        <GitCompare className="w-16 h-16 text-slate-300 mb-4" />
-        <h2 className="text-xl font-medium text-slate-700">Không tìm thấy tiến trình đối soát</h2>
-        <p className="mt-2">Vui lòng chọn một tiến trình từ menu bên trái.</p>
+      <div className="flex flex-col items-center justify-center h-[60vh] text-[#64748B]">
+        <GitCompare className="w-16 h-16 text-[#CBD5E1] mb-4" />
+        <h2 className="text-[16px] font-medium text-[#020817]">Không tìm thấy tiến trình đối soát</h2>
+        <p className="mt-2 text-[13px]">Vui lòng chọn một tiến trình từ menu bên trái.</p>
       </div>
     );
   }
 
+  const statCards = [
+    { label: 'Tổng Dữ liệu đối soát', value: history.length.toLocaleString(), icon: Database, tone: 'bg-blue-50 text-blue-600' },
+    { label: 'Khớp dữ liệu', value: matchedRows.toLocaleString(), icon: CheckCircle2, tone: 'bg-green-50 text-green-600' },
+    { label: 'Không khớp', value: mismatchedRows.toLocaleString(), icon: AlertTriangle, tone: 'bg-amber-50 text-amber-600' },
+    { label: 'Tỷ lệ khớp', value: `${overallMatchRate.toFixed(2)}%`, icon: Percent, tone: 'bg-purple-50 text-purple-600' },
+  ];
+
+  const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+  const TD = 'px-3 py-1 text-[13px] text-black';
+
   return (
-    <div className="space-y-6">
-      {/* Tab bar (theo form Đối soát thu thập) */}
-      <div className="bg-white border-b border-slate-200 px-6 -mx-6 -mt-6">
-        <div className="flex gap-6">
-          <button className="flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 border-blue-600 text-blue-600">
-            <List className="w-5 h-5" />
+    <div className="space-y-4">
+      {/* Tab bar (mục 5.9) */}
+      <div className="bg-white border-b border-[#E2E8F0] px-6 -mx-6 -mt-6">
+        <div className="flex">
+          <button type="button" className={tabClass(true)}>
+            <List className="w-4 h-4" />
             Danh sách đối soát
           </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-            <Database className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-500 font-medium">Tổng Dữ liệu đối soát</p>
-            <p className="text-2xl font-bold text-slate-800">{history.length.toLocaleString()}</p>
-          </div>
+      <div className="space-y-4 pt-2">
+        {/* Thẻ thống kê (mục 5.6.1) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {statCards.map(card => (
+            <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${card.tone}`}>
+                  <card.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                  <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{card.value}</div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-500 font-medium">Khớp dữ liệu</p>
-            <p className="text-2xl font-bold text-slate-800">
-              {matchedRows.toLocaleString()}
-            </p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-lg">
-            <AlertTriangle className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-500 font-medium">Không khớp</p>
-            <p className="text-2xl font-bold text-slate-800">
-              {mismatchedRows.toLocaleString()}
-            </p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
-            <Percent className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-500 font-medium">Tỷ lệ khớp</p>
-            <p className="text-2xl font-bold text-slate-800">
-              {overallMatchRate.toFixed(2)}%
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* History Table */}
-      <div className="space-y-4">
-        {/* General Search Toolbar & Advanced Filters directly on background */}
-        <div className="space-y-4 mb-4">
-          {/* Row 1: Search input + Blue Search Button + Filter Toggle Button */}
-          <div className="flex items-center gap-3">
+        {/* Tìm kiếm & bộ lọc (mục 5.19) — chỉ áp dụng khi bấm Tìm kiếm hoặc Enter */}
+        <div>
+          <div className="flex items-center gap-1.5">
             <div className="relative flex-1">
               <input
                 type="text"
+                aria-label="Tìm kiếm"
                 placeholder="Tìm theo tên tiến trình..."
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className={SEARCH_INPUT_CLS}
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
               />
             </div>
-            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center cursor-pointer">
+            <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
               <Search className="w-5 h-5" />
             </button>
             <button
+              type="button"
+              aria-label="Bộ lọc"
+              aria-expanded={showFilters}
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-lg transition-colors flex items-center justify-center border cursor-pointer ${
-                showFilters 
-                  ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                  : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-              }`}
+              className={filterBtnClass(showFilters)}
               title="Bộ lọc"
             >
               {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
 
-          {/* Row 2: Advanced Filter Panel */}
           {showFilters && (
-            <div className="grid grid-cols-3 gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2 duration-200">
+            <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
               <div>
-                <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Từ ngày)</label>
-                <input
-                  type="date"
-                  value={filterStartDate}
-                  onChange={(e) => { setFilterStartDate(e.target.value); setCurrentPage(1); }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-                />
+                <label className={FILTER_LABEL}>Khoảng thời gian (Từ ngày)</label>
+                <div className={DATE_BOX_CLS}>
+                  <input
+                    type="date"
+                    aria-label="Khoảng thời gian (Từ ngày)"
+                    value={filterStartDate}
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
+                  />
+                  <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
+                </div>
               </div>
               <div>
-                <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Đến ngày)</label>
-                <input
-                  type="date"
-                  value={filterEndDate}
-                  onChange={(e) => { setFilterEndDate(e.target.value); setCurrentPage(1); }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-                />
+                <label className={FILTER_LABEL}>Khoảng thời gian (Đến ngày)</label>
+                <div className={DATE_BOX_CLS}>
+                  <input
+                    type="date"
+                    aria-label="Khoảng thời gian (Đến ngày)"
+                    value={filterEndDate}
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
+                  />
+                  <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
+                </div>
               </div>
               <div>
-                <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái xử lý / kết nối</label>
+                <label className={FILTER_LABEL}>Trạng thái xử lý / kết nối</label>
                 <select
+                  aria-label="Trạng thái xử lý / kết nối"
                   value={filterStatus}
-                  onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className={INPUT_CLS}
                 >
                   <option value="all">Tất cả trạng thái</option>
                   <option value="Thành công">Thành công</option>
@@ -294,82 +222,82 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        {/* History Table */}
+        <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse table-auto" style={{ fontSize: '13px' }}>
-              <thead>
-                <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight" style={{ fontSize: '13px' }}>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-center w-12 text-[13px]" style={{ fontSize: '13px' }}>STT</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Tên tiến trình đối soát</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Tên API</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Số bản ghi cung cấp</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Số bản ghi nhận</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-right" style={{ fontSize: '13px' }}>Chênh lệch</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-center" style={{ fontSize: '13px' }}>Trạng thái</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-center" style={{ fontSize: '13px' }}>Ngày đối soát</th>
-                  <th className="py-3 px-4 font-semibold text-slate-500 text-[13px] text-center w-24" style={{ fontSize: '13px' }}>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700" style={{ fontSize: '13px' }}>
-              {paginatedHistory.length > 0 ? paginatedHistory.map((entry, index) => {
-                const reconStatus = getReconStatus(entry);
-                const stt = (currentPage - 1) * itemsPerPage + index + 1;
-                const [datePart, timePart] = entry.runDate.split(' ');
-                return (
-                <tr key={entry.id} className="hover:bg-slate-50/50 transition-colors" style={{ fontSize: '13px' }}>
-                  <td className="py-3 px-4 text-center text-slate-500 font-medium text-[13px]" style={{ fontSize: '13px' }}>{stt}</td>
-                  <td className="py-3 px-4 text-slate-600 text-[13px]" style={{ fontSize: '13px' }}>{process.name}</td>
-                  <td className="py-3 px-4 text-slate-600 text-[13px]" style={{ fontSize: '13px' }}>{getApiName(process.id)}</td>
-                  <td className="py-3 px-4 text-right font-medium text-[13px]" style={{ fontSize: '13px' }}>{entry.totalSent.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-right font-medium text-emerald-600 text-[13px]" style={{ fontSize: '13px' }}>{entry.totalMatched.toLocaleString()}</td>
-                  <td className={`py-3 px-4 text-right font-bold text-[13px] ${entry.discrepancies > 0 ? 'text-amber-600' : 'text-slate-400'}`} style={{ fontSize: '13px' }}>
-                    {entry.discrepancies.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-4 text-center text-[13px]" style={{ fontSize: '13px' }}>
-                    <StatusTag
-                      label={reconStatus}
-                      variant={reconStatus === 'Khớp dữ liệu' ? 'green' : reconStatus === 'Không khớp' ? 'red' : 'blue'}
-                    />
-                  </td>
-                  <td className="py-3 px-4 text-center text-slate-500 font-medium whitespace-nowrap text-[13px]" style={{ fontSize: '13px' }}>
-                    <div>{datePart}</div>
-                    {timePart && <div className="text-[12px] text-slate-400" style={{ fontSize: '12px' }}>{timePart}</div>}
-                  </td>
-                  <td className="py-3 px-4 text-center text-[13px]" style={{ fontSize: '13px' }}>
-                    <div className="flex items-center justify-center gap-1.5">
-                      <button
-                        onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}
-                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => { setIsHistoryModalOpen(true); }}
-                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer"
-                        title="Xem lịch sử"
-                      >
-                        <History className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+            <table className="w-full border-collapse collection-table text-[13px]">
+              <thead className="bg-[#F8FAFC]">
+                <tr className="h-[42px]">
+                  <th className={`${TH} text-center w-12`}>STT</th>
+                  <th className={`${TH} text-left min-w-[200px]`}>Tên tiến trình đối soát</th>
+                  <th className={`${TH} text-left min-w-[200px]`}>Tên API</th>
+                  <th className={`${TH} text-right`}>Số bản ghi cung cấp</th>
+                  <th className={`${TH} text-right`}>Số bản ghi nhận</th>
+                  <th className={`${TH} text-right`}>Chênh lệch</th>
+                  <th className={`${TH} text-left`}>Trạng thái</th>
+                  <th className={`${TH} text-left`}>Ngày đối soát</th>
+                  <th className={`${TH} text-center w-24 sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
                 </tr>
-                );
-              }) : (
-                <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-500">
-                    Không tìm thấy bản ghi lịch sử phù hợp.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginatedHistory.length > 0 ? paginatedHistory.map((entry, index) => {
+                  const reconStatus = getReconStatus(entry);
+                  const stt = (currentPage - 1) * itemsPerPage + index + 1;
+                  const [datePart, timePart] = entry.runDate.split(' ');
+                  return (
+                    <tr key={entry.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                      <td className={`${TD} text-center`}>{stt}</td>
+                      <td className={`${TD} max-w-[360px]`}><TruncatedText text={process.name} /></td>
+                      <td className={`${TD} max-w-[360px]`}><TruncatedText text={getApiName(process.id)} /></td>
+                      <td className="px-3 py-1 text-[13px] text-black text-right tabular-nums">{entry.totalSent.toLocaleString()}</td>
+                      <td className="px-3 py-1 text-[13px] text-[#15803D] text-right tabular-nums">{entry.totalMatched.toLocaleString()}</td>
+                      <td className={`px-3 py-1 text-[13px] text-right tabular-nums ${entry.discrepancies > 0 ? 'text-[#D97706]' : 'text-[#94A3B8]'}`}>
+                        {entry.discrepancies.toLocaleString()}
+                      </td>
+                      <td className={TD}>
+                        <Badge
+                          label={reconStatus}
+                          variant={reconStatus === 'Khớp dữ liệu' ? 'green' : reconStatus === 'Không khớp' ? 'red' : 'blue'}
+                        />
+                      </td>
+                      <td className={`${TD} whitespace-nowrap leading-[18px]`}>
+                        <div>{datePart}</div>
+                        {timePart && <div className="text-[#64748B]">{timePart}</div>}
+                      </td>
+                      <td className="px-3 py-1 text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]">
+                        <div className="flex items-center justify-center gap-1">
+                          <RowIconAction label="Xem chi tiết" onClick={() => { setSelectedEntry(entry as ReconciliationHistoryEntry); setIsDetailsModalOpen(true); }}>
+                            <Eye className="w-4 h-4" />
+                          </RowIconAction>
+                          <RowIconAction label="Xem lịch sử" onClick={() => { setIsHistoryModalOpen(true); }}>
+                            <History className="w-4 h-4" />
+                          </RowIconAction>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                }) : (
+                  <tr>
+                    <td colSpan={9} className="py-16 text-center text-[13px] text-[#64748B]">
+                      Không tìm thấy bản ghi lịch sử phù hợp.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPage}
+            totalItems={filteredHistory.length}
+            pageSize={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setItemsPerPage}
+          />
         </div>
-        {renderPagination(filteredHistory.length)}
       </div>
-    </div>
-      
-      <ProvisionReconciliationDetailsModal 
+
+      <ProvisionReconciliationDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         entry={selectedEntry}

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Scale } from 'lucide-react';
 import { GenericProcessingPage } from '../processing/GenericProcessingPage';
-import { DatabaseTemplate } from '../DatabaseTemplate';
+import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
+import { CourtJudgmentView } from '../../court-judgment/CourtJudgmentView';
 
 interface StatCard {
   id: string;
@@ -62,14 +63,20 @@ export function CourtJudgmentPage({ mode = 'thu thập', context = 'thu thập',
     return <GenericProcessingPage systemName="CSDL Thông tin Bản án" datasets={stats.map((s, idx) => ({ id: s.id || `item_${idx}`, name: s.title }))} />;
   }
 
+  // Giao diện chuẩn hóa riêng cho CSDL Bản án (không dùng khung chung DatabaseTemplate/DataDetailModal)
   return (
-    <DatabaseTemplate
+    <DatabasePageTemplate
       title="Dữ liệu Thông tin Bản án, quyết định"
-      categoryName="TAND tối cao"
-      stats={stats}
-      context={context}
-      mode={mode}
+      description="Quản lý và xem chi tiết dữ liệu từ TAND tối cao"
       onBack={onBack}
-    />
+      innerSidebarItems={stats.map(s => ({ id: s.id, label: s.title }))}
+      activeId={stats[0]?.id}
+      onSelectDataType={() => {}}
+      stretchHeight
+    >
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
+        <CourtJudgmentView title={stats[0]?.title || ''} />
+      </div>
+    </DatabasePageTemplate>
   );
-}
+}

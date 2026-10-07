@@ -168,7 +168,7 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
           <input
             type="text"
             placeholder="Tìm kiếm dữ liệu..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full h-10 pl-10 pr-4 bg-white border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -183,7 +183,7 @@ export function InnerSidebar({ title, items, onSelectItem, activeId, hideGroupHe
                 title="Lọc theo trạng thái"
                 value={activeFilter}
                 onChange={(e) => onFilterChange?.(e.target.value)}
-                className="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-[13px] bg-slate-50 font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full h-10 pl-3 pr-8 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600"
               >
                 {filters.map(f => (
                   <option key={f.value} value={f.value}>{f.label}</option>

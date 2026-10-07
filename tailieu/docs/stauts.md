@@ -9,7 +9,7 @@
 ## 1. PHÂN HỆ ĐĂNG NHẬP & CORE
 
 - `[ ]` Màn hình Đăng nhập (`pages/LoginPage.tsx`)
-- `[x]` Cấu trúc Menu & Điều hướng chính (`admin/menuStructure.ts`)
+- `[ ]` Cấu trúc Menu & Điều hướng chính (`admin/menuStructure.ts`)
 
 ---
 
@@ -19,44 +19,44 @@
 - `[ ]` Dashboard thu thập dữ liệu nội bộ (`collection/InternalDataPage.tsx`)
 - `[ ]` Dashboard thu thập dữ liệu ngoại (`collection/ExternalDataPage.tsx`)
 - `[x]` Danh sách thiết lập dịch vụ thu thập (`collection/CollectionSetupPage.tsx`)
-- `[x]` Xem dữ liệu đã thu thập (`collection/ViewCollectedDataPage.tsx`)
-- `[x]` Chi tiết dịch vụ — trang riêng (`collection/ServiceDataDetailPage.tsx`)
+- `[ ]` Xem dữ liệu đã thu thập (`collection/ViewCollectedDataPage.tsx`)
+- `[ ]` Chi tiết dịch vụ — trang riêng (`collection/ServiceDataDetailPage.tsx`)
 - `[x]` Quản lý nhật ký thu thập (`collection/LogManagement.tsx`)
 
 ### Modals dịch vụ thu thập (`collection/ServiceModals.tsx`)
 - `[x]` Modal Thêm mới dịch vụ thu thập (`AddServiceModal`)
 - `[x]` Modal Chỉnh sửa dịch vụ thu thập (`EditServiceModal`)
-- `[x]` Modal Xóa dịch vụ (`DeleteServiceModal`)
-- `[x]` Modal Cài đặt nâng cao dịch vụ (`SettingsServiceModal`)
+- `[ ]` Modal Xóa dịch vụ (`DeleteServiceModal`)
+- `[ ]` Modal Cài đặt nâng cao dịch vụ (`SettingsServiceModal`)
 
 ### Modal xem chi tiết dịch vụ (`collection/ViewServiceModal.tsx`)
-- `[x]` Tab Thông tin chung
+- `[ ]` Tab Thông tin chung
 - `[x]` Tab Cấu hình kết nối
-- `[x]` Tab Cấu trúc (Mapping)
-- `[x]` Tab Cấu hình thu thập
+- `[ ]` Tab Cấu trúc (Mapping)
+- `[ ]` Tab Cấu hình thu thập
 - `[x]` Tab Lịch sử hoạt động
 
 ### Quản lý hệ thống nguồn
-- `[ ]` Trang quản lý hệ thống nguồn (`collection/SourceSystemManagementPage.tsx`)
-- `[ ]` Modal Thêm/Sửa hệ thống nguồn (`collection/SourceSystemModal.tsx`)
-- `[ ]` Modal Xem chi tiết hệ thống nguồn (`collection/SourceSystemDetailModal.tsx`)
-- `[ ]` Modal Xác nhận xóa hệ thống nguồn (`collection/SourceSystemDeleteConfirmModal.tsx`)
+- `[x]` Trang quản lý hệ thống nguồn (`collection/SourceSystemManagementPage.tsx`)
+- `[x]` Modal Thêm/Sửa hệ thống nguồn (`collection/SourceSystemModal.tsx`)
+- `[x]` Modal Xem chi tiết hệ thống nguồn (`collection/SourceSystemDetailModal.tsx`)
+- `[x]` Modal Xác nhận xóa hệ thống nguồn (`collection/SourceSystemDeleteConfirmModal.tsx`)
 
 ### Quản lý Agent
-- `[ ]` Trang quản lý Agent thu thập (`collection/AgentManagementPage.tsx`)
-- `[ ]` Modal Thêm/Sửa Agent (`collection/AgentModal.tsx`)
-- `[ ]` Modal Xem chi tiết Agent (`collection/AgentDetailModal.tsx`)
-- `[ ]` Modal Xác nhận xóa Agent (`collection/AgentDeleteConfirmModal.tsx`)
+- `[x]` Trang quản lý Agent thu thập (`collection/AgentManagementPage.tsx`)
+- `[x]` Modal Thêm/Sửa Agent (`collection/AgentModal.tsx`)
+- `[x]` Modal Xem chi tiết Agent (`collection/AgentDetailModal.tsx`)
+- `[x]` Modal Xác nhận xóa Agent (`collection/AgentDeleteConfirmModal.tsx`)
 
 ### Components dùng chung trong thu thập
-- `[ ]` Cấu hình kết nối (`collection/ConnectionConfigSection.tsx`)
+- `[x]` Cấu hình kết nối (`collection/ConnectionConfigSection.tsx`)
 - `[ ]` Cấu hình thu thập dữ liệu (`collection/DataCollectionConfigSection.tsx`)
 - `[ ]` Nạp cấu trúc (`collection/StructureLoadingConfig.tsx`)
 - `[ ]` Mapping dữ liệu nâng cao (`collection/AdvancedDataMapping.tsx`)
 - `[ ]` Modal xem chi tiết dịch vụ (`collection/ServiceDetailModal.tsx`)
 - `[ ]` Modal xem dịch vụ (`collection/ViewServiceModal.tsx`)
 - `[ ]` Template trang CSDL (`collection/DatabasePageTemplate.tsx`)
-- `[x]` Sidebar phụ (`collection/InnerSidebar.tsx`)
+- `[ ]` Sidebar phụ (`collection/InnerSidebar.tsx`)
 
 ---
 
@@ -64,11 +64,11 @@
 
 ### Quản lý quy tắc & CSDL đích
 - `[ ]` Thiết lập quy tắc xử lý (`processing/ProcessingRuleSetupPage.tsx`)
-- `[ ]` Quản lý cơ sở dữ liệu đích (`processing/TargetDatabaseManagementPage.tsx`)
-- `[ ]` Chi tiết cơ sở dữ liệu đích (`processing/TargetDatabaseDetailPage.tsx`)
+- `[x]` Quản lý cơ sở dữ liệu đích (`processing/TargetDatabaseManagementPage.tsx`)
+- `[x]` Chi tiết cơ sở dữ liệu đích (`processing/TargetDatabaseDetailPage.tsx`)
 - `[ ]` Modal cấu hình CSDL đích (`processing/TargetDatabaseConfigModal.tsx`)
 - `[ ]` Modal chi tiết CSDL đích (`processing/TargetDatabaseDetailModal.tsx`)
-- `[ ]` Modal thêm/sửa CSDL đích (`processing/TargetDatabaseModal.tsx`)
+- `[x]` Modal thêm/sửa CSDL đích (`processing/TargetDatabaseModal.tsx`)
 - `[ ]` Modal chọn CSDL đích (`processing/SelectTargetDatabaseModal.tsx`)
 - `[ ]` Xem dữ liệu đã xử lý (`processing/ProcessedDataPage.tsx`)
 - `[ ]` Modal Mapping dữ liệu (`processing/DataMappingModal.tsx`)
@@ -106,18 +106,18 @@
 - `[ ]` Trang thiết lập đối soát tổng (`pages/ReconciliationSetupPage.tsx`)
 
 ### Đối soát theo loại dữ liệu
-- `[ ]` Template đối soát (dùng chung cho các trang đối soát) (`reconciliation/ReconciliationTemplate.tsx`)
-- `[ ]` Đối soát dữ liệu nội bộ (`reconciliation/InternalReconciliationPage.tsx`)
-- `[ ]` Đối soát danh mục bên ngoài (`reconciliation/ExternalCategoriesReconciliationPage.tsx`)
-- `[ ]` Đối soát bản án / quyết định TAND (`reconciliation/ExternalCourtJudgmentReconciliationPage.tsx`)
+- `[x]` Template đối soát (dùng chung cho các trang đối soát) (`reconciliation/ReconciliationTemplate.tsx`)
+- `[x]` Đối soát dữ liệu nội bộ (`reconciliation/InternalReconciliationPage.tsx`)
+- `[x]` Đối soát danh mục bên ngoài (`reconciliation/ExternalCategoriesReconciliationPage.tsx`)
+- `[x]` Đối soát bản án / quyết định TAND (`reconciliation/ExternalCourtJudgmentReconciliationPage.tsx`)
 
 ### Tabs trong trang thiết lập đối soát
 - `[x]` Tab Thiết lập dịch vụ đối soát (`reconciliation/ReconciliationServiceSetupTab.tsx`)
-- `[ ]` Tab Lịch sử đối soát (`reconciliation/ReconciliationHistoryTab.tsx`)
-- `[ ]` Tab Nhật ký đối soát (`reconciliation/ReconciliationLogTab.tsx`)
+- `[x]` Tab Lịch sử đối soát (`reconciliation/ReconciliationHistoryTab.tsx`)
+- `[x]` Tab Nhật ký đối soát (`reconciliation/ReconciliationLogTab.tsx`)
 
 ### Modals đối soát
-- `[ ]` Modal chi tiết bản ghi đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
+- `[x]` Modal chi tiết bản ghi đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
 - `[ ]` Modal tiến trình đồng bộ thủ công (`reconciliation/ManualSyncProgressModal.tsx`)
 - `[ ]` Modal thêm / sửa cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
 - `[ ]` Modal xác nhận xóa cấu hình (`reconciliation/DeleteConfirmModal.tsx`)
@@ -133,38 +133,38 @@
 
 ### Trang chính
 - `[ ]` Dashboard danh mục (`category/CategoryDashboardPage.tsx`)
-- `[x]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
-- `[x]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
+- `[ ]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
+- `[ ]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
 - `[x]` Thiết lập danh mục (`category/CategorySetupPage.tsx`)
-- `[x]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
-- `[x]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
-- `[x]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
-- `[x]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
-- `[x]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
-- `[x]` Thống kê danh mục (`category/CategoryStatisticsPage.tsx`)
-- `[x]` Báo cáo thống kê tổng hợp (`category/CategoryStatisticsReportPage.tsx`)
+- `[ ]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
+- `[ ]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
+- `[ ]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
+- `[ ]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
+- `[ ]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
+- `[ ]` Thống kê danh mục (`category/CategoryStatisticsPage.tsx`)
+- `[ ]` Báo cáo thống kê tổng hợp (`category/CategoryStatisticsReportPage.tsx`)
 
 ### Sub-tabs trong trang danh mục
-- `[ ]` Tab Phê duyệt (`category/components/tabs/ApprovalTab.tsx`)
-- `[x]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
-- `[ ]` Tab Quan hệ thực thể (`category/components/tabs/RelationshipsTab.tsx`)
-- `[x]` Tab Thiết lập (`category/components/tabs/SetupTab.tsx`)
-- `[x]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
+- `[x]` Tab Phê duyệt (`category/components/tabs/ApprovalTab.tsx`)
+- `[ ]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
+- `[x]` Tab Quan hệ thực thể (`category/components/tabs/RelationshipsTab.tsx`)
+- `[ ]` Tab Thiết lập (`category/components/tabs/SetupTab.tsx`)
+- `[ ]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
 
 ### Modals danh mục
 - `[x]` Modal Wizard tạo danh mục mới (`category/components/modals/CategoryWizardModal.tsx`)
 - `[ ]` Modal Chỉnh sửa danh mục (`category/components/modals/EditCategoryModal.tsx`)
 - `[ ]` Modal Xác nhận xóa (`category/components/modals/DeleteConfirmModal.tsx`)
-- `[ ]` Modal Gửi phê duyệt (`category/components/modals/ApprovalRequestModal.tsx`)
-- `[ ]` Modal Review phê duyệt (`category/components/modals/ReviewApprovalModal.tsx`)
-- `[ ]` Modal Phê duyệt đơn giản (`category/components/modals/SimpleApproveModal.tsx`)
+- `[x]` Modal Gửi phê duyệt (`category/components/modals/ApprovalRequestModal.tsx`)
+- `[x]` Modal Review phê duyệt (`category/components/modals/ReviewApprovalModal.tsx`)
+- `[x]` Modal Phê duyệt đơn giản (`category/components/modals/SimpleApproveModal.tsx`)
 - `[ ]` Modal Từ chối đơn giản (`category/components/modals/SimpleRejectModal.tsx`)
-- `[ ]` Modal Gửi yêu cầu hết hạn (`category/components/modals/ExpireRequestModal.tsx`)
-- `[ ]` Modal Phê duyệt hết hạn (`category/components/modals/ExpireApproveModal.tsx`)
-- `[x]` Modal Công bố (`category/components/modals/PublishModal.tsx`)
-- `[x]` Modal Cấu hình công bố (`category/components/modals/PublishConfigModal.tsx`)
-- `[x]` Modal Hủy công bố (`category/components/modals/UnpublishModal.tsx`)
-- `[x]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
+- `[x]` Modal Gửi yêu cầu hết hạn (`category/components/modals/ExpireRequestModal.tsx`)
+- `[x]` Modal Phê duyệt hết hạn (`category/components/modals/ExpireApproveModal.tsx`)
+- `[ ]` Modal Công bố (`category/components/modals/PublishModal.tsx`)
+- `[ ]` Modal Cấu hình công bố (`category/components/modals/PublishConfigModal.tsx`)
+- `[ ]` Modal Hủy công bố (`category/components/modals/UnpublishModal.tsx`)
+- `[ ]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
 - `[ ]` Modal Khôi phục phiên bản (`category/components/modals/RestoreVersionModal.tsx`)
 - `[ ]` Modal Lưu trữ bản ghi (`category/components/modals/ArchiveRecordModal.tsx`)
 - `[ ]` Modal Form thuộc tính (`category/components/modals/AttributeFormModal.tsx`)
@@ -185,7 +185,7 @@
 - `[x]` Nhóm đối tượng chính sách xã hội (`external/SocialSecurityGroupPage.tsx`)
 - `[x]` Nhóm người có công (`external/MeritoriousGroupPage.tsx`)
 - `[x]` Nhóm trẻ em (`external/ChildrenGroupPage.tsx`)
-- `[ ]` Nhóm danh mục (`external/CategoryGroupPage.tsx`)
+- `[x]` Nhóm danh mục (`external/CategoryGroupPage.tsx`)
 - `[x]` Phán quyết tòa án (`external/CourtJudgmentPage.tsx`)
 - `[x]` Người khuyết tật (`external/DisabledPersonPage.tsx`)
 - `[x]` Người cao tuổi (`external/ElderlyPersonPage.tsx`)
@@ -250,31 +250,31 @@
 ## 8. PHÂN HỆ DỮ LIỆU CHỦ (MASTER DATA)
 
 ### Trang chính
-- `[ ]` Quản lý Master Data tổng (`master-data/MasterDataManagementPage.tsx`)
-- `[ ]` Trang Master Data chính (`master-data/MasterDataAPage.tsx`)
-- `[ ]` Thiết lập Master Data (`master-data/MasterDataSetupPage.tsx`)
-- `[ ]` Phê duyệt Master Data (`master-data/MasterDataApprovalPage.tsx`)
-- `[ ]` Công bố Master Data (`master-data/MasterDataPublishPage.tsx`)
+- `[x]` Quản lý Master Data tổng (`master-data/MasterDataManagementPage.tsx`)
+- `[x]` Trang Master Data chính (`master-data/MasterDataAPage.tsx`)
+- `[x]` Thiết lập Master Data (`master-data/MasterDataSetupPage.tsx`)
+- `[x]` Phê duyệt Master Data (`master-data/MasterDataApprovalPage.tsx`)
+- `[x]` Công bố Master Data (`master-data/MasterDataPublishPage.tsx`)
 - `[x]` Báo cáo Master Data (`master-data/MasterDataReportsPage.tsx`)
-- `[ ]` Quản lý quy mô / tỉ lệ (`master-data/MasterDataScaleManagementPage.tsx`)
-- `[ ]` Wizard tạo Master Data (`master-data/MasterDataWizard.tsx`)
+- `[x]` Quản lý quy mô / tỉ lệ (`master-data/MasterDataScaleManagementPage.tsx`)
+- `[x]` Wizard tạo Master Data (`master-data/MasterDataWizard.tsx`)
 - `[x]` Trang cập nhật Master Data (`master-data/MasterDataUpdatePage.tsx`)
 - `[x]` Chi tiết mục dữ liệu Cập nhật Master Data (`master-data/MasterDataUpdateItemPage.tsx`)
 
 ### Tabs trong trang Master Data
-- `[ ]` Tab Quản lý thuộc tính (`master-data/AttributesManagementTab.tsx`)
-- `[ ]` Tab Quan hệ thực thể (`master-data/EntityRelationshipsTab.tsx`)
-- `[ ]` Tab Quy tắc gộp (`master-data/MergeRulesManagementTab.tsx`)
-- `[ ]` Tab Quy tắc định danh (`master-data/UniqueIdentifierRulesTab.tsx`)
-- `[ ]` Tab Lịch sử thay đổi (`master-data/HistoryTab.tsx`)
-- `[ ]` Tab Cập nhật dữ liệu (`master-data/MasterDataUpdateTab.tsx`)
-- `[ ]` Tab Review cập nhật (`master-data/MasterDataUpdateReviewTab.tsx`)
-- `[ ]` Tab Phê duyệt (`master-data/ApprovalTab.tsx`)
+- `[x]` Tab Quản lý thuộc tính (`master-data/AttributesManagementTab.tsx`)
+- `[x]` Tab Quan hệ thực thể (`master-data/EntityRelationshipsTab.tsx`)
+- `[x]` Tab Quy tắc gộp (`master-data/MergeRulesManagementTab.tsx`)
+- `[x]` Tab Quy tắc định danh (`master-data/UniqueIdentifierRulesTab.tsx`)
+- `[x]` Tab Lịch sử thay đổi (`master-data/HistoryTab.tsx`)
+- `[x]` Tab Cập nhật dữ liệu (`master-data/MasterDataUpdateTab.tsx`)
+- `[x]` Tab Review cập nhật (`master-data/MasterDataUpdateReviewTab.tsx`)
+- `[x]` Tab Phê duyệt (`master-data/ApprovalTab.tsx`)
 
 ### Danh sách Master Data (theo lĩnh vực)
-- `[ ]` Trang danh sách tổng hợp (`master-data-list/MasterDataListPage.tsx`)
-- `[ ]` Trang Master Data tổng (`master-data-list/MasterDataPage.tsx`)
-- `[ ]` Master Data A–J (`master-data-list/MasterDataAPage.tsx` đến `MasterDataJPage.tsx`)
+- `[x]` Trang danh sách tổng hợp (`master-data-list/MasterDataListPage.tsx`)
+- `[x]` Trang Master Data tổng (`master-data-list/MasterDataPage.tsx`)
+- `[x]` Master Data A–J (`master-data-list/MasterDataAPage.tsx` đến `MasterDataJPage.tsx`)
 
 ---
 
@@ -345,7 +345,7 @@
 ## 10. PHÂN HỆ DỮ LIỆU MỞ (OPEN DATA)
 
 ### Thiết lập & Quản lý
-- `[]` Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`)
+- `[x]` Thiết lập danh mục dữ liệu mở (`open-data/OpenDataSetupPage.tsx`)
   - Tab Quản lý danh mục
   - Tab Metadata
   - Tab Giấy phép
@@ -353,61 +353,61 @@
   - Tab Lịch sử
 
 ### Công bố & Yêu cầu
-- `[ ]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
-- `[ ]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
-- `[ ]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
+- `[x]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
+- `[x]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
+- `[x]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
 
 ### Quy tắc & Thống kê
-- `[ ]` Quy tắc cập nhật dữ liệu mở (`open-data/OpenDataUpdateRulesPage.tsx`)
-- `[ ]` Thống kê dữ liệu mở (`open-data/OpenDataStatisticsPage.tsx`)
-- `[ ]` Báo cáo dữ liệu mở (`open-data/OpenDataReportPage.tsx`)
-- `[ ]` Báo cáo dữ liệu mở (chi tiết) (`open-data-report/OpenDataReportPage.tsx`)
+- `[x]` Quy tắc cập nhật dữ liệu mở (`open-data/OpenDataUpdateRulesPage.tsx`)
+- `[x]` Thống kê dữ liệu mở (`open-data/OpenDataStatisticsPage.tsx`)
+- `[x]` Báo cáo dữ liệu mở (`open-data/OpenDataReportPage.tsx`)
+- `[x]` Báo cáo dữ liệu mở (chi tiết) (`open-data-report/OpenDataReportPage.tsx`)
 
 ### Cổng công khai
 - `[ ]` Cổng thông tin dữ liệu mở công khai (`open-data/OpenDataPublicPortal.tsx`)
 
 ### Danh mục dữ liệu mở (open-data-category/)
-- `[ ]` Trang danh mục dữ liệu mở công khai (`open-data-category/OpenDataCategoryPage.tsx`)
+- `[x]` Trang danh mục dữ liệu mở công khai (`open-data-category/OpenDataCategoryPage.tsx`)
 - `[x]` Thiết lập danh mục dữ liệu mở (`open-data-category/OpenDataCategorySetupPage.tsx`)
-- `[ ]` Danh mục A–J (`open-data-category/OpenDataCategoryAPage.tsx` đến `open-data-category/OpenDataCategoryJPage.tsx`)
+- `[x]` Danh mục A–J (`open-data-category/OpenDataCategoryAPage.tsx` đến `open-data-category/OpenDataCategoryJPage.tsx`)
 
 ### Components danh mục mở
-- `[ ]` Thanh hành động (`open-data-category/components/OpenDataCategoryActions.tsx`)
-- `[ ]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
-- `[ ]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
-- `[ ]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
-- `[ ]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
-- `[ ]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
-- `[ ]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
+- `[x]` Thanh hành động (`open-data-category/components/OpenDataCategoryActions.tsx`)
+- `[x]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
+- `[x]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
+- `[x]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
+- `[x]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
+- `[x]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
+- `[x]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
 
 ---
 
 ## 11. PHÂN HỆ QUẢN TRỊ HỆ THỐNG
 
 ### Quản lý người dùng & phân quyền
-- `[ ]` Quản lý người dùng (`admin/UserManagementPage.tsx`)
-- `[ ]` Quản lý nhóm & phân quyền (`admin/GroupManagementPage.tsx`)
-- `[ ]` Quản lý vai trò (`admin/RoleManagementPage.tsx`)
-- `[ ]` Quản lý chức năng hệ thống (`admin/FunctionManagementPage.tsx`)
+- `[x]` Quản lý người dùng (`admin/UserManagementPage.tsx`)
+- `[x]` Quản lý nhóm & phân quyền (`admin/GroupManagementPage.tsx`)
+- `[x]` Quản lý vai trò (`admin/RoleManagementPage.tsx`)
+- `[x]` Quản lý chức năng hệ thống (`admin/FunctionManagementPage.tsx`)
 - `[ ]` Danh sách chức năng (`admin/FunctionListPage.tsx`)
 
 ### Cấu hình hệ thống
 - `[ ]` Cấu hình hệ thống (`admin/SystemConfigPage.tsx`)
-- `[ ]` Cấu hình bảo mật (`admin/SecurityConfigPage.tsx`)
+- `[x]` Cấu hình bảo mật (`admin/SecurityConfigPage.tsx`)
 - `[ ]` Cấu hình quy tắc mật khẩu (`admin/PasswordRuleConfigPage.tsx`)
-- `[ ]` Cấu hình lưu trữ nhật ký (`admin/LogRetentionConfigPage.tsx`)
-- `[ ]` Sao lưu & Phục hồi (`admin/BackupPage.tsx`)
+- `[x]` Cấu hình lưu trữ nhật ký (`admin/LogRetentionConfigPage.tsx`)
+- `[x]` Sao lưu & Phục hồi (`admin/BackupPage.tsx`)
 
 ### Nhật ký hệ thống
-- `[ ]` Nhật ký truy cập (`admin/AccessLogPage.tsx`)
-- `[ ]` Nhật ký đăng nhập (`admin/LoginLogPage.tsx`)
-- `[ ]` Nhật ký lỗi hệ thống (`admin/ErrorLogPage.tsx`)
-- `[ ]` Nhật ký thay đổi cấu hình (`admin/ConfigChangeLogPage.tsx`)
-- `[ ]` Nhật ký quản lý tài khoản (`admin/AccountManagementLogPage.tsx`)
+- `[x]` Nhật ký truy cập (`admin/AccessLogPage.tsx`)
+- `[x]` Nhật ký đăng nhập (`admin/LoginLogPage.tsx`)
+- `[x]` Nhật ký lỗi hệ thống (`admin/ErrorLogPage.tsx`)
+- `[x]` Nhật ký thay đổi cấu hình (`admin/ConfigChangeLogPage.tsx`)
+- `[x]` Nhật ký quản lý tài khoản (`admin/AccountManagementLogPage.tsx`)
 - `[ ]` Lịch sử hoạt động người dùng (`admin/UserActivityHistoryPage.tsx`)
 
 ### Thống kê
-- `[ ]` Thống kê hệ thống (`admin/StatisticsPage.tsx`)
+- `[x]` Thống kê hệ thống (`admin/StatisticsPage.tsx`)
 
 ---
 

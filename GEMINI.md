@@ -76,7 +76,7 @@ F:\BTP\DLDC_1\tailieu\docs\compomennt.md
 | Thành phần | Quy tắc cốt lõi |
 |---|---|
 | **Font chữ** | Inter, system-ui, sans-serif |
-| **Cỡ chữ** | Nội dung: 13px · Label form: 13px · Menu: 12px · H1: 16px · H2: 14px |
+| **Cỡ chữ** | Nội dung: 13px · Label form: 13px · Menu: 12px · H1 (tiêu đề trang): 20px/700 `#2A0F0F` · Tiêu đề modal: 16px · H2: 14px |
 | **Màu chính** | Primary: `#2563eb` · Destructive: `#dc2626` · Border: `#e2e8f0` |
 | **Bo góc** | Nút/Input: `rounded-lg` (8px) · Card: `rounded-lg` (8px) · Modal: `rounded-2xl` |
 | **Button Primary** | `bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px]` |

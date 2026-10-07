@@ -67,8 +67,9 @@ export function CategoryGroupPage({ mode = 'thu thập', context = 'thu thập' 
       innerSidebarItems={sidebarItems}
       activeId={selectedId}
       onSelectDataType={(id) => setSelectedId(id)}
+      stretchHeight
     >
-      <div className="mt-4">
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
         <CategoryGroupModal
           isOpen={true}
           onClose={() => {}}

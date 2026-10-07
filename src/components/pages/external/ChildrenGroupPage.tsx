@@ -60,8 +60,9 @@ export function ChildrenGroupPage({ mode = 'thu thập', context = 'thu thập' 
       innerSidebarItems={sidebarItems}
       activeId={selectedId}
       onSelectDataType={(id) => setSelectedId(id)}
+      stretchHeight
     >
-      <div className="mt-4">
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
         <ChildrenModal
           isOpen={true}
           onClose={() => {}}

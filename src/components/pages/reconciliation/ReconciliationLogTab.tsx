@@ -1,6 +1,16 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, Filter, X } from 'lucide-react';
+import {
+  Badge, TruncatedText, Pagination, BTN_OUTLINE, INPUT_CLS,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, isoToDisplayDate
+} from '../collection/collectionUi';
+
+// Bảng theo compomennt.md 5.3; căn lề 5.3.3
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+// Màu badge trạng thái nhật ký (mục 5.8)
+const LOG_STATUS_VARIANT: Record<string, string> = { success: 'green', warning: 'orange', error: 'red', info: 'blue' };
 
 interface LogEntry {
   id: string;
@@ -19,6 +29,11 @@ interface LogEntry {
 export function ReconciliationLogTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'warning' | 'error'>('all');
+  // Điều kiện đã áp dụng — chỉ cập nhật khi bấm Tìm kiếm / Enter (mục 5.19)
+  const [applied, setApplied] = useState<{ searchTerm: string; filterStatus: 'all' | 'success' | 'warning' | 'error' }>({ searchTerm: '', filterStatus: 'all' });
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const logs: LogEntry[] = [
     {
@@ -88,100 +103,124 @@ export function ReconciliationLogTab() {
     }
   ];
 
-  const filteredLogs = logs.filter(log => {
-    const matchesSearch = searchTerm === '' ||
-      log.packageName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.packageCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.executor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase());
+  const runSearch = () => {
+    setApplied({ searchTerm, filterStatus });
+    setCurrentPage(1);
+  };
 
-    const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
+  const filteredLogs = logs.filter(log => {
+    const kw = normalizeSearch(applied.searchTerm);
+    const matchesSearch = kw === '' ||
+      [log.packageName, log.packageCode, log.action, log.executor, log.details].some(v => normalizeSearch(v).includes(kw));
+
+    const matchesStatus = applied.filterStatus === 'all' || log.status === applied.filterStatus;
 
     return matchesSearch && matchesStatus;
   });
+  const pagedLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-6">
-      {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="flex-1 relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+    <div className="space-y-4 pt-2">
+      {/* Thanh tìm kiếm & bộ lọc (mục 5.19) */}
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-1.5">
             <input
+              aria-label="Tìm kiếm nhật ký"
               type="text"
               placeholder="Tìm kiếm log theo gói tin, hành động, người dùng..."
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+              className={SEARCH_INPUT_CLS}
               title="Tìm kiếm nhật ký"
             />
-          </div>
-          
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <select
-              value={filterStatus}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value as any)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[160px]"
-              title="Lọc hồ sơ theo trạng thái"
+            <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              aria-label="Bộ lọc"
+              aria-expanded={showFilters}
+              className={filterBtnClass(showFilters)}
+              title="Bộ lọc"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="success">Thành công</option>
-              <option value="error">Lỗi</option>
-              <option value="warning">Cảnh báo</option>
-            </select>
-
-            <button 
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
-              title="Xuất nhật ký ra file"
-            >
-              <Download className="w-4 h-4" />
-              Xuất log
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
+
+          <button type="button" className={BTN_OUTLINE} title="Xuất nhật ký ra file">
+            <Download className="w-4 h-4" />
+            Xuất log
+          </button>
         </div>
+
+        {/* Vùng bộ lọc: khung xám, cách thanh tìm kiếm 15px */}
+        {showFilters && (
+          <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+            <div>
+              <label className={FILTER_LABEL}>Trạng thái</label>
+              <select
+                value={filterStatus}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value as any)}
+                className={INPUT_CLS}
+                aria-label="Trạng thái"
+                title="Lọc hồ sơ theo trạng thái"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="success">Thành công</option>
+                <option value="error">Lỗi</option>
+                <option value="warning">Cảnh báo</option>
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Logs Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+      {/* Bảng nhật ký (mục 5.3) */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">Thời gian</th>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">Gói tin</th>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">Hành động</th>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">Người thực hiện</th>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">IP</th>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">Chi tiết</th>
-                <th className="px-6 py-3 text-left text-sm text-slate-600">Trạng thái</th>
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-[#F8FAFC] sticky top-0 z-[1]">
+              <tr className="h-[42px]">
+                <th className={`${TH} text-left`}>Thời gian</th>
+                <th className={`${TH} text-left`}>Gói tin</th>
+                <th className={`${TH} text-left`}>Hành động</th>
+                <th className={`${TH} text-left`}>Người thực hiện</th>
+                <th className={`${TH} text-left`}>IP</th>
+                <th className={`${TH} text-left`}>Chi tiết</th>
+                <th className={`${TH} text-left`}>Trạng thái</th>
               </tr>
             </thead>
             <tbody>
-              {filteredLogs.map((log) => (
-                <tr key={log.id} className="border-b border-slate-200 hover:bg-slate-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{log.timestamp.split(' ')[0]}</div>
-                    <div className="text-xs text-slate-400">{log.timestamp.split(' ')[1]}</div>
+              {pagedLogs.map((log) => {
+                const [d, t] = log.timestamp.split(' ');
+                return (
+                <tr key={log.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                  <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                    <div>{isoToDisplayDate(d) || d}</div>
+                    {t && <div className="text-[#64748B]">{t}</div>}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-slate-900">{log.packageName}</div>
-                    <div className="text-xs text-slate-500">{log.packageCode}</div>
+                  <td className={`${TD} text-left max-w-[360px] leading-[18px]`}>
+                    <TruncatedText text={log.packageName} />
+                    <TruncatedText text={log.packageCode} className="text-[#64748B]" />
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-900">{log.action}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{log.executor}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600 font-mono">{log.ipAddress}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600 max-w-md">{log.details}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 text-xs rounded-full border ${log.statusColor}`}>
-                      {log.statusText}
-                    </span>
+                  <td className={`${TD} text-left whitespace-nowrap`}>{log.action}</td>
+                  <td className={`${TD} text-left whitespace-nowrap`}>{log.executor}</td>
+                  <td className={`${TD} text-left whitespace-nowrap`}>{log.ipAddress}</td>
+                  <td className={`${TD} text-left max-w-[360px]`}>
+                    <TruncatedText text={log.details} />
+                  </td>
+                  <td className={`${TD} text-left whitespace-nowrap`}>
+                    <Badge label={log.statusText} variant={LOG_STATUS_VARIANT[log.status] || 'slate'} />
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {filteredLogs.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy log nào
                   </td>
                 </tr>
@@ -189,6 +228,16 @@ export function ReconciliationLogTab() {
             </tbody>
           </table>
         </div>
+
+        {/* Phân trang (mục 5.14) */}
+        <Pagination
+          className="border-t border-[#E2E8F0]"
+          currentPage={currentPage}
+          totalItems={filteredLogs.length}
+          pageSize={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setItemsPerPage}
+        />
       </div>
     </div>
   );

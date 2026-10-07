@@ -41,6 +41,8 @@ import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal
 import { CategoryStructureViewModal } from './components/modals/CategoryStructureViewModal';
 import { CategoryVersionChangeModal } from './components/modals/CategoryVersionChangeModal';
 import { Portal } from '../../common/Portal';
+import { toast } from 'sonner';
+import { tabClass, formatDateVN, toLocalIsoDate } from '../collection/collectionUi';
 
 export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }) => {
   const navigate = useNavigate();
@@ -145,6 +147,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   // Form & Modal States
   const [showWizard, setShowWizard] = useState(false);
   const [isViewMode, setIsViewMode] = useState(false);
+  // Yêu cầu phê duyệt danh mục đang xem qua Wizard (mở từ tab Phê duyệt)
+  const [approvalViewRequest, setApprovalViewRequest] = useState<ApprovalRequest | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardEntityId, setWizardEntityId] = useState<string | null>(null);
@@ -153,7 +157,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   // Tự động chuyển trạng thái sang Hiệu lực khi đến ngày hiệu lực được chọn
   useEffect(() => {
     const checkEffectiveDates = () => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = toLocalIsoDate(new Date());
       setEntities(prev => {
         const hasAny = prev.some(e =>
           e.lifecycleStatus === 'approved' &&
@@ -248,6 +252,24 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       requestedDate: '04/12/2024 15:20', status: 'rejected',
       reviewedBy: 'Giám đốc Trần B', reviewedDate: '05/12/2024',
       comments: 'Cấu trúc dữ liệu không phù hợp với tiêu chuẩn'
+    },
+    // Mock thử chuyển nhanh danh mục ↔ cấu trúc (07/10/2026):
+    // DM-GIOITINH, DM-HC: có cả yêu cầu danh mục + cấu trúc đang chờ → thông báo có nút chuyển
+    // DM-QUOCGIA: chỉ có yêu cầu cấu trúc đang chờ; DM-DANTOC: chỉ có yêu cầu danh mục đang chờ → chỉ thông báo đã duyệt
+    {
+      id: '20', type: 'structure', entityId: '1', entityCode: 'DM-GIOITINH',
+      entityName: 'Dữ liệu Danh mục giới tính', requestedBy: 'Bùi Thị I',
+      requestedDate: '21/12/2024 09:10', status: 'pending'
+    },
+    {
+      id: '21', type: 'structure', entityId: '6', entityCode: 'DM-HC',
+      entityName: 'Dữ liệu Danh mục đơn vị hành chính', requestedBy: 'Hoàng Văn F',
+      requestedDate: '11/12/2024 10:20', status: 'pending'
+    },
+    {
+      id: '22', type: 'structure', entityId: '3', entityCode: 'DM-QUOCGIA',
+      entityName: 'Dữ liệu Danh mục và mã Quốc gia, Quốc tịch', requestedBy: 'Lê Minh C',
+      requestedDate: '19/12/2024 15:40', status: 'pending'
     },
     {
       id: '10', type: 'category', entityId: '2', entityCode: 'DM-DANTOC',
@@ -445,7 +467,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   // --------------------------------------------------------------------------------
 
   // Hành động Xem chi tiết
-  const handleView = (entity: MasterDataEntity) => {
+  const handleView = (entity: MasterDataEntity, fromRequest: ApprovalRequest | null = null) => {
+    setApprovalViewRequest(fromRequest);
     setEditingEntity(entity);
     setFormData(entity);
     setWizardEntityId(entity.id);
@@ -474,14 +497,62 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     setEditingEntity(null);
   };
 
+  // --------------------------------------------------------------------------------
+  // Sau khi phê duyệt danh mục / cấu trúc: nếu cùng danh mục còn yêu cầu loại kia đang chờ
+  // → thông báo kèm nút chuyển sang thẻ phê duyệt tương ứng, lọc sẵn danh mục (PM duyệt phương án B 07/10/2026)
+  // --------------------------------------------------------------------------------
+  const [approvalEntityFilter, setApprovalEntityFilter] = useState<{ ids: string[]; label: string } | null>(null);
+  const APPROVAL_KIND_LABEL: Record<string, string> = { category: 'danh mục', structure: 'cấu trúc' };
+
+  const notifyAfterApprove = (approved: ApprovalRequest[]) => {
+    const approvedIds = approved.map(r => r.id);
+    const shown = new Set<string>();
+    (['category', 'structure'] as const).forEach(kind => {
+      const done = approved.filter(r => r.type === kind);
+      if (done.length === 0) return;
+      const other = kind === 'category' ? 'structure' : 'category';
+      const doneEntityIds = Array.from(new Set(done.map(r => r.entityId)));
+      const waiting = requests.filter(r => r.type === other && r.status === 'pending' && !approvedIds.includes(r.id) && doneEntityIds.includes(r.entityId));
+      const waitingEntityIds = Array.from(new Set(waiting.map(r => r.entityId)));
+      const title = done.length === 1
+        ? `Đã phê duyệt ${APPROVAL_KIND_LABEL[kind]} ${done[0].entityCode}`
+        : `Đã phê duyệt ${done.length} yêu cầu ${APPROVAL_KIND_LABEL[kind]}`;
+      shown.add(kind);
+      if (waitingEntityIds.length === 0) {
+        toast.success(title);
+        return;
+      }
+      const codes = waitingEntityIds.map(id => waiting.find(r => r.entityId === id)?.entityCode || id);
+      toast.success(title, {
+        description: done.length === 1
+          ? `Danh mục còn ${waiting.length} yêu cầu phê duyệt ${APPROVAL_KIND_LABEL[other]} đang chờ.`
+          : `${waitingEntityIds.length} danh mục có yêu cầu phê duyệt ${APPROVAL_KIND_LABEL[other]} đang chờ.`,
+        duration: 8000,
+        action: {
+          label: `Chuyển sang phê duyệt ${APPROVAL_KIND_LABEL[other]}`,
+          onClick: () => {
+            setActiveTab('approval');
+            setApprovalTab(other);
+            setStatusFilter('pending');
+            setApprovalEntityFilter({ ids: waitingEntityIds, label: codes.join(', ') });
+          },
+        },
+      });
+    });
+    // Loại khác (phiên bản, hết hiệu lực): chỉ báo đã phê duyệt
+    const rest = approved.filter(r => !shown.has(r.type));
+    if (rest.length > 0) toast.success(rest.length === 1 ? 'Đã phê duyệt yêu cầu' : `Đã phê duyệt ${rest.length} yêu cầu`);
+  };
+
   // Hành động Phê duyệt / Từ chối hàng loạt (dùng chung cho ReviewApprovalModal và Phê duyệt nhanh/Từ chối nhanh)
   const applyBulkApprove = (ids: string[], note: string, partialStatuses?: Record<string, Record<string, 'approved' | 'rejected'>>) => {
+    notifyAfterApprove(requests.filter(r => ids.includes(r.id) && r.status === 'pending'));
     const approvedEntityIdsForCategory: string[] = [];
     setRequests(requests.map(r => {
       if (ids.includes(r.id)) {
         const currentLineStatuses = partialStatuses?.[r.id] || {};
         if (r.type === 'category') approvedEntityIdsForCategory.push(r.entityId);
-        return { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note, lineStatuses: currentLineStatuses };
+        return { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note, lineStatuses: currentLineStatuses };
       }
       return r;
     }));
@@ -504,7 +575,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   };
 
   const applyBulkReject = (ids: string[], note: string) => {
-    setRequests(requests.map(r => ids.includes(r.id) ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+    setRequests(requests.map(r => ids.includes(r.id) ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
   };
 
   // Hành động Xóa
@@ -535,11 +606,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   const handleSaveStep1 = (action: 'draft' | 'submit' | 'next' | 'next3') => {
     if (!formData.code?.trim()) {
-      alert('Vui lòng nhập mã danh mục!');
+      toast.error('Vui lòng nhập mã danh mục!');
       return;
     }
     if (!formData.name?.trim()) {
-      alert('Vui lòng nhập tên danh mục!');
+      toast.error('Vui lòng nhập tên danh mục!');
       return;
     }
 
@@ -558,8 +629,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         ...(formData as MasterDataEntity),
         id: newId,
         code: formData.code.trim(),
-        createdDate: new Date().toLocaleDateString('vi-VN'),
-        updatedDate: new Date().toLocaleDateString('vi-VN'),
+        createdDate: formatDateVN(new Date()),
+        updatedDate: formatDateVN(new Date()),
         createdBy: 'Admin',
         lifecycleStatus: 'draft',
         version: 1 // Phiên bản đầu tiên
@@ -681,7 +752,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       defaultValue: data.defaultValue,
       validationRules: data.validationRules,
       description: data.description,
-      createdDate: new Date().toLocaleDateString('vi-VN'),
+      createdDate: formatDateVN(new Date()),
       version: 1,
       status: 'draft',
       keyType: data.keyType || 'none',
@@ -693,7 +764,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   const handleSaveAttribute = () => {
     if (!attributeFormData.fieldName || !attributeFormData.displayName) {
-      alert('Vui lòng nhập đầy đủ Tên trường và Tên hiển thị!');
+      toast.error('Vui lòng nhập đầy đủ Tên trường và Tên hiển thị!');
       return;
     }
 
@@ -717,7 +788,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         defaultValue: attributeFormData.defaultValue,
         validationRules: attributeFormData.validationRules,
         description: attributeFormData.description,
-        createdDate: new Date().toLocaleDateString('vi-VN'),
+        createdDate: formatDateVN(new Date()),
         version: 1,
         status: 'draft',
         keyType: attributeFormData.keyType || 'none',
@@ -750,9 +821,9 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   return (
     <div className="space-y-6">
-      {/* Tabs Header */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="flex px-6 gap-2">
+      {/* Tabs Header (compomennt.md 5.9) */}
+      <div className="bg-white border-b border-[#E2E8F0]">
+        <div className="flex px-6">
           {[
             { id: 'setup', label: 'Thiết lập danh mục', icon: Settings },
             { id: 'attributes', label: 'Thiết lập cấu trúc', icon: Sliders },
@@ -761,13 +832,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           ].map(tab => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${activeTab === tab.id
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
+              className={tabClass(activeTab === tab.id)}
             >
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+              <tab.icon className="w-4 h-4" />
               {tab.label}
             </button>
           ))}
@@ -833,7 +902,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           {activeTab === 'approval' && <ApprovalTab
             entities={entities}
             approvalTab={approvalTab}
-            setApprovalTab={setApprovalTab}
+            setApprovalTab={(t) => { setApprovalTab(t); setApprovalEntityFilter(null); }}
             requests={requests}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
@@ -854,10 +923,9 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                  setVersionChangeRequest(req);
                  setShowVersionChangeModal(true);
               } else {
-                 const entity = entities.find(e => e.id === req.entityId) || null;
-                 setInfoViewEntity(entity);
-                 setInfoViewRequestId(req.id);
-                 setShowInfoViewModal(true);
+                 // Phê duyệt danh mục: dùng chung màn Xem chi tiết của Thiết lập danh mục (Wizard chế độ xem) — PM yêu cầu 07/10/2026
+                 const entity = entities.find(e => e.id === req.entityId);
+                 if (entity) handleView(entity, req);
               }
             }}
             onApproveClick={(req) => { setPendingApprovalData(req); setShowSimpleApproveModal(true); }}
@@ -867,6 +935,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             onQuickReject={(ids) => { setSelectedRequests(requests.filter(r => ids.includes(r.id))); setShowBulkRejectModal(true); }}
             approvalTypeLabels={approvalTypeLabels}
             approvalStatusLabels={approvalStatusLabels}
+            entityFilter={approvalEntityFilter}
+            onClearEntityFilter={() => setApprovalEntityFilter(null)}
           />}
           {activeTab === 'version-history' && <VersionHistoryTab searchTerm={searchTerm} setSearchTerm={setSearchTerm} onViewDetail={() => { }} versions={versions} />}
       </div>
@@ -897,6 +967,10 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           isViewOnly={isViewMode}
           isEditMode={isEditMode}
           requests={requests}
+          approvalActions={isViewMode && approvalViewRequest?.status === 'pending' ? {
+            onApprove: () => { setPendingApprovalData(approvalViewRequest); setShowWizard(false); setShowSimpleApproveModal(true); },
+            onReject: () => { setPendingApprovalData(approvalViewRequest); setShowWizard(false); setShowSimpleRejectModal(true); },
+          } : null}
         />
 
         {genericConfirm && (
@@ -917,8 +991,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           title="Xác nhận xóa danh mục"
           message={
             <div className="space-y-1">
-              <div className="text-slate-500">Tên danh mục:</div>
-              <div className="font-medium text-slate-800">{entityToDelete?.name}</div>
+              <div className="text-[#64748B]">Tên danh mục:</div>
+              <div className="font-medium text-[#020817]">{entityToDelete?.name}</div>
             </div>
           }
           onConfirm={confirmDelete}
@@ -930,8 +1004,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           title="Xác nhận xóa trường dữ liệu"
           message={
             <div className="space-y-1">
-              <div className="text-slate-500">Tên trường dữ liệu hiển thị:</div>
-              <div className="font-medium text-slate-800">{attributes.find(a => a.id === attributeToDeleteId)?.displayName}</div>
+              <div className="text-[#64748B]">Tên trường dữ liệu hiển thị:</div>
+              <div className="font-medium text-[#020817]">{attributes.find(a => a.id === attributeToDeleteId)?.displayName}</div>
             </div>
           }
           onConfirm={() => {
@@ -954,7 +1028,8 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           entity={entities.find(e => e.id === pendingApprovalData?.entityId) || null}
           submissionContent={pendingApprovalData?.submissionContent}
           onConfirm={(note) => {
-            setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            if (pendingApprovalData && !Array.isArray(pendingApprovalData)) notifyAfterApprove([pendingApprovalData]);
+            setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             // Cập nhật lifecycle status của entity nếu approved
             if (pendingApprovalData?.type === 'category') {
               const ent = entities.find(e => e.id === pendingApprovalData.entityId);
@@ -984,7 +1059,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           entity={entities.find(e => e.id === pendingApprovalData?.entityId) || null}
           submissionContent={pendingApprovalData?.submissionContent}
           onConfirm={(note) => {
-            setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             // Cập nhật lifecycle status của entity nếu rejected
             if (pendingApprovalData?.type === 'category') {
               setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'rejected' } as MasterDataEntity : e));
@@ -1048,7 +1123,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                  entityCode: expireEntity.code,
                  entityName: expireEntity.name,
                  requestedBy: 'Nguyễn Văn A',
-                 requestedDate: new Date().toLocaleDateString('vi-VN'),
+                 requestedDate: formatDateVN(new Date()),
                  status: 'pending',
                  changes: { expireDate: data.expireDate, reason: data.reason, approver: data.approver, note: data.note },
                  comments: `Ngừng sử dụng từ ${data.expireDate}. Lý do: ${data.reason}. Lãnh đạo trình duyệt: ${data.approver}. ${data.note}`
@@ -1069,14 +1144,14 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
            entity={expireEntity}
            request={pendingApprovalData}
            onApprove={(note) => {
-              setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+              setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
               if (expireEntity) {
                  setEntities(entities.map(e => e.id === expireEntity.id ? { ...e, lifecycleStatus: 'inactive' } as MasterDataEntity : e));
               }
               setShowExpireApproveModal(false);
            }}
            onReject={(note) => {
-              setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+              setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
               if (expireEntity) {
                  setEntities(entities.map(e => e.id === expireEntity.id ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
               }
@@ -1091,11 +1166,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           entity={versionChangeEntity}
           request={versionChangeRequest}
           onApprove={(note) => {
-            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             setShowVersionChangeModal(false);
           }}
           onReject={(note) => {
-            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             setShowVersionChangeModal(false);
           }}
         />
@@ -1109,14 +1184,15 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           requestStatus={requests.find(r => r.id === structureViewRequestId)?.status}
           reviewComment={requests.find(r => r.id === structureViewRequestId)?.comments}
           onApprove={(note) => {
-            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            notifyAfterApprove(requests.filter(r => r.id === structureViewRequestId));
+            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             if (structureViewEntity) {
               setEntities(entities.map(e => e.id === structureViewEntity.id ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
             }
             setShowStructureViewModal(false);
           }}
           onReject={(note) => {
-            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             setShowStructureViewModal(false);
           }}
         />
@@ -1129,14 +1205,15 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           submissionContent={requests.find(r => r.id === infoViewRequestId)?.submissionContent}
           reviewComment={requests.find(r => r.id === infoViewRequestId)?.comments}
           onApprove={(note) => {
-            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            notifyAfterApprove(requests.filter(r => r.id === infoViewRequestId));
+            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'approved', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             if (infoViewEntity) {
               setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'approved' } as MasterDataEntity : e));
             }
             setShowInfoViewModal(false);
           }}
           onReject={(note) => {
-            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: new Date().toLocaleDateString('vi-VN'), comments: note } : r));
+            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
             if (infoViewEntity) {
               setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'draft' } as MasterDataEntity : e));
             }
@@ -1166,7 +1243,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                 entityCode: approvalRequestData.code,
                 entityName: approvalRequestData.name,
                 requestedBy: 'Nguyễn Văn A',
-                requestedDate: new Date().toLocaleString('vi-VN'),
+                requestedDate: formatDateVN(new Date(), true).slice(0, 16),
                 status: 'pending',
                 ...(reqType === 'category' ? { submissionContent: formAny.changeDescription } : {}),
                 ...(reqType === 'version' ? {
@@ -1201,7 +1278,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
                 version: String(entity?.version || 1),
                 author: 'Nguyễn Văn A',
                 category: approvalRequestData.name,
-                date: new Date().toLocaleString('vi-VN'),
+                date: formatDateVN(new Date(), true).slice(0, 16),
                 content: `Chỉnh sửa ${versionTypeMap[approvalRequestData.type] || 'thông tin'} danh mục`,
                 type: versionTypeMap[approvalRequestData.type] || 'Thông tin chung',
                 status: 'pending_approval',

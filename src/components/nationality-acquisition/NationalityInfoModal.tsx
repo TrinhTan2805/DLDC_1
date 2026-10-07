@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Search } from 'lucide-react';
+import { X } from 'lucide-react';
 import { NationalityInfoSearchFilter } from './NationalityInfoSearchFilter';
 import { NationalityInfoTable, NationalityRecord } from './NationalityInfoTable';
+import { BTN_OUTLINE, BTN_GHOST_ICON, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE } from '../pages/collection/collectionUi';
 
 interface NationalityInfoModalProps {
   isOpen: boolean;
@@ -62,35 +63,36 @@ export function NationalityInfoModal({
   return (
     <>
       {!isInline && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/50 z-[100]" onClick={onClose} />
       )}
 
-      <div className={isInline ? "w-full flex-1 flex flex-col min-h-0" : "fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"}>
+      <div className={isInline ? "w-full flex-1 flex flex-col min-h-0" : "fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none"}>
         {isInline && (
           <div className="flex flex-col mb-4">
-            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Tích hợp: {title}.
+            <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">{title}</h1>
+            <p className="text-[13px] text-[#64748B] mt-1 leading-5">
+              Tích hợp: <span className="font-semibold text-[#020817]">{title}</span>
               <br />
-              Thuộc đơn vị: Cục Hành chính tư pháp.
+              Thuộc đơn vị: <span className="font-semibold text-[#020817]">Cục Hành chính tư pháp</span>
             </p>
           </div>
         )}
 
-        <div className={isInline ? "flex flex-col flex-1 min-h-0" : "bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] pointer-events-auto flex flex-col"}>
+        <div className={isInline ? "flex flex-col flex-1 min-h-0" : "bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] pointer-events-auto flex flex-col"}>
           {!isInline && (
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-lg">
+            <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-2xl">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-                <p className="text-sm text-slate-500 mt-1">
-                  Tích hợp: {title}.
+                <h2 className="text-[16px] font-medium text-[#020817]">{title}</h2>
+                <p className="text-[13px] text-[#64748B] mt-1 leading-5">
+                  Tích hợp: <span className="font-semibold text-[#020817]">{title}</span>
                   <br />
-                  Thuộc đơn vị: Cục Hành chính tư pháp.
+                  Thuộc đơn vị: <span className="font-semibold text-[#020817]">Cục Hành chính tư pháp</span>
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600"
+                className={BTN_GHOST_ICON}
+                aria-label="Đóng"
                 title="Đóng"
               >
                 <X className="w-5 h-5" />
@@ -98,7 +100,7 @@ export function NationalityInfoModal({
             </div>
           )}
 
-          <div className={`flex-1 overflow-hidden flex flex-col ${isInline ? '' : 'bg-white rounded-b-lg'}`}>
+          <div className={`flex-1 overflow-hidden flex flex-col ${isInline ? '' : 'bg-white rounded-b-2xl'}`}>
             <div className="flex-1 flex flex-col overflow-hidden">
               <NationalityInfoSearchFilter
                 isFilterOpen={isFilterOpen}
@@ -109,7 +111,8 @@ export function NationalityInfoModal({
                 isInline={isInline}
               />
 
-              <div className={isInline ? "bg-white border border-slate-200 rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden" : "flex-1 flex flex-col overflow-hidden"}>
+              {/* Table Container */}
+              <div className={isInline ? "bg-white border border-[#E2E8F0] rounded-lg flex-1 flex flex-col overflow-hidden" : "flex-1 flex flex-col overflow-hidden"}>
                 <NationalityInfoTable
                   records={filteredRecords}
                   currentPage={currentPage}
@@ -129,60 +132,57 @@ export function NationalityInfoModal({
         </div>
       </div>
 
-      {/* Record Detail Modal Popup */}
+      {/* Modal Chi tiết bản ghi */}
       {selectedRecord && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" onClick={() => setSelectedRecord(null)}></div>
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-slate-50/50">
-                <h3 className="text-lg font-bold text-slate-900">Chi tiết hồ sơ quốc tịch</h3>
-                <button
-                  onClick={() => setSelectedRecord(null)}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-600 transition-colors"
-                  title="Đóng chi tiết"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedRecord(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0 bg-white">
+              <h3 className="text-[16px] font-medium text-[#020817]">Chi tiết hồ sơ quốc tịch</h3>
+              <button onClick={() => setSelectedRecord(null)} aria-label="Đóng chi tiết" title="Đóng chi tiết" className={BTN_GHOST_ICON}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-6 py-4 overflow-y-auto custom-scrollbar space-y-6">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div className="space-y-1">
+                  <div className={FIELD_LABEL}>Họ và tên</div>
+                  <div className={`${FIELD_VALUE} break-words`}>{selectedRecord.name || '-'}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className={FIELD_LABEL}>Số quyết định</div>
+                  <div className={`${FIELD_VALUE} break-words`}>{selectedRecord.decisionNo || '-'}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className={FIELD_LABEL}>Ngày cấp</div>
+                  <div className={`${FIELD_VALUE} break-words`}>{selectedRecord.date || '-'}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className={FIELD_LABEL}>Thời gian đồng bộ</div>
+                  <div className={`${FIELD_VALUE} break-words`}>{selectedRecord.syncDate || '19/12/2025 15:30:00'}</div>
+                </div>
               </div>
 
-              <div className="p-6 overflow-y-auto space-y-4 text-sm text-slate-800">
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-xs text-slate-400 font-semibold block uppercase">Họ và tên</span>
-                    <span className="font-bold text-slate-900 text-base">{selectedRecord.name}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 font-semibold block uppercase">Số quyết định</span>
-                    <span className="font-mono font-bold text-blue-600">{selectedRecord.decisionNo}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 font-semibold block uppercase">Ngày cấp</span>
-                    <span className="font-mono text-slate-700">{selectedRecord.date}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 font-semibold block uppercase">Thời gian đồng bộ</span>
-                    <span className="font-mono text-slate-700">{selectedRecord.syncDate || '19/12/2025 15:30:00'}</span>
+              {selectedRecord.details && (
+                <div className="border-t border-[#E2E8F0] pt-4">
+                  <h4 className={SECTION_TITLE}>Thông tin chi tiết hồ sơ</h4>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    {Object.entries(selectedRecord.details).map(([k, v]) => (
+                      <div key={k} className="space-y-1">
+                        <div className={FIELD_LABEL}>{k}</div>
+                        <div className={`${FIELD_VALUE} break-words`}>{String(v ?? '') || '-'}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
+              )}
+            </div>
 
-                {selectedRecord.details && (
-                  <div className="border border-slate-200 rounded-lg p-4 bg-white space-y-3">
-                    <h4 className="font-bold text-slate-700 border-b border-slate-100 pb-2 text-xs uppercase tracking-wider">Thông tin chi tiết hồ sơ</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.entries(selectedRecord.details).map(([k, v]) => (
-                        <div key={k} className="space-y-0.5">
-                          <span className="text-xs text-slate-500 font-medium">{k}:</span>
-                          <p className="font-semibold text-slate-800">{String(v)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+            <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end flex-shrink-0">
+              <button onClick={() => setSelectedRecord(null)} className={BTN_OUTLINE}>Đóng</button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );

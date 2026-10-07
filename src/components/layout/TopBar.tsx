@@ -137,20 +137,20 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
 
   return (
     <>
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
+    <header className="h-16 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-6">
       {/* Page Title - Breadcrumb */}
       <div className="flex-1">
         {breadcrumb && breadcrumb.length > 0 ? (
-          <div className="flex items-center gap-2 text-sm">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[12px] font-normal text-[#020817]">
             {breadcrumb.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
-                {index > 0 && <span className="text-slate-400">/</span>}
-                <span className={index === breadcrumb.length - 1 ? "text-slate-900 font-medium" : "text-slate-500"}>
+                {index > 0 && <span>/</span>}
+                <span aria-current={index === breadcrumb.length - 1 ? 'page' : undefined}>
                   {item}
                 </span>
               </div>
             ))}
-          </div>
+          </nav>
         ) : (
           <h1 className="text-slate-900 text-lg">{title}</h1>
         )}
@@ -161,7 +161,8 @@ export function TopBar({ title, description, onUserMenuClick, currentPage, bread
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
           <button 
-            className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            aria-label="Thông báo"
+            className="relative w-10 h-10 p-2 inline-flex items-center justify-center text-[#475569] hover:bg-[#F1F5F9] rounded-full transition-colors"
             onClick={() => setShowNotifications(!showNotifications)}
           >
             <Bell className="w-5 h-5" />

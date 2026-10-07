@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, AlertTriangle, Loader2 } from 'lucide-react';
+import { BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON } from '../../../collection/collectionUi';
 
 interface ArchiveRecordModalProps {
   isOpen: boolean;
@@ -34,53 +35,55 @@ export function ArchiveRecordModal({ isOpen, onClose, onConfirm, recordName }: A
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+            <div className="w-10 h-10 rounded-full bg-[#FEF2F2] flex items-center justify-center text-[#DC2626]">
               <AlertTriangle className="w-5 h-5" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Ngừng áp dụng</h3>
+            <h3 className="text-[16px] font-medium text-[#020817]">Ngừng áp dụng</h3>
           </div>
           <button
             onClick={onClose}
             disabled={isLoading}
-            title="Đóng" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+            title="Đóng"
+            aria-label="Đóng"
+            className={`${BTN_GHOST_ICON} disabled:text-[#CBD5E1] disabled:hover:bg-transparent disabled:cursor-not-allowed`}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6">
-          <p className="text-slate-600">
-            Bạn có chắc chắn muốn ngừng áp dụng bản ghi <span className="font-semibold text-slate-900">{recordName}</span> không?
+        <div className="px-6 py-4 overflow-y-auto custom-scrollbar">
+          <p className="text-[13px] text-[#020817]">
+            Bạn có chắc chắn muốn ngừng áp dụng bản ghi <span className="font-medium">{recordName}</span> không?
           </p>
-          <p className="text-sm text-red-600 mt-3 p-3 bg-red-50 rounded-lg">
+          <div className="mt-3 p-3 bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg text-[13px] text-[#B91C1C]">
             Bản ghi ngừng áp dụng sẽ không được sử dụng ở các màn hình nhập liệu khác, nhưng vẫn giữ lại trong lịch sử dữ liệu.
-          </p>
+          </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 flex gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="mt-4 p-3 bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg text-[13px] text-[#B91C1C] flex gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-[#DC2626]" />
               <span>{error}</span>
             </div>
           )}
         </div>
 
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
           <button
             onClick={onClose}
             disabled={isLoading}
-            title="Hủy bỏ" className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-medium transition-colors disabled:opacity-50"
+            title="Hủy bỏ" className={BTN_OUTLINE}
           >
             Hủy bỏ
           </button>
           <button
             onClick={handleConfirm}
             disabled={isLoading}
-            title="Xác nhận" className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium transition-colors flex items-center gap-2 disabled:opacity-70 min-w-[120px] justify-center"
+            title="Xác nhận" className={`${BTN_DESTRUCTIVE} min-w-[120px]`}
           >
             {isLoading ? (
               <>

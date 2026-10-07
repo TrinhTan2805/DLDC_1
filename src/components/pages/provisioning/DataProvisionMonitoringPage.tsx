@@ -10,6 +10,25 @@ import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
 import { AuditLogsTab } from './tabs/AuditLogsTab';
 import { ScrollText } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, Label, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Badge, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, FIELD_LABEL, FIELD_VALUE } from '../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
+
+// Bảng (compomennt.md 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+// Thẻ biểu đồ / thẻ thống kê nhỏ (compomennt.md 5.6.1)
+const CHART_CARD = 'bg-white rounded-2xl border border-[#E2E8F0]';
+const CHART_TITLE = 'text-[14px] font-medium text-[#020817] flex items-center';
+const STAT_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4 flex items-center gap-3';
+const STAT_LABEL = 'text-[16px] text-[#64748B] block';
+const STAT_VALUE = 'text-[16px] font-semibold text-[#0F172A] tabular-nums block';
+// Trục / tooltip biểu đồ: chữ 12px #64748B, lưới #E2E8F0
+const AXIS_TICK = { fill: '#64748B', fontSize: 12 };
+const CHART_TOOLTIP_STYLE = { backgroundColor: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', boxShadow: 'none', fontSize: '12px' };
+// Nút chọn nhanh (chip): đang chọn nền #EAF3FF viền #BFDBFE chữ #155DFC; thường = BTN_OUTLINE
+const CHIP_ACTIVE = 'h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg border border-[#BFDBFE] bg-[#EAF3FF] text-[#155DFC] text-[13px] font-medium transition-colors cursor-pointer';
 
 // High-fidelity mock stats based on API
 const apiMockStats: Record<string, {
@@ -520,226 +539,167 @@ export function DataProvisionMonitoringPage() {
       gatewayStatus: stats!.gatewayStatus,
     }));
 
-  const renderTablePagination = (totalItems: number) => {
-    const totalPages = Math.ceil(totalItems / tableItemsPerPage) || 1;
-    return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 text-[13px] collection-pagination">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị {tableItemsPerPage} bản ghi/trang</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600">
-            {totalItems === 0 ? 0 : (tablePage - 1) * tableItemsPerPage + 1} - {Math.min(tablePage * tableItemsPerPage, totalItems)} / {totalItems}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setTablePage(tablePage > 1 ? tablePage - 1 : tablePage)}
-              disabled={tablePage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Trước
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setTablePage(page)}
-                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                  tablePage === page
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => {
-                if (tablePage < totalPages) {
-                  setTablePage(tablePage + 1);
-                }
-              }}
-              disabled={tablePage === totalPages || totalItems === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const renderTablePagination = (totalItems: number) => (
+    <Pagination
+      className="border-t border-[#E2E8F0]"
+      currentPage={tablePage}
+      totalItems={totalItems}
+      pageSize={tableItemsPerPage}
+      onPageChange={setTablePage}
+    />
+  );
 
   return (
-    <div className="monitoring-page-root" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <style dangerouslySetInnerHTML={{__html: `
-        .monitoring-page-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-        .monitoring-page-root .stat-card-title {
-          font-size: 16px !important;
-        }
-      `}} />
+    <div className="monitoring-page-root text-[13px]">
       <div className="space-y-6">
-        
-        {/* Filter bar */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+
+        {/* Filter bar (5.19) — bộ lọc chỉ áp dụng khi bấm "Tìm kiếm" */}
+        <div className="bg-white p-4 rounded-2xl border border-[#E2E8F0]">
           {/* Bộ lọc chính + nút nâng cao + xuất báo cáo */}
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex-1 min-w-[180px]">
-              <label className="block text-[12px] text-slate-500 mb-1 font-medium">Loại dữ liệu</label>
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="flex-1 min-w-[193px]">
+              <label className={FILTER_LABEL}>Loại dữ liệu</label>
               <select
+                aria-label="Loại dữ liệu"
                 value={draftLoai}
                 onChange={(e) => { setDraftLoai(e.target.value); setDraftDatabase(''); setDraftApi(''); }}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`${INPUT_CLS} cursor-pointer`}
               >
                 {DATA_TYPE_OPTIONS.map(o => (<option key={o.value} value={o.value}>{o.label}</option>))}
               </select>
             </div>
-            <div className="flex-1 min-w-[180px]">
-              <label className="block text-[12px] text-slate-500 mb-1 font-medium">{draftLoai === 'mo' ? 'Dịch vụ dữ liệu mở' : 'Cơ sở dữ liệu'}</label>
+            <div className="flex-1 min-w-[193px]">
+              <label className={FILTER_LABEL}>{draftLoai === 'mo' ? 'Dịch vụ dữ liệu mở' : 'Cơ sở dữ liệu'}</label>
               <select
+                aria-label={draftLoai === 'mo' ? 'Dịch vụ dữ liệu mở' : 'Cơ sở dữ liệu'}
                 value={draftDatabase}
                 onChange={(e) => { setDraftDatabase(e.target.value); setDraftApi(''); }}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`${INPUT_CLS} cursor-pointer`}
               >
                 <option value="">{draftLoai === 'mo' ? '-- Chọn tệp dữ liệu mở (Đã công bố) --' : 'Tất cả CSDL'}</option>
                 {draftDatabaseOptions.map(db => (<option key={db} value={db}>{db}</option>))}
               </select>
             </div>
-            <div className="flex-1 min-w-[180px]">
-              <label className="block text-[12px] text-slate-500 mb-1 font-medium">API</label>
+            <div className="flex-1 min-w-[193px]">
+              <label className={FILTER_LABEL}>API</label>
               <select
+                aria-label="API"
                 value={draftApi}
                 onChange={(e) => setDraftApi(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`${INPUT_CLS} cursor-pointer`}
               >
                 <option value="">Tất cả API</option>
                 {draftFilteredApis.map(api => (<option key={api.id} value={api.id}>{api.name}</option>))}
               </select>
             </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={applySearch}
+                title="Tìm kiếm"
+                aria-label="Tìm kiếm"
+                className={SEARCH_BTN_CLS}
+              >
+                <Search className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                title="Tìm kiếm nâng cao"
+                aria-label="Tìm kiếm nâng cao"
+                aria-expanded={showAdvanced}
+                className={filterBtnClass(showAdvanced)}
+              >
+                {showAdvanced ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+              </button>
+            </div>
             <button
-              onClick={applySearch}
-              title="Tìm kiếm"
-              aria-label="Tìm kiếm"
-              className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center shadow-sm shrink-0 transition-colors"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              title="Tìm kiếm nâng cao"
-              className={`p-2 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${showAdvanced ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-            >
-              {showAdvanced ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-            </button>
-            <button
+              type="button"
               onClick={() => setShowExportModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors font-medium text-[13px] shadow-sm shrink-0"
+              className={`${BTN_PRIMARY} shrink-0`}
             >
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="w-4 h-4" />
               Xuất báo cáo
             </button>
           </div>
 
           {/* Khung tìm kiếm nâng cao (xổ ra khi bấm nút nâng cao) */}
           {showAdvanced && (
-            <div className="pt-3 border-t border-slate-100">
-              <p className="text-[12px] font-semibold text-slate-600 mb-2">Tìm kiếm nâng cao</p>
-              <div className="flex flex-wrap items-end gap-3">
-                <div className="min-w-[160px]">
-                  <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ ngày</label>
-                  <input type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+              <p className="col-span-full text-[13px] font-semibold text-[#0E0D0D] leading-5">Tìm kiếm nâng cao</p>
+              <div>
+                <label className={FILTER_LABEL}>Từ ngày</label>
+                <div className={DATE_BOX_CLS}>
+                  <input aria-label="Từ ngày" type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0" />
                 </div>
-                <div className="min-w-[160px]">
-                  <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đến ngày</label>
-                  <input type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className={FILTER_LABEL}>Đến ngày</label>
+                <div className={DATE_BOX_CLS}>
+                  <input aria-label="Đến ngày" type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0" />
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Overview performance stat cards */}
+        {/* Overview performance stat cards (5.6.1) */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+          <div className={STAT_CARD}>
             <div className="p-2 bg-blue-50 rounded-lg shrink-0">
               <Activity className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <span className="stat-card-title text-[16px] text-slate-500 block">Tổng số yêu cầu</span>
-              <span className="text-xl font-bold text-slate-800 block">{view.totalRequests.toLocaleString()}</span>
+              <span className={STAT_LABEL}>Tổng số yêu cầu</span>
+              <span className={STAT_VALUE}>{view.totalRequests.toLocaleString()}</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-            <div className="p-2 bg-emerald-50 rounded-lg shrink-0">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          <div className={STAT_CARD}>
+            <div className="p-2 bg-green-50 rounded-lg shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <span className="stat-card-title text-[16px] text-slate-500 block">Tỷ lệ thành công</span>
-              <span className="text-xl font-bold text-emerald-600 block">{view.successRate}</span>
+              <span className={STAT_LABEL}>Tỷ lệ thành công</span>
+              <span className={STAT_VALUE}>{view.successRate}</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+          <div className={STAT_CARD}>
             <div className="p-2 bg-blue-50 rounded-lg shrink-0">
               <Clock className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <span className="stat-card-title text-[16px] text-slate-500 block">Thời gian phản hồi TB</span>
-              <span className="text-xl font-bold text-blue-600 block">{view.avgLatency}</span>
+              <span className={STAT_LABEL}>Thời gian phản hồi TB</span>
+              <span className={STAT_VALUE}>{view.avgLatency}</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-            <div className="p-2 bg-emerald-50 rounded-lg shrink-0">
-              <Server className="w-5 h-5 text-emerald-600" />
+          <div className={STAT_CARD}>
+            <div className="p-2 bg-green-50 rounded-lg shrink-0">
+              <Server className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <span className="stat-card-title text-[16px] text-slate-500 block">Trạng thái Cổng Gateway</span>
-              <span className="text-xl font-bold text-slate-800 block flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full inline-block animate-pulse ${view.gatewayStatus.includes('cảnh báo') ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
+              <span className={STAT_LABEL}>Trạng thái Cổng Gateway</span>
+              <span className={`${STAT_VALUE} flex items-center gap-1.5`}>
+                <span className={`w-2 h-2 rounded-full inline-block animate-pulse ${view.gatewayStatus.includes('cảnh báo') ? 'bg-[#D97706]' : 'bg-[#16A34A]'}`}></span>
                 {view.gatewayStatus}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Navigation tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="border-b border-slate-200 bg-slate-50/50">
-            <nav className="flex space-x-6 px-6" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab('bao_cao')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
-                  activeTab === 'bao_cao'
-                    ? 'border-blue-600 text-blue-600 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
+        {/* Navigation tabs (5.9) */}
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+          <div className="border-b border-[#E2E8F0]">
+            <nav className="flex gap-2 px-4 overflow-x-auto" aria-label="Tabs">
+              <button type="button" onClick={() => setActiveTab('bao_cao')} className={tabClass(activeTab === 'bao_cao')}>
+                <BarChart3 className="w-4 h-4" />
                 Báo cáo thống kê
               </button>
-              <button
-                onClick={() => setActiveTab('luong_du_lieu')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
-                  activeTab === 'luong_du_lieu'
-                    ? 'border-blue-600 text-blue-600 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <Network className="w-4 h-4 mr-2" />
+              <button type="button" onClick={() => setActiveTab('luong_du_lieu')} className={tabClass(activeTab === 'luong_du_lieu')}>
+                <Network className="w-4 h-4" />
                 Sơ đồ giám sát
               </button>
-              <button
-                onClick={() => setActiveTab('nhat_ky')}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[13px] flex items-center transition-colors ${
-                  activeTab === 'nhat_ky'
-                    ? 'border-blue-600 text-blue-600 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <ScrollText className="w-4 h-4 mr-2" />
+              <button type="button" onClick={() => setActiveTab('nhat_ky')} className={tabClass(activeTab === 'nhat_ky')}>
+                <ScrollText className="w-4 h-4" />
                 Nhật ký khai thác (Audit Logs)
               </button>
             </nav>
@@ -756,67 +716,65 @@ export function DataProvisionMonitoringPage() {
                 if (!stats) return null;
                 return (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] text-slate-600">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-[14px] font-medium text-[#020817]">
                     <Network className="w-4 h-4 text-blue-600" />
-                    Sơ đồ luồng: <span className="font-semibold text-slate-800">{info?.name}</span>
+                    <span className="text-[#64748B] font-normal">Sơ đồ luồng:</span> <span>{info?.name}</span>
                   </div>
-                  <button onClick={() => setFlowApi(null)} className="px-3 py-1.5 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium flex items-center gap-1.5">
+                  <button type="button" onClick={() => setFlowApi(null)} className={BTN_OUTLINE}>
                     <X className="w-4 h-4" /> Đóng
                   </button>
                 </div>
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 flex items-center justify-center min-h-[300px] overflow-hidden">
+              <div className="bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] p-8 flex items-center justify-center min-h-[300px] overflow-hidden">
                 <div className="flex w-full max-w-5xl items-center relative">
                   
                   {/* SOURCE */}
                   <div className="relative flex flex-col items-center w-32 shrink-0 z-10">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 border-blue-500 shadow-sm relative z-10">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 border-blue-500 relative z-10">
                       <Database className="w-8 h-8 text-blue-600" />
                     </div>
                     <div className="absolute top-full mt-3 flex flex-col items-center w-40 text-center">
-                      <span className="text-xs font-bold text-slate-700">{stats.database}</span>
-                      <span className="text-[10px] text-slate-400 mt-0.5">Nguồn dữ liệu nội bộ</span>
+                      <span className="text-[13px] font-medium text-[#020817]">{stats.database}</span>
+                      <span className="text-[12px] text-[#64748B] mt-0.5">Nguồn dữ liệu nội bộ</span>
                     </div>
                   </div>
 
                   {/* LINE: Source -> Gateway */}
                   <div className="flex-1 relative flex items-center justify-center z-0 px-2 min-w-[100px]">
-                    <div className={`w-full h-1.5 rounded-full relative flex items-center justify-center overflow-hidden ${stats.sourceConnection === 'active' ? 'bg-slate-200' : 'bg-rose-100'}`}>
+                    <div className={`w-full h-1.5 rounded-full relative flex items-center justify-center overflow-hidden ${stats.sourceConnection === 'active' ? 'bg-[#E2E8F0]' : 'bg-[#FEE2E2]'}`}>
                       {stats.sourceConnection === 'active' ? (
                         <>
                           <div className="absolute left-0 h-full bg-emerald-500 w-1/2 animate-[pulse_1.5s_infinite] rounded-full"></div>
-                          <ArrowRightLeft className="w-4 h-4 text-emerald-600 bg-white rounded-full relative z-10 p-0.5 shadow-sm" />
+                          <ArrowRightLeft className="w-4 h-4 text-emerald-600 bg-white rounded-full relative z-10 p-0.5" />
                         </>
                       ) : (
                         <>
-                          <div className="w-full border-t-2 border-dashed border-rose-400 absolute"></div>
-                          <X className="w-4 h-4 text-white bg-rose-500 rounded-full relative z-10 p-0.5 shadow-sm" />
+                          <div className="w-full border-t-2 border-dashed border-[#DC2626] absolute"></div>
+                          <X className="w-4 h-4 text-white bg-[#DC2626] rounded-full relative z-10 p-0.5" />
                         </>
                       )}
                     </div>
                     <div className="absolute top-full mt-2">
-                      <span className={`text-[10px] font-bold px-3 py-1 rounded-full border whitespace-nowrap ${stats.sourceConnection === 'active' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>
-                        {stats.sourceConnection === 'active' ? 'Kết nối ổn định' : 'Mất kết nối'}
-                      </span>
+                      <Badge label={stats.sourceConnection === 'active' ? 'Kết nối ổn định' : 'Mất kết nối'} variant={stats.sourceConnection === 'active' ? 'green' : 'red'} />
                     </div>
                   </div>
 
                   {/* GATEWAY */}
                   <div className="relative flex flex-col items-center w-40 shrink-0 z-10">
-                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border-4 border-blue-500 shadow-lg animate-in zoom-in duration-300 relative z-10">
+                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center border-4 border-blue-500 animate-in zoom-in duration-300 relative z-10">
                       <Server className="w-10 h-10 text-blue-600 animate-pulse" />
                     </div>
                     <div className="absolute top-full mt-3 flex flex-col items-center w-48 text-center">
-                      <span className="text-xs font-extrabold text-slate-800">CỔNG API GATEWAY</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full mt-1 font-bold ${stats.gatewayStatus === 'Hoạt động tốt' || stats.gatewayStatus === 'Ổn định' ? 'bg-green-150 text-green-700' : 'bg-blue-50 text-blue-700 border border-blue-200'}`}>
-                        {stats.gatewayStatus}
+                      <span className="text-[13px] font-semibold text-[#020817]">CỔNG API GATEWAY</span>
+                      <span className="mt-1">
+                        <Badge label={stats.gatewayStatus} variant={stats.gatewayStatus === 'Hoạt động tốt' || stats.gatewayStatus === 'Ổn định' ? 'green' : 'blue'} />
                       </span>
                     </div>
                   </div>
 
                   {/* TRUNK LINE FROM GATEWAY (only if multiple partners) */}
                   {stats.partners && stats.partners.length > 1 && (
-                     <div className="w-6 h-1.5 bg-slate-200 z-0 -mr-0.5 rounded-l-full"></div>
+                     <div className="w-6 h-1.5 bg-[#E2E8F0] z-0 -mr-0.5 rounded-l-full"></div>
                   )}
 
                   {/* PARTNERS CONTAINER */}
@@ -827,7 +785,7 @@ export function DataProvisionMonitoringPage() {
                          
                          {/* Vertical Trunk Piece for this row */}
                          {stats.partners.length > 1 && (
-                           <div className="absolute left-0 w-1.5 bg-slate-200 z-0" 
+                           <div className="absolute left-0 w-1.5 bg-[#E2E8F0] z-0" 
                                 style={{ 
                                   top: idx === 0 ? '50%' : '0', 
                                   bottom: idx === stats.partners.length - 1 ? '50%' : '0',
@@ -841,34 +799,32 @@ export function DataProvisionMonitoringPage() {
 
                          {/* Line: Trunk/Gateway -> Partner */}
                          <div className="flex-1 relative flex items-center justify-center z-0 px-2">
-                           <div className={`w-full h-1.5 ${stats.partners.length > 1 ? 'rounded-r-full' : 'rounded-full'} relative flex items-center justify-center overflow-hidden ${partner.connection === 'active' ? 'bg-slate-200' : 'bg-rose-100'}`}>
+                           <div className={`w-full h-1.5 ${stats.partners.length > 1 ? 'rounded-r-full' : 'rounded-full'} relative flex items-center justify-center overflow-hidden ${partner.connection === 'active' ? 'bg-[#E2E8F0]' : 'bg-[#FEE2E2]'}`}>
                               {partner.connection === 'active' ? (
                                 <>
                                   <div className="absolute left-0 h-full bg-emerald-500 w-1/2 animate-[pulse_1.5s_infinite] rounded-full"></div>
-                                  <ArrowRightLeft className="w-4 h-4 text-emerald-600 bg-white rounded-full relative z-10 p-0.5 shadow-sm" />
+                                  <ArrowRightLeft className="w-4 h-4 text-emerald-600 bg-white rounded-full relative z-10 p-0.5" />
                                 </>
                               ) : (
                                 <>
-                                  <div className="w-full border-t-2 border-dashed border-rose-400 absolute"></div>
-                                  <X className="w-4 h-4 text-white bg-rose-500 rounded-full relative z-10 p-0.5 shadow-sm" />
+                                  <div className="w-full border-t-2 border-dashed border-[#DC2626] absolute"></div>
+                                  <X className="w-4 h-4 text-white bg-[#DC2626] rounded-full relative z-10 p-0.5" />
                                 </>
                               )}
                            </div>
                            <div className="absolute top-full mt-2">
-                             <span className={`text-[10px] font-bold px-3 py-1 rounded-full border whitespace-nowrap ${partner.connection === 'active' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-rose-600 bg-rose-50 border-rose-100'}`}>
-                               {partner.connection === 'active' ? 'Kết nối ổn định' : 'Mất kết nối'}
-                             </span>
+                             <Badge label={partner.connection === 'active' ? 'Kết nối ổn định' : 'Mất kết nối'} variant={partner.connection === 'active' ? 'green' : 'red'} />
                            </div>
                          </div>
 
                          {/* PARTNER NODE */}
                          <div className="relative flex flex-col items-center w-32 shrink-0 z-10 ml-2">
-                           <div className={`w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 ${partner.connection === 'active' ? 'border-purple-500' : 'border-slate-300'} shadow-sm relative z-10`}>
-                             <Share2 className={`w-8 h-8 ${partner.connection === 'active' ? 'text-purple-600' : 'text-slate-400'}`} />
+                           <div className={`w-16 h-16 bg-white rounded-full flex items-center justify-center border-4 ${partner.connection === 'active' ? 'border-purple-500' : 'border-[#CBD5E1]'} relative z-10`}>
+                             <Share2 className={`w-8 h-8 ${partner.connection === 'active' ? 'text-purple-600' : 'text-[#94A3B8]'}`} />
                            </div>
                            <div className="absolute top-full mt-3 flex flex-col items-center w-48 text-center">
-                             <span className="text-xs font-bold text-slate-700">{partner.name}</span>
-                             <span className="text-[10px] text-slate-400 mt-0.5">Đơn vị khai thác API</span>
+                             <span className="text-[13px] font-medium text-[#020817]">{partner.name}</span>
+                             <span className="text-[12px] text-[#64748B] mt-0.5">Đơn vị khai thác API</span>
                            </div>
                          </div>
                          
@@ -882,33 +838,35 @@ export function DataProvisionMonitoringPage() {
               </div>
                 );
               })() : (
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                  <div className="px-5 py-3 border-b border-slate-200 bg-slate-50 text-[13px] font-semibold text-slate-600">
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] text-[14px] font-medium text-[#020817]">
                     Danh sách API đang giám sát ({listApis.length})
                   </div>
-                  <div className="divide-y divide-slate-100">
+                  <div className="divide-y divide-[#E2E8F0]">
                     {listApis.map(api => {
                       const st = apiMockStats[api.id];
                       const err = !!st && (st.sourceConnection === 'error' || (st.partners || []).some(p => p.connection === 'error'));
                       return (
-                        <div key={api.id} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-slate-50/70 transition-colors">
+                        <div key={api.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[#F8FAFC] transition-colors">
                           <div className="flex items-center gap-3 min-w-0">
-                            <span className={`w-2 h-2 rounded-full inline-block shrink-0 ${err ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
-                            <div className="min-w-0">
-                              <p className="text-[13px] font-medium text-slate-800 truncate">{api.name}</p>
-                              <p className="text-[11px] text-slate-400 truncate">{api.database}</p>
+                            <span className={`w-2 h-2 rounded-full inline-block shrink-0 ${err ? 'bg-[#DC2626]' : 'bg-[#16A34A]'}`}></span>
+                            <div className="min-w-0 leading-[18px]">
+                              <p className="text-[13px] text-[#020817] truncate">{api.name}</p>
+                              <p className="text-[12px] text-[#64748B] truncate">{api.database}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <button
+                              type="button"
                               onClick={() => setDetailApi(api.id)}
-                              className="px-3 py-1.5 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-medium flex items-center gap-1.5"
+                              className={BTN_OUTLINE}
                             >
                               <Info className="w-4 h-4" /> Xem chi tiết
                             </button>
                             <button
+                              type="button"
                               onClick={() => setFlowApi(api.id)}
-                              className="px-3 py-1.5 text-[13px] text-blue-600 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 font-medium flex items-center gap-1"
+                              className={`${CHIP_ACTIVE} hover:bg-[#DBEAFE]`}
                             >
                               Xem sơ đồ <ChevronRight className="w-4 h-4" />
                             </button>
@@ -929,12 +887,10 @@ export function DataProvisionMonitoringPage() {
                 {reportTypes.map(rt => (
                   <button
                     key={rt.key}
+                    type="button"
+                    aria-pressed={reportType === rt.key}
                     onClick={() => { setReportType(rt.key); setTablePage(1); }}
-                    className={`px-4 py-2 rounded-lg text-[13px] font-medium border transition-colors ${
-                      reportType === rt.key
-                        ? 'bg-blue-50 border-blue-200 text-blue-700'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
+                    className={reportType === rt.key ? CHIP_ACTIVE : BTN_OUTLINE}
                   >
                     {rt.label}
                   </button>
@@ -942,62 +898,57 @@ export function DataProvisionMonitoringPage() {
               </div>
 
               {/* UC2.2 — Biểu đồ trực quan (đổi theo loại báo cáo) */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                  <h3 className="font-bold text-slate-800 text-sm flex items-center">
+              <div className={`${CHART_CARD} overflow-hidden`}>
+                <div className="px-4 py-3 border-b border-[#E2E8F0] flex flex-wrap justify-between items-center gap-3">
+                  <h3 className={CHART_TITLE}>
                     <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
                     {currentReportType.label} theo ngày (Tháng 06/2026)
                   </h3>
                   <div className="flex items-center gap-3">
                     {currentReportType.key === 'phanhoi' && (
                       <div className="flex items-center gap-2">
-                        <label className="text-[13px] text-slate-500">Ngưỡng cảnh báo:</label>
+                        <label className="text-[13px] text-[#64748B]">Ngưỡng cảnh báo:</label>
                         <input
                           type="number"
                           min={0}
+                          aria-label="Ngưỡng cảnh báo"
                           value={responseThreshold}
                           onChange={(e) => setResponseThreshold(Number(e.target.value))}
-                          className="w-20 px-2 py-1 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                          className="w-20 h-9 px-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                         />
-                        <span className="text-[13px] text-slate-500">ms</span>
+                        <span className="text-[13px] text-[#64748B]">ms</span>
                       </div>
                     )}
-                    <span className="text-[13px] text-slate-500">Đơn vị: {currentReportType.unit}</span>
+                    <span className="text-[12px] text-[#64748B]">Đơn vị: {currentReportType.unit}</span>
                   </div>
                 </div>
-                <div className="p-5">
-                  <div className="w-full" style={{ height: 320 }}>
+                <div className="p-4">
+                  <div className="w-full h-[320px]">
                     <ResponsiveContainer width="100%" height={320}>
                       {currentReportType.chart === 'area' ? (
                         <AreaChart data={reportData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="repArea" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                              <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} />
-                          <YAxis tick={{ fill: '#64748b', fontSize: 13 }} axisLine={{ stroke: '#e2e8f0' }} />
-                          <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }} />
-                          <Area type="monotone" dataKey="luuLuong" name="Lưu lượng (MB)" stroke="#2563eb" strokeWidth={2} fill="url(#repArea)" />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={AXIS_TICK} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+                          <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                          <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                          <Area type="monotone" dataKey="luuLuong" name="Lưu lượng (MB)" stroke="#2563eb" strokeWidth={2} fill="#2563eb" fillOpacity={0.12} />
                         </AreaChart>
                       ) : currentReportType.chart === 'bar' ? (
                         <BarChart data={reportData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} />
-                          <YAxis allowDecimals={false} tick={{ fill: '#64748b', fontSize: 13 }} axisLine={{ stroke: '#e2e8f0' }} />
-                          <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={AXIS_TICK} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+                          <YAxis allowDecimals={false} tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                          <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                           <Bar dataKey="loiKetNoi" name="Lỗi kết nối" fill="#dc2626" radius={[4, 4, 0, 0]} maxBarSize={18} />
                         </BarChart>
                       ) : (
                         <LineChart data={reportData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={{ fill: '#64748b', fontSize: 10 }} axisLine={{ stroke: '#e2e8f0' }} />
-                          <YAxis tick={{ fill: '#64748b', fontSize: 13 }} axisLine={{ stroke: '#e2e8f0' }} />
-                          <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px' }} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                          <XAxis dataKey="day" interval={0} tickFormatter={(v: any) => String(v).slice(0, 2)} tick={AXIS_TICK} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+                          <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                          <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                           {currentReportType.key === 'phanhoi' ? (
-                            <ReferenceLine y={responseThreshold} stroke="#dc2626" strokeDasharray="4 3" label={{ value: `Ngưỡng ${responseThreshold}ms`, position: 'insideTopRight', fill: '#dc2626', fontSize: 11 }} />
+                            <ReferenceLine y={responseThreshold} stroke="#dc2626" strokeDasharray="4 3" label={{ value: `Ngưỡng ${responseThreshold}ms`, position: 'insideTopRight', fill: '#dc2626', fontSize: 12 }} />
                           ) : null}
                           <Line
                             type="monotone"
@@ -1022,32 +973,32 @@ export function DataProvisionMonitoringPage() {
 
               {/* Bảng chi tiết theo ngày + Biểu đồ cung cấp dữ liệu theo phương thức chia sẻ */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                  <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                    <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                <div className={`${CHART_CARD} overflow-hidden flex flex-col`}>
+                  <div className="px-4 py-3 border-b border-[#E2E8F0] flex justify-between items-center">
+                    <h3 className={CHART_TITLE}>
                       <Database className="w-4 h-4 mr-2 text-blue-600" />
                       Dữ liệu chi tiết theo ngày — {currentReportType.label}
                     </h3>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                        <tr>
-                          <th className="px-6 py-3 font-semibold">Ngày</th>
-                          <th className="px-6 py-3 font-semibold text-right">{currentReportType.label} ({currentReportType.unit})</th>
+                  <div className="overflow-x-auto custom-scrollbar flex-1">
+                    <table className="w-full border-collapse collection-table text-[13px]">
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px] border-b border-[#E0E0E0]">
+                          <th className={`${TH} text-left`}>Ngày</th>
+                          <th className={`${TH} text-right`}>{currentReportType.label} ({currentReportType.unit})</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody>
                         {paginatedReport.map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                            <td className="px-6 py-3 font-medium text-slate-700">{row.day}</td>
-                            <td className="px-6 py-3 text-right font-mono text-slate-700">{(row as any)[currentReportType.dataKey].toLocaleString()}</td>
+                          <tr key={idx} className={TR}>
+                            <td className={TD}>{row.day}</td>
+                            <td className={`${TD} text-right tabular-nums`}>{(row as any)[currentReportType.dataKey].toLocaleString()}</td>
                           </tr>
                         ))}
                         {/* Summary row */}
-                        <tr className="bg-slate-50/50 font-bold text-slate-800">
-                          <td className="px-6 py-3">{currentReportType.key === 'phanhoi' ? 'Trung bình' : 'Tổng cộng'}</td>
-                          <td className="px-6 py-3 text-right font-mono">
+                        <tr className="h-12 bg-[#F8FAFC] border-b border-[#E0E0E0]">
+                          <td className={`${TD} font-medium`}>{currentReportType.key === 'phanhoi' ? 'Trung bình' : 'Tổng cộng'}</td>
+                          <td className={`${TD} font-medium text-right tabular-nums`}>
                             {currentReportType.key === 'phanhoi'
                               ? Math.round(reportData.reduce((acc, r) => acc + r.thoiGianPhanHoi, 0) / reportData.length).toLocaleString()
                               : reportData.reduce((acc, r) => acc + (r as any)[currentReportType.dataKey], 0).toLocaleString()}
@@ -1060,22 +1011,24 @@ export function DataProvisionMonitoringPage() {
                   {renderTablePagination(reportData.length)}
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 flex flex-col h-full">
+                <div className={`${CHART_CARD} p-4 flex flex-col h-full`}>
                   {(reportType === 'luuluong' || reportType === 'truycap') && (
                     <>
                       <div className="flex items-start justify-between mb-3 gap-2">
                         <div>
-                          <h3 className="font-bold text-slate-800 text-sm flex items-center">
+                          <h3 className={CHART_TITLE}>
                             {isDrilled && !selectedDatabase && (
                               <button
+                                type="button"
                                 onClick={() => setDrillDatabase(null)}
-                                className="mr-2 p-1 -ml-1 rounded-md hover:bg-slate-100 text-slate-500"
+                                className={`${BTN_GHOST_ICON} mr-2 -ml-1`}
                                 title="Quay lại theo CSDL"
+                                aria-label="Quay lại theo CSDL"
                               >
                                 <ChevronLeft className="w-4 h-4" />
                               </button>
                             )}
-                            <List className="w-4 h-4 mr-2 text-blue-600 text-[13px]" />
+                            <List className="w-4 h-4 mr-2 text-blue-600 shrink-0" />
                             {selectedApi
                               ? `API được chọn — ${selectedApi}`
                               : targetDatabase
@@ -1085,7 +1038,7 @@ export function DataProvisionMonitoringPage() {
                               : 'Tỷ lệ lưu lượng yêu cầu theo Hệ thống/API (18 CSDL)'}
                           </h3>
                           {!isDrilled && (
-                            <p className="text-[11px] text-slate-400 mt-1">* Vui lòng chọn Hệ thống ở bộ lọc trên hoặc bấm vào tên CSDL để xem tỷ lệ chi tiết từng API chia sẻ</p>
+                            <p className="text-[12px] text-[#64748B] mt-1">* Vui lòng chọn Hệ thống ở bộ lọc trên hoặc bấm vào tên CSDL để xem tỷ lệ chi tiết từng API chia sẻ</p>
                           )}
                         </div>
                       </div>
@@ -1101,34 +1054,32 @@ export function DataProvisionMonitoringPage() {
                               <div
                                 key={item.name}
                                 onClick={() => { if (!isDrilled) setDrillDatabase(item.name); }}
-                                className={`p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-white hover:shadow-md hover:border-slate-200 transition-all ${!isDrilled ? 'cursor-pointer' : ''}`}
+                                className={`p-2.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-white hover:border-[#CBD5E1] transition-colors ${!isDrilled ? 'cursor-pointer' : ''}`}
                               >
                                 <div className="flex items-center justify-between gap-2 mb-1.5">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-medium tabular-nums shrink-0 ${
                                       index === 0 ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                                      index === 1 ? 'bg-slate-200 text-slate-700 border border-slate-300' :
+                                      index === 1 ? 'bg-[#E2E8F0] text-[#334155] border border-[#CBD5E1]' :
                                       index === 2 ? 'bg-amber-700/10 text-amber-800 border border-amber-700/20' :
-                                      'bg-slate-100 text-slate-500'
+                                      'bg-[#F1F5F9] text-[#64748B]'
                                     }`}>
                                       {index + 1}
                                     </span>
                                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                                    <span className="font-medium text-slate-800 text-[13px] truncate" title={item.name}>{item.name}</span>
+                                    <span className="text-[#020817] text-[13px] truncate" title={item.name}>{item.name}</span>
                                   </div>
 
                                   <div className="flex items-center gap-2 shrink-0">
-                                    <span className="font-mono text-slate-700 font-semibold text-[13px]">
+                                    <span className="text-[#020817] text-[13px] tabular-nums">
                                       {item.value.toLocaleString('vi-VN')} {reportType === 'truycap' ? 'lượt' : 'MB'}
                                     </span>
-                                    <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold font-mono text-[11px] border border-blue-100">
-                                      {displayPct}%
-                                    </span>
+                                    <Badge label={`${displayPct}%`} variant="blue" />
                                   </div>
                                 </div>
 
                                 {/* Thanh tiến trình tỉ lệ */}
-                                <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+                                <div className="w-full bg-[#E2E8F0] h-2 rounded-full overflow-hidden">
                                   <div
                                     className="h-full rounded-full transition-all duration-500"
                                     style={{ width: `${Math.max(2, pct)}%`, backgroundColor: item.color }}
@@ -1143,25 +1094,25 @@ export function DataProvisionMonitoringPage() {
 
                   {reportType === 'phanhoi' && (
                     <>
-                      <h3 className="font-bold text-slate-800 text-sm flex items-center mb-1">
+                      <h3 className={`${CHART_TITLE} mb-1`}>
                         <Clock className="w-4 h-4 mr-2 text-red-600" />
                         API vượt ngưỡng thời gian phản hồi
                       </h3>
-                      <p className="text-[11px] text-slate-400 mb-3">* Ngưỡng cảnh báo hiện tại: {responseThreshold} ms</p>
+                      <p className="text-[12px] text-[#64748B] mb-3">* Ngưỡng cảnh báo hiện tại: {responseThreshold} ms</p>
                       <div className="flex-1 overflow-y-auto min-h-0 max-h-[275px]">
                         {responseTimeExceeded.length === 0 ? (
-                          <div className="h-full flex items-center justify-center text-[13px] text-slate-400 italic">
+                          <div className="h-full py-16 flex items-center justify-center text-[13px] text-[#64748B]">
                             Không có API nào vượt ngưỡng cảnh báo
                           </div>
                         ) : (
                           <div className="space-y-2">
                             {responseTimeExceeded.map(item => (
-                              <div key={item.id} className="border border-red-100 bg-red-50/50 rounded-lg px-3 py-2 flex items-center justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>
-                                  <p className="text-[11px] text-slate-500 truncate">{item.database}</p>
+                              <div key={item.id} className="border border-[#FEE2E2] bg-[#FEF2F2] rounded-lg px-3 py-2 flex items-center justify-between gap-3">
+                                <div className="min-w-0 leading-[18px]">
+                                  <p className="text-[13px] text-[#020817] truncate">{item.name}</p>
+                                  <p className="text-[12px] text-[#64748B] truncate">{item.database}</p>
                                 </div>
-                                <span className="text-[13px] font-bold text-red-600 whitespace-nowrap">{item.avgLatency}</span>
+                                <span className="text-[13px] font-medium text-[#DC2626] whitespace-nowrap tabular-nums">{item.avgLatency}</span>
                               </div>
                             ))}
                           </div>
@@ -1172,24 +1123,24 @@ export function DataProvisionMonitoringPage() {
 
                   {reportType === 'loi' && (
                     <>
-                      <h3 className="font-bold text-slate-800 text-sm flex items-center mb-3">
+                      <h3 className={`${CHART_TITLE} mb-3`}>
                         <AlertCircle className="w-4 h-4 mr-2 text-red-600" />
                         API đang bị lỗi kết nối
                       </h3>
                       <div className="flex-1 overflow-y-auto min-h-0 max-h-[275px]">
                         {connectionErrors.length === 0 ? (
-                          <div className="h-full flex items-center justify-center text-[13px] text-slate-400 italic">
+                          <div className="h-full py-16 flex items-center justify-center text-[13px] text-[#64748B]">
                             Không có API nào đang bị lỗi kết nối
                           </div>
                         ) : (
                           <div className="space-y-2">
                             {connectionErrors.map(item => (
-                              <div key={item.id} className="border border-red-100 bg-red-50/50 rounded-lg px-3 py-2">
+                              <div key={item.id} className="border border-[#FEE2E2] bg-[#FEF2F2] rounded-lg px-3 py-2">
                                 <div className="flex items-center justify-between gap-3 mb-1">
-                                  <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>
-                                  <span className="text-[10px] font-bold uppercase tracking-wide text-red-600 bg-red-100 px-2 py-0.5 rounded-full whitespace-nowrap">{item.errorCode}</span>
+                                  <p className="text-[13px] text-[#020817] truncate">{item.name}</p>
+                                  <Badge label={item.errorCode} variant="red" />
                                 </div>
-                                <p className="text-[11px] text-slate-500">{item.database}</p>
+                                <p className="text-[12px] text-[#64748B]">{item.database}</p>
                               </div>
                             ))}
                           </div>
@@ -1209,72 +1160,68 @@ export function DataProvisionMonitoringPage() {
 
       {/* API Log Details Modal */}
       {selectedLog && createPortal(
-        <div style={{ zIndex: 999999 }} className="monitoring-page-root fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-          <style dangerouslySetInnerHTML={{__html: `
-            .monitoring-page-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-              font-size: 13px !important;
-            }
-          `}} />
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
-            
+        <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50/50">
+            <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0]">
               <div className="flex items-center gap-2">
-                <AlertCircle className={`w-5 h-5 ${selectedLog.type === 'ERROR' ? 'text-rose-500' : selectedLog.type === 'WARN' ? 'text-amber-500' : 'text-blue-500'}`} />
-                <h3 className="text-base font-bold text-slate-800">Chi tiết nhật ký sự cố</h3>
+                <AlertCircle className={`w-5 h-5 ${selectedLog.type === 'ERROR' ? 'text-[#DC2626]' : selectedLog.type === 'WARN' ? 'text-[#D97706]' : 'text-[#155DFC]'}`} />
+                <h3 className="text-[16px] font-medium text-[#020817]">Chi tiết nhật ký sự cố</h3>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setSelectedLog(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                className={BTN_GHOST_ICON}
                 title="Đóng"
+                aria-label="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Content list */}
-            <div className="p-5 space-y-4">
-              
+            <div className="px-6 py-4 overflow-y-auto custom-scrollbar space-y-4">
+
               {/* Error/Info message bubble */}
-              <div className={`p-4 rounded-lg border text-[13px] font-medium leading-relaxed ${
-                selectedLog.type === 'ERROR' ? 'bg-rose-50 border-rose-200 text-rose-800' : selectedLog.type === 'WARN' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-blue-50 border-blue-200 text-blue-800'
+              <div className={`p-3 rounded-lg border text-[13px] text-[#020817] leading-relaxed break-words ${
+                selectedLog.type === 'ERROR' ? 'bg-[#FEF2F2] border-[#FEE2E2]' : selectedLog.type === 'WARN' ? 'bg-[#FFF7ED] border-[#FED7AA]' : 'bg-[#EAF3FF] border-[#BFDBFE]'
               }`}>
                 {selectedLog.message}
               </div>
 
               {/* Metadatas */}
-              <div className="border border-slate-100 rounded-lg divide-y divide-slate-100">
-                <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-[13px] font-medium text-slate-400">Thời gian log:</span>
-                  <span className="text-[13px] text-slate-700 font-mono col-span-2">{selectedLog.time}</span>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <div className={FIELD_LABEL}>Thời gian log:</div>
+                  <div className={`${FIELD_VALUE} mt-1`}>{selectedLog.time}</div>
                 </div>
-                <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-[13px] font-medium text-slate-400">Mức độ cảnh báo:</span>
-                  <span className="text-[13px] col-span-2 font-semibold uppercase">{selectedLog.type}</span>
+                <div>
+                  <div className={FIELD_LABEL}>Mức độ cảnh báo:</div>
+                  <div className={`${FIELD_VALUE} mt-1`}>{selectedLog.type}</div>
                 </div>
-                <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-[13px] font-medium text-slate-400">IP Đối tác khai thác:</span>
-                  <span className="text-[13px] text-slate-700 font-mono col-span-2">{selectedLog.clientIp}</span>
+                <div>
+                  <div className={FIELD_LABEL}>IP Đối tác khai thác:</div>
+                  <div className={`${FIELD_VALUE} mt-1`}>{selectedLog.clientIp}</div>
                 </div>
-                <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-[13px] font-medium text-slate-400">Độ trễ phản hồi:</span>
-                  <span className="text-[13px] text-blue-600 font-semibold font-mono col-span-2">{selectedLog.latency}</span>
+                <div>
+                  <div className={FIELD_LABEL}>Độ trễ phản hồi:</div>
+                  <div className={`${FIELD_VALUE} mt-1 tabular-nums`}>{selectedLog.latency}</div>
                 </div>
-                <div className="grid grid-cols-3 py-2.5 px-3">
-                  <span className="text-[13px] font-medium text-slate-400">Kích thước phản hồi:</span>
-                  <span className="text-[13px] text-slate-700 font-mono col-span-2">{selectedLog.responseSize}</span>
+                <div>
+                  <div className={FIELD_LABEL}>Kích thước phản hồi:</div>
+                  <div className={`${FIELD_VALUE} mt-1 tabular-nums`}>{selectedLog.responseSize}</div>
                 </div>
               </div>
 
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-slate-100 flex justify-end bg-slate-50">
+            <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm animate-in fade-in"
+                className={BTN_OUTLINE}
               >
                 Đóng
               </button>

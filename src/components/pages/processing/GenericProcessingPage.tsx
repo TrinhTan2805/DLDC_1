@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock, Check, Play, RefreshCw } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock, Check, Play, RefreshCw, ArrowUpRight } from 'lucide-react';
 
 import { DataMappingModal } from './DataMappingModal';
 import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
 import { TargetDatabaseConfigModal } from './TargetDatabaseConfigModal';
 import { ScheduleManagementModal } from './ScheduleManagementModal';
-import { TargetDatabase } from './mockTargetDatabases';
+import { TargetDatabase, initialTargetDatabases } from './mockTargetDatabases';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { Portal } from '../../common/Portal';
@@ -52,6 +52,8 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
   const [isHistoryDetailModalOpen, setIsHistoryDetailModalOpen] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState<any>(null);
   const [selectedTargetDB, setSelectedTargetDB] = useState<TargetDatabase | null>(null);
+  // CSDL làm sạch hiển thị ở đầu trang: CSDL đích đã chọn khi cấu hình ánh xạ, mặc định CSDL đích đầu tiên (mock)
+  const cleanTargetDB = selectedTargetDB ?? initialTargetDatabases[0];
   const [targetConfigData, setTargetConfigData] = useState<any>(null);
   const [formatRules, setFormatRules] = useState<{ id: number, field: string, rule: string, action: string, replacementValue: string, isSaved: boolean }[]>([]);
   const [validityRules, setValidityRules] = useState<{
@@ -435,7 +437,19 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
             </div>
           </div>
-          <p className="text-[13px] text-slate-500 mb-6">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
+          <p className="text-[13px] text-slate-500">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
+          {/* CSDL làm sạch (CSDL đích) + nút chuyển sang màn chi tiết CSDL đích để xem dữ liệu sau xử lý */}
+          <div className="flex items-center gap-2 mt-1 mb-6 text-[13px] text-slate-500">
+            <span>CSDL làm sạch: <span className="text-[#020817] font-medium">{cleanTargetDB.name}</span></span>
+            <button
+              type="button"
+              onClick={() => (window as any).navigateToPage?.(`target-database-detail-${cleanTargetDB.id}`)}
+              className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[13px] font-medium text-[#155DFC] hover:bg-blue-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
+            >
+              Xem dữ liệu
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+          </div>
 
           {/* Stats Overview */}
           <div className="grid grid-cols-4 gap-4 mb-8">

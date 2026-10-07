@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Users, Key, Copy, RefreshCw, KeyRound, Shield } from 'lucide-react';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK } from '../../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
 interface ProvisionAccountModalProps {
   isOpen: boolean;
@@ -59,26 +62,22 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
   };
 
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-account-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .provision-account-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+
+        {/* Header (mục 5.4) */}
+        <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-bold text-slate-800">
+            <h2 className="text-[16px] font-medium text-[#020817]">
               {accountData ? 'Cập nhật tài khoản API' : 'Tạo tài khoản API mới'}
             </h2>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className={BTN_GHOST_ICON}
+            aria-label="Đóng"
             title="Đóng"
           >
             <X className="w-5 h-5" />
@@ -87,12 +86,12 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 space-y-5">
-            
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+
             {/* Target Organization */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Đơn vị được cấp quyền <span className="text-red-500">*</span>
+              <label className={LABEL_CLS}>
+                Đơn vị được cấp quyền <span className={REQUIRED_MARK}>*</span>
               </label>
               <input
                 type="text"
@@ -100,21 +99,21 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
                 value={selectedOrg}
                 onChange={(e) => setSelectedOrg(e.target.value)}
                 placeholder="Nhập tên đơn vị được cấp quyền (vd: Sở Y tế tỉnh Bắc Ninh)"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium bg-white"
+                className={INPUT_CLS}
               />
-              <p className="text-[11px] text-slate-500 mt-1">
+              <p className="text-[12px] text-[#64748B] mt-1">
                 Tài khoản này sẽ được gắn vào cấu hình phân quyền của đơn vị trên.
               </p>
             </div>
 
             {/* Username */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Tên tài khoản (Username) <span className="text-red-500">*</span>
+              <label className={LABEL_CLS}>
+                Tên tài khoản (Username) <span className={REQUIRED_MARK}>*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <KeyRound className="h-4 w-4 text-slate-400" />
+                  <KeyRound className="h-4 w-4 text-[#94A3B8]" />
                 </div>
                 <input
                   type="text"
@@ -122,40 +121,42 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Nhập tên tài khoản (vd: yte_bacninh_02)"
-                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
+                  className={`${INPUT_CLS} pl-10`}
                 />
               </div>
             </div>
 
             {/* Client ID */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Client ID / App Key <span className="text-red-500">*</span>
+              <label className={LABEL_CLS}>
+                Client ID / App Key <span className={REQUIRED_MARK}>*</span>
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Shield className="h-4 w-4 text-slate-400" />
+                    <Shield className="h-4 w-4 text-[#94A3B8]" />
                   </div>
                   <input
                     type="text"
                     readOnly
                     value={clientId}
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono text-slate-600 focus:outline-none"
+                    className={`${INPUT_CLS} pl-10 bg-[#F8FAFC]`}
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center bg-white"
+                  className={`${BTN_OUTLINE} w-10 px-0 shrink-0`}
+                  aria-label="Sao chép Client ID"
                   title="Sao chép Client ID"
                 >
-                  {isCopied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  {isCopied ? <Check className="w-4 h-4 text-[#16A34A]" /> : <Copy className="w-4 h-4" />}
                 </button>
                 <button
                   type="button"
                   onClick={() => setClientId(generateClientId())}
-                  className="px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors flex items-center justify-center bg-white"
+                  className={`${BTN_OUTLINE} w-10 px-0 shrink-0`}
+                  aria-label="Tạo mới Client ID"
                   title="Tạo mới Client ID"
                 >
                   <RefreshCw className="w-4 h-4" />
@@ -166,19 +167,19 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50">
+          <div className="px-6 py-4 border-t border-[#E2E8F0] flex justify-end gap-3 bg-[#F8FAFC]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
+              className={BTN_OUTLINE}
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium text-sm shadow-sm"
+              className={BTN_PRIMARY}
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-4 h-4" />
               {accountData ? 'Lưu thay đổi' : 'Tạo tài khoản'}
             </button>
           </div>

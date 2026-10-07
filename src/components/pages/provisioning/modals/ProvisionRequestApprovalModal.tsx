@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, CheckCircle, XCircle } from 'lucide-react';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, BTN_FOCUS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE } from '../../collection/collectionUi';
 
 interface ProvisionRequestApprovalModalProps {
   isOpen: boolean;
@@ -16,56 +17,79 @@ export function ProvisionRequestApprovalModal({ isOpen, onClose, requestData, on
 
   if (!isOpen) return null;
 
+  const decisionCls = (active: boolean, tone: 'approve' | 'reject') =>
+    `flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 bg-white transition-colors ${BTN_FOCUS} ${
+      active
+        ? tone === 'approve' ? 'border-[#16A34A] text-[#15803D]' : 'border-[#DC2626] text-[#B91C1C]'
+        : 'border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC]'
+    }`;
+
   return createPortal(
     <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-          <h2 className="text-base font-bold text-slate-800">Xử lý yêu cầu cung cấp dữ liệu</h2>
-          <button aria-label="Đóng" onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header (mục 5.4) */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
+          <h2 className="text-[16px] font-medium text-[#020817]">Xử lý yêu cầu cung cấp dữ liệu</h2>
+          <button type="button" aria-label="Đóng" title="Đóng" onClick={onClose} className={BTN_GHOST_ICON}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-2">Mã YC: {requestData?.id || 'YC-2026-0429'}</h3>
-            <p className="text-[13px] text-slate-600 mb-1"><span className="font-semibold text-slate-700">Cơ quan yêu cầu:</span> {requestData?.org || 'Sở Nội vụ Lạng Sơn'}</p>
-            <p className="text-[13px] text-slate-600 mb-1"><span className="font-semibold text-slate-700">Loại dữ liệu:</span> {requestData?.dataType || 'Thống kê hộ tịch'}</p>
-            <p className="text-[13px] text-slate-600 mb-1"><span className="font-semibold text-slate-700">Mục đích:</span> {requestData?.purpose || 'Phục vụ báo cáo quý'}</p>
+        <div className="px-6 py-4 space-y-6 overflow-y-auto custom-scrollbar">
+          {/* Nhãn – giá trị (mục 5.17) */}
+          <div className="rounded-2xl border border-[#E2E8F0] p-4 grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="space-y-1">
+              <div className={FIELD_LABEL}>Mã YC</div>
+              <div className={FIELD_VALUE}>{requestData?.id || 'YC-2026-0429'}</div>
+            </div>
+            <div className="space-y-1">
+              <div className={FIELD_LABEL}>Cơ quan yêu cầu</div>
+              <div className={`${FIELD_VALUE} break-words`}>{requestData?.org || 'Sở Nội vụ Lạng Sơn'}</div>
+            </div>
+            <div className="space-y-1">
+              <div className={FIELD_LABEL}>Loại dữ liệu</div>
+              <div className={`${FIELD_VALUE} break-words`}>{requestData?.dataType || 'Thống kê hộ tịch'}</div>
+            </div>
+            <div className="space-y-1">
+              <div className={FIELD_LABEL}>Mục đích</div>
+              <div className={`${FIELD_VALUE} break-words`}>{requestData?.purpose || 'Phục vụ báo cáo quý'}</div>
+            </div>
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold text-slate-700 mb-2">Quyết định xử lý</label>
-            <div className="flex gap-8">
-              <button onClick={() => setStatus('approve')} className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${status === 'approve' ? 'border-emerald-600 bg-white text-emerald-700' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
-                <CheckCircle className={`w-8 h-8 mb-2 ${status === 'approve' ? 'text-emerald-600' : 'text-slate-400'}`} />
-                <span className="font-bold text-[11px] uppercase tracking-wider">Phê duyệt</span>
+            <label className={`${LABEL_CLS} !mb-2`}>Quyết định xử lý</label>
+            <div className="flex gap-4">
+              <button type="button" onClick={() => setStatus('approve')} className={decisionCls(status === 'approve', 'approve')}>
+                <CheckCircle className={`w-8 h-8 ${status === 'approve' ? 'text-[#16A34A]' : 'text-[#94A3B8]'}`} />
+                <span className="text-[13px] font-medium">Phê duyệt</span>
               </button>
-              <button onClick={() => setStatus('reject')} className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${status === 'reject' ? 'border-red-500 bg-white text-red-600' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
-                <XCircle className={`w-8 h-8 mb-2 ${status === 'reject' ? 'text-red-500' : 'text-slate-400'}`} />
-                <span className="font-bold text-[11px] uppercase tracking-wider">Từ chối</span>
+              <button type="button" onClick={() => setStatus('reject')} className={decisionCls(status === 'reject', 'reject')}>
+                <XCircle className={`w-8 h-8 ${status === 'reject' ? 'text-[#DC2626]' : 'text-[#94A3B8]'}`} />
+                <span className="text-[13px] font-medium">Từ chối</span>
               </button>
             </div>
           </div>
 
           {status === 'reject' && (
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-1">Lý do từ chối <span className="text-red-500">*</span></label>
-              <textarea className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px]" rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Nhập lý do từ chối yêu cầu..." />
+              <label className={LABEL_CLS}>Lý do từ chối <span className={REQUIRED_MARK}>*</span></label>
+              <textarea className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600" rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Nhập lý do từ chối yêu cầu..." />
             </div>
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50 rounded-b-xl">
-          <button aria-label="Hủy bỏ" onClick={onClose} className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 rounded-lg px-4 py-2 font-medium text-[13px] transition-colors shadow-sm">Hủy bỏ</button>
+        {/* Footer (mục 5.4) */}
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 flex-shrink-0">
+          <button type="button" aria-label="Hủy bỏ" onClick={onClose} className={BTN_OUTLINE}>Hủy bỏ</button>
           <button
+            type="button"
             aria-label="Xác nhận"
             onClick={() => {
               if (status === 'approve') onApprove(requestData?.id || 'YC-2026-0429');
               else onReject(requestData?.id || 'YC-2026-0429', rejectReason);
               onClose();
             }}
-            className={`px-4 py-2 text-white rounded-lg font-medium text-[13px] transition-colors shadow-sm ${status === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}
+            className={status === 'approve' ? BTN_PRIMARY : BTN_DESTRUCTIVE}
           >
             {status === 'approve' ? 'Xác nhận phê duyệt' : 'Xác nhận từ chối'}
           </button>

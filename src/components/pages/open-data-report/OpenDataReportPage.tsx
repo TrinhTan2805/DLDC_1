@@ -1,9 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Filter, Download, FileText, BarChart3, PieChart, TrendingUp, Calendar, Building2, Tag, FileType, Shield, Eye, MousePointer, ArrowUpDown, ChevronUp, ChevronDown, Bell, Settings, X, Layers } from 'lucide-react';
+import { Search, Filter, Download, FileText, BarChart3, PieChart, TrendingUp, Building2, Tag, FileType, Shield, Eye, ArrowUpDown, ChevronUp, ChevronDown, Bell, Settings, X, Layers } from 'lucide-react';
 import { BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
 import { initialTargetDatabases } from '../processing/mockTargetDatabases';
 import { mockPublishedCategories } from '../open-data-category/OpenDataCategorySetupPage';
-import { PUBLISH_STATUS_LABELS, PUBLISH_STATUS_STYLES, type PublishStatus } from '../open-data/OpenDataPublishPage';
+import { PUBLISH_STATUS_LABELS, type PublishStatus } from '../open-data/OpenDataPublishPage';
+import {
+  Badge, TruncatedText, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, INPUT_CLS, FILTER_LABEL, FILTER_GRID_CLS,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, normalizeSearch,
+} from '../collection/collectionUi';
 
 const XAxisAny = XAxis as any;
 const YAxisAny = YAxis as any;
@@ -13,6 +18,36 @@ const BarAny = Bar as any;
 const PieAny = Pie as any;
 const LineAny = Line as any;
 
+// Bảng (compomennt.md 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+// Khung bảng / thẻ biểu đồ / thẻ thống kê nhỏ (compomennt.md 5.3, 5.6.1)
+const TABLE_WRAP = 'bg-white rounded-lg border border-[#E2E8F0] overflow-hidden';
+const CHART_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4';
+const CHART_TITLE = 'text-[14px] font-medium text-[#020817]';
+const STAT_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4';
+const STAT_LABEL = 'text-[16px] text-[#64748B]';
+const STAT_VALUE = 'text-[16px] font-semibold text-[#0F172A] tabular-nums';
+const FILTER_PANEL = 'bg-white p-4 rounded-2xl border border-[#E2E8F0]';
+// Ô chọn trong thẻ biểu đồ (bộ lọc riêng từng biểu đồ)
+const CHART_SELECT = 'h-9 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer';
+// Trục / chú thích / tooltip biểu đồ: chữ 12px #64748B, lưới #E2E8F0
+const AXIS_TICK = { fontSize: 12, fill: '#64748B' };
+const CHART_TOOLTIP_STYLE = { borderRadius: 8, border: '1px solid #E2E8F0', boxShadow: 'none', fontSize: 12, color: '#64748B' };
+const LEGEND_PROPS = {
+  wrapperStyle: { fontSize: 12 },
+  iconType: 'circle',
+  formatter: (value: string) => <span style={{ color: '#64748B' }}>{value}</span>,
+};
+
+// Trạng thái công bố → tông Badge (giữ ý nghĩa màu cũ: xanh lá / xám / vàng)
+const PUBLISH_STATUS_VARIANT: Record<PublishStatus, string> = {
+  published: 'green',
+  draft: 'slate',
+  updating: 'amber',
+};
 
 interface OpenDataReportPageProps {
   onBack: () => void;
@@ -249,26 +284,27 @@ function MultiSelect({ label, options, selected, onChange }: MultiSelectProps) {
 
   return (
     <div ref={ref} className="relative">
-      <label className="block text-[13px] text-slate-700 mb-2">{label}</label>
+      <label className={FILTER_LABEL}>{label}</label>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] text-left flex items-center justify-between bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        aria-expanded={open}
+        className={`w-full h-10 px-3 border rounded-lg text-[13px] text-left flex items-center justify-between gap-2 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer ${open ? 'border-[#155DFC]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]'}`}
       >
-        <span className={selected.length === 0 ? 'text-slate-400' : 'text-slate-900'}>
+        <span className={`truncate ${selected.length === 0 ? 'text-[#64748B]' : 'text-[#020817]'}`}>
           {selected.length === 0 ? 'Tất cả' : `Đã chọn ${selected.length}`}
         </span>
-        <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+        <ChevronDown className={`w-4 h-4 text-[#94A3B8] flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-52 overflow-y-auto">
+        <div className="absolute z-50 mt-1 w-full bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-52 overflow-y-auto custom-scrollbar">
           {options.map(opt => (
-            <label key={opt} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer text-[13px] text-slate-700">
+            <label key={opt} className="flex items-center gap-3 px-3 py-2 hover:bg-[#F1F5F9] cursor-pointer text-[13px] text-[#020817] transition-colors">
               <input
                 type="checkbox"
                 checked={selected.includes(opt)}
                 onChange={() => toggle(opt)}
-                className="w-3.5 h-3.5 rounded accent-blue-600"
+                className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
               />
               {opt}
             </label>
@@ -292,30 +328,33 @@ function ExportDropdown({ onExportExcel, onExportPDF }: { onExportExcel: () => v
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative shrink-0">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-[13px] cursor-pointer"
+        aria-expanded={open}
+        className={`${BTN_OUTLINE} whitespace-nowrap`}
       >
         <Download className="w-4 h-4" />
         Xuất dữ liệu
-        <ChevronDown className="w-3 h-3" />
+        <ChevronDown className="w-4 h-4" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1 z-50">
           <button
+            type="button"
             onClick={() => { onExportExcel(); setOpen(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] text-slate-700 hover:bg-slate-50 border-b border-slate-100"
+            className="w-full flex items-center gap-2 min-h-8 px-3 py-1.5 rounded-md text-left text-[13px] text-[#020817] hover:bg-[#F1F5F9] transition-colors cursor-pointer"
           >
-            <Download className="w-4 h-4 text-green-600" />
+            <Download className="w-4 h-4 text-[#16A34A]" />
             Xuất Excel (.xlsx)
           </button>
           <button
+            type="button"
             onClick={() => { onExportPDF(); setOpen(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] text-slate-700 hover:bg-slate-50"
+            className="w-full flex items-center gap-2 min-h-8 px-3 py-1.5 rounded-md text-left text-[13px] text-[#020817] hover:bg-[#F1F5F9] transition-colors cursor-pointer"
           >
-            <FileText className="w-4 h-4 text-red-600" />
+            <FileText className="w-4 h-4 text-[#DC2626]" />
             Xuất PDF (.pdf)
           </button>
         </div>
@@ -326,7 +365,7 @@ function ExportDropdown({ onExportExcel, onExportPDF }: { onExportExcel: () => v
 
 export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const [activeTab, setActiveTab] = useState<'search' | 'statistics' | 'classification' | 'access'>('search');
-  
+
   // Search & Filter States
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -334,7 +373,9 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const [filterFormat, setFilterFormat] = useState('all');
   const [filterLicense, setFilterLicense] = useState('all');
   const [showSearchFilters, setShowSearchFilters] = useState(false);
-  
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm nút Tìm kiếm hoặc Enter (compomennt.md 5.19)
+  const [appliedSearch, setAppliedSearch] = useState({ keyword: '', category: 'all', agency: 'all', format: 'all', license: 'all' });
+
   // Statistics States
   const [statsGroupBy, setStatsGroupBy] = useState<'agency' | 'category' | 'license' | 'time'>('category');
   const [statsTimeRange, setStatsTimeRange] = useState('2024');
@@ -386,6 +427,11 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const [sortKey, setSortKey] = useState<keyof (typeof mockDatasets)[0] | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
+  const runSearch = () => {
+    setAppliedSearch({ keyword: searchKeyword, category: filterCategory, agency: filterAgency, format: filterFormat, license: filterLicense });
+    setSearchPage(1);
+  };
+
   const handleSort = (key: keyof (typeof mockDatasets)[0]) => {
     if (sortKey === key) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -396,18 +442,18 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   };
 
   const SortIcon = ({ col }: { col: keyof (typeof mockDatasets)[0] }) => {
-    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 text-slate-400 inline ml-1" />;
+    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 text-[#94A3B8] inline ml-1" />;
     return sortDir === 'asc'
       ? <ChevronUp className="w-3 h-3 text-blue-600 inline ml-1" />
       : <ChevronDown className="w-3 h-3 text-blue-600 inline ml-1" />;
   };
 
   const filteredDatasets = mockDatasets.filter(dataset => {
-    if (searchKeyword && !dataset.name.toLowerCase().includes(searchKeyword.toLowerCase())) return false;
-    if (filterCategory !== 'all' && dataset.category !== filterCategory) return false;
-    if (filterAgency !== 'all' && dataset.agency !== filterAgency) return false;
-    if (filterFormat !== 'all' && dataset.format !== filterFormat) return false;
-    if (filterLicense !== 'all' && dataset.license !== filterLicense) return false;
+    if (appliedSearch.keyword && !normalizeSearch(dataset.name).includes(normalizeSearch(appliedSearch.keyword))) return false;
+    if (appliedSearch.category !== 'all' && dataset.category !== appliedSearch.category) return false;
+    if (appliedSearch.agency !== 'all' && dataset.agency !== appliedSearch.agency) return false;
+    if (appliedSearch.format !== 'all' && dataset.format !== appliedSearch.format) return false;
+    if (appliedSearch.license !== 'all' && dataset.license !== appliedSearch.license) return false;
     return true;
   });
 
@@ -507,125 +553,72 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
   const accessChartData = computedAccessChartData.map(d => ({ ...d, views: Math.round(d.views * chartUserTypeRatio) }));
 
   const handleExportExcel = () => {
-    alert('Xuất dữ liệu ra Excel');
+    toast.info('Xuất dữ liệu ra Excel');
   };
 
   const handleExportPDF = () => {
-    alert('Xuất dữ liệu ra PDF');
+    toast.info('Xuất dữ liệu ra PDF');
   };
 
+  // Phân trang chuẩn (compomennt.md 5.14) — nối vào state trang/kích thước trang sẵn có
   const renderPagination = (total: number, currentPage: number, setCurrentPage: (p: number) => void) => {
     if (total <= 0) return null;
-    const totalPages = Math.ceil(total / pageSize);
-    const startItem = (currentPage - 1) * pageSize + 1;
-    const endItem = Math.min(currentPage * pageSize, total);
     return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white text-[13px] text-slate-600">
-        <div className="flex items-center gap-2">
-          <span>Hiển thị</span>
-          <select
-            value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span>bản ghi/trang</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span>{startItem} - {endItem} / {total}</span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[13px] transition-colors cursor-pointer ${
-                  currentPage === page
-                    ? 'bg-blue-600 text-white'
-                    : 'border border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
+      <Pagination
+        className="border-t border-[#E2E8F0]"
+        currentPage={currentPage}
+        totalItems={total}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+      />
     );
   };
 
-  return (
-    <div className="flex-1 flex flex-col bg-slate-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 py-2">
-        <div className="flex items-center justify-between">
-          <div>
-          </div>
-        </div>
+  const renderEmptyReport = (Icon: typeof BarChart3) => (
+    <div className="bg-white border border-[#E2E8F0] rounded-2xl flex flex-col items-center justify-center text-center py-20 gap-4">
+      <Icon className="w-12 h-12 text-[#CBD5E1]" />
+      <p className="text-[13px] text-[#64748B]">Vui lòng thiết lập bộ lọc và nhấn <span className="text-[#334155] font-medium">Tạo báo cáo</span> để xem kết quả.</p>
+    </div>
+  );
 
-        {/* Tabs */}
-        <div className="flex items-center gap-2 mt-2 border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab('search')}
-            className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all text-[13px] ${
-              activeTab === 'search'
-                ? 'border-blue-600 text-blue-600 bg-blue-50'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Search className="w-4 h-4" />
-            Tìm kiếm và lọc
-          </button>
-          <button
-            onClick={() => setActiveTab('statistics')}
-            className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all text-[13px] ${
-              activeTab === 'statistics'
-                ? 'border-blue-600 text-blue-600 bg-blue-50'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <BarChart3 className="w-4 h-4" />
-            Báo cáo thống kê
-          </button>
-          <button
-            onClick={() => setActiveTab('classification')}
-            className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all text-[13px] ${
-              activeTab === 'classification'
-                ? 'border-blue-600 text-blue-600 bg-blue-50'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <PieChart className="w-4 h-4" />
-            Báo cáo phân loại
-          </button>
-          <button
-            onClick={() => setActiveTab('access')}
-            className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-all text-[13px] ${
-              activeTab === 'access'
-                ? 'border-blue-600 text-blue-600 bg-blue-50'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <TrendingUp className="w-4 h-4" />
-            Thống kê lượt truy cập
-          </button>
+  const renderStatCard = (label: string, value: string | number, Icon: typeof BarChart3, tone: string) => (
+    <div className={STAT_CARD}>
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-lg ${tone}`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <div>
+          <div className={STAT_LABEL}>{label}</div>
+          <div className={STAT_VALUE}>{value}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const TABS = [
+    { id: 'search' as const, label: 'Tìm kiếm và lọc', icon: Search },
+    { id: 'statistics' as const, label: 'Báo cáo thống kê', icon: BarChart3 },
+    { id: 'classification' as const, label: 'Báo cáo phân loại', icon: PieChart },
+    { id: 'access' as const, label: 'Thống kê lượt truy cập', icon: TrendingUp },
+  ];
+
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Tabs (compomennt.md 5.9) */}
+      <div className="bg-white border-b border-[#E2E8F0]">
+        <div className="flex px-4">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={tabClass(activeTab === tab.id)}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -634,140 +627,141 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
         {/* Tab 1: Tìm kiếm và lọc (UC481) */}
         {activeTab === 'search' && (
           <div className="space-y-4">
-            {/* Toolbar: tìm kiếm + bật/tắt bộ lọc + xuất dữ liệu — theo mẫu chuẩn của Thiết lập dịch vụ */}
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Tìm theo từ khóa, tên dataset..."
-                    value={searchKeyword}
-                    onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  />
+            {/* Toolbar: tìm kiếm + bật/tắt bộ lọc + xuất dữ liệu (compomennt.md 5.19) */}
+            <div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-1.5">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      aria-label="Tìm kiếm"
+                      placeholder="Tìm theo từ khóa, tên dataset..."
+                      value={searchKeyword}
+                      onChange={(e) => setSearchKeyword(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                      className={SEARCH_INPUT_CLS}
+                    />
+                  </div>
+                  <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+                    <Search className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Bộ lọc"
+                    aria-expanded={showSearchFilters}
+                    onClick={() => setShowSearchFilters(!showSearchFilters)}
+                    className={filterBtnClass(showSearchFilters)}
+                    title="Bộ lọc"
+                  >
+                    {showSearchFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                  </button>
                 </div>
-                <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
-                  <Search className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowSearchFilters(!showSearchFilters)}
-                  className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showSearchFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                  title="Bộ lọc"
-                >
-                  {showSearchFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-                </button>
+
+                <div className="flex items-center gap-1.5">
+                  <ExportDropdown onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <ExportDropdown onExportExcel={handleExportExcel} onExportPDF={handleExportPDF} />
-              </div>
+              {/* Bộ lọc (thu gọn/mở rộng) */}
+              {showSearchFilters && (
+                <div className={FILTER_GRID_CLS}>
+                  <div>
+                    <label className={FILTER_LABEL}>Chủ đề</label>
+                    <select
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả chủ đề</option>
+                      <option value="Văn bản pháp luật">Văn bản pháp luật</option>
+                      <option value="Đăng ký kinh doanh">Đăng ký kinh doanh</option>
+                      <option value="Công chứng">Công chứng</option>
+                      <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={FILTER_LABEL}>Cơ quan công bố</label>
+                    <select
+                      value={filterAgency}
+                      onChange={(e) => setFilterAgency(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả cơ quan</option>
+                      <option value="Bộ Tư pháp">Bộ Tư pháp</option>
+                      <option value="Cục Đăng ký kinh doanh">Cục Đăng ký kinh doanh</option>
+                      <option value="Cục Công chứng">Cục Công chứng</option>
+                      <option value="Cục TGPL">Cục TGPL</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={FILTER_LABEL}>Định dạng</label>
+                    <select
+                      value={filterFormat}
+                      onChange={(e) => setFilterFormat(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả định dạng</option>
+                      <option value="JSON">JSON</option>
+                      <option value="Excel">Excel</option>
+                      <option value="CSV">CSV</option>
+                      <option value="XML">XML</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={FILTER_LABEL}>Giấy phép</label>
+                    <select
+                      value={filterLicense}
+                      onChange={(e) => setFilterLicense(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả giấy phép</option>
+                      <option value="CC BY 4.0">CC BY 4.0</option>
+                      <option value="ODC-BY">ODC-BY</option>
+                      <option value="ODbL">ODbL</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Bộ lọc (thu gọn/mở rộng) */}
-            {showSearchFilters && (
-              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 shadow-sm">
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-slate-700">Chủ đề</label>
-                  <select
-                    value={filterCategory}
-                    onChange={(e) => setFilterCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="all">Tất cả chủ đề</option>
-                    <option value="Văn bản pháp luật">Văn bản pháp luật</option>
-                    <option value="Đăng ký kinh doanh">Đăng ký kinh doanh</option>
-                    <option value="Công chứng">Công chứng</option>
-                    <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-slate-700">Cơ quan công bố</label>
-                  <select
-                    value={filterAgency}
-                    onChange={(e) => setFilterAgency(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="all">Tất cả cơ quan</option>
-                    <option value="Bộ Tư pháp">Bộ Tư pháp</option>
-                    <option value="Cục Đăng ký kinh doanh">Cục Đăng ký kinh doanh</option>
-                    <option value="Cục Công chứng">Cục Công chứng</option>
-                    <option value="Cục TGPL">Cục TGPL</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-slate-700">Định dạng</label>
-                  <select
-                    value={filterFormat}
-                    onChange={(e) => setFilterFormat(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="all">Tất cả định dạng</option>
-                    <option value="JSON">JSON</option>
-                    <option value="Excel">Excel</option>
-                    <option value="CSV">CSV</option>
-                    <option value="XML">XML</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-slate-700">Giấy phép</label>
-                  <select
-                    value={filterLicense}
-                    onChange={(e) => setFilterLicense(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="all">Tất cả giấy phép</option>
-                    <option value="CC BY 4.0">CC BY 4.0</option>
-                    <option value="ODC-BY">ODC-BY</option>
-                    <option value="ODbL">ODbL</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            <p className="text-[13px] text-slate-500">
-              Tìm thấy <span className="font-medium text-blue-600">{filteredDatasets.length}</span> kết quả
+            <p className="text-[13px] text-[#64748B]">
+              Tìm thấy <span className="font-medium text-blue-600 tabular-nums">{filteredDatasets.length}</span> kết quả
             </p>
 
             {/* Results Table — chỉ hiển thị đúng các trường theo UC481 (tên, mô tả, chủ đề, định dạng, trạng thái công bố) */}
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <div className={TABLE_WRAP}>
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('catalogCode')}>Mã danh mục<SortIcon col="catalogCode" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600">Tên danh mục</th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('name')}>Tên &amp; mô tả<SortIcon col="name" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('category')}>Chủ đề<SortIcon col="category" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('format')}>Định dạng<SortIcon col="format" /></th>
-                      <th className="px-4 py-3 text-left text-[13px] text-slate-600 cursor-pointer select-none hover:bg-slate-100" onClick={() => handleSort('status')}>Trạng thái công bố<SortIcon col="status" /></th>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className="h-[42px]">
+                      <th className={`${TH} text-left cursor-pointer select-none hover:bg-[#F1F5F9]`} onClick={() => handleSort('catalogCode')}>Mã danh mục<SortIcon col="catalogCode" /></th>
+                      <th className={`${TH} text-left`}>Tên danh mục</th>
+                      <th className={`${TH} text-left cursor-pointer select-none hover:bg-[#F1F5F9]`} onClick={() => handleSort('name')}>Tên &amp; mô tả<SortIcon col="name" /></th>
+                      <th className={`${TH} text-left cursor-pointer select-none hover:bg-[#F1F5F9]`} onClick={() => handleSort('category')}>Chủ đề<SortIcon col="category" /></th>
+                      <th className={`${TH} text-left cursor-pointer select-none hover:bg-[#F1F5F9]`} onClick={() => handleSort('format')}>Định dạng<SortIcon col="format" /></th>
+                      <th className={`${TH} text-left cursor-pointer select-none hover:bg-[#F1F5F9]`} onClick={() => handleSort('status')}>Trạng thái công bố<SortIcon col="status" /></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody>
                     {sortedDatasets.slice((searchPage - 1) * pageSize, searchPage * pageSize).map((dataset) => (
-                      <tr key={dataset.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-[13px] text-slate-900 whitespace-nowrap">{dataset.catalogCode}</td>
-                        <td className="px-4 py-3 text-[13px] text-slate-700 whitespace-nowrap">{getCatalogName(dataset.catalogCode)}</td>
-                        <td className="px-4 py-3 text-[13px] max-w-[360px]">
-                          <div className="text-slate-900">{dataset.name}</div>
-                          <div className="text-slate-500 mt-0.5">{dataset.description}</div>
+                      <tr key={dataset.id} className={TR}>
+                        <td className={`${TD} text-left whitespace-nowrap`}>{dataset.catalogCode}</td>
+                        <td className={`${TD} text-left max-w-[280px]`}><TruncatedText text={getCatalogName(dataset.catalogCode)} /></td>
+                        <td className={`${TD} text-left max-w-[360px] leading-[18px]`}>
+                          <TruncatedText text={dataset.name} />
+                          <TruncatedText text={dataset.description} className="text-[#64748B]" />
                         </td>
-                        <td className="px-4 py-3 text-[13px]">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-[13px] bg-blue-50 text-blue-700">
-                            {dataset.category}
-                          </span>
+                        <td className={`${TD} text-left`}>
+                          <Badge label={dataset.category} variant="blue" />
                         </td>
-                        <td className="px-4 py-3 text-[13px]">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-[13px] bg-slate-100 text-slate-700">
-                            {dataset.format}
-                          </span>
+                        <td className={`${TD} text-left`}>
+                          <Badge label={dataset.format} variant="slate" />
                         </td>
-                        <td className="px-4 py-3 text-[13px]">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-[13px] border ${PUBLISH_STATUS_STYLES[dataset.status]}`}>
-                            {PUBLISH_STATUS_LABELS[dataset.status]}
-                          </span>
+                        <td className={`${TD} text-left`}>
+                          <Badge label={PUBLISH_STATUS_LABELS[dataset.status]} variant={PUBLISH_STATUS_VARIANT[dataset.status]} />
                         </td>
                       </tr>
                     ))}
@@ -782,47 +776,23 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
         {/* Tab 2: Báo cáo thống kê */}
         {activeTab === 'statistics' && (
           <div className="space-y-6">
-            {/* Summary Cards */}
+            {/* Summary Cards (compomennt.md 5.6.1) */}
             <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Tổng Dataset</span>
-                  <FileText className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{mockDatasets.length}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Cơ quan công bố</span>
-                  <Building2 className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.agency)).size}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Chủ đề</span>
-                  <Tag className="w-5 h-5 text-amber-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.category)).size}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Giấy phép</span>
-                  <Shield className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.license)).size}</div>
-              </div>
+              {renderStatCard('Tổng Dataset', mockDatasets.length, FileText, 'bg-blue-50 text-blue-600')}
+              {renderStatCard('Cơ quan công bố', new Set(mockDatasets.map(d => d.agency)).size, Building2, 'bg-blue-50 text-blue-600')}
+              {renderStatCard('Chủ đề', new Set(mockDatasets.map(d => d.category)).size, Tag, 'bg-amber-50 text-amber-600')}
+              {renderStatCard('Giấy phép', new Set(mockDatasets.map(d => d.license)).size, Shield, 'bg-purple-50 text-purple-600')}
             </div>
 
             {/* Filter Panel */}
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <div className={FILTER_PANEL}>
               <div className={`grid gap-4 ${statsGroupBy === 'time' ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Nhóm theo</label>
+                  <label className={FILTER_LABEL}>Nhóm theo</label>
                   <select
                     value={statsGroupBy}
                     onChange={(e) => { setStatsGroupBy(e.target.value as any); setStatsFromDate(''); setStatsToDate(''); setSelectedCategories([]); setSelectedAgencies([]); setSelectedLicenses([]); setStatsReportReady(false); }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="category">Theo chủ đề</option>
                     <option value="agency">Theo cơ quan công bố</option>
@@ -834,26 +804,26 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 {statsGroupBy === 'time' ? (
                   <>
                     <div>
-                      <label className="block text-[13px] text-slate-700 mb-2">Từ ngày</label>
+                      <label className={FILTER_LABEL}>Từ ngày</label>
                       <input
                         type="date"
                         value={statsFromDate}
                         onChange={(e) => setStatsFromDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={INPUT_CLS}
                       />
                     </div>
                     <div>
-                      <label className="block text-[13px] text-slate-700 mb-2">Đến ngày</label>
+                      <label className={FILTER_LABEL}>Đến ngày</label>
                       <input
                         type="date"
                         value={statsToDate}
                         min={statsFromDate}
                         onChange={(e) => setStatsToDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={INPUT_CLS}
                       />
                     </div>
                     <div className="flex items-end gap-2">
-                      <button onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedFromDate(statsFromDate); setAppliedToDate(statsToDate); setStatsReportReady(true); setStatsPage(1); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap">
+                      <button type="button" onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedFromDate(statsFromDate); setAppliedToDate(statsToDate); setStatsReportReady(true); setStatsPage(1); }} className={`${BTN_PRIMARY} whitespace-nowrap`}>
                         <BarChart3 className="w-4 h-4" />
                         Tạo báo cáo
                       </button>
@@ -883,7 +853,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                       }}
                     />
                     <div className="flex items-end gap-2">
-                      <button onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedCategories(selectedCategories); setAppliedAgencies(selectedAgencies); setAppliedLicenses(selectedLicenses); setStatsReportReady(true); setStatsPage(1); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap">
+                      <button type="button" onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedCategories(selectedCategories); setAppliedAgencies(selectedAgencies); setAppliedLicenses(selectedLicenses); setStatsReportReady(true); setStatsPage(1); }} className={`${BTN_PRIMARY} whitespace-nowrap`}>
                         <BarChart3 className="w-4 h-4" />
                         Tạo báo cáo
                       </button>
@@ -897,8 +867,8 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             {statsReportReady ? (
               <>
                 {/* Chart */}
-                <div className="bg-white border border-slate-200 rounded-lg p-6">
-                  <h3 className="text-slate-900 mb-4">
+                <div className={CHART_CARD}>
+                  <h3 className={`${CHART_TITLE} mb-3`}>
                     Thống kê số lượng Dataset theo {
                       appliedGroupBy === 'category' ? 'chủ đề' :
                       appliedGroupBy === 'agency' ? 'cơ quan' :
@@ -908,36 +878,36 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   </h3>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={computedStatsData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxisAny dataKey="name" />
-                      <YAxisAny allowDecimals={false} />
-                      <TooltipAny />
-                      <LegendAny />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxisAny dataKey="name" axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                      <YAxisAny allowDecimals={false} axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                      <TooltipAny cursor={{ fill: '#F8FAFC' }} contentStyle={CHART_TOOLTIP_STYLE} />
+                      <LegendAny {...LEGEND_PROPS} />
                       <BarAny dataKey="count" name="Số lượng Dataset" fill="#3b82f6" maxBarSize={56} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
 
                 {/* Data Table */}
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-200">
-                    <h3 className="text-slate-900">Chi tiết thống kê</h3>
+                <div className={TABLE_WRAP}>
+                  <div className="px-4 py-3 border-b border-[#E2E8F0]">
+                    <h3 className={CHART_TITLE}>Chi tiết thống kê</h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px]">
+                          <th className={`${TH} text-left`}>
                             {appliedGroupBy === 'category' ? 'Chủ đề' : appliedGroupBy === 'agency' ? 'Cơ quan' : appliedGroupBy === 'license' ? 'Giấy phép' : 'Tháng'}
                           </th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Số lượng Dataset</th>
+                          <th className={`${TH} text-right`}>Số lượng Dataset</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200">
+                      <tbody>
                         {computedStatsData.slice((statsPage - 1) * pageSize, statsPage * pageSize).map((item, index) => (
-                          <tr key={index} className="hover:bg-slate-50">
-                            <td className="px-4 py-3 text-[13px] text-slate-900">{item.name}</td>
-                            <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{item.count}</td>
+                          <tr key={index} className={TR}>
+                            <td className={`${TD} text-left`}>{item.name}</td>
+                            <td className={`${TD} text-right tabular-nums`}>{item.count}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -946,59 +916,30 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   {renderPagination(computedStatsData.length, statsPage, setStatsPage)}
                 </div>
               </>
-            ) : (
-              <div className="bg-white border border-slate-200 rounded-lg p-12 flex flex-col items-center justify-center text-center">
-                <BarChart3 className="w-12 h-12 text-slate-300 mb-3" />
-                <p className="text-[13px] text-slate-500">Vui lòng thiết lập bộ lọc và nhấn <span className="font-semibold text-blue-600">Tạo báo cáo</span> để xem kết quả.</p>
-              </div>
-            )}
+            ) : renderEmptyReport(BarChart3)}
           </div>
         )}
 
         {/* Tab 3: Báo cáo phân loại */}
         {activeTab === 'classification' && (
           <div className="space-y-6">
-            {/* Summary Cards */}
+            {/* Summary Cards (compomennt.md 5.6.1) */}
             <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Tổng Dataset</span>
-                  <FileText className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{mockDatasets.length}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Nguồn cung cấp</span>
-                  <FileType className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.source)).size}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Chủ đề</span>
-                  <Tag className="w-5 h-5 text-amber-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.category)).size}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Định dạng</span>
-                  <Layers className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{new Set(mockDatasets.map(d => d.format)).size}</div>
-              </div>
+              {renderStatCard('Tổng Dataset', mockDatasets.length, FileText, 'bg-blue-50 text-blue-600')}
+              {renderStatCard('Nguồn cung cấp', new Set(mockDatasets.map(d => d.source)).size, FileType, 'bg-blue-50 text-blue-600')}
+              {renderStatCard('Chủ đề', new Set(mockDatasets.map(d => d.category)).size, Tag, 'bg-amber-50 text-amber-600')}
+              {renderStatCard('Định dạng', new Set(mockDatasets.map(d => d.format)).size, Layers, 'bg-emerald-50 text-emerald-600')}
             </div>
 
             {/* Filter Panel */}
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <div className={FILTER_PANEL}>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[13px] text-slate-700 mb-2">Phân loại theo</label>
+                  <label className={FILTER_LABEL}>Phân loại theo</label>
                   <select
                     value={classifyBy}
                     onChange={(e) => { setClassifyBy(e.target.value as any); setSelectedClassFilters([]); setClassReportReady(false); }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="source">Theo nguồn cung cấp</option>
                     <option value="category">Theo chủ đề</option>
@@ -1015,8 +956,9 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
 
                 <div className="flex items-end gap-2">
                   <button
+                    type="button"
                     onClick={() => { setAppliedClassifyBy(classifyBy); setAppliedClassFilters(selectedClassFilters); setClassReportReady(true); setClassPage(1); }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
+                    className={`${BTN_PRIMARY} whitespace-nowrap`}
                   >
                     <PieChart className="w-4 h-4" />
                     Tạo báo cáo
@@ -1029,40 +971,42 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             {classReportReady ? (
               <>
                 {/* Charts Grid — biểu đồ tròn hẹp hơn biểu đồ cột */}
-                <div className="grid grid-cols-5 gap-6">
-                  <div className="col-span-2 bg-white border border-slate-200 rounded-lg p-6">
-                    <h3 className="text-slate-900 mb-4">
+                <div className="grid grid-cols-5 gap-4">
+                  <div className={`col-span-2 ${CHART_CARD}`}>
+                    <h3 className={`${CHART_TITLE} mb-3`}>
                       Biểu đồ phân bố theo {appliedClassifyBy === 'source' ? 'nguồn cung cấp' : appliedClassifyBy === 'category' ? 'chủ đề' : 'định dạng chia sẻ'}
                     </h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <RechartsPieChart>
-                        <PieAny
-                          data={computedClassPieData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }: any) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                          outerRadius={90}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {computedClassPieData.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </PieAny>
-                        <TooltipAny />
-                      </RechartsPieChart>
-                    </ResponsiveContainer>
+                    <div className="text-[12px]">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <RechartsPieChart>
+                          <PieAny
+                            data={computedClassPieData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }: any) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                            outerRadius={90}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {computedClassPieData.map((_, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </PieAny>
+                          <TooltipAny contentStyle={CHART_TOOLTIP_STYLE} />
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
 
-                  <div className="col-span-3 bg-white border border-slate-200 rounded-lg p-6">
-                    <h3 className="text-slate-900 mb-4">Thống kê số lượng Dataset</h3>
+                  <div className={`col-span-3 ${CHART_CARD}`}>
+                    <h3 className={`${CHART_TITLE} mb-3`}>Thống kê số lượng Dataset</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={computedClassPieData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxisAny dataKey="name" />
-                        <YAxisAny allowDecimals={false} />
-                        <TooltipAny />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                        <XAxisAny dataKey="name" axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                        <YAxisAny allowDecimals={false} axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                        <TooltipAny cursor={{ fill: '#F8FAFC' }} contentStyle={CHART_TOOLTIP_STYLE} />
                         <BarAny dataKey="value" name="Số lượng" fill="#0ea5e9" maxBarSize={56} radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -1070,27 +1014,27 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 </div>
 
                 {/* Detail Table */}
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-200">
-                    <h3 className="text-slate-900">Bảng phân tích chi tiết</h3>
+                <div className={TABLE_WRAP}>
+                  <div className="px-4 py-3 border-b border-[#E2E8F0]">
+                    <h3 className={CHART_TITLE}>Bảng phân tích chi tiết</h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px]">
+                          <th className={`${TH} text-left`}>
                             {appliedClassifyBy === 'source' ? 'Nguồn cung cấp' : appliedClassifyBy === 'category' ? 'Chủ đề' : 'Định dạng chia sẻ'}
                           </th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Số lượng</th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Tỷ lệ (%)</th>
+                          <th className={`${TH} text-right`}>Số lượng</th>
+                          <th className={`${TH} text-right`}>Tỷ lệ (%)</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200">
+                      <tbody>
                         {computedClassData.slice((classPage - 1) * pageSize, classPage * pageSize).map((item, index) => (
-                          <tr key={index} className="hover:bg-slate-50">
-                            <td className="px-4 py-3 text-[13px] text-slate-900">{item.name}</td>
-                            <td className="px-4 py-3 text-[13px] text-slate-900 text-right">{item.count}</td>
-                            <td className="px-4 py-3 text-[13px] text-slate-900 text-right">
+                          <tr key={index} className={TR}>
+                            <td className={`${TD} text-left`}>{item.name}</td>
+                            <td className={`${TD} text-right tabular-nums`}>{item.count}</td>
+                            <td className={`${TD} text-right tabular-nums`}>
                               {computedClassTotal > 0 ? (item.count / computedClassTotal * 100).toFixed(1) : '0.0'}%
                             </td>
                           </tr>
@@ -1101,73 +1045,44 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   {renderPagination(computedClassData.length, classPage, setClassPage)}
                 </div>
               </>
-            ) : (
-              <div className="bg-white border border-slate-200 rounded-lg p-12 flex flex-col items-center justify-center text-center">
-                <PieChart className="w-12 h-12 text-slate-300 mb-3" />
-                <p className="text-[13px] text-slate-500">Vui lòng thiết lập bộ lọc và nhấn <span className="font-semibold text-blue-600">Tạo báo cáo</span> để xem kết quả.</p>
-              </div>
-            )}
+            ) : renderEmptyReport(PieChart)}
           </div>
         )}
 
         {/* Tab 4: Thống kê lượt truy cập */}
         {activeTab === 'access' && (
           <div className="space-y-6">
-            {/* Summary Cards */}
+            {/* Summary Cards (compomennt.md 5.6.1) */}
             <div className="grid grid-cols-4 gap-4">
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Tổng lượt xem</span>
-                  <Eye className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{mockDatasets.reduce((s, d) => s + d.views, 0).toLocaleString()}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Tổng lượt tải</span>
-                  <Download className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{mockDatasets.reduce((s, d) => s + d.downloads, 0).toLocaleString()}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Lượt tải theo File Excel</span>
-                  <FileText className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{mockAccessByFormat.find(f => f.name === 'File Excel')?.downloads.toLocaleString() ?? 0}</div>
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Lượt tải theo API</span>
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="text-2xl text-slate-900">{mockAccessByFormat.find(f => f.name === 'API')?.downloads.toLocaleString() ?? 0}</div>
-              </div>
+              {renderStatCard('Tổng lượt xem', mockDatasets.reduce((s, d) => s + d.views, 0).toLocaleString(), Eye, 'bg-blue-50 text-blue-600')}
+              {renderStatCard('Tổng lượt tải', mockDatasets.reduce((s, d) => s + d.downloads, 0).toLocaleString(), Download, 'bg-blue-50 text-blue-600')}
+              {renderStatCard('Lượt tải theo File Excel', mockAccessByFormat.find(f => f.name === 'File Excel')?.downloads.toLocaleString() ?? 0, FileText, 'bg-emerald-50 text-emerald-600')}
+              {renderStatCard('Lượt tải theo API', mockAccessByFormat.find(f => f.name === 'API')?.downloads.toLocaleString() ?? 0, TrendingUp, 'bg-purple-50 text-purple-600')}
             </div>
 
             {/* Filter Panel — lọc theo thời gian + nguồn truy cập (CSDL) + loại dữ liệu chia sẻ (API/Excel) */}
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <div className={FILTER_PANEL}>
               <div className="flex flex-wrap items-end gap-3">
                 <div className="w-[150px]">
-                  <label className="block text-[13px] text-slate-700 mb-2">Từ tháng</label>
+                  <label className={FILTER_LABEL}>Từ tháng</label>
                   <input
                     type="month"
                     value={accessFromMonth}
                     min={accessToMonth ? addMonths(accessToMonth, -11) : undefined}
                     max={accessToMonth || undefined}
                     onChange={(e) => { setAccessFromMonth(e.target.value); setAccessReportReady(false); }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
                 <div className="w-[150px]">
-                  <label className="block text-[13px] text-slate-700 mb-2">Đến tháng</label>
+                  <label className={FILTER_LABEL}>Đến tháng</label>
                   <input
                     type="month"
                     value={accessToMonth}
                     min={accessFromMonth || undefined}
                     max={accessFromMonth ? addMonths(accessFromMonth, 11) : undefined}
                     onChange={(e) => { setAccessToMonth(e.target.value); setAccessReportReady(false); }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
                 <div className="w-[180px]">
@@ -1188,14 +1103,15 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 </div>
                 <div className="flex items-end gap-2 shrink-0">
                   <button
+                    type="button"
                     onClick={() => {
                       if (accessFromMonth && accessToMonth) {
-                        if (accessToMonth < accessFromMonth) { alert('“Đến tháng” phải sau “Từ tháng”.'); return; }
-                        if (accessToMonth > addMonths(accessFromMonth, 11)) { alert('Khoảng thời gian tối đa là 1 năm (12 tháng).'); return; }
+                        if (accessToMonth < accessFromMonth) { toast.error('“Đến tháng” phải sau “Từ tháng”.'); return; }
+                        if (accessToMonth > addMonths(accessFromMonth, 11)) { toast.error('Khoảng thời gian tối đa là 1 năm (12 tháng).'); return; }
                       }
                       setAppliedAccessFromMonth(accessFromMonth); setAppliedAccessToMonth(accessToMonth); setAppliedAccessSources(accessSources); setAppliedAccessFormats(accessFormats); setAccessReportReady(true); setAccessPage(1);
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-[13px] whitespace-nowrap"
+                    className={`${BTN_PRIMARY} whitespace-nowrap`}
                   >
                     <TrendingUp className="w-4 h-4" />
                     Tạo báo cáo
@@ -1208,18 +1124,18 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
             {accessReportReady ? (
               <>
                 {/* Trend Charts — 2 kênh: lượt gọi API (hệ thống khai thác) và lượt truy cập (người dùng xem giao diện); trục ngang = tháng, giá trị theo điều kiện lọc */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Biểu đồ 1: Lượt tải dữ liệu — lọc theo Đơn vị khai thác */}
-                  <div className="bg-white border border-slate-200 rounded-lg p-6">
-                    <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
-                      <h3 className="text-slate-900">Lượt tải dữ liệu</h3>
+                  <div className={CHART_CARD}>
+                    <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                      <h3 className={CHART_TITLE}>Lượt tải dữ liệu</h3>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[12px] text-slate-500 whitespace-nowrap">Đơn vị khai thác:</span>
+                        <span className="text-[13px] text-[#64748B] whitespace-nowrap">Đơn vị khai thác:</span>
                         <select
                           title="Đơn vị khai thác"
                           value={chartUnit}
                           onChange={(e) => setChartUnit(e.target.value)}
-                          className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[220px]"
+                          className={`${CHART_SELECT} max-w-[220px]`}
                         >
                           {ACCESS_EXPLOIT_UNITS.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
                         </select>
@@ -1227,27 +1143,27 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     </div>
                     <ResponsiveContainer width="100%" height={360}>
                       <LineChart data={apiChartData} margin={{ top: 5, right: 20, left: 0, bottom: 28 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxisAny dataKey="name" interval={0} angle={-35} textAnchor="end" height={64} tick={{ fontSize: 11 }} />
-                        <YAxisAny />
-                        <TooltipAny />
-                        <LegendAny />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                        <XAxisAny dataKey="name" interval={0} angle={-35} textAnchor="end" height={64} axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                        <YAxisAny axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                        <TooltipAny contentStyle={CHART_TOOLTIP_STYLE} />
+                        <LegendAny {...LEGEND_PROPS} />
                         <LineAny type="monotone" dataKey="apiCalls" stroke="#2563eb" strokeWidth={2} name="Lượt tải dữ liệu" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
 
                   {/* Biểu đồ 2: Lượt truy cập — lọc theo Loại người dùng */}
-                  <div className="bg-white border border-slate-200 rounded-lg p-6">
-                    <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
-                      <h3 className="text-slate-900">Lượt truy cập</h3>
+                  <div className={CHART_CARD}>
+                    <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                      <h3 className={CHART_TITLE}>Lượt truy cập</h3>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[12px] text-slate-500 whitespace-nowrap">Loại người dùng:</span>
+                        <span className="text-[13px] text-[#64748B] whitespace-nowrap">Loại người dùng:</span>
                         <select
                           title="Loại người dùng"
                           value={chartUserType}
                           onChange={(e) => setChartUserType(e.target.value)}
-                          className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[200px]"
+                          className={`${CHART_SELECT} max-w-[200px]`}
                         >
                           {ACCESS_USER_TYPES.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
                         </select>
@@ -1255,11 +1171,11 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                     </div>
                     <ResponsiveContainer width="100%" height={360}>
                       <LineChart data={accessChartData} margin={{ top: 5, right: 20, left: 0, bottom: 28 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxisAny dataKey="name" interval={0} angle={-35} textAnchor="end" height={64} tick={{ fontSize: 11 }} />
-                        <YAxisAny />
-                        <TooltipAny />
-                        <LegendAny />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                        <XAxisAny dataKey="name" interval={0} angle={-35} textAnchor="end" height={64} axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                        <YAxisAny axisLine={false} tickLine={false} tick={AXIS_TICK} />
+                        <TooltipAny contentStyle={CHART_TOOLTIP_STYLE} />
+                        <LegendAny {...LEGEND_PROPS} />
                         <LineAny type="monotone" dataKey="views" stroke="#10B981" strokeWidth={2} name="Lượt truy cập" />
                       </LineChart>
                     </ResponsiveContainer>
@@ -1267,80 +1183,79 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                 </div>
 
                 {/* Alert Table */}
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-200">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-slate-900 flex items-center gap-2">
-                        <Bell className="w-5 h-5 text-orange-500" />
+                <div className={TABLE_WRAP}>
+                  <div className="px-4 py-3 border-b border-[#E2E8F0]">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <h3 className={`${CHART_TITLE} flex items-center gap-2`}>
+                        <Bell className="w-4 h-4 text-[#D97706]" />
                         Cảnh báo truy cập vượt ngưỡng
                       </h3>
-                      <div className="flex items-center gap-3">
-                        <Settings className="w-4 h-4 text-slate-400" />
-                        <span className="text-[13px] text-slate-600">Ngưỡng cảnh báo:</span>
+                      <div className="flex items-center gap-2">
+                        <Settings className="w-4 h-4 text-[#94A3B8]" />
+                        <span className="text-[13px] text-[#64748B]">Ngưỡng cảnh báo:</span>
                         <input
                           type="number"
                           min={1}
+                          aria-label="Ngưỡng cảnh báo"
                           value={alertThresholdInput}
                           onChange={(e) => setAlertThresholdInput(e.target.value)}
-                          className="w-24 px-2 py-1 border border-slate-300 rounded text-[13px] text-right focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          className="w-24 h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] text-right tabular-nums bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                         />
-                        <span className="text-[13px] text-slate-600">lượt</span>
+                        <span className="text-[13px] text-[#64748B]">lượt</span>
                         <button
+                          type="button"
                           onClick={() => { const v = parseInt(alertThresholdInput); if (!isNaN(v) && v > 0) setAlertThreshold(v); }}
-                          className="px-3 py-1 bg-orange-500 text-white text-[13px] rounded hover:bg-orange-600"
+                          className={BTN_PRIMARY}
                         >
                           Lưu cài đặt
                         </button>
                       </div>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Đang cảnh báo khi lượt truy cập chia sẻ vượt <span className="font-medium text-orange-600">{alertThreshold.toLocaleString()} lượt</span>
+                    <p className="text-[13px] text-[#64748B] mt-1">
+                      Đang cảnh báo khi lượt truy cập chia sẻ vượt <span className="font-medium text-[#D97706] tabular-nums">{alertThreshold.toLocaleString()} lượt</span>
                     </p>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600 w-10">STT</th>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">Tên tệp dữ liệu</th>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">Thời gian</th>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">Nguồn truy cập</th>
-                          <th className="px-4 py-3 text-left text-[13px] text-slate-600">Định dạng chia sẻ</th>
-                          <th className="px-4 py-3 text-right text-[13px] text-slate-600">Lượt truy cập chia sẻ</th>
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px]">
+                          <th className={`${TH} text-center w-12`}>STT</th>
+                          <th className={`${TH} text-left`}>Tên tệp dữ liệu</th>
+                          <th className={`${TH} text-left`}>Thời gian</th>
+                          <th className={`${TH} text-left`}>Nguồn truy cập</th>
+                          <th className={`${TH} text-left`}>Định dạng chia sẻ</th>
+                          <th className={`${TH} text-right`}>Lượt truy cập chia sẻ</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200">
+                      <tbody>
                         {filteredAlertLogs.length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-[13px] text-slate-400">
+                            <td colSpan={6} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                               Không có dữ liệu cảnh báo phù hợp với điều kiện lọc
                             </td>
                           </tr>
                         ) : filteredAlertLogs.slice((accessPage - 1) * pageSize, accessPage * pageSize).map((row, index) => {
                           const exceeded = row.accessCount >= alertThreshold;
+                          const [datePart, timePart] = row.time.split(' ');
                           return (
-                            <tr key={index} className={exceeded ? 'bg-orange-50 hover:bg-orange-100' : 'hover:bg-slate-50'}>
-                              <td className="px-4 py-3 text-[13px] text-slate-500">{(accessPage - 1) * pageSize + index + 1}</td>
-                              <td className="px-4 py-3 text-[13px] text-slate-900">{row.file}</td>
-                              <td className="px-4 py-3 text-[13px] text-slate-600">{row.time}</td>
-                              <td className="px-4 py-3 text-[13px] text-slate-600">{row.source}</td>
-                              <td className="px-4 py-3 text-[13px]">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] ${
-                                  row.format === 'API' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
-                                }`}>
-                                  {row.format}
-                                </span>
+                            <tr key={index} className={exceeded ? 'h-12 bg-[#FFF7ED] border-b border-[#E0E0E0] transition-colors' : TR}>
+                              <td className={`${TD} text-center tabular-nums`}>{(accessPage - 1) * pageSize + index + 1}</td>
+                              <td className={`${TD} text-left max-w-[320px]`}><TruncatedText text={row.file} /></td>
+                              <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                                <div>{datePart}</div>
+                                {timePart && <div className="text-[#64748B]">{timePart}</div>}
                               </td>
-                              <td className="px-4 py-3 text-[13px] text-right">
+                              <td className={`${TD} text-left whitespace-nowrap`}>{row.source}</td>
+                              <td className={`${TD} text-left`}>
+                                <Badge label={row.format} variant={row.format === 'API' ? 'emerald' : 'slate'} />
+                              </td>
+                              <td className={`${TD} text-right`}>
                                 <div className="flex items-center justify-end gap-2">
-                                  <span className={exceeded ? 'font-semibold text-orange-600' : 'text-slate-900'}>
+                                  <span className={`tabular-nums ${exceeded ? 'text-[#C2410C]' : ''}`}>
                                     {row.accessCount.toLocaleString()}
                                   </span>
                                   {exceeded && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] bg-orange-100 text-orange-600">
-                                      <Bell className="w-2.5 h-2.5" />
-                                      Vượt ngưỡng
-                                    </span>
+                                    <Badge label="Vượt ngưỡng" variant="orange" icon={<Bell className="w-3 h-3" />} />
                                   )}
                                 </div>
                               </td>
@@ -1353,12 +1268,7 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   {renderPagination(filteredAlertLogs.length, accessPage, setAccessPage)}
                 </div>
               </>
-            ) : (
-              <div className="bg-white border border-slate-200 rounded-lg p-12 flex flex-col items-center justify-center text-center">
-                <TrendingUp className="w-12 h-12 text-slate-300 mb-3" />
-                <p className="text-[13px] text-slate-500">Vui lòng thiết lập bộ lọc và nhấn <span className="font-semibold text-blue-600">Tạo báo cáo</span> để xem kết quả.</p>
-              </div>
-            )}
+            ) : renderEmptyReport(TrendingUp)}
           </div>
         )}
       </div>

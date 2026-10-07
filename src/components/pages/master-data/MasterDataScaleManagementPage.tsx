@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, Circle, CheckSquare, ChevronDown, ChevronLeft, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen, Info } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { Settings, Sliders, GitCompare, Network, Key, Plus, Edit, Trash2, X, Search, Filter, CheckSquare, ChevronLeft, Eye, FileText, Clock, XCircle, Send, AlertCircle, Check, ArrowRight, SquarePen, Info, MoreVertical } from 'lucide-react';
+import { toast } from 'sonner';
 import { AttributesManagementTab, defaultAttributes, DLDC_ENTITY_DETAIL_CONFIGS } from './AttributesManagementTab';
 import { MasterDataWizard } from './MasterDataWizard';
 import { MergeRulesManagementTab, mockMergeRules, matchMethodLabels, fuzzyAlgorithmLabels, conflictStrategyLabels, onEmptyLabels } from './MergeRulesManagementTab';
@@ -8,7 +9,13 @@ import { UniqueIdentifierRulesTab, mockIdentifierRules, buildCode } from './Uniq
 import { ApprovalTab } from './ApprovalTab';
 import { ReviewResultCard } from '../category/components/modals/ReviewResultCard';
 import { Portal } from '../../common/Portal';
-import { ClampedText } from '../../common/ClampedText';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON,
+  ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch
+} from '../collection/collectionUi';
 
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
@@ -238,15 +245,16 @@ const SOURCE_KIND_LABELS: Record<SourceKind, string> = {
   query: 'Truy vấn',
 };
 
+// Màu badge loại nguồn / độ mịn (variant của Badge chuẩn — giữ ý nghĩa màu cũ)
 const SOURCE_KIND_COLORS: Record<SourceKind, string> = {
-  table: 'bg-blue-50 text-blue-700 border-blue-200',
-  view: 'bg-purple-50 text-purple-700 border-purple-200',
-  query: 'bg-amber-50 text-amber-700 border-amber-200',
+  table: 'blue',
+  view: 'purple',
+  query: 'amber',
 };
 
 const SOURCE_GRAIN_COLORS: Record<SourceGrain, string> = {
-  '1:1': 'bg-slate-50 text-slate-700 border-slate-200',
-  '1:n': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  '1:1': 'slate',
+  '1:n': 'emerald',
 };
 
 const MOCK_APPROVERS = [
@@ -256,6 +264,56 @@ const MOCK_APPROVERS = [
   { id: 'a4', name: 'Phạm Quốc Hùng',   position: 'Cục trưởng',         department: 'Cục Công nghệ thông tin' },
   { id: 'a5', name: 'Hoàng Thị Lan',    position: 'Trưởng phòng',       department: 'Phòng Nghiệp vụ pháp lý' },
 ];
+
+// Màu badge trạng thái vòng đời — giữ nguyên ý nghĩa màu cũ
+const STATUS_VARIANT: Record<LifecycleStatus, string> = {
+  draft: 'amber',
+  pending: 'blue',
+  approved: 'green',
+  rejected: 'red',
+};
+
+// Màu badge loại quan hệ (đồng bộ màn Danh mục dùng chung)
+const RELATION_TYPE_VARIANT: Record<string, string> = {
+  'one-to-many': 'blue',
+  'many-to-many': 'purple',
+  'one-to-one': 'emerald',
+};
+
+// Bảng chuẩn (compomennt.md 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] last:border-b-0 hover:bg-[#F8FAFC] transition-colors';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+// Thẻ nhóm trong modal Xem chi tiết
+const GROUP_CARD = 'rounded-2xl border border-[#E2E8F0] bg-white';
+const GROUP_HEAD = 'px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center gap-2';
+const GROUP_TITLE = 'text-[14px] font-medium text-[#020817]';
+const EMPTY_BOX = 'rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-6 text-center';
+const MUTED = 'text-[#94A3B8]';
+
+// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
+const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
+  <DropdownMenuItem
+    disabled={!!reason}
+    onClick={reason ? undefined : onSelect}
+    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
+  >
+    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
+    <span className="flex flex-col">
+      <span>{label}</span>
+      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
+    </span>
+  </DropdownMenuItem>
+);
+
+// Cặp nhãn – giá trị chỉ đọc (compomennt.md 5.17)
+const ViewField = ({ label, children, full, extra }: { label: string; children: ReactNode; full?: boolean; extra?: ReactNode }) => (
+  <div className={full ? 'col-span-2' : ''}>
+    <div className={`${FIELD_LABEL} mb-1 flex items-center gap-1.5`}>{label}{extra}</div>
+    <div className={`${FIELD_VALUE} break-words`}>{children}</div>
+  </div>
+);
 
 export function MasterDataScaleManagementPage() {
   const [activeTab, setActiveTab] = useState<TabType>('setup');
@@ -313,7 +371,7 @@ export function MasterDataScaleManagementPage() {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.managingAgency || (!editingEntity && !formData.code?.trim())) {
-      alert('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
 
@@ -322,13 +380,13 @@ export function MasterDataScaleManagementPage() {
     const codeNorm = (formData.code || '').trim().toLowerCase();
     const dupName = entities.some(e => e.id !== editingEntity?.id && e.name.trim().toLowerCase() === nameNorm);
     if (dupName) {
-      alert(`Tên thực thể "${formData.name}" đã tồn tại. Vui lòng nhập tên khác.`);
+      toast.error(`Tên thực thể "${formData.name}" đã tồn tại. Vui lòng nhập tên khác.`);
       return;
     }
     if (codeNorm) {
       const dupCode = entities.some(e => e.id !== editingEntity?.id && e.code.trim().toLowerCase() === codeNorm);
       if (dupCode) {
-        alert(`Mã thực thể "${formData.code}" đã tồn tại. Vui lòng nhập mã khác.`);
+        toast.error(`Mã thực thể "${formData.code}" đã tồn tại. Vui lòng nhập mã khác.`);
         return;
       }
     }
@@ -441,89 +499,40 @@ export function MasterDataScaleManagementPage() {
     });
   };
 
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm Tìm kiếm hoặc Enter (compomennt.md 5.19)
+  const [applied, setApplied] = useState<{ search: string; status: LifecycleStatus | 'all'; dataType: string; agency: string }>({
+    search: '', status: 'all', dataType: 'all', agency: 'all',
+  });
+
+  const runSearch = () => {
+    setApplied({ search: searchTerm, status: filterStatus, dataType: filterDataType, agency: filterManagingAgency });
+    setCurrentPageNum(1);
+  };
+
   const filteredEntities = entities.filter(e => {
-    const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
-    const matchesDataType = filterDataType === 'all' || e.dataType === filterDataType;
-    const matchesManagingAgency = filterManagingAgency === 'all' || e.managingAgency === filterManagingAgency;
+    const q = normalizeSearch(applied.search);
+    const matchesSearch = q === '' || normalizeSearch(e.name).includes(q) || normalizeSearch(e.code).includes(q);
+    const matchesStatus = applied.status === 'all' || e.lifecycleStatus === applied.status;
+    const matchesDataType = applied.dataType === 'all' || e.dataType === applied.dataType;
+    const matchesManagingAgency = applied.agency === 'all' || e.managingAgency === applied.agency;
     return matchesSearch && matchesStatus && matchesDataType && matchesManagingAgency;
   });
 
   const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
-  const renderPagination = (totalItemsCount: number) => {
-    if (totalItemsCount <= 0) return null;
-    const totalPages = Math.ceil(totalItemsCount / pageSize);
-    const startItem = (currentPageNum - 1) * pageSize + 1;
-    const endItem = Math.min(currentPageNum * pageSize, totalItemsCount);
-
-    return (
-      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-        {/* Left Side: Page Size Selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 font-normal">Hiển thị</span>
-          <select
-            aria-label="Select record count"
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPageNum(1);
-            }}
-            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600 font-normal">bản ghi/trang</span>
-        </div>
-
-        {/* Right Side: Page Range and Navigation */}
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600 font-normal">
-            {startItem} - {endItem} / {totalItemsCount}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
-              disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPageNum(page)}
-                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
-              disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const stats = [
+    { label: 'Tổng số dữ liệu chủ', value: entities.length, icon: FileText, bg: 'bg-blue-50', fg: 'text-blue-600' },
+    { label: 'Đang soạn thảo', value: entities.filter(e => e.lifecycleStatus === 'draft').length, icon: Clock, bg: 'bg-amber-50', fg: 'text-amber-600' },
+    { label: 'Chờ phê duyệt', value: entities.filter(e => e.lifecycleStatus === 'pending').length, icon: Send, bg: 'bg-blue-50', fg: 'text-blue-600' },
+    { label: 'Đã phê duyệt', value: entities.filter(e => e.lifecycleStatus === 'approved').length, icon: CheckSquare, bg: 'bg-green-50', fg: 'text-green-600' },
+    { label: 'Từ chối', value: entities.filter(e => e.lifecycleStatus === 'rejected').length, icon: XCircle, bg: 'bg-red-50', fg: 'text-red-600' },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="overflow-hidden">
-        {/* Tabs */}
-        <div className="flex border-b border-slate-200 overflow-x-auto bg-white">
+        {/* Tabs (compomennt.md 5.9) */}
+        <div className="flex border-b border-[#E2E8F0] overflow-x-auto bg-white">
           {[
             { id: 'setup', label: 'Thiết lập thực thể', icon: Settings },
             { id: 'attributes', label: 'Thiết lập thuộc tính', icon: Sliders },
@@ -534,13 +543,11 @@ export function MasterDataScaleManagementPage() {
           ].map(tab => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${activeTab === tab.id
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
+              className={`${tabClass(activeTab === tab.id)} whitespace-nowrap shrink-0`}
             >
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
+              <tab.icon className="w-4 h-4" />
               {tab.label}
             </button>
           ))}
@@ -550,242 +557,201 @@ export function MasterDataScaleManagementPage() {
         <div className={activeTab === 'setup' ? 'py-6' : 'p-6'}>
           {activeTab === 'setup' && (
             <div className="space-y-4">
-              {/* Statistics Cards */}
-              <div className="grid grid-cols-5 gap-4 mb-6">
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Tổng số dữ liệu chủ</span>
-                    <FileText className="w-5 h-5 text-blue-600" />
+              {/* Thẻ thống kê (compomennt.md 5.6.1) */}
+              <div className="grid grid-cols-5 gap-4">
+                {stats.map(card => (
+                  <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${card.bg}`}>
+                        <card.icon className={`w-5 h-5 ${card.fg}`} />
+                      </div>
+                      <div>
+                        <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{card.value}</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.length}</div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Đang soạn thảo</span>
-                    <Clock className="w-5 h-5 text-yellow-500" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'draft').length}</div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
-                    <Send className="w-5 h-5 text-blue-500" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'pending').length}</div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Đã phê duyệt</span>
-                    <CheckSquare className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'approved').length}</div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[13px] text-slate-500">Từ chối</span>
-                    <XCircle className="w-5 h-5 text-red-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-slate-900">{entities.filter(e => e.lifecycleStatus === 'rejected').length}</div>
-                </div>
+                ))}
               </div>
 
-              {/* Search and Action Bar */}
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm theo tên hoặc mã dữ liệu chủ..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-                    />
+              {/* Tìm kiếm & bộ lọc (compomennt.md 5.19) */}
+              <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 flex items-center gap-1.5">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        aria-label="Tìm kiếm dữ liệu chủ"
+                        placeholder="Tìm kiếm theo tên hoặc mã dữ liệu chủ..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                        className={SEARCH_INPUT_CLS}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Tìm kiếm"
+                      title="Tìm kiếm"
+                      onClick={runSearch}
+                      className={SEARCH_BTN_CLS}
+                    >
+                      <Search className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Bộ lọc"
+                      aria-expanded={showFilters}
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={filterBtnClass(showFilters)}
+                      title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                    >
+                      {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                    </button>
                   </div>
                   <button
                     type="button"
-                    className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-                    title="Tìm kiếm"
-                  >
-                    <Search className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                      showFilters
-                        ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                    title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                  >
-                    {showFilters ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4" />}
-                  </button>
-                  <div className="h-6 w-px bg-slate-200 mx-1" />
-                  <button
                     onClick={() => { setEditingEntity(null); setShowWizard(true); }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
+                    className={BTN_PRIMARY}
                   >
                     <Plus className="w-4 h-4" />
                     Tạo mới
                   </button>
                 </div>
 
-                {/* Collapsible Filters Panel */}
+                {/* Vùng bộ lọc — áp dụng khi bấm Tìm kiếm */}
                 {showFilters && (
-                  <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái vòng đời</label>
-                        <div className="relative">
-                          <select
-                            value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value as LifecycleStatus | 'all')}
-                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
-                          >
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="draft">Đang soạn thảo</option>
-                            <option value="pending">Chờ phê duyệt</option>
-                            <option value="approved">Đã phê duyệt</option>
-                            <option value="rejected">Từ chối</option>
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
-                      </div>
+                  <div className={FILTER_GRID_CLS}>
+                    <div>
+                      <label className={FILTER_LABEL}>Trạng thái vòng đời</label>
+                      <select
+                        aria-label="Trạng thái vòng đời"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value as LifecycleStatus | 'all')}
+                        className={INPUT_CLS}
+                      >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="draft">Đang soạn thảo</option>
+                        <option value="pending">Chờ phê duyệt</option>
+                        <option value="approved">Đã phê duyệt</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                    </div>
 
-                      <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Loại dữ liệu</label>
-                        <div className="relative">
-                          <select
-                            value={filterDataType}
-                            onChange={(e) => setFilterDataType(e.target.value)}
-                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
-                          >
-                            <option value="all">Tất cả loại dữ liệu</option>
-                            <option value="individual">Thực thể Cá nhân</option>
-                            <option value="organization">Thực thể Tổ chức</option>
-                            <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
-                            <option value="asset">Thực thể Tài sản</option>
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
-                      </div>
+                    <div>
+                      <label className={FILTER_LABEL}>Loại dữ liệu</label>
+                      <select
+                        aria-label="Loại dữ liệu"
+                        value={filterDataType}
+                        onChange={(e) => setFilterDataType(e.target.value)}
+                        className={INPUT_CLS}
+                      >
+                        <option value="all">Tất cả loại dữ liệu</option>
+                        <option value="individual">Thực thể Cá nhân</option>
+                        <option value="organization">Thực thể Tổ chức</option>
+                        <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
+                        <option value="asset">Thực thể Tài sản</option>
+                      </select>
+                    </div>
 
-                      <div>
-                        <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Cơ quan quản lý</label>
-                        <div className="relative">
-                          <select
-                            value={filterManagingAgency}
-                            onChange={(e) => setFilterManagingAgency(e.target.value)}
-                            className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium font-sans"
-                          >
-                            <option value="all">Tất cả cơ quan</option>
-                            {MANAGING_UNITS.map(unit => (
-                              <option key={unit} value={unit}>{unit}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
-                      </div>
+                    <div>
+                      <label className={FILTER_LABEL}>Cơ quan quản lý</label>
+                      <select
+                        aria-label="Cơ quan quản lý"
+                        value={filterManagingAgency}
+                        onChange={(e) => setFilterManagingAgency(e.target.value)}
+                        className={INPUT_CLS}
+                      >
+                        <option value="all">Tất cả cơ quan</option>
+                        {MANAGING_UNITS.map(unit => (
+                          <option key={unit} value={unit}>{unit}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Entity List */}
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+              {/* Danh sách thực thể (compomennt.md 5.3) */}
+              <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
                 <div className="overflow-x-auto">
-                  {/* collection-table: dùng quy tắc ghi đè có sẵn trong index.css để header in đậm */}
-                  <table className="w-full text-left collection-table">
-                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                      <tr>
-                        {/* Cột nhãn dùng w-px để co sát nội dung, phần rộng còn lại dồn cho cột Tên / Mã dữ liệu chủ */}
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-px text-center">STT</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap min-w-[220px]">Tên / Mã dữ liệu chủ</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 min-w-[120px]">Loại dữ liệu</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 min-w-[140px]">Cơ quan quản lý</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px">Người tạo / Ngày tạo</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px text-center">Cập nhật lần cuối</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Trạng thái</th>
-                        <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Thao tác</th>
+                  <table className={TABLE_CLS}>
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={`${TH} text-center w-12`}>STT</th>
+                        <th className={`${TH} text-left min-w-[220px]`}>Tên / Mã dữ liệu chủ</th>
+                        <th className={`${TH} text-left min-w-[120px]`}>Loại dữ liệu</th>
+                        <th className={`${TH} text-left min-w-[140px]`}>Cơ quan quản lý</th>
+                        <th className={`${TH} text-left w-px`}>Người tạo / Ngày tạo</th>
+                        <th className={`${TH} text-left w-px`}>Cập nhật lần cuối</th>
+                        <th className={`${TH} text-left w-px`}>Trạng thái</th>
+                        <th className={`${TH} text-center w-px sticky right-0 z-[1] bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white">
+                    <tbody>
                       {paginatedEntities.length > 0 ? (
-                        paginatedEntities.map((entity, index) => (
-                          <tr key={entity.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-4 text-slate-500 text-[13px] text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                            <td className="px-4 py-4 text-[13px]">
-                              <ClampedText text={entity.name} className="font-semibold text-[#0f172a] leading-snug break-words text-[13px]" />
-                              <ClampedText text={entity.code} className="font-mono text-slate-500 font-medium break-all mt-0.5 text-[13px]" />
-                            </td>
-                            <td className="px-4 py-4 text-slate-700 text-[13px] font-normal min-w-[120px]">{dataTypeLabels[entity.dataType]}</td>
-                            <td className="px-4 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency}</td>
-                            <td className="px-4 py-4 text-[13px]">
-                              <div className="text-slate-900 font-medium whitespace-nowrap">{entity.createdBy || '--'}</div>
-                              <div className="text-slate-500 font-medium font-mono mt-0.5 whitespace-nowrap">{entity.createdDate || '--'}</div>
-                            </td>
-                            <td className="px-4 py-4 text-center text-[13px] text-slate-700 whitespace-nowrap">{entity.updatedDate}</td>
-                            <td className="px-4 py-4 text-center">
-                              <div className="flex justify-center">
-                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[13px] font-normal border whitespace-nowrap ${
-                                  entity.lifecycleStatus === 'approved'
-                                    ? 'bg-green-50 text-green-700 border-green-100'
-                                    : entity.lifecycleStatus === 'pending'
-                                      ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                      : entity.lifecycleStatus === 'draft'
-                                        ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
-                                        : 'bg-red-50 text-red-700 border-red-100'
-                                }`}>
-                                  {lifecycleLabels[entity.lifecycleStatus]?.label || entity.lifecycleStatus}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center justify-center gap-1.5">
-                                <button
-                                  onClick={() => { setViewingEntity(entity); setViewStep(1); }}
-                                  className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-colors"
-                                  title="Xem chi tiết"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => entity.lifecycleStatus === 'draft' && handleApprove(entity)}
-                                  disabled={entity.lifecycleStatus !== 'draft'}
-                                  className={`p-1.5 rounded-lg transition-colors ${
-                                    entity.lifecycleStatus === 'draft'
-                                      ? 'text-indigo-600 hover:bg-indigo-50 cursor-pointer'
-                                      : 'text-slate-300 cursor-not-allowed'
-                                  }`}
-                                  title={entity.lifecycleStatus === 'draft' ? 'Gửi trình duyệt' : 'Chỉ gửi được bản ghi đang soạn thảo'}
-                                >
-                                  <Send className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleEdit(entity)}
-                                  className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer transition-colors"
-                                  title="Chỉnh sửa"
-                                >
-                                  <SquarePen className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(entity.id)}
-                                  className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
-                                  title="Xóa"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                        paginatedEntities.map((entity, index) => {
+                          const sendReason = entity.lifecycleStatus === 'draft' ? null : 'Chỉ gửi được bản ghi đang soạn thảo';
+                          return (
+                            <tr key={entity.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                              <td className={`${TD} text-center whitespace-nowrap`}>{(currentPageNum - 1) * pageSize + index + 1}</td>
+                              <td className={`${TD} text-left max-w-[360px] leading-[18px]`}>
+                                <TruncatedText text={entity.name} />
+                                <TruncatedText text={entity.code} className="text-[#64748B]" />
+                              </td>
+                              <td className={`${TD} text-left max-w-[220px]`}>
+                                <TruncatedText text={dataTypeLabels[entity.dataType]} />
+                              </td>
+                              <td className={`${TD} text-left max-w-[240px]`}>
+                                <TruncatedText text={entity.managingAgency || '--'} />
+                              </td>
+                              <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                                <div>{entity.createdBy || '--'}</div>
+                                <div className="text-[#64748B]">{entity.createdDate || '--'}</div>
+                              </td>
+                              <td className={`${TD} text-left whitespace-nowrap`}>{entity.updatedDate}</td>
+                              <td className={`${TD} text-left`}>
+                                <Badge label={lifecycleLabels[entity.lifecycleStatus]?.label || entity.lifecycleStatus} variant={STATUS_VARIANT[entity.lifecycleStatus]} />
+                              </td>
+                              <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]`}>
+                                {/* Cột thao tác (compomennt.md 5.3.2): 4 thao tác => Xem chi tiết + Chỉnh sửa + menu ⋯ */}
+                                <div className="inline-flex items-center justify-center gap-1">
+                                  <RowIconAction label="Xem chi tiết" onClick={() => { setViewingEntity(entity); setViewStep(1); }}>
+                                    <Eye className="w-4 h-4" />
+                                  </RowIconAction>
+                                  <RowIconAction label="Chỉnh sửa" onClick={() => handleEdit(entity)}>
+                                    <SquarePen className="w-4 h-4" />
+                                  </RowIconAction>
+
+                                  <DropdownMenu>
+                                    <Tooltip>
+                                      {/* Chỉ hiện tooltip khi hover: khi menu đóng focus quay về nút, không để tooltip tự bật đè lên modal */}
+                                      <TooltipTrigger asChild onFocus={(e: { preventDefault: () => void }) => e.preventDefault()}>
+                                        <span className="inline-flex">
+                                          <DropdownMenuTrigger asChild>
+                                            <button type="button" aria-label="Thao tác khác" className={ROW_ICON_BTN}>
+                                              <MoreVertical className="w-4 h-4" />
+                                            </button>
+                                          </DropdownMenuTrigger>
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>Thao tác khác</TooltipContent>
+                                    </Tooltip>
+                                    <DropdownMenuContent align="end" className="w-56 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1">
+                                      <MenuAction icon={<Send className="w-4 h-4" />} label="Gửi trình duyệt" reason={sendReason}
+                                        onSelect={() => handleApprove(entity)} />
+                                      <MenuAction icon={<Trash2 className="w-4 h-4" />} label="Xóa" reason={null} danger
+                                        onSelect={() => handleDelete(entity.id)} />
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
-                          <td colSpan={10} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                          <td colSpan={8} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                             Không tìm thấy dữ liệu
                           </td>
                         </tr>
@@ -793,349 +759,329 @@ export function MasterDataScaleManagementPage() {
                     </tbody>
                   </table>
                 </div>
-                {/* Pagination */}
-                {renderPagination(filteredEntities.length)}
+                {/* Phân trang (compomennt.md 5.14) */}
+                {filteredEntities.length > 0 && (
+                  <Pagination
+                    className="border-t border-[#E2E8F0]"
+                    currentPage={currentPageNum}
+                    totalItems={filteredEntities.length}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPageNum}
+                    onPageSizeChange={setPageSize}
+                  />
+                )}
               </div>
 
-              {/* Form Modal */}
+              {/* Form Modal (compomennt.md 5.4) */}
               {showForm && (
                 <Portal>
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition-all">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-                    <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white">
-                      <h3 className="text-[16px] font-bold text-slate-900">
-                        {editingEntity ? 'Chỉnh sửa thực thể dữ liệu chủ' : 'Thêm mới thực thể dữ liệu chủ'}
-                      </h3>
-                      <button onClick={handleCloseForm} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-
-                    <div className="p-6 space-y-4 overflow-y-auto flex-1 text-[13px]">
-                      {/* Mã thực thể */}
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Mã thực thể <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={editingEntity ? editingEntity.code : (formData.code || '')}
-                          onChange={(e) => !editingEntity && setFormData({ ...formData, code: e.target.value })}
-                          disabled={!!editingEntity}
-                          placeholder="VD: MD-CITIZEN-001"
-                          className={`w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] outline-none transition-all ${
-                            editingEntity
-                              ? 'bg-slate-50 text-slate-400'
-                              : 'bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium text-slate-700'
-                          }`}
-                        />
+                  <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+                      <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
+                        <h3 className="text-[16px] font-medium text-[#020817]">
+                          {editingEntity ? 'Chỉnh sửa thực thể dữ liệu chủ' : 'Thêm mới thực thể dữ liệu chủ'}
+                        </h3>
+                        <button type="button" aria-label="Đóng" onClick={handleCloseForm} className={BTN_GHOST_ICON}>
+                          <X className="w-5 h-5" />
+                        </button>
                       </div>
 
-                      {/* Tên dữ liệu chủ */}
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Tên dữ liệu chủ <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="VD: Bộ dữ liệu chủ Công dân"
-                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                        />
-                      </div>
-
-                      {/* Đơn vị chủ quản */}
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Đơn vị chủ quản <span className="text-red-600">*</span>
-                        </label>
-                        <select
-                          value={formData.managingAgency}
-                          onChange={(e) => setFormData({ ...formData, managingAgency: e.target.value })}
-                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                        >
-                          <option value="">-- Chọn đơn vị chủ quản --</option>
-                          {MANAGING_UNITS.map(u => (
-                            <option key={u} value={u}>{u}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Tên cơ sở dữ liệu / Hệ thống */}
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Tên cơ sở dữ liệu / Hệ thống
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.systemName || ''}
-                          onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
-                          placeholder="VD: CSDL hộ tịch điện tử, Hệ thống TGPL..."
-                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700"
-                        />
-                      </div>
-
-                      {/* Loại thực thể + Phạm vi */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="px-6 py-4 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+                        {/* Mã thực thể */}
                         <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                            Loại thực thể <span className="text-red-600">*</span>
+                          <label className={LABEL_CLS}>
+                            Mã thực thể <span className={REQUIRED_MARK}>*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={editingEntity ? editingEntity.code : (formData.code || '')}
+                            onChange={(e) => !editingEntity && setFormData({ ...formData, code: e.target.value })}
+                            disabled={!!editingEntity}
+                            placeholder="VD: MD-CITIZEN-001"
+                            className={INPUT_CLS}
+                          />
+                        </div>
+
+                        {/* Tên dữ liệu chủ */}
+                        <div>
+                          <label className={LABEL_CLS}>
+                            Tên dữ liệu chủ <span className={REQUIRED_MARK}>*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="VD: Bộ dữ liệu chủ Công dân"
+                            className={INPUT_CLS}
+                          />
+                        </div>
+
+                        {/* Đơn vị chủ quản */}
+                        <div>
+                          <label className={LABEL_CLS}>
+                            Đơn vị chủ quản <span className={REQUIRED_MARK}>*</span>
                           </label>
                           <select
-                            value={formData.dataType}
-                            onChange={(e) => setFormData({ ...formData, dataType: e.target.value as DataType })}
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
+                            aria-label="Đơn vị chủ quản"
+                            value={formData.managingAgency}
+                            onChange={(e) => setFormData({ ...formData, managingAgency: e.target.value })}
+                            className={INPUT_CLS}
                           >
-                            <option value="individual">Thực thể Cá nhân</option>
-                            <option value="organization">Thực thể Tổ chức</option>
-                            <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
-                            <option value="asset">Thực thể Tài sản</option>
+                            <option value="">-- Chọn đơn vị chủ quản --</option>
+                            {MANAGING_UNITS.map(u => (
+                              <option key={u} value={u}>{u}</option>
+                            ))}
                           </select>
                         </div>
+
+                        {/* Tên cơ sở dữ liệu / Hệ thống */}
                         <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                            Phạm vi sử dụng <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            value={formData.scope}
-                            onChange={(e) => setFormData({ ...formData, scope: e.target.value as ScopeType })}
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                          >
-                            <option value="national">Cấp quốc gia</option>
-                            <option value="ministry">Cấp bộ</option>
-                            <option value="provincial">Cấp tỉnh/thành</option>
-                            <option value="internal">Nội bộ</option>
-                          </select>
+                          <label className={LABEL_CLS}>Tên cơ sở dữ liệu / Hệ thống</label>
+                          <input
+                            type="text"
+                            value={formData.systemName || ''}
+                            onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
+                            placeholder="VD: CSDL hộ tịch điện tử, Hệ thống TGPL..."
+                            className={INPUT_CLS}
+                          />
                         </div>
-                      </div>
 
-                      {/* Mô tả đối tượng */}
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Mô tả đối tượng</label>
-                        <textarea
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          placeholder="Mô tả tóm tắt về đối tượng dữ liệu chủ này..."
-                          rows={3}
-                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 resize-none"
-                        />
-                      </div>
-
-                      {/* Trạng thái vòng đời */}
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                          Trạng thái vòng đời
-                        </label>
-                        <select
-                          value={formData.lifecycleStatus}
-                          onChange={(e) => setFormData({ ...formData, lifecycleStatus: e.target.value as LifecycleStatus })}
-                          className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                        >
-                          <option value="draft">Đang soạn thảo</option>
-                          <option value="pending">Chờ phê duyệt</option>
-                          <option value="approved">Đã phê duyệt</option>
-                          <option value="rejected">Từ chối</option>
-                        </select>
-                      </div>
-
-                      {/* Đăng ký nguồn dữ liệu (chip + grain) */}
-                      <div className="pt-4 border-t border-slate-200">
-                        <div className="flex items-center justify-between mb-3">
+                        {/* Loại thực thể + Phạm vi */}
+                        <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <h4 className="text-[13px] font-bold text-slate-900">Đăng ký nguồn dữ liệu</h4>
-                            <p className="text-[13px] text-slate-500 mt-0.5">Các nguồn đã đăng ký được dùng để ánh xạ khi cấu hình thuộc tính</p>
-                          </div>
-                          {!sourceFormOpen && (
-                            <button
-                              type="button"
-                              onClick={() => setSourceFormOpen(true)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                            <label className={LABEL_CLS}>
+                              Loại thực thể <span className={REQUIRED_MARK}>*</span>
+                            </label>
+                            <select
+                              aria-label="Loại thực thể"
+                              value={formData.dataType}
+                              onChange={(e) => setFormData({ ...formData, dataType: e.target.value as DataType })}
+                              className={INPUT_CLS}
                             >
-                              <Plus className="w-3.5 h-3.5" /> Thêm nguồn
-                            </button>
+                              <option value="individual">Thực thể Cá nhân</option>
+                              <option value="organization">Thực thể Tổ chức</option>
+                              <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
+                              <option value="asset">Thực thể Tài sản</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className={LABEL_CLS}>
+                              Phạm vi sử dụng <span className={REQUIRED_MARK}>*</span>
+                            </label>
+                            <select
+                              aria-label="Phạm vi sử dụng"
+                              value={formData.scope}
+                              onChange={(e) => setFormData({ ...formData, scope: e.target.value as ScopeType })}
+                              className={INPUT_CLS}
+                            >
+                              <option value="national">Cấp quốc gia</option>
+                              <option value="ministry">Cấp bộ</option>
+                              <option value="provincial">Cấp tỉnh/thành</option>
+                              <option value="internal">Nội bộ</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Mô tả đối tượng */}
+                        <div>
+                          <label className={LABEL_CLS}>Mô tả đối tượng</label>
+                          <textarea
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Mô tả tóm tắt về đối tượng dữ liệu chủ này..."
+                            rows={3}
+                            className={`${INPUT_CLS} h-auto py-2 resize-none`}
+                          />
+                        </div>
+
+                        {/* Trạng thái vòng đời */}
+                        <div>
+                          <label className={LABEL_CLS}>Trạng thái vòng đời</label>
+                          <select
+                            aria-label="Trạng thái vòng đời"
+                            value={formData.lifecycleStatus}
+                            onChange={(e) => setFormData({ ...formData, lifecycleStatus: e.target.value as LifecycleStatus })}
+                            className={INPUT_CLS}
+                          >
+                            <option value="draft">Đang soạn thảo</option>
+                            <option value="pending">Chờ phê duyệt</option>
+                            <option value="approved">Đã phê duyệt</option>
+                            <option value="rejected">Từ chối</option>
+                          </select>
+                        </div>
+
+                        {/* Đăng ký nguồn dữ liệu (chip + grain) */}
+                        <div className="pt-4 border-t border-[#E2E8F0]">
+                          <div className="flex items-center justify-between gap-4 mb-3">
+                            <div>
+                              <h4 className={GROUP_TITLE}>Đăng ký nguồn dữ liệu</h4>
+                              <p className="text-[13px] text-[#64748B] mt-0.5">Các nguồn đã đăng ký được dùng để ánh xạ khi cấu hình thuộc tính</p>
+                            </div>
+                            {!sourceFormOpen && (
+                              <button
+                                type="button"
+                                onClick={() => setSourceFormOpen(true)}
+                                className={BTN_OUTLINE}
+                              >
+                                <Plus className="w-4 h-4" /> Thêm nguồn
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            {(formData.sources || []).length === 0 && (
+                              <span className={`text-[13px] ${MUTED}`}>Chưa đăng ký nguồn dữ liệu nào</span>
+                            )}
+                            {(formData.sources || []).map(src => (
+                              <span
+                                key={src.id}
+                                className="inline-flex items-center gap-2 pl-3 pr-2 py-1 bg-white border border-[#E2E8F0] rounded-2xl text-[13px]"
+                              >
+                                <span className="text-[#020817]">{src.name}</span>
+                                <Badge label={SOURCE_KIND_LABELS[src.kind]} variant={SOURCE_KIND_COLORS[src.kind]} />
+                                <Badge label={src.grain} variant={SOURCE_GRAIN_COLORS[src.grain]} />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveSource(src.id)}
+                                  className="p-0.5 rounded text-[#94A3B8] hover:text-[#DC2626] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                  title="Xóa nguồn"
+                                  aria-label="Xóa nguồn"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+
+                          {sourceFormOpen && (
+                            <div className="mt-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
+                              <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                  <label className={LABEL_CLS}>Tên nguồn</label>
+                                  <select
+                                    aria-label="Tên nguồn"
+                                    value={sourceForm.name}
+                                    onChange={(e) => setSourceForm(prev => ({ ...prev, name: e.target.value }))}
+                                    className={INPUT_CLS}
+                                  >
+                                    {ENTITY_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className={LABEL_CLS}>Loại nguồn</label>
+                                  <select
+                                    aria-label="Loại nguồn"
+                                    value={sourceForm.kind}
+                                    onChange={(e) => setSourceForm(prev => ({ ...prev, kind: e.target.value as SourceKind }))}
+                                    className={INPUT_CLS}
+                                  >
+                                    <option value="table">Bảng</option>
+                                    <option value="view">View</option>
+                                    <option value="query">Truy vấn</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className={LABEL_CLS}>Độ mịn (Grain)</label>
+                                  <select
+                                    aria-label="Độ mịn (Grain)"
+                                    value={sourceForm.grain}
+                                    onChange={(e) => setSourceForm(prev => ({ ...prev, grain: e.target.value as SourceGrain }))}
+                                    className={INPUT_CLS}
+                                  >
+                                    <option value="1:1">1:1 (Một - Một)</option>
+                                    <option value="1:n">1:n (Một - Nhiều)</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="flex justify-end gap-3 mt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => { setSourceFormOpen(false); setSourceForm({ name: ENTITY_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1' }); }}
+                                  className={BTN_OUTLINE}
+                                >
+                                  Hủy
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleAddSource}
+                                  className={BTN_PRIMARY}
+                                >
+                                  <Plus className="w-4 h-4" /> Thêm vào danh sách
+                                </button>
+                              </div>
+                            </div>
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
-                          {(formData.sources || []).length === 0 && (
-                            <span className="text-[13px] text-slate-400">Chưa đăng ký nguồn dữ liệu nào</span>
-                          )}
-                          {(formData.sources || []).map(src => (
-                            <span
-                              key={src.id}
-                              className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 bg-white border border-slate-200 rounded-full text-[13px]"
+                        {/* Cấu hình nguồn dữ liệu */}
+                        <div className="pt-4 border-t border-[#E2E8F0]">
+                          <h4 className={`${GROUP_TITLE} mb-3`}>Cấu hình nguồn dữ liệu</h4>
+
+                          <div className="mb-4">
+                            <label className={LABEL_CLS}>
+                              Nguồn dữ liệu <span className={REQUIRED_MARK}>*</span>
+                            </label>
+                            <select
+                              aria-label="Nguồn dữ liệu"
+                              value={formData.dataSource || 'dldc'}
+                              onChange={(e) => setFormData({ ...formData, dataSource: e.target.value as DataSourceType })}
+                              className={INPUT_CLS}
                             >
-                              <span className="font-medium text-slate-700">{src.name}</span>
-                              <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
-                                {SOURCE_KIND_LABELS[src.kind]}
-                              </span>
-                              <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
-                                {src.grain}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveSource(src.id)}
-                                className="text-slate-400 hover:text-red-500 transition-colors"
-                                title="Xóa nguồn"
-                                aria-label="Xóa nguồn"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </span>
-                          ))}
+                              <option value="dldc">Từ Kho DLDC</option>
+                              <option value="manual">Nhập thủ công</option>
+                            </select>
+                          </div>
+
+                          {(formData.dataSource || 'dldc') === 'dldc' && (
+                            <div className="flex items-start gap-2 rounded-lg border border-[#BFDBFE] bg-[#EAF3FF] p-3">
+                              <Info className="w-4 h-4 text-[#155DFC] shrink-0 mt-0.5" />
+                              <p className="text-[13px] text-[#020817]">
+                                Cấu hình cơ sở dữ liệu, bảng chính và các trường dữ liệu chi tiết cần thực hiện qua <strong className="font-medium">Tạo mới (Wizard 6 bước)</strong>.
+                              </p>
+                            </div>
+                          )}
+
+                          {formData.dataSource === 'manual' && (
+                            <div className="flex items-start gap-2 rounded-lg border border-[#FED7AA] bg-[#FFF7ED] p-3">
+                              <Info className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
+                              <p className="text-[13px] text-[#020817]">
+                                Dữ liệu sẽ được nhập thủ công bởi người dùng có quyền. Không cần cấu hình nguồn tự động.
+                              </p>
+                            </div>
+                          )}
                         </div>
 
-                        {sourceFormOpen && (
-                          <div className="mt-3 border border-blue-200 rounded-xl bg-blue-50/30 p-4">
-                            <div className="grid grid-cols-3 gap-3">
-                              <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Tên nguồn</label>
-                                <select
-                                  value={sourceForm.name}
-                                  onChange={(e) => setSourceForm(prev => ({ ...prev, name: e.target.value }))}
-                                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                                >
-                                  {ENTITY_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Loại nguồn</label>
-                                <select
-                                  value={sourceForm.kind}
-                                  onChange={(e) => setSourceForm(prev => ({ ...prev, kind: e.target.value as SourceKind }))}
-                                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                                >
-                                  <option value="table">Bảng</option>
-                                  <option value="view">View</option>
-                                  <option value="query">Truy vấn</option>
-                                </select>
-                              </div>
-                              <div>
-                                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">Độ mịn (Grain)</label>
-                                <select
-                                  value={sourceForm.grain}
-                                  onChange={(e) => setSourceForm(prev => ({ ...prev, grain: e.target.value as SourceGrain }))}
-                                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                                >
-                                  <option value="1:1">1:1 (Một - Một)</option>
-                                  <option value="1:n">1:n (Một - Nhiều)</option>
-                                </select>
-                              </div>
+                        {/* Metadata (if editing) */}
+                        {editingEntity && (
+                          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#E2E8F0]">
+                            <div>
+                              <label className={LABEL_CLS}>Ngày tạo</label>
+                              <input type="text" aria-label="Ngày tạo" value={editingEntity.createdDate} disabled className={INPUT_CLS} />
                             </div>
-                            <div className="flex justify-end gap-2 mt-3">
-                              <button
-                                type="button"
-                                onClick={() => { setSourceFormOpen(false); setSourceForm({ name: ENTITY_SOURCE_OPTIONS[0], kind: 'table', grain: '1:1' }); }}
-                                className="px-3 py-1.5 border border-slate-200 text-slate-700 rounded-lg text-[13px] font-medium hover:bg-slate-50 transition-colors"
-                              >
-                                Hủy
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleAddSource}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors"
-                              >
-                                <Plus className="w-3.5 h-3.5" /> Thêm vào danh sách
-                              </button>
+                            <div>
+                              <label className={LABEL_CLS}>Cập nhật lần cuối</label>
+                              <input type="text" aria-label="Cập nhật lần cuối" value={editingEntity.updatedDate} disabled className={INPUT_CLS} />
+                            </div>
+                            <div className="col-span-2">
+                              <label className={LABEL_CLS}>Người tạo</label>
+                              <input type="text" aria-label="Người tạo" value={editingEntity.createdBy} disabled className={INPUT_CLS} />
                             </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Cấu hình nguồn dữ liệu */}
-                      <div className="pt-4 border-t border-slate-200">
-                        <h4 className="text-[13px] font-bold text-slate-900 mb-3">Cấu hình nguồn dữ liệu</h4>
-
-                        <div className="mb-4">
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                            Nguồn dữ liệu <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            value={formData.dataSource || 'dldc'}
-                            onChange={(e) => setFormData({ ...formData, dataSource: e.target.value as DataSourceType })}
-                            className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-slate-700 cursor-pointer"
-                          >
-                            <option value="dldc">Từ Kho DLDC</option>
-                            <option value="manual">Nhập thủ công</option>
-                          </select>
-                        </div>
-
-                        {(formData.dataSource || 'dldc') === 'dldc' && (
-                          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-                            <p className="text-[13px] text-blue-700">
-                              ℹ️ Cấu hình cơ sở dữ liệu, bảng chính và các trường dữ liệu chi tiết cần thực hiện qua <strong>Tạo mới (Wizard 6 bước)</strong>.
-                            </p>
-                          </div>
-                        )}
-
-                        {formData.dataSource === 'manual' && (
-                          <div className="bg-amber-50/50 border border-amber-200/50 rounded-xl p-4">
-                            <p className="text-[13px] text-amber-800">
-                              ℹ️ Dữ liệu sẽ được nhập thủ công bởi người dùng có quyền. Không cần cấu hình nguồn tự động.
-                            </p>
-                          </div>
-                        )}
+                      <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0">
+                        <button type="button" onClick={handleCloseForm} className={BTN_OUTLINE}>
+                          Hủy
+                        </button>
+                        <button type="button" onClick={handleSubmit} className={BTN_PRIMARY}>
+                          {editingEntity ? 'Cập nhật' : 'Tạo mới'}
+                        </button>
                       </div>
-
-                      {/* Metadata (if editing) */}
-                      {editingEntity && (
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                              Ngày tạo
-                            </label>
-                            <input
-                              type="text"
-                              value={editingEntity.createdDate}
-                              disabled
-                              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                              Cập nhật lần cuối
-                            </label>
-                            <input
-                              type="text"
-                              value={editingEntity.updatedDate}
-                              disabled
-                              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                              Người tạo
-                            </label>
-                            <input
-                              type="text"
-                              value={editingEntity.createdBy}
-                              disabled
-                              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 outline-none text-[13px]"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0">
-                      <button
-                        onClick={handleCloseForm}
-                        className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer active:scale-95 shadow-sm"
-                      >
-                        Hủy
-                      </button>
-                      <button
-                        onClick={handleSubmit}
-                        className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer active:scale-95 shadow-sm"
-                      >
-                        {editingEntity ? 'Cập nhật' : 'Tạo mới'}
-                      </button>
                     </div>
                   </div>
-                </div>
-              </Portal>
-            )}
+                </Portal>
+              )}
             </div>
           )}
 
@@ -1161,162 +1107,114 @@ export function MasterDataScaleManagementPage() {
         </div>
       </div>
 
-      {/* Xem chi tiết Modal */}
+      {/* Xem chi tiết Modal (compomennt.md 5.4) */}
       {viewingEntity && (
         <Portal>
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
-                <h3 className="text-[16px] font-bold text-slate-900">Xem chi tiết thực thể dữ liệu chủ</h3>
-                <button
-                  onClick={() => setViewingEntity(null)}
-                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                >
+          <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
+                <h3 className="text-[16px] font-medium text-[#020817]">Xem chi tiết thực thể dữ liệu chủ</h3>
+                <button type="button" aria-label="Đóng" onClick={() => setViewingEntity(null)} className={BTN_GHOST_ICON}>
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Stepper — giống quy trình 6 bước của Tạo mới/Chỉnh sửa */}
-              <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+              {/* Stepper — giống quy trình các bước của Tạo mới/Chỉnh sửa */}
+              <div className="px-6 py-4 border-b border-[#E2E8F0] shrink-0">
                 <div className="flex items-start justify-between">
-                  {VIEW_STEPS.map((step, index) => (
-                    <div key={step.number} className="flex items-start flex-1">
-                      <div className="flex flex-col items-center flex-1">
-                        <button
-                          type="button"
-                          onClick={() => setViewStep(step.number)}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer flex-shrink-0 ${
-                            viewStep === step.number
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-green-600 text-white hover:bg-green-700'
-                          }`}
-                          title={step.title}
-                        >
-                          {viewStep === step.number ? step.number : <Check className="w-4 h-4" />}
-                        </button>
-                        <p className={`text-[12px] mt-1.5 text-center ${viewStep === step.number ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
-                          {step.title}
-                        </p>
+                  {VIEW_STEPS.map((step, index) => {
+                    const active = viewStep === step.number;
+                    return (
+                      <div key={step.number} className="flex items-start flex-1">
+                        <div className="flex flex-col items-center flex-1">
+                          <button
+                            type="button"
+                            onClick={() => setViewStep(step.number)}
+                            aria-label={step.title}
+                            aria-current={active ? 'step' : undefined}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium transition-colors cursor-pointer shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 ${
+                              active
+                                ? 'bg-[#155DFC] text-white'
+                                : 'bg-[#EAF3FF] text-[#155DFC] border border-[#BFDBFE] hover:border-[#155DFC]'
+                            }`}
+                            title={step.title}
+                          >
+                            {active ? step.number : <Check className="w-4 h-4" />}
+                          </button>
+                          <p className={`text-[13px] leading-4 mt-1.5 text-center ${active ? 'text-[#155DFC] font-medium' : 'text-[#64748B]'}`}>
+                            {step.title}
+                          </p>
+                        </div>
+                        {index < VIEW_STEPS.length - 1 && (
+                          <div className="flex-1 h-0.5 bg-[#E2E8F0] mx-1 mt-4" />
+                        )}
                       </div>
-                      {index < VIEW_STEPS.length - 1 && (
-                        <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-4" />
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="p-6 overflow-y-auto flex-1 space-y-4 text-[13px]">
+              <div className="px-6 py-4 overflow-y-auto custom-scrollbar flex-1 space-y-4">
                 {viewStep === 1 && (
-                <>
-                {/* Mã thực thể */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Mã thực thể</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-mono font-semibold text-slate-800">
-                    {viewingEntity.code}
-                  </div>
-                </div>
-
-                {/* Tên dữ liệu chủ */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên dữ liệu chủ</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.name}
-                  </div>
-                </div>
-
-                {/* Loại thực thể + Phạm vi */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[13px] font-medium text-slate-500 mb-1">Loại thực thể</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                      {dataTypeLabels[viewingEntity.dataType]}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] font-medium text-slate-500 mb-1">Phạm vi sử dụng</label>
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                      {scopeLabels[viewingEntity.scope]}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Đơn vị chủ quản */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đơn vị chủ quản</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.managingAgency || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
-                  </div>
-                </div>
-
-                {/* Mô tả đối tượng */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Mô tả đối tượng</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800 min-h-[72px] whitespace-pre-wrap">
-                    {viewingEntity.description || <span className="text-slate-400 italic">Chưa có mô tả</span>}
-                  </div>
-                </div>
-
-                {/* Tên cơ sở dữ liệu / Hệ thống */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.systemName || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
-                  </div>
-                </div>
-
-                {/* Ngày hiệu lực */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-[13px] font-medium text-slate-500 mb-1">
-                    Ngày hiệu lực
-                    <span className="relative inline-flex items-center group">
-                      <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-72 bg-slate-900 text-white text-xs rounded-lg p-3 z-10 shadow-lg leading-relaxed normal-case font-normal">
-                        Thời gian hiệu lực sẽ được gán với từng bản ghi trong thực thể dữ liệu chủ, hiệu lực của bản ghi có thể chỉnh sửa khi thực hiện rà soát bản ghi.
-                        <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900" />
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    <ViewField label="Mã thực thể">{viewingEntity.code}</ViewField>
+                    <ViewField label="Tên dữ liệu chủ">{viewingEntity.name}</ViewField>
+                    <ViewField label="Loại thực thể">{dataTypeLabels[viewingEntity.dataType]}</ViewField>
+                    <ViewField label="Phạm vi sử dụng">{scopeLabels[viewingEntity.scope]}</ViewField>
+                    <ViewField label="Đơn vị chủ quản">
+                      {viewingEntity.managingAgency || <span className={MUTED}>Chưa cập nhật</span>}
+                    </ViewField>
+                    <ViewField label="Tên cơ sở dữ liệu / Hệ thống">
+                      {viewingEntity.systemName || <span className={MUTED}>Chưa cập nhật</span>}
+                    </ViewField>
+                    <ViewField label="Mô tả đối tượng" full>
+                      <span className="whitespace-pre-wrap">
+                        {viewingEntity.description || <span className={MUTED}>Chưa có mô tả</span>}
                       </span>
-                    </span>
-                  </label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {viewingEntity.effectiveDate || <span className="text-slate-400 font-normal italic">Chưa cập nhật</span>}
+                    </ViewField>
+                    <ViewField
+                      label="Ngày hiệu lực"
+                      extra={
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              tabIndex={0}
+                              aria-label="Ghi chú Ngày hiệu lực"
+                              className="inline-flex rounded text-[#94A3B8] hover:text-[#475569] cursor-help outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                            >
+                              <Info className="w-3.5 h-3.5" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>
+                            Thời gian hiệu lực sẽ được gán với từng bản ghi trong thực thể dữ liệu chủ, hiệu lực của bản ghi có thể chỉnh sửa khi thực hiện rà soát bản ghi.
+                          </TooltipContent>
+                        </Tooltip>
+                      }
+                    >
+                      {viewingEntity.effectiveDate || <span className={MUTED}>Chưa cập nhật</span>}
+                    </ViewField>
+                    <ViewField label="Trạng thái vòng đời">
+                      <Badge label={lifecycleLabels[viewingEntity.lifecycleStatus]?.label} variant={STATUS_VARIANT[viewingEntity.lifecycleStatus]} />
+                    </ViewField>
+                    <ViewField label="Đăng ký nguồn dữ liệu" full>
+                      {(viewingEntity.sources || []).length === 0 ? (
+                        <span className={MUTED}>Chưa đăng ký nguồn dữ liệu nào</span>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-2">
+                          {(viewingEntity.sources || []).map(src => (
+                            <span
+                              key={src.id}
+                              className="inline-flex items-center gap-2 pl-3 pr-1 py-1 bg-white border border-[#E2E8F0] rounded-2xl text-[13px]"
+                            >
+                              <span className="text-[#020817]">{src.name}</span>
+                              <Badge label={SOURCE_KIND_LABELS[src.kind]} variant={SOURCE_KIND_COLORS[src.kind]} />
+                              <Badge label={src.grain} variant={SOURCE_GRAIN_COLORS[src.grain]} />
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </ViewField>
                   </div>
-                </div>
-
-                {/* Trạng thái vòng đời */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Trạng thái vòng đời</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                    {lifecycleLabels[viewingEntity.lifecycleStatus]?.label}
-                  </div>
-                </div>
-
-                {/* Đăng ký nguồn dữ liệu */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Đăng ký nguồn dữ liệu</label>
-                  {(viewingEntity.sources || []).length === 0 ? (
-                    <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-400 italic">
-                      Chưa đăng ký nguồn dữ liệu nào
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
-                      {(viewingEntity.sources || []).map(src => (
-                        <span
-                          key={src.id}
-                          className="inline-flex items-center gap-2 pl-3 pr-2.5 py-1 bg-white border border-slate-200 rounded-full text-[13px]"
-                        >
-                          <span className="font-medium text-slate-700">{src.name}</span>
-                          <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_KIND_COLORS[src.kind]}`}>
-                            {SOURCE_KIND_LABELS[src.kind]}
-                          </span>
-                          <span className={`px-1.5 py-0.5 rounded-full border text-[13px] font-medium ${SOURCE_GRAIN_COLORS[src.grain]}`}>
-                            {src.grain}
-                          </span>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                </>
                 )}
 
                 {/* Bước 2: Tạo thuộc tính */}
@@ -1326,19 +1224,17 @@ export function MasterDataScaleManagementPage() {
                   const stepSources = stepConfig?.sources || [];
                   return (
                   <>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Danh sách thuộc tính</p>
-                      <span className="text-[12px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                        {stepAttrs.length} trường
-                      </span>
+                  <div className={`${GROUP_CARD} overflow-hidden`}>
+                    <div className={GROUP_HEAD}>
+                      <FileText className="w-4 h-4 text-[#64748B]" />
+                      <p className={GROUP_TITLE}>Danh sách thuộc tính</p>
+                      <Badge label={`${stepAttrs.length} trường`} variant="blue" />
                     </div>
                     {stepAttrs.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 text-center py-8">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
+                      <p className="text-[13px] text-[#64748B] text-center py-8">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-[13px]" style={{ tableLayout: 'fixed' }}>
+                        <table className={TABLE_CLS} style={{ tableLayout: 'fixed' }}>
                           <colgroup>
                             <col style={{ width: '6%' }} />
                             <col style={{ width: '6%' }} />
@@ -1348,36 +1244,34 @@ export function MasterDataScaleManagementPage() {
                             <col style={{ width: '20%' }} />
                             <col style={{ width: '20%' }} />
                           </colgroup>
-                          <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                              <th className="text-center px-3 py-2.5 text-[13px]">
-                                <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
+                          <thead className="bg-[#F8FAFC]">
+                            <tr className="h-[42px]">
+                              <th className={`${TH} text-center`}>
+                                <input type="checkbox" checked disabled aria-label="Chọn tất cả" className="w-4 h-4 accent-blue-600 cursor-not-allowed" />
                               </th>
-                              <th className="text-center px-3 py-2.5 text-[13px] font-semibold text-slate-600">PK</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Nguồn (Table)</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Trường gốc (Column)</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên cột</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Tên hiển thị</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Kiểu dữ liệu</th>
+                              <th className={`${TH} text-center`}>PK</th>
+                              <th className={`${TH} text-left`}>Nguồn (Table)</th>
+                              <th className={`${TH} text-left`}>Trường gốc (Column)</th>
+                              <th className={`${TH} text-left`}>Tên cột</th>
+                              <th className={`${TH} text-left`}>Tên hiển thị</th>
+                              <th className={`${TH} text-left`}>Kiểu dữ liệu</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 bg-white">
+                          <tbody>
                             {stepAttrs.map(attr => (
-                              <tr key={attr.id}>
-                                <td className="text-center px-3 py-2 text-[13px]">
-                                  <input type="checkbox" checked disabled className="rounded border-slate-300 text-blue-600 cursor-not-allowed" />
+                              <tr key={attr.id} className={TR}>
+                                <td className={`${TD} text-center`}>
+                                  <input type="checkbox" checked disabled aria-label={attr.displayName} className="w-4 h-4 accent-blue-600 cursor-not-allowed" />
                                 </td>
-                                <td className="text-center px-3 py-2 text-[13px]">
-                                  <input type="checkbox" checked={attr.unique} disabled
-                                    className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-not-allowed accent-amber-500" />
+                                <td className={`${TD} text-center`}>
+                                  <input type="checkbox" checked={attr.unique} disabled aria-label="PK"
+                                    className="w-4 h-4 accent-[#D97706] cursor-not-allowed" />
                                 </td>
-                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{attr.tableName || '—'}</td>
-                                <td className="px-4 py-2 text-[13px] overflow-hidden">
-                                  <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono text-[12px]">{attr.fieldName}</code>
-                                </td>
-                                <td className="px-4 py-2 text-[13px] text-slate-700 overflow-hidden">{attr.fieldName}</td>
-                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{attr.displayName}</td>
-                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">{attr.dataType}</td>
+                                <td className={`${TD} text-left`}><TruncatedText text={attr.tableName || '—'} /></td>
+                                <td className={`${TD} text-left`}><TruncatedText text={attr.fieldName} /></td>
+                                <td className={`${TD} text-left`}><TruncatedText text={attr.fieldName} /></td>
+                                <td className={`${TD} text-left`}><TruncatedText text={attr.displayName} /></td>
+                                <td className={`${TD} text-left`}><TruncatedText text={String(attr.dataType)} /></td>
                               </tr>
                             ))}
                           </tbody>
@@ -1387,43 +1281,39 @@ export function MasterDataScaleManagementPage() {
                   </div>
 
                   {/* Ánh xạ cột nguồn → thuộc tính — giống mục Tạo thuộc tính ở Tạo mới/Chỉnh sửa dữ liệu chủ */}
-                  <div className="border border-slate-200 rounded-xl overflow-hidden mt-4">
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className={`${GROUP_CARD} overflow-hidden`}>
+                    <div className={`${GROUP_HEAD} justify-between`}>
                       <div className="flex items-center gap-2">
-                        <ArrowRight className="w-4 h-4 text-slate-500" />
-                        <p className="text-[13px] font-semibold text-slate-700">Ánh xạ cột nguồn</p>
+                        <ArrowRight className="w-4 h-4 text-[#64748B]" />
+                        <p className={GROUP_TITLE}>Ánh xạ cột nguồn</p>
                       </div>
-                      <span className="text-[13px] text-slate-500">{stepSources.length} nguồn</span>
+                      <span className="text-[13px] text-[#64748B]">{stepSources.length} nguồn</span>
                     </div>
                     {stepAttrs.length === 0 || stepSources.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 text-center py-8">Chưa có ánh xạ nguồn dữ liệu nào được cấu hình cho thực thể này</p>
+                      <p className="text-[13px] text-[#64748B] text-center py-8">Chưa có ánh xạ nguồn dữ liệu nào được cấu hình cho thực thể này</p>
                     ) : (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-[13px]">
-                          <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thuộc tính</th>
+                        <table className={TABLE_CLS}>
+                          <thead className="bg-[#F8FAFC]">
+                            <tr className="h-[42px]">
+                              <th className={`${TH} text-left`}>Thuộc tính</th>
                               {stepSources.map(src => (
-                                <th key={src.id} className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">{src.name}</th>
+                                <th key={src.id} className={`${TH} text-left`}>{src.name}</th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 bg-white">
+                          <tbody>
                             {stepAttrs.map(attr => (
-                              <tr key={attr.id}>
-                                <td className="px-4 py-2 text-[13px]">
-                                  <span className="text-slate-700 font-medium">{attr.displayName}</span>
-                                  <code className="ml-1.5 bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-mono text-[12px]">{attr.fieldName}</code>
+                              <tr key={attr.id} className={TR}>
+                                <td className={`${TD} text-left max-w-[280px] leading-[18px]`}>
+                                  <TruncatedText text={attr.displayName} />
+                                  <TruncatedText text={attr.fieldName} className="text-[#64748B]" />
                                 </td>
                                 {stepSources.map(src => {
                                   const mappedCol = stepConfig?.mapping[attr.fieldName]?.[src.id];
                                   return (
-                                    <td key={src.id} className="px-4 py-2 text-[13px] text-slate-600">
-                                      {mappedCol ? (
-                                        <code className="font-mono bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 text-slate-800 text-[12px]">{mappedCol}</code>
-                                      ) : (
-                                        <span className="text-slate-400">—</span>
-                                      )}
+                                    <td key={src.id} className={`${TD} text-left whitespace-nowrap`}>
+                                      {mappedCol ? mappedCol : <span className={MUTED}>—</span>}
                                     </td>
                                   );
                                 })}
@@ -1446,9 +1336,9 @@ export function MasterDataScaleManagementPage() {
 
                   if (!entityRule) {
                     return (
-                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                        <GitCompare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc hợp nhất cho thực thể này. Xem/thiết lập tại tab "Thiết lập quy tắc hợp nhất" trong Mô hình dữ liệu chủ.</p>
+                      <div className={EMPTY_BOX}>
+                        <GitCompare className="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
+                        <p className="text-[13px] text-[#64748B]">Chưa cấu hình quy tắc hợp nhất cho thực thể này. Xem/thiết lập tại tab "Thiết lập quy tắc hợp nhất" trong Mô hình dữ liệu chủ.</p>
                       </div>
                     );
                   }
@@ -1456,54 +1346,52 @@ export function MasterDataScaleManagementPage() {
                   return (
                     <>
                     {/* Lớp 1: Matching Rules */}
-                    <div className="border border-blue-200 rounded-xl overflow-hidden">
-                      <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-                        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+                    <div className={`${GROUP_CARD} overflow-hidden`}>
+                      <div className={`${GROUP_HEAD} gap-3`}>
+                        <span className="w-6 h-6 rounded-full bg-[#155DFC] text-white text-[13px] font-medium flex items-center justify-center shrink-0">1</span>
                         <div>
-                          <p className="text-[13px] font-semibold text-blue-800">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
-                          <p className="text-[13px] text-blue-500">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
+                          <p className={GROUP_TITLE}>Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
+                          <p className="text-[13px] text-[#64748B]">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
                         </div>
                       </div>
                       <div className="p-4 space-y-3 bg-white">
-                        <div>
-                          <p className="text-[13px] text-slate-600">
-                            Ngưỡng tự động gộp (≥):{' '}
-                            <span className="font-semibold text-slate-900">{entityRule.autoThreshold ?? '-'}%</span>
-                          </p>
-                        </div>
-                        <div className="border border-slate-100 rounded-lg overflow-hidden">
-                          <table className="w-full text-[13px]">
-                            <thead className="bg-slate-50 border-b border-slate-100">
-                              <tr>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
-                                <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
-                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
-                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                                <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
+                        <p className="text-[13px] text-[#475569]">
+                          Ngưỡng tự động gộp (≥):{' '}
+                          <span className="font-medium text-[#020817] tabular-nums">{entityRule.autoThreshold ?? '-'}%</span>
+                        </p>
+                        <div className="rounded-lg border border-[#E2E8F0] overflow-hidden">
+                          <table className={TABLE_CLS}>
+                            <thead className="bg-[#F8FAFC]">
+                              <tr className="h-[42px]">
+                                <th className={`${TH} text-left`}>Trường đối chiếu</th>
+                                <th className={`${TH} text-left`}>Kiểu so khớp</th>
+                                <th className={`${TH} text-left`}>Thuật toán</th>
+                                <th className={`${TH} text-right w-28`}>Ngưỡng (%)</th>
+                                <th className={`${TH} text-right w-28`}>Trọng số (%)</th>
+                                <th className={`${TH} text-left w-28`}>Điều kiện</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-50 bg-white">
+                            <tbody>
                               {!entityRule.matchingRulesDetail || entityRule.matchingRulesDetail.length === 0 ? (
                                 <tr>
-                                  <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                                  <td colSpan={6} className="px-3 py-6 text-center text-[13px] text-[#64748B]">
                                     Chưa cấu hình quy tắc so khớp
                                   </td>
                                 </tr>
                               ) : (
                                 entityRule.matchingRulesDetail.map(rule => (
-                                  <tr key={rule.id}>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">{fieldLabel(rule.fieldName)}</td>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">{matchMethodLabels[rule.method]}</td>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">
-                                      {rule.method === 'fuzzy' ? fuzzyAlgorithmLabels[rule.algorithm] : <span className="text-slate-400">—</span>}
+                                  <tr key={rule.id} className={TR}>
+                                    <td className={`${TD} text-left`}>{fieldLabel(rule.fieldName)}</td>
+                                    <td className={`${TD} text-left`}>{matchMethodLabels[rule.method]}</td>
+                                    <td className={`${TD} text-left`}>
+                                      {rule.method === 'fuzzy' ? fuzzyAlgorithmLabels[rule.algorithm] : <span className={MUTED}>—</span>}
                                     </td>
-                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">
-                                      {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className="text-slate-400">—</span>}
+                                    <td className={`${TD} text-right tabular-nums`}>
+                                      {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className={MUTED}>—</span>}
                                     </td>
-                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">{rule.weight}</td>
-                                    <td className="px-3 py-2 text-[13px] text-center text-slate-700">
-                                      {rule.operator ?? <span className="text-slate-400">—</span>}
+                                    <td className={`${TD} text-right tabular-nums`}>{rule.weight}</td>
+                                    <td className={`${TD} text-left`}>
+                                      {rule.operator ?? <span className={MUTED}>—</span>}
                                     </td>
                                   </tr>
                                 ))
@@ -1515,56 +1403,54 @@ export function MasterDataScaleManagementPage() {
                     </div>
 
                     {/* Trường hard-block */}
-                    <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
+                    <div className={`${GROUP_CARD} p-4 space-y-3`}>
                       <div>
-                        <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
-                        <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+                        <p className={GROUP_TITLE}>Trường hard-block</p>
+                        <p className="text-[13px] text-[#64748B]">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         {!entityRule.hardBlockFields || entityRule.hardBlockFields.length === 0 ? (
-                          <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
+                          <span className={`text-[13px] ${MUTED}`}>Chưa có trường hard-block nào</span>
                         ) : (
                           entityRule.hardBlockFields.map(f => (
-                            <span key={f} className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
-                              {fieldLabel(f)}
-                            </span>
+                            <Badge key={f} label={fieldLabel(f)} variant="blue" />
                           ))
                         )}
                       </div>
                     </div>
 
                     {/* Lớp 2: Hợp nhất giá trị (Survivorship) */}
-                    <div className="border border-blue-200 rounded-xl overflow-hidden">
-                      <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-                        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+                    <div className={`${GROUP_CARD} overflow-hidden`}>
+                      <div className={`${GROUP_HEAD} gap-3`}>
+                        <span className="w-6 h-6 rounded-full bg-[#155DFC] text-white text-[13px] font-medium flex items-center justify-center shrink-0">2</span>
                         <div>
-                          <p className="text-[13px] font-semibold text-blue-800">Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
-                          <p className="text-[13px] text-blue-500">Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
+                          <p className={GROUP_TITLE}>Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
+                          <p className="text-[13px] text-[#64748B]">Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
                         </div>
                       </div>
                       <div className="p-4 bg-white">
                         {!entityRule.extractionRulesDetail || entityRule.extractionRulesDetail.length === 0 ? (
-                          <p className="text-[13px] text-slate-400 text-center py-6">Chưa cấu hình quy tắc hợp nhất giá trị</p>
+                          <p className="text-[13px] text-[#64748B] text-center py-6">Chưa cấu hình quy tắc hợp nhất giá trị</p>
                         ) : (
-                          <div className="border border-slate-100 rounded-lg overflow-hidden">
-                            <table className="w-full text-[13px]">
-                              <thead className="bg-slate-50 border-b border-slate-100">
-                                <tr>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
-                                  <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
+                          <div className="rounded-lg border border-[#E2E8F0] overflow-hidden">
+                            <table className={TABLE_CLS}>
+                              <thead className="bg-[#F8FAFC]">
+                                <tr className="h-[42px]">
+                                  <th className={`${TH} text-left`}>Trường</th>
+                                  <th className={`${TH} text-left`}>Chiến lược</th>
+                                  <th className={`${TH} text-left`}>Nguồn dữ liệu</th>
+                                  <th className={`${TH} text-left`}>Khi hết vẫn trống</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-50 bg-white">
+                              <tbody>
                                 {entityRule.extractionRulesDetail.map(rule => (
-                                  <tr key={rule.id}>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">{fieldLabel(rule.fieldName)}</td>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">{conflictStrategyLabels[rule.conflictStrategy]}</td>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">
+                                  <tr key={rule.id} className={TR}>
+                                    <td className={`${TD} text-left`}>{fieldLabel(rule.fieldName)}</td>
+                                    <td className={`${TD} text-left`}>{conflictStrategyLabels[rule.conflictStrategy]}</td>
+                                    <td className={`${TD} text-left`}>
                                       {rule.conflictStrategy === 'source' ? rule.primarySource : rule.priorityOrder.join(' → ')}
                                     </td>
-                                    <td className="px-3 py-2 text-[13px] text-slate-700">{onEmptyLabels[rule.onEmpty]}</td>
+                                    <td className={`${TD} text-left`}>{onEmptyLabels[rule.onEmpty]}</td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -1585,47 +1471,47 @@ export function MasterDataScaleManagementPage() {
 
                   if (entityRelationships.length === 0) {
                     return (
-                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                        <Network className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[13px] text-slate-500">Chưa cấu hình quan hệ nào cho thực thể này. Xem/thiết lập tại tab "Thiết lập quan hệ thực thể" trong Mô hình dữ liệu chủ.</p>
+                      <div className={EMPTY_BOX}>
+                        <Network className="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
+                        <p className="text-[13px] text-[#64748B]">Chưa cấu hình quan hệ nào cho thực thể này. Xem/thiết lập tại tab "Thiết lập quan hệ thực thể" trong Mô hình dữ liệu chủ.</p>
                       </div>
                     );
                   }
 
                   return (
-                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                        <Network className="w-4 h-4 text-slate-500" />
-                        <p className="text-[13px] font-semibold text-slate-700">Quan hệ thực thể</p>
-                        <span className="text-[12px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                          {entityRelationships.length} quan hệ
-                        </span>
+                    <div className={`${GROUP_CARD} overflow-hidden`}>
+                      <div className={GROUP_HEAD}>
+                        <Network className="w-4 h-4 text-[#64748B]" />
+                        <p className={GROUP_TITLE}>Quan hệ thực thể</p>
+                        <Badge label={`${entityRelationships.length} quan hệ`} variant="blue" />
                       </div>
                       <div className="overflow-x-auto">
-                        <table className="w-full text-[13px]">
-                          <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thực thể nguồn</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Khóa nguồn</th>
-                              <th className="text-center px-4 py-2.5 text-[13px] font-semibold text-slate-600">Loại quan hệ</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Thực thể đích</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Khóa đích</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Bảng trung gian / Trường hiển thị</th>
-                              <th className="text-left px-4 py-2.5 text-[13px] font-semibold text-slate-600">Mô tả</th>
+                        <table className={TABLE_CLS}>
+                          <thead className="bg-[#F8FAFC]">
+                            <tr className="h-[42px]">
+                              <th className={`${TH} text-left`}>Thực thể nguồn</th>
+                              <th className={`${TH} text-left`}>Khóa nguồn</th>
+                              <th className={`${TH} text-left`}>Loại quan hệ</th>
+                              <th className={`${TH} text-left`}>Thực thể đích</th>
+                              <th className={`${TH} text-left`}>Khóa đích</th>
+                              <th className={`${TH} text-left`}>Bảng trung gian / Trường hiển thị</th>
+                              <th className={`${TH} text-left`}>Mô tả</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 bg-white">
+                          <tbody>
                             {entityRelationships.map(rel => (
-                              <tr key={rel.id}>
-                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{rel.sourceEntityName}</td>
-                                <td className="px-4 py-2 text-[13px] font-mono text-slate-600 overflow-hidden">{getSourceKey(rel) || '—'}</td>
-                                <td className="px-4 py-2 text-[13px] text-center text-slate-700 overflow-hidden">{relationTypeLabels[rel.relationType]}</td>
-                                <td className="px-4 py-2 text-[13px] text-slate-900 font-medium overflow-hidden">{rel.targetEntityName}</td>
-                                <td className="px-4 py-2 text-[13px] font-mono text-slate-600 overflow-hidden">{getTargetKey(rel) || '—'}</td>
-                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">
-                                  {rel.relationType === 'many-to-many' ? (rel.junctionTable || '—') : (rel.displayField || '—')}
+                              <tr key={rel.id} className={TR}>
+                                <td className={`${TD} text-left max-w-[200px]`}><TruncatedText text={rel.sourceEntityName} /></td>
+                                <td className={`${TD} text-left max-w-[160px]`}><TruncatedText text={getSourceKey(rel) || '—'} /></td>
+                                <td className={`${TD} text-left`}>
+                                  <Badge label={relationTypeLabels[rel.relationType]} variant={RELATION_TYPE_VARIANT[rel.relationType] || 'blue'} />
                                 </td>
-                                <td className="px-4 py-2 text-[13px] text-slate-600 overflow-hidden">{rel.description || '—'}</td>
+                                <td className={`${TD} text-left max-w-[200px]`}><TruncatedText text={rel.targetEntityName} /></td>
+                                <td className={`${TD} text-left max-w-[160px]`}><TruncatedText text={getTargetKey(rel) || '—'} /></td>
+                                <td className={`${TD} text-left max-w-[200px]`}>
+                                  <TruncatedText text={rel.relationType === 'many-to-many' ? (rel.junctionTable || '—') : (rel.displayField || '—')} />
+                                </td>
+                                <td className={`${TD} text-left max-w-[240px]`}><TruncatedText text={rel.description || '—'} /></td>
                               </tr>
                             ))}
                           </tbody>
@@ -1641,9 +1527,9 @@ export function MasterDataScaleManagementPage() {
 
                   if (!entityRule) {
                     return (
-                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                        <Key className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc định danh cho thực thể này. Xem/thiết lập tại tab "Quy tắc định danh duy nhất" trong Mô hình dữ liệu chủ.</p>
+                      <div className={EMPTY_BOX}>
+                        <Key className="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
+                        <p className="text-[13px] text-[#64748B]">Chưa cấu hình quy tắc định danh cho thực thể này. Xem/thiết lập tại tab "Quy tắc định danh duy nhất" trong Mô hình dữ liệu chủ.</p>
                       </div>
                     );
                   }
@@ -1652,74 +1538,56 @@ export function MasterDataScaleManagementPage() {
                     <div className="grid grid-cols-2 gap-6">
                       {/* Left */}
                       <div className="space-y-4">
-                        <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
-                          <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
-                          <div className="grid grid-cols-2 gap-4 text-[13px]">
-                            <div>
-                              <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
-                              <span className="font-medium text-slate-800">{entityRule.prefix || '(không có)'}</span>
-                            </div>
-                            <div>
-                              <span className="block text-slate-500 mb-1">Hậu tố (Suffix)</span>
-                              <span className="font-medium text-slate-800">{entityRule.suffix || '(không có)'}</span>
-                            </div>
-                            <div>
-                              <span className="block text-slate-500 mb-1">Ký tự phân cách</span>
-                              <span className="font-medium text-slate-800">{entityRule.separator === 'none' ? 'Không dùng' : `"${entityRule.separator}"`}</span>
-                            </div>
-                            <div>
-                              <span className="block text-slate-500 mb-1">Độ dài số thứ tự</span>
-                              <span className="font-medium text-slate-800">{entityRule.digits} chữ số</span>
-                            </div>
+                        <div className={`${GROUP_CARD} p-4 space-y-4`}>
+                          <h4 className={GROUP_TITLE}>Cấu trúc mã định danh</h4>
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                            <ViewField label="Tiền tố (Prefix)">{entityRule.prefix || '(không có)'}</ViewField>
+                            <ViewField label="Hậu tố (Suffix)">{entityRule.suffix || '(không có)'}</ViewField>
+                            <ViewField label="Ký tự phân cách">{entityRule.separator === 'none' ? 'Không dùng' : `"${entityRule.separator}"`}</ViewField>
+                            <ViewField label="Độ dài số thứ tự">{entityRule.digits} chữ số</ViewField>
                           </div>
                         </div>
 
-                        <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
-                          <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
-                          <div className="grid grid-cols-2 gap-4 text-[13px]">
-                            <div>
-                              <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
-                              <span className="font-medium text-slate-800">{entityRule.startFrom}</span>
-                            </div>
-                            <div>
-                              <span className="block text-slate-500 mb-1">Bước tăng</span>
-                              <span className="font-medium text-slate-800">{entityRule.increment}</span>
-                            </div>
+                        <div className={`${GROUP_CARD} p-4 space-y-4`}>
+                          <h4 className={GROUP_TITLE}>Số tự tăng</h4>
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                            <ViewField label="Bắt đầu từ">{entityRule.startFrom}</ViewField>
+                            <ViewField label="Bước tăng">{entityRule.increment}</ViewField>
                           </div>
                         </div>
 
-                        <div className="border border-slate-200 rounded-xl p-5 bg-white flex items-start gap-3">
-                          <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${entityRule.checkDuplicate ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                        <div className={`${GROUP_CARD} p-4 flex items-start gap-3`}>
+                          <div className={`mt-0.5 w-4 h-4 rounded shrink-0 flex items-center justify-center ${entityRule.checkDuplicate ? 'bg-[#155DFC]' : 'bg-[#E2E8F0]'}`}>
                             {entityRule.checkDuplicate && <Check className="w-3 h-3 text-white" />}
                           </div>
                           <div>
-                            <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
-                            <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                            <p className="text-[13px] font-medium text-[#020817]">Kiểm tra trùng lặp khi tạo mới</p>
+                            <p className="text-[13px] text-[#64748B] mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Right — preview */}
                       <div className="space-y-4">
-                        <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-4">
-                          <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
-                          <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
-                            <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
+                        <div className="rounded-2xl border border-[#BFDBFE] bg-[#EAF3FF] p-4 space-y-4">
+                          <h4 className={GROUP_TITLE}>Mẫu mã định danh</h4>
+                          <div className="bg-white border border-[#BFDBFE] rounded-lg px-6 py-7 text-center">
+                            <span className="text-[20px] font-semibold text-[#155DFC] tracking-widest break-all">
                               {buildCode(entityRule, entityRule.startFrom)}
-                            </code>
+                            </span>
                           </div>
-                          <div className="space-y-3 text-[13px]">
-                            <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                              <span className="text-slate-600">Mã thứ 1:</span>
-                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom)}</code>
+                          <div className="text-[13px]">
+                            <div className="flex justify-between items-center py-2 border-b border-[#BFDBFE]">
+                              <span className="text-[#475569]">Mã thứ 1:</span>
+                              <span className="font-medium text-[#020817]">{buildCode(entityRule, entityRule.startFrom)}</span>
                             </div>
-                            <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                              <span className="text-slate-600">Mã thứ 2:</span>
-                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom + entityRule.increment)}</code>
+                            <div className="flex justify-between items-center py-2 border-b border-[#BFDBFE]">
+                              <span className="text-[#475569]">Mã thứ 2:</span>
+                              <span className="font-medium text-[#020817]">{buildCode(entityRule, entityRule.startFrom + entityRule.increment)}</span>
                             </div>
-                            <div className="flex justify-between items-center py-1.5">
-                              <span className="text-slate-600">Mã thứ 3:</span>
-                              <code className="font-mono font-semibold text-slate-800">{buildCode(entityRule, entityRule.startFrom + entityRule.increment * 2)}</code>
+                            <div className="flex justify-between items-center py-2">
+                              <span className="text-[#475569]">Mã thứ 3:</span>
+                              <span className="font-medium text-[#020817]">{buildCode(entityRule, entityRule.startFrom + entityRule.increment * 2)}</span>
                             </div>
                           </div>
                         </div>
@@ -1735,9 +1603,9 @@ export function MasterDataScaleManagementPage() {
 
                   if (!entityRule) {
                     return (
-                      <div className="border border-slate-200 rounded-xl bg-slate-50 p-6 text-center">
-                        <Clock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[13px] text-slate-500">Chưa cấu hình quy tắc đánh phiên bản cho thực thể này. Xem/thiết lập tại tab "Mô hình dữ liệu chủ".</p>
+                      <div className={EMPTY_BOX}>
+                        <Clock className="w-8 h-8 text-[#CBD5E1] mx-auto mb-2" />
+                        <p className="text-[13px] text-[#64748B]">Chưa cấu hình quy tắc đánh phiên bản cho thực thể này. Xem/thiết lập tại tab "Mô hình dữ liệu chủ".</p>
                       </div>
                     );
                   }
@@ -1747,20 +1615,20 @@ export function MasterDataScaleManagementPage() {
                   return (
                     <div className="space-y-4">
                       {/* Phần 1 — Điều kiện tạo version mới */}
-                      <div className="border border-slate-200 rounded-xl overflow-hidden">
-                        <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50">
-                          <h4 className="text-[13px] font-bold text-slate-800">Phần 1 — Điều kiện tạo version mới</h4>
+                      <div className={`${GROUP_CARD} overflow-hidden`}>
+                        <div className={GROUP_HEAD}>
+                          <h4 className={GROUP_TITLE}>Phần 1 — Điều kiện tạo version mới</h4>
                         </div>
-                        <div className="divide-y divide-slate-100">
+                        <div className="divide-y divide-[#E2E8F0]">
                           {entityAttrs.length === 0 ? (
-                            <p className="px-5 py-6 text-center text-[13px] text-slate-400">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
+                            <p className="px-4 py-6 text-center text-[13px] text-[#64748B]">Chưa có thuộc tính nào được cấu hình cho thực thể này</p>
                           ) : (
                             entityAttrs.map(attr => {
                               const enabled = !entityRule.disabledFields.includes(attr.fieldName);
                               return (
-                                <div key={attr.id} className="flex items-center justify-between gap-4 px-5 py-3">
-                                  <span className="text-[13px] font-medium text-slate-700">{attr.displayName}</span>
-                                  <span className={`text-[13px] whitespace-nowrap ${enabled ? 'text-blue-600' : 'text-slate-400'}`}>
+                                <div key={attr.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                                  <span className="text-[13px] text-[#020817]">{attr.displayName}</span>
+                                  <span className={`text-[13px] whitespace-nowrap ${enabled ? 'text-[#155DFC]' : MUTED}`}>
                                     {enabled ? 'Thay đổi giá trị → tạo version mới' : 'Không tạo version (chỉ ghi log)'}
                                   </span>
                                 </div>
@@ -1768,39 +1636,27 @@ export function MasterDataScaleManagementPage() {
                             })
                           )}
                         </div>
-                        <div className="px-5 py-3 border-t border-slate-200 bg-white flex items-start gap-3">
-                          <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${entityRule.autoVersionOnSync ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                        <div className="px-4 py-3 border-t border-[#E2E8F0] bg-white flex items-start gap-3">
+                          <div className={`mt-0.5 w-4 h-4 rounded shrink-0 flex items-center justify-center ${entityRule.autoVersionOnSync ? 'bg-[#155DFC]' : 'bg-[#E2E8F0]'}`}>
                             {entityRule.autoVersionOnSync && <Check className="w-3 h-3 text-white" />}
                           </div>
                           <div>
-                            <p className="text-[13px] font-medium text-slate-700">Tự động tạo phiên bản khi đồng bộ từ hệ thống nguồn (re-merge)</p>
-                            <p className="text-[13px] text-slate-500 mt-1">Thay đổi thủ công của Cán bộ luôn cần qua phê duyệt trước khi tạo phiên bản mới.</p>
+                            <p className="text-[13px] font-medium text-[#020817]">Tự động tạo phiên bản khi đồng bộ từ hệ thống nguồn (re-merge)</p>
+                            <p className="text-[13px] text-[#64748B] mt-1">Thay đổi thủ công của Cán bộ luôn cần qua phê duyệt trước khi tạo phiên bản mới.</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Phần 2 — Định dạng số phiên bản */}
-                      <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
-                        <h4 className="text-[13px] font-bold text-slate-800">Phần 2 — Định dạng số phiên bản</h4>
-                        <div className="grid grid-cols-2 gap-4 text-[13px]">
-                          <div>
-                            <span className="block text-slate-500 mb-1">Định dạng phiên bản</span>
-                            <span className="font-medium text-slate-800">{formatInfo.label}</span>
-                          </div>
-                          <div>
-                            <span className="block text-slate-500 mb-1">Ví dụ</span>
-                            <code className="font-mono text-slate-800">{formatInfo.example}</code>
-                          </div>
+                      <div className={`${GROUP_CARD} p-4 space-y-4`}>
+                        <h4 className={GROUP_TITLE}>Phần 2 — Định dạng số phiên bản</h4>
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                          <ViewField label="Định dạng phiên bản">{formatInfo.label}</ViewField>
+                          <ViewField label="Ví dụ">{formatInfo.example}</ViewField>
                           {entityRule.versionFormat === 'custom' && (
-                            <div>
-                              <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
-                              <span className="font-medium text-slate-800">{entityRule.customPrefix || '(không có)'}</span>
-                            </div>
+                            <ViewField label="Tiền tố (Prefix)">{entityRule.customPrefix || '(không có)'}</ViewField>
                           )}
-                          <div>
-                            <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
-                            <span className="font-medium text-slate-800">{entityRule.startFrom}</span>
-                          </div>
+                          <ViewField label="Bắt đầu từ">{entityRule.startFrom}</ViewField>
                         </div>
                       </div>
                     </div>
@@ -1810,84 +1666,64 @@ export function MasterDataScaleManagementPage() {
                 {/* Bước 7: Phê duyệt */}
                 {viewStep === 7 && (
                 <>
-                {/* Nội dung trình duyệt */}
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-500 mb-1">Nội dung trình duyệt</label>
-                  <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800 whitespace-pre-wrap">
-                    {viewingEntity.submissionContent || <span className="text-slate-400 italic">Chưa gửi trình duyệt</span>}
-                  </div>
-                </div>
+                  <ViewField label="Nội dung trình duyệt" full>
+                    <span className="whitespace-pre-wrap">
+                      {viewingEntity.submissionContent || <span className={MUTED}>Chưa gửi trình duyệt</span>}
+                    </span>
+                  </ViewField>
 
-                {/* Ý kiến phê duyệt / Lý do từ chối */}
-                {(viewingEntity.requestStatus === 'approved' || viewingEntity.requestStatus === 'rejected') && (
-                  <ReviewResultCard status={viewingEntity.requestStatus} comment={viewingEntity.reviewComment} />
-                )}
+                  {/* Ý kiến phê duyệt / Lý do từ chối */}
+                  {(viewingEntity.requestStatus === 'approved' || viewingEntity.requestStatus === 'rejected') && (
+                    <ReviewResultCard status={viewingEntity.requestStatus} comment={viewingEntity.reviewComment} />
+                  )}
 
-                {/* Thông tin hệ thống */}
-                <div className="pt-4 border-t border-slate-200">
-                  <h4 className="text-[13px] font-bold text-slate-700 mb-3">Thông tin hệ thống</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Ngày tạo</label>
-                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800">
-                        {viewingEntity.createdDate}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Người tạo</label>
-                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                        {viewingEntity.createdBy}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Ngày cập nhật gần nhất</label>
-                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-800">
-                        {viewingEntity.updatedDate}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[13px] font-medium text-slate-500 mb-1">Người cập nhật</label>
-                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-800">
-                        {viewingEntity.updatedBy || <span className="text-slate-400 font-normal italic">Chưa có</span>}
-                      </div>
+                  {/* Thông tin hệ thống */}
+                  <div className="pt-4 border-t border-[#E2E8F0]">
+                    <h4 className={SECTION_TITLE}>Thông tin hệ thống</h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <ViewField label="Ngày tạo">{viewingEntity.createdDate}</ViewField>
+                      <ViewField label="Người tạo">{viewingEntity.createdBy}</ViewField>
+                      <ViewField label="Ngày cập nhật gần nhất">{viewingEntity.updatedDate}</ViewField>
+                      <ViewField label="Người cập nhật">
+                        {viewingEntity.updatedBy || <span className={MUTED}>Chưa có</span>}
+                      </ViewField>
                     </div>
                   </div>
-                </div>
                 </>
                 )}
               </div>
 
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3 shrink-0">
+              <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0">
                 <button
+                  type="button"
                   onClick={() => { setViewingEntity(null); handleEdit(viewingEntity); }}
-                  className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  className={BTN_OUTLINE}
                 >
                   <Edit className="w-4 h-4" />
                   Chỉnh sửa
                 </button>
                 {viewStep > 1 && (
                   <button
+                    type="button"
                     onClick={() => setViewStep(viewStep - 1)}
-                    className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                    className={BTN_OUTLINE}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Quay lại
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => setViewingEntity(null)}
-                  className={`px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm ${
-                    viewStep < 7
-                      ? 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                  className={viewStep < 7 ? BTN_OUTLINE : BTN_PRIMARY}
                 >
                   Đóng
                 </button>
                 {viewStep < 7 && (
                   <button
+                    type="button"
                     onClick={() => setViewStep(viewStep + 1)}
-                    className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                    className={BTN_PRIMARY}
                   >
                     Tiếp theo
                     <ArrowRight className="w-4 h-4" />
@@ -1902,33 +1738,24 @@ export function MasterDataScaleManagementPage() {
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
         <Portal>
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-200">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                <h3 className="text-[16px] font-bold text-slate-900">Xác nhận xóa</h3>
-                <button
-                  onClick={() => setDeleteConfirmId(null)}
-                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                >
+          <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
+                <h3 className="text-[16px] font-medium text-[#020817]">Xác nhận xóa</h3>
+                <button type="button" aria-label="Đóng" onClick={() => setDeleteConfirmId(null)} className={BTN_GHOST_ICON}>
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="px-6 py-5">
-                <p className="text-[13px] text-slate-600">
+              <div className="px-6 py-4 overflow-y-auto custom-scrollbar">
+                <p className="text-[13px] text-[#020817]">
                   Bạn có chắc chắn muốn xóa thực thể này? Hành động này không thể hoàn tác.
                 </p>
               </div>
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
-                <button
-                  onClick={() => setDeleteConfirmId(null)}
-                  className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
-                >
+              <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0">
+                <button type="button" onClick={() => setDeleteConfirmId(null)} className={BTN_OUTLINE}>
                   Hủy
                 </button>
-                <button
-                  onClick={handleConfirmDelete}
-                  className="bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
-                >
+                <button type="button" onClick={handleConfirmDelete} className={BTN_DESTRUCTIVE}>
                   Xóa
                 </button>
               </div>
@@ -1940,89 +1767,73 @@ export function MasterDataScaleManagementPage() {
       {/* Gửi trình duyệt Modal */}
       {approvalEntity && (
         <Portal>
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                <div>
-                  <h3 className="text-[16px] font-bold text-slate-900">Gửi trình duyệt</h3>
-                  <p className="text-[12px] text-slate-500 mt-0.5">
-                    Bản ghi: <span className="text-indigo-700 font-medium">{approvalEntity.name}</span>
+          <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 shrink-0">
+                <div className="min-w-0">
+                  <h3 className="text-[16px] font-medium text-[#020817]">Gửi trình duyệt</h3>
+                  <p className="text-[13px] text-[#64748B] mt-0.5">
+                    Bản ghi: <span className="text-[#020817] font-medium">{approvalEntity.name}</span>
                   </p>
                 </div>
-                <button
-                  onClick={handleCloseApprovalModal}
-                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                >
+                <button type="button" aria-label="Đóng" onClick={handleCloseApprovalModal} className={BTN_GHOST_ICON}>
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div className="px-6 py-4 space-y-4 overflow-y-auto custom-scrollbar">
                 {/* Thông tin phê duyệt */}
-                <div className="border border-blue-200 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 px-4 py-2.5 border-b border-blue-200">
-                    <h4 className="text-[13px] font-semibold text-blue-900">Thông tin phê duyệt</h4>
+                <div className="rounded-2xl border border-[#E2E8F0] p-4 space-y-4">
+                  <h4 className={GROUP_TITLE}>Thông tin phê duyệt</h4>
+                  <div>
+                    <label className={LABEL_CLS}>
+                      Chọn người trình duyệt <span className={REQUIRED_MARK}>*</span>
+                    </label>
+                    <select
+                      aria-label="Chọn người trình duyệt"
+                      value={selectedApprover}
+                      onChange={e => setSelectedApprover(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="">-- Chọn người trình duyệt --</option>
+                      {MOCK_APPROVERS.map(u => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} - {u.position} ({u.department})
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="p-4 space-y-4">
-                    <div>
-                      <label className="block text-[13px] text-slate-700 mb-1.5">
-                        Chọn người trình duyệt <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        value={selectedApprover}
-                        onChange={e => setSelectedApprover(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-                      >
-                        <option value="">-- Chọn người trình duyệt --</option>
-                        {MOCK_APPROVERS.map(u => (
-                          <option key={u.id} value={u.id}>
-                            {u.name} - {u.position} ({u.department})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[13px] text-slate-700 mb-1.5">
-                        Ghi chú phê duyệt
-                      </label>
-                      <textarea
-                        value={approvalNote}
-                        onChange={e => setApprovalNote(e.target.value)}
-                        rows={3}
-                        placeholder="Nhập lý do và ghi chú cho việc gửi trình duyệt này..."
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                      />
-                    </div>
+                  <div>
+                    <label className={LABEL_CLS}>Ghi chú phê duyệt</label>
+                    <textarea
+                      value={approvalNote}
+                      onChange={e => setApprovalNote(e.target.value)}
+                      rows={3}
+                      placeholder="Nhập lý do và ghi chú cho việc gửi trình duyệt này..."
+                      className={`${INPUT_CLS} h-auto py-2 resize-none`}
+                    />
                   </div>
                 </div>
 
                 {/* Info */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div className="text-[13px] text-green-800">
-                      <p className="mb-1">Sau khi gửi, dữ liệu chủ sẽ ở trạng thái <strong>"Chờ phê duyệt"</strong>.</p>
-                      <p>Người phê duyệt sẽ xem xét và quyết định phê duyệt hoặc từ chối.</p>
-                    </div>
+                <div className="flex items-start gap-2 rounded-lg border border-[#DCFCE7] bg-[#F0FDF4] p-3">
+                  <AlertCircle className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                  <div className="text-[13px] text-[#020817]">
+                    <p className="mb-1">Sau khi gửi, dữ liệu chủ sẽ ở trạng thái <strong className="font-medium">"Chờ phê duyệt"</strong>.</p>
+                    <p>Người phê duyệt sẽ xem xét và quyết định phê duyệt hoặc từ chối.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
-                <button
-                  onClick={handleCloseApprovalModal}
-                  className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
-                >
+              <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0">
+                <button type="button" onClick={handleCloseApprovalModal} className={BTN_OUTLINE}>
                   Hủy
                 </button>
                 <button
+                  type="button"
                   onClick={handleConfirmApprove}
                   disabled={!selectedApprover}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${
-                    selectedApprover
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
+                  className={BTN_PRIMARY}
                 >
                   <Send className="w-4 h-4" />
                   Gửi trình duyệt
@@ -2064,7 +1875,7 @@ export function MasterDataScaleManagementPage() {
             } : e));
             setShowWizard(false);
             setEditingEntity(null);
-            alert(`✅ Đã cập nhật thực thể "${wizardData.name}".`);
+            toast.success(`Đã cập nhật thực thể "${wizardData.name}".`);
             return;
           }
 
@@ -2094,7 +1905,7 @@ export function MasterDataScaleManagementPage() {
 
           setEntities([...entities, newEntity]);
           setShowWizard(false);
-          alert(`✅ Tạo thành công "${wizardData.name}" với ${wizardData.attributes.length} thuộc tính!\n\nĐã gửi yêu cầu phê duyệt.`);
+          toast.success(`Tạo thành công "${wizardData.name}" với ${wizardData.attributes.length} thuộc tính!\n\nĐã gửi yêu cầu phê duyệt.`);
         }}
         onSaveDraft={(wizardData) => {
           const now = new Date();
@@ -2121,7 +1932,7 @@ export function MasterDataScaleManagementPage() {
             } : e));
             setShowWizard(false);
             setEditingEntity(null);
-            alert(`💾 Đã lưu nháp thực thể "${wizardData.name}".`);
+            toast.success(`Đã lưu nháp thực thể "${wizardData.name}".`);
             return;
           }
 
@@ -2151,7 +1962,7 @@ export function MasterDataScaleManagementPage() {
 
           setEntities([...entities, draftEntity]);
           setShowWizard(false);
-          alert(`💾 Đã lưu nháp "${wizardData.name}". Bạn có thể tiếp tục chỉnh sửa sau.`);
+          toast.success(`Đã lưu nháp "${wizardData.name}". Bạn có thể tiếp tục chỉnh sửa sau.`);
         }}
       />
     </div>

@@ -1,7 +1,15 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { Search, Calendar, Filter, X } from 'lucide-react';
-import { StatusTag } from '../../common/StatusTag';
+import {
+  Badge, TruncatedText, Pagination, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS,
+  FILTER_LABEL, DATE_BOX_CLS, normalizeSearch, DateInput, isoToDisplayDate
+} from '../collection/collectionUi';
+
+// Bảng theo compomennt.md 5.3; căn lề 5.3.3 (số căn phải)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const NUM = 'text-right tabular-nums whitespace-nowrap';
 
 interface ReconciliationHistory {
   id: string;
@@ -146,6 +154,8 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   
+  const [applied, setApplied] = useState({ searchTerm: initialSearchTerm, filterStatus: 'all' as 'all' | 'success' | 'failed', filterSystem: 'all', dateFrom: '', dateTo: '' });
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -260,20 +270,18 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
 
   const filteredHistories = histories.filter(history => {
     // If search term is activeTab target, don't perform strict text matching inside packages
-    const matchesSearch = initialSearchTerm || searchTerm === '' ||
-      history.packageName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      history.packageCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      history.systemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      history.action.toLowerCase().includes(searchTerm.toLowerCase());
+    const kw = normalizeSearch(applied.searchTerm);
+    const matchesSearch = initialSearchTerm || kw === '' ||
+      [history.packageName, history.packageCode, history.systemName, history.action].some(v => normalizeSearch(v).includes(kw));
 
-    const matchesStatus = filterStatus === 'all' || history.status === filterStatus;
-    const matchesSystem = filterSystem === 'all' || history.systemName === filterSystem;
+    const matchesStatus = applied.filterStatus === 'all' || history.status === applied.filterStatus;
+    const matchesSystem = applied.filterSystem === 'all' || history.systemName === applied.filterSystem;
 
     let matchesDate = true;
-    if (dateFrom || dateTo) {
+    if (applied.dateFrom || applied.dateTo) {
       const historyDate = new Date(history.timestamp.split(' ')[0]);
-      if (dateFrom && historyDate < new Date(dateFrom)) matchesDate = false;
-      if (dateTo && historyDate > new Date(dateTo)) matchesDate = false;
+      if (applied.dateFrom && historyDate < new Date(applied.dateFrom)) matchesDate = false;
+      if (applied.dateTo && historyDate > new Date(applied.dateTo)) matchesDate = false;
     }
 
     return matchesSearch && matchesStatus && matchesSystem && matchesDate;
@@ -281,173 +289,124 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
 
   const uniqueSystems = Array.from(new Set(histories.map(h => h.systemName)));
 
+  const runSearch = () => {
+    setApplied({ searchTerm, filterStatus, filterSystem, dateFrom, dateTo });
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="space-y-4 pt-4">
-      {/* Filters and Actions */}
+    <div className="space-y-4">
+      {/* Thanh tìm kiếm & bộ lọc (mục 5.19) */}
       {!hideSearchAndFilters && (
-        <div className="mb-6">
-        {/* Row 1: Search and Buttons */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 flex items-center gap-3">
-            <div className="relative flex-1">
-              <input aria-label="Input field"
-                type="text"
-                placeholder="Tìm kiếm lịch sử theo gói tin, hệ thống, hành động..."
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                value={searchTerm}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
-            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+        <div>
+          <div className="flex items-center gap-1.5">
+            <input
+              aria-label="Tìm kiếm lịch sử đối soát"
+              type="text"
+              placeholder="Tìm kiếm lịch sử theo gói tin, hệ thống, hành động..."
+              className={SEARCH_INPUT_CLS}
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+            />
+            <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
               <Search className="w-5 h-5" />
             </button>
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${
-                showFilters 
-                  ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                  : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-              }`}
+              aria-label="Bộ lọc"
+              aria-expanded={showFilters}
+              className={filterBtnClass(showFilters)}
               title="Bộ lọc"
             >
               {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
+
+          {showFilters && (
+            <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+              <div>
+                <label className={FILTER_LABEL}>Trạng thái</label>
+                <select aria-label="Trạng thái" className={INPUT_CLS} value={filterStatus} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value as any)}>
+                  <option value="all">Tất cả trạng thái</option>
+                  <option value="success">Thành công</option>
+                  <option value="failed">Thất bại</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={FILTER_LABEL}>Hệ thống</label>
+                <select aria-label="Hệ thống" className={INPUT_CLS} value={filterSystem} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterSystem(e.target.value)}>
+                  <option value="all">Tất cả hệ thống</option>
+                  {uniqueSystems.map(system => (
+                    <option key={system} value={system}>{system}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={FILTER_LABEL}>Từ ngày</label>
+                <DateInput ariaLabel="Từ ngày" value={dateFrom} onChange={setDateFrom} />
+              </div>
+
+              <div>
+                <label className={FILTER_LABEL}>Đến ngày</label>
+                <DateInput ariaLabel="Đến ngày" value={dateTo} onChange={setDateTo} />
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* Row 2: Filters (Collapsible) */}
-        {showFilters && (
-          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-            <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
-              <select aria-label="Select box"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                value={filterStatus}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setFilterStatus(e.target.value as any);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="success">Thành công</option>
-                <option value="failed">Thất bại</option>
-              </select>
-            </div>
-
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Hệ thống</label>
-              <select aria-label="Select box"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                value={filterSystem}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setFilterSystem(e.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="all">Tất cả hệ thống</option>
-                {uniqueSystems.map(system => (
-                  <option key={system} value={system}>{system}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Từ ngày</label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Input field"
-                  type="date"
-                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                  value={dateFrom}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setDateFrom(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
-            </div>
-
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Đến ngày</label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Input field"
-                  type="date"
-                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                  value={dateTo}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setDateTo(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
       )}
 
-      {/* History Table */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+      {/* Bảng lịch sử (mục 5.3) */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse collection-table text-[13px]">
-            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
-              <tr>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thu thập</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi (Nguồn)</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Số bản ghi (Kho)</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Lệch</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Ngày đối soát</th>
+            <thead className="bg-[#F8FAFC] sticky top-0 z-[1]">
+              <tr className="h-[42px]">
+                <th className={`${TH} text-center w-12`}>STT</th>
+                <th className={`${TH} text-left`}>Thu thập</th>
+                <th className={`${TH} text-right`}>Số bản ghi (Nguồn)</th>
+                <th className={`${TH} text-right`}>Số bản ghi (Kho)</th>
+                <th className={`${TH} text-right`}>Lệch</th>
+                <th className={`${TH} text-left`}>Trạng thái</th>
+                <th className={`${TH} text-left`}>Ngày đối soát</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredHistories
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                .map((history, index) => (
-                  <tr key={history.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                .map((history, index) => {
+                  const diff = (history.warehouseCount ?? history.recordsSent) - (history.sourceCount ?? history.recordsSent);
+                  const [d, t] = history.timestamp.split(' ');
+                  return (
+                  <tr key={history.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <td className={`${TD} text-center whitespace-nowrap`}>
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="px-4 py-3 text-left text-[13px]">
-                      <div className="font-medium text-slate-950 leading-snug text-[13px]">{history.datasetName ?? history.packageName}</div>
-                      <div className="text-slate-500 mt-1 text-[12px] font-mono">{history.runLabel ?? history.packageCode}</div>
+                    <td className={`${TD} text-left max-w-[360px] leading-[18px]`}>
+                      <TruncatedText text={history.datasetName ?? history.packageName} />
+                      <TruncatedText text={history.runLabel ?? history.packageCode} className="text-[#64748B]" />
                     </td>
-                    <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
-                      {(history.sourceCount ?? history.recordsSent).toLocaleString()}
+                    <td className={`${TD} ${NUM}`}>{(history.sourceCount ?? history.recordsSent).toLocaleString()}</td>
+                    <td className={`${TD} ${NUM}`}>{(history.warehouseCount ?? history.recordsSent).toLocaleString()}</td>
+                    <td className={`${TD} ${NUM} ${diff !== 0 ? 'text-[#DC2626] font-semibold' : ''}`}>
+                      {diff > 0 ? `+${diff.toLocaleString()}` : diff.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-center text-slate-950 font-semibold font-mono text-[13px]">
-                      {(history.warehouseCount ?? history.recordsSent).toLocaleString()}
+                    <td className={`${TD} text-left whitespace-nowrap`}>
+                      <Badge label={history.statusText} variant={history.statusVariant ?? (history.status === 'success' ? 'green' : 'red')} />
                     </td>
-                    {(() => {
-                      const diff = (history.warehouseCount ?? history.recordsSent) - (history.sourceCount ?? history.recordsSent);
-                      return (
-                        <td className={`px-4 py-3 text-center font-mono text-[13px] ${diff === 0 ? 'text-slate-500 font-medium' : 'text-rose-600 font-semibold'}`}>
-                          {diff > 0 ? `+${diff.toLocaleString()}` : diff.toLocaleString()}
-                        </td>
-                      );
-                    })()}
-                    <td className="px-4 py-3 text-center">
-                      <StatusTag
-                        label={history.statusText}
-                        variant={history.statusVariant ?? (history.status === 'success' ? 'green' : 'red')}
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-center text-slate-500 font-medium font-mono whitespace-nowrap text-[13px]">
-                      <div>{history.timestamp.split(' ')[0]}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">{history.timestamp.split(' ')[1]}</div>
+                    <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                      <div>{isoToDisplayDate(d) || d}</div>
+                      {t && <div className="text-[#64748B]">{t}</div>}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               {filteredHistories.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={7} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy lịch sử đối soát
                   </td>
                 </tr>
@@ -455,70 +414,16 @@ export function ReconciliationHistoryTab({ initialSearchTerm = '', hideSearchAnd
             </tbody>
           </table>
         </div>
-        
-        {/* Pagination */}
-        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600">Hiển thị</span>
-            <select aria-label="Select record count" 
-              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-              title="Số bản ghi trên trang"
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span className="text-slate-600">bản ghi/trang</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <span className="text-slate-600">
-              {filteredHistories.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredHistories.length)} / {filteredHistories.length}
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-              >
-                Trước
-              </button>
-              
-              {Array.from({ length: Math.ceil(filteredHistories.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                    currentPage === page
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
 
-              <button
-                onClick={() => {
-                  const totalPages = Math.ceil(filteredHistories.length / itemsPerPage);
-                  if (currentPage < totalPages) {
-                    setCurrentPage(currentPage + 1);
-                  }
-                }}
-                disabled={currentPage === Math.ceil(filteredHistories.length / itemsPerPage) || Math.ceil(filteredHistories.length / itemsPerPage) === 0}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-              >
-                Sau
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Phân trang (mục 5.14) */}
+        <Pagination
+          className="border-t border-[#E2E8F0]"
+          currentPage={currentPage}
+          totalItems={filteredHistories.length}
+          pageSize={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setItemsPerPage}
+        />
       </div>
     </div>
   );

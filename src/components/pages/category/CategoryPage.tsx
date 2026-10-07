@@ -38,7 +38,9 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  ChevronDown
+  ChevronDown,
+  RefreshCw,
+  CheckCircle
 } from 'lucide-react';
 import { PowerOff } from 'lucide-react';
 import { CreateVersionModal } from './components/modals/CreateVersionModal';
@@ -50,6 +52,40 @@ import { CategoryInfoViewModal } from './components/modals/CategoryInfoViewModal
 import { MasterDataEntity } from './categoryTypes';
 import { lifecycleLabels, scopeLabels } from './categoryConstants';
 import { Portal } from '../../common/Portal';
+import { toast } from 'sonner';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, tabClass,
+  BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, ROW_ICON_BTN,
+  INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, normalizeSearch
+} from '../collection/collectionUi';
+
+// --- Lớp giao diện dùng chung trong file (compomennt.md 5.3, 5.4) ---
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TABLE_WRAP = 'bg-white rounded-lg border border-[#E2E8F0] overflow-hidden';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+const STICKY_TH = 'sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]';
+const STICKY_TD = 'sticky right-0 bg-white group-hover:bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]';
+const CHECKBOX_CLS = 'w-4 h-4 accent-blue-600 rounded cursor-pointer align-middle';
+const EMPTY_TD = 'py-16 text-center text-[13px] text-[#64748B]';
+const MODAL_OVERLAY = 'fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200';
+const MODAL_BOX = 'bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden';
+const MODAL_HEADER = 'px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 shrink-0';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_SUBTITLE = 'text-[13px] text-[#64748B]';
+const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar flex-1';
+const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600';
+const BANNER_INFO = 'p-3 rounded-lg border bg-[#EAF3FF] border-[#BFDBFE] text-[13px] text-[#020817] flex items-start gap-2';
+const BANNER_WARN = 'p-3 rounded-lg border bg-[#FFF7ED] border-[#FED7AA] text-[13px] text-[#020817] flex items-start gap-2';
+const BANNER_DANGER = 'p-3 rounded-lg border bg-[#FEF2F2] border-[#FEE2E2] text-[13px] text-[#020817] flex items-start gap-2';
+const BANNER_SUCCESS = 'p-3 rounded-lg border bg-[#F0FDF4] border-[#DCFCE7] text-[13px] text-[#020817] flex items-start gap-2';
+const CHIP_ACTIVE = `${BTN_OUTLINE} !bg-[#EAF3FF] !border-[#BFDBFE] !text-[#155DFC]`;
+// Nút icon 40×40 nền trắng viền #CBD5E1 (mục 5.1 – Icon outline)
+const ICON_OUTLINE_40 = 'w-10 h-10 shrink-0 rounded-lg border bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC] hover:text-[#020817] transition-colors flex items-center justify-center cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600';
+const STAT_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4';
 
 export type CategoryPublishStatus = 'unpublished' | 'published' | 'stopped';
 
@@ -236,6 +272,8 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
       ...r,
     })));
   }, [categoryId]);
+  // searchInput: giá trị đang gõ; searchTerm: giá trị đã áp dụng (chỉ cập nhật khi bấm Tìm kiếm / Enter — mục 5.19)
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
@@ -243,12 +281,14 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const handleExportFile = (format: string) => {
     setShowExportMenu(false);
-    alert(`Xuất dữ liệu ra ${format}`);
+    toast.info(`Xuất dữ liệu ra ${format}`);
   };
 
   // Filter conditions (like TargetDatabaseDetailPage)
   interface FilterCondition { id: string; field: string; operator: string; value: string; logic: 'AND' | 'OR'; }
   const [filterConditions, setFilterConditions] = useState<FilterCondition[]>([]);
+  // Điều kiện lọc đã áp dụng — chỉ cập nhật khi bấm Tìm kiếm / Enter
+  const [appliedFilterConditions, setAppliedFilterConditions] = useState<FilterCondition[]>([]);
 
   // Sort panel state (like TargetDatabaseDetailPage)
   interface SortCondition { id: string; field: 'name' | 'code' | 'createdDate' | 'updatedDate'; order: 'ASC' | 'DESC'; }
@@ -256,6 +296,21 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   const [sortConditions, setSortConditions] = useState<SortCondition[]>([]);
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const runSearch = () => {
+    setSearchTerm(searchInput);
+    setAppliedFilterConditions(filterConditions);
+    setCurrentPageNum(1);
+  };
+  // Tab Dữ liệu (không có ô tìm kiếm): áp dụng điều kiện lọc khi bấm "Áp dụng bộ lọc" / Enter
+  const applyDataFilters = () => {
+    setAppliedFilterConditions(filterConditions);
+    setCurrentPageNum(1);
+  };
+  // Nút Cập nhật: làm mới danh sách bản ghi, giữ nguyên điều kiện lọc/sắp xếp đang áp dụng
+  const handleRefreshData = () => {
+    setCurrentPageNum(1);
+    toast.success('Đã cập nhật dữ liệu');
+  };
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   // Xem chi tiết bản ghi (tab Dữ liệu) — hiển thị đầy đủ Ngày tạo/Người tạo/Ngày cập nhật/Người cập nhật
@@ -345,7 +400,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const handleSaveInlineEdit = (id: string) => {
     if (!inlineEditData.code.trim() || !inlineEditData.name.trim()) {
-      alert('Mã và Tên giá trị không được để trống');
+      toast.error('Mã và Tên giá trị không được để trống');
       return;
     }
     const currentDate = new Date().toLocaleDateString('vi-VN');
@@ -394,7 +449,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const handleSaveInlineAdd = () => {
     if (!inlineAddData.code.trim() || !inlineAddData.name.trim()) {
-      alert('Mã và Tên giá trị không được để trống');
+      toast.error('Mã và Tên giá trị không được để trống');
       return;
     }
     const newId = (categories.length + 1).toString();
@@ -621,17 +676,19 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const filteredApprovalRequests = approvalRequests.filter(req => {
     const matchesStatus = approvalStatusFilter === 'all' || req.status === approvalStatusFilter;
-    const matchesSearch = searchTerm === '' ||
-      req.recordCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.recordName.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = normalizeSearch(searchTerm);
+    const matchesSearch = q === '' ||
+      normalizeSearch(req.recordCode).includes(q) ||
+      normalizeSearch(req.recordName).includes(q);
     return matchesStatus && matchesSearch;
   });
 
   const filteredUnpublishRequests = unpublishRequests.filter(req => {
     const matchesStatus = approvalStatusFilter === 'all' || req.status === approvalStatusFilter;
-    const matchesSearch = searchTerm === '' ||
-      req.categoryCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.categoryName.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = normalizeSearch(searchTerm);
+    const matchesSearch = q === '' ||
+      normalizeSearch(req.categoryCode).includes(q) ||
+      normalizeSearch(req.categoryName).includes(q);
     return matchesStatus && matchesSearch;
   });
 
@@ -656,7 +713,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const handleBulkApprove = () => {
     if (selectedApprovalIds.length === 0) {
-      alert('Vui lòng chọn ít nhất một yêu cầu để phê duyệt');
+      toast.error('Vui lòng chọn ít nhất một yêu cầu để phê duyệt');
       return;
     }
     setPendingApprovalIds(selectedApprovalIds);
@@ -666,7 +723,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const handleBulkReject = () => {
     if (selectedApprovalIds.length === 0) {
-      alert('Vui lòng chọn ít nhất một yêu cầu để từ chối');
+      toast.error('Vui lòng chọn ít nhất một yêu cầu để từ chối');
       return;
     }
     setPendingApprovalIds(selectedApprovalIds);
@@ -698,7 +755,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const confirmReject = () => {
     if (!approvalComment.trim()) {
-      alert('Vui lòng nhập lý do từ chối');
+      toast.error('Vui lòng nhập lý do từ chối');
       return;
     }
     // In production, this would call an API
@@ -740,13 +797,13 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   const getRequestTypeBadge = (type: string) => {
     switch (type) {
       case 'create':
-        return <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Tạo mới</span>;
+        return <Badge label="Tạo mới" variant="blue" />;
       case 'edit-version':
-        return <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Phê duyệt phiên bản</span>;
+        return <Badge label="Phê duyệt phiên bản" variant="purple" />;
       case 'edit-structure':
-        return <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Phê duyệt cấu trúc</span>;
+        return <Badge label="Phê duyệt cấu trúc" variant="purple" />;
       case 'edit-effective':
-        return <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Phê duyệt hiệu hiệu lực</span>;
+        return <Badge label="Phê duyệt hiệu hiệu lực" variant="orange" />;
       default:
         return null;
     }
@@ -760,14 +817,9 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   };
 
   const filteredCategories = categories.filter(cat => {
-    // Search term filter (always applied)
-    const matchesSearch = !searchTerm ||
-      cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cat.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cat.description.toLowerCase().includes(searchTerm.toLowerCase());
-    if (!matchesSearch) return false;
 
-    // Dynamic filter conditions
+    // Dynamic filter conditions (đã áp dụng)
+    const filterConditions = appliedFilterConditions;
     if (filterConditions.length === 0) return true;
 
     const getFieldValue = (c: typeof cat, field: string): string => {
@@ -836,79 +888,50 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const paginatedCategories = filteredCategories.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
+  // Phân trang chuẩn (compomennt.md 5.14) — nối vào state currentPageNum/pageSize sẵn có
   const renderPagination = (totalCount: number) => {
-    if (totalCount <= 0) return null;
-    const totalPages = Math.ceil(totalCount / pageSize);
-    const startItem = (currentPageNum - 1) * pageSize + 1;
-    const endItem = Math.min(currentPageNum * pageSize, totalCount);
     return (
-      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 font-normal">Hiển thị</span>
-          <select
-            aria-label="Số bản ghi trên trang"
-            value={pageSize}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) => { setPageSize(Number(e.target.value)); setCurrentPageNum(1); }}
-            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
-          <span className="text-slate-600 font-normal">bản ghi/trang</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600 font-normal">{startItem} - {endItem} / {totalCount}</span>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))} disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer">
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button key={page} onClick={() => setCurrentPageNum(page)}
-                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                {page}
-              </button>
-            ))}
-            <button onClick={() => setCurrentPageNum(Math.min(Math.ceil(totalCount / pageSize), currentPageNum + 1))} disabled={currentPageNum === Math.ceil(totalCount / pageSize)}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer">
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
+      <Pagination
+        className="border-t border-[#E2E8F0]"
+        currentPage={currentPageNum}
+        totalItems={totalCount}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50]}
+        onPageChange={setCurrentPageNum}
+        onPageSizeChange={(size) => { setPageSize(size); setCurrentPageNum(1); }}
+      />
     );
   };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'standard':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Tiêu chuẩn</span>;
+        return <Badge label="Tiêu chuẩn" variant="blue" />;
       case 'reference':
-        return <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Tham chiếu</span>;
+        return <Badge label="Tham chiếu" variant="purple" />;
       case 'system':
-        return <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Hệ thống</span>;
+        return <Badge label="Hệ thống" variant="orange" />;
       default:
         return null;
     }
   };
 
-  const getStatusBadge = (status: string, textSizeClass: string = 'text-[13px]') => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
-        return <span className={`px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Bản nháp</span>;
+        return <Badge label="Bản nháp" variant="slate" />;
       case 'pending':
-        return <span className={`px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Chờ duyệt</span>;
+        return <Badge label="Chờ duyệt" variant="orange" />;
       case 'approved':
       case 'active':
       case 'published':
-        return <span className={`px-3 py-1 bg-green-50 text-green-700 border border-green-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Đã phê duyệt</span>;
+        return <Badge label="Đã phê duyệt" variant="green" />;
       case 'rejected':
-        return <span className={`px-3 py-1 bg-red-50 text-red-700 border border-red-200 ${textSizeClass} rounded-full whitespace-nowrap`}>Từ chối</span>;
+        return <Badge label="Từ chối" variant="red" />;
       case 'inactive':
-        return <span className={`px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 ${textSizeClass} rounded-full whitespace-nowrap`}>Ngừng áp dụng</span>;
+        return <Badge label="Ngừng áp dụng" variant="slate" />;
       case 'unpublished':
-        return <span className={`px-3 py-1 bg-slate-200 text-slate-700 ${textSizeClass} rounded-full whitespace-nowrap`}>Hủy công khai</span>;
+        return <Badge label="Hủy công khai" variant="slate" />;
       default:
         return null;
     }
@@ -917,11 +940,11 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   const getApprovalStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <span className="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs rounded-full whitespace-nowrap">Chờ phê duyệt</span>;
+        return <Badge label="Chờ phê duyệt" variant="amber" />;
       case 'approved':
-        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs rounded-full whitespace-nowrap">Đã phê duyệt</span>;
+        return <Badge label="Đã phê duyệt" variant="green" />;
       case 'rejected':
-        return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-xs rounded-full whitespace-nowrap">Từ chối</span>;
+        return <Badge label="Từ chối" variant="red" />;
       default:
         return null;
     }
@@ -932,11 +955,11 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   const getDataStatusBadge = (dataStatus?: Category['dataStatus']) => {
     switch (dataStatus) {
       case 'edited':
-        return <span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 text-[12px] rounded-full whitespace-nowrap">Chỉnh sửa</span>;
+        return <Badge label="Chỉnh sửa" variant="blue" />;
       case 'inactive':
-        return <span className="px-3 py-1 bg-slate-200 text-slate-600 border border-slate-300 text-[12px] rounded-full whitespace-nowrap">Ngừng hiệu lực</span>;
+        return <Badge label="Ngừng hiệu lực" variant="slate" />;
       default:
-        return <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[12px] rounded-full whitespace-nowrap">Thêm mới</span>;
+        return <Badge label="Thêm mới" variant="emerald" />;
     }
   };
 
@@ -944,14 +967,14 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
   const getRecordApprovalBadge = (status: Category['status']) => {
     switch (status) {
       case 'draft':
-        return <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[12px] rounded-full whitespace-nowrap">Chưa duyệt</span>;
+        return <Badge label="Chưa duyệt" variant="slate" />;
       case 'pending':
-        return <span className="px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 text-[12px] rounded-full whitespace-nowrap">Chờ duyệt</span>;
+        return <Badge label="Chờ duyệt" variant="orange" />;
       case 'rejected':
-        return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 text-[12px] rounded-full whitespace-nowrap">Từ chối</span>;
+        return <Badge label="Từ chối" variant="red" />;
       default:
         // approved/active/published/unpublished/inactive — coi như đã xử lý xong vòng duyệt gần nhất
-        return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-[12px] rounded-full whitespace-nowrap">Đã duyệt</span>;
+        return <Badge label="Đã duyệt" variant="green" />;
     }
   };
   // Chỉ hiển thị ô check "gửi duyệt" khi bản ghi ở trạng thái Chưa duyệt (draft)
@@ -1008,7 +1031,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
   const handleImportConfirm = () => {
     if (importErrors.length > 0) {
-      alert('Vui lòng sửa các lỗi trước khi nhập dữ liệu');
+      toast.error('Vui lòng sửa các lỗi trước khi nhập dữ liệu');
       return;
     }
 
@@ -1042,135 +1065,151 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
     showPublishModal || showUnpublishModal
   );
 
+  // Màu dòng: dòng đang chọn tô nền #EAF3FF, cột thao tác sticky đồng màu với dòng
+  const rowCls = (selected: boolean) =>
+    `group h-12 border-b border-[#E0E0E0] transition-colors ${selected ? 'bg-[#EAF3FF]' : 'bg-white hover:bg-[#F8FAFC]'}`;
+  const stickyTdCls = (selected: boolean) =>
+    `sticky right-0 shadow-[-1px_0_0_#E2E8F0] ${selected ? 'bg-[#EAF3FF]' : 'bg-white group-hover:bg-[#F8FAFC]'}`;
+  const INLINE_INPUT = `${INPUT_CLS} !h-8`;
+
+  const approvalStatCards = [
+    { label: 'Chờ phê duyệt', value: approvalStats.pending, icon: Clock, bg: 'bg-orange-50', fg: 'text-orange-600' },
+    { label: 'Đã phê duyệt', value: approvalStats.approved, icon: CheckCircle2, bg: 'bg-green-50', fg: 'text-green-600' },
+    { label: 'Đã từ chối', value: approvalStats.rejected, icon: XCircle, bg: 'bg-red-50', fg: 'text-red-600' },
+    { label: 'Tổng yêu cầu', value: approvalStats.total, icon: Edit2, bg: 'bg-blue-50', fg: 'text-blue-600' },
+  ];
+
+  const publishTone = publishStatus === 'published'
+    ? { box: 'bg-[#F0FDF4] border-[#DCFCE7]', icon: 'text-[#16A34A]' }
+    : publishStatus === 'stopped'
+    ? { box: 'bg-[#FEF2F2] border-[#FEE2E2]', icon: 'text-[#DC2626]' }
+    : { box: 'bg-[#F8FAFC] border-[#E2E8F0]', icon: 'text-[#64748B]' };
+
+  const closeIconBtn = (onClick: () => void, label = 'Đóng') => (
+    <button type="button" aria-label={label} title={label} onClick={onClick} className={BTN_GHOST_ICON}>
+      <X className="w-5 h-5" />
+    </button>
+  );
+
   return (
     <div className="space-y-4">
-      {/* Tab bar — matches CategorySetupPage style; ẩn khi xem chỉ đọc (chỉ hiện dữ liệu) */}
+      {/* Tab bar (compomennt.md 5.9) — ẩn khi xem chỉ đọc (chỉ hiện dữ liệu) */}
       {!readOnly && (
-        <div className="bg-white border-b border-slate-200">
-          <div className="flex px-6 gap-2">
-            {[
-              { id: 'setup' as const,           label: 'Dữ liệu',   icon: List },
-              { id: 'approval' as const,         label: 'Phê duyệt', icon: CheckCircle2 },
-              { id: 'publish' as const,          label: 'Công khai',  icon: Globe },
-              { id: 'version-history' as const,  label: 'Phiên bản',  icon: Clock },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                }`}
-              >
-                <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`} />
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center border-b border-[#E2E8F0]">
+          {[
+            { id: 'setup' as const,           label: 'Dữ liệu',   icon: List },
+            { id: 'approval' as const,         label: 'Phê duyệt', icon: CheckCircle2 },
+            { id: 'publish' as const,          label: 'Công khai',  icon: Globe },
+            { id: 'version-history' as const,  label: 'Phiên bản',  icon: Clock },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={tabClass(activeTab === tab.id)}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
         </div>
       )}
 
       {/* Tab Content */}
       <div>
           {activeTab === 'setup' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
 
-              {/* Search & Action Bar */}
-              <div className="space-y-3">
-                <div className="flex flex-col md:flex-row items-center gap-3">
-                  <div className="flex-1 w-full flex items-center gap-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm theo mã, tên danh mục..."
-                        value={searchTerm}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => { setSearchTerm(e.target.value); setCurrentPageNum(1); }}
-                        className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 w-full md:w-auto">
-                    {/* Lọc button */}
+              {/* Search & Action Bar (compomennt.md 5.19) */}
+              <div>
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-1.5">
+                    {/* Cập nhật (làm mới dữ liệu) */}
                     <button
                       type="button"
+                      aria-label="Cập nhật"
+                      title="Cập nhật"
+                      onClick={handleRefreshData}
+                      className={ICON_OUTLINE_40}
+                    >
+                      <RefreshCw className="w-5 h-5" />
+                    </button>
+                    {/* Lọc */}
+                    <button
+                      type="button"
+                      aria-expanded={showFilters}
                       onClick={() => { setShowFilters(!showFilters); setShowSortPanel(false); }}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium border rounded-xl transition-all cursor-pointer active:scale-95 ${
-                        showFilters ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
+                      className={`${showFilters ? CHIP_ACTIVE : BTN_OUTLINE} shrink-0`}
                     >
                       <Filter className="w-4 h-4" />
-                      Lọc{filterConditions.length > 0 && !showFilters ? <span className="ml-1 w-2 h-2 rounded-full bg-blue-500 inline-block" /> : null}
+                      Lọc{appliedFilterConditions.length > 0 && !showFilters ? <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" /> : null}
                     </button>
-                    {/* Sắp xếp button */}
+                    {/* Sắp xếp */}
                     <button
                       type="button"
+                      aria-pressed={showSortPanel}
                       onClick={() => { setShowSortPanel(!showSortPanel); setShowFilters(false); }}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium border rounded-xl transition-all cursor-pointer active:scale-95 ${
-                        showSortPanel ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
+                      className={`${showSortPanel ? CHIP_ACTIVE : BTN_OUTLINE} shrink-0`}
                     >
                       <ArrowUpDown className="w-4 h-4" />
-                      Sắp xếp{sortConditions.length > 0 && !showSortPanel ? <span className="ml-1 w-2 h-2 rounded-full bg-blue-500 inline-block" /> : null}
+                      Sắp xếp{sortConditions.length > 0 && !showSortPanel ? <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" /> : null}
                     </button>
-                    {!readOnly && (
-                      <>
-                        {/* Gửi duyệt phiên bản */}
-                        <button
-                          type="button"
-                          onClick={() => selectedRecordIds.length > 0 && setShowApprovalRequestModal(true)}
-                          disabled={selectedRecordIds.length === 0}
-                          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-95 whitespace-nowrap ${
-                            selectedRecordIds.length > 0
-                              ? 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
-                              : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
-                          }`}
-                        >
-                          <Send className="w-4 h-4" />
-                          Gửi duyệt
-                        </button>
-                        {/* Thêm bản ghi mới */}
-                        <button
-                          type="button"
-                          onClick={() => { setEditingRecord(null); setShowAddModal(true); }}
-                          className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Thêm bản ghi mới
-                        </button>
-                      </>
-                    )}
                   </div>
+                  {!readOnly && (
+                    <div className="flex items-center gap-1.5">
+                      {/* Gửi duyệt phiên bản */}
+                      <button
+                        type="button"
+                        onClick={() => selectedRecordIds.length > 0 && setShowApprovalRequestModal(true)}
+                        disabled={selectedRecordIds.length === 0}
+                        className={`${BTN_OUTLINE} whitespace-nowrap`}
+                      >
+                        <Send className="w-4 h-4" />
+                        Gửi duyệt
+                      </button>
+                      {/* Thêm bản ghi mới */}
+                      <button
+                        type="button"
+                        onClick={() => { setEditingRecord(null); setShowAddModal(true); }}
+                        className={`${BTN_PRIMARY} whitespace-nowrap`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        Thêm bản ghi mới
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* Collapsible Filter Panel — condition-based like CSDL đích */}
+                {/* Collapsible Filter Panel — điều kiện chỉ áp dụng khi bấm Tìm kiếm / Enter */}
                 {showFilters && (
-                  <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                    <div className="flex flex-col gap-3">
+                  <div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col gap-2">
                       {filterConditions.map((fc, i) => (
-                        <div key={fc.id} className="flex items-center gap-3">
+                        <div key={fc.id} className="flex items-center gap-2">
                           {i > 0 && (
                             <select
+                              aria-label="Toán tử logic"
                               value={fc.logic}
                               onChange={e => {
                                 const updated = [...filterConditions];
                                 updated[i] = { ...updated[i], logic: e.target.value as 'AND' | 'OR' };
                                 setFilterConditions(updated);
                               }}
-                              className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-24 focus:outline-none focus:border-blue-500 bg-white"
+                              className={`${INPUT_CLS} !w-24 shrink-0`}
                             >
                               <option value="AND">AND</option>
                               <option value="OR">OR</option>
                             </select>
                           )}
                           <select
+                            aria-label="Trường lọc"
                             value={fc.field}
                             onChange={e => {
                               const updated = [...filterConditions];
                               updated[i] = { ...updated[i], field: e.target.value };
                               setFilterConditions(updated);
                             }}
-                            className={`px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white ${i === 0 ? 'flex-1 max-w-xs' : 'flex-1 max-w-[210px]'}`}
+                            className={`${INPUT_CLS} flex-1 ${i === 0 ? 'max-w-xs' : 'max-w-[210px]'}`}
                           >
                             <option value="code">Mã</option>
                             <option value="name">Tên giá trị</option>
@@ -1182,13 +1221,14 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                             <option value="updatedBy">Người cập nhật</option>
                           </select>
                           <select
+                            aria-label="Phép so sánh"
                             value={fc.operator}
                             onChange={e => {
                               const updated = [...filterConditions];
                               updated[i] = { ...updated[i], operator: e.target.value };
                               setFilterConditions(updated);
                             }}
-                            className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-40 focus:outline-none focus:border-blue-500 bg-white"
+                            className={`${INPUT_CLS} !w-40 shrink-0`}
                           >
                             <option value="=">Bằng (=)</option>
                             <option value="!=">Khác (!=)</option>
@@ -1199,24 +1239,27 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                           <div className="flex-1 relative">
                             <input
                               type="text"
+                              aria-label="Giá trị lọc"
                               value={fc.value}
                               onChange={e => {
                                 const updated = [...filterConditions];
                                 updated[i] = { ...updated[i], value: e.target.value };
                                 setFilterConditions(updated);
-                                setCurrentPageNum(1);
                               }}
+                              onKeyDown={(e) => { if (e.key === 'Enter') applyDataFilters(); }}
                               placeholder="&lt;?&gt;"
-                              className="w-full px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500"
+                              className={INPUT_CLS}
                             />
                           </div>
                           <button
+                            type="button"
+                            aria-label="Xóa điều kiện"
+                            title="Xóa điều kiện"
                             onClick={() => {
                               const newF = filterConditions.filter(item => item.id !== fc.id);
                               setFilterConditions(newF);
-                              setCurrentPageNum(1);
                             }}
-                            className="p-1.5 border border-red-200 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"
+                            className={`${BTN_GHOST_ICON} !text-[#DC2626] hover:!bg-[#FEF2F2]`}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1224,20 +1267,27 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                       ))}
                       <div className="flex items-center gap-2 mt-1">
                         <button
-                          onClick={() => { setFilterConditions(prev => [...prev, { id: Date.now().toString(), field: 'code', operator: '=', value: '', logic: 'AND' }]); setCurrentPageNum(1); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 bg-white transition-colors"
+                          type="button"
+                          onClick={() => setFilterConditions(prev => [...prev, { id: Date.now().toString(), field: 'code', operator: '=', value: '', logic: 'AND' }])}
+                          className={BTN_OUTLINE}
                         >
-                          <Plus className="w-3.5 h-3.5" /> Thêm điều kiện
+                          <Plus className="w-4 h-4" /> Thêm điều kiện
                         </button>
                         <button
-                          onClick={() => { setFilterConditions([]); setCurrentPageNum(1); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-50 bg-white transition-colors"
+                          type="button"
+                          onClick={() => { setFilterConditions([]); setAppliedFilterConditions([]); setCurrentPageNum(1); }}
+                          className={BTN_OUTLINE}
                         >
-                          <X className="w-3.5 h-3.5" /> Xóa bộ lọc
+                          <X className="w-4 h-4" /> Xóa bộ lọc
                         </button>
+                        {filterConditions.length > 0 && (
+                          <button type="button" onClick={applyDataFilters} className={BTN_PRIMARY}>
+                            <CheckCircle className="w-4 h-4" /> Áp dụng bộ lọc
+                          </button>
+                        )}
                       </div>
                       {filterConditions.length === 0 && (
-                        <p className="text-[13px] text-slate-400 italic">Chưa có điều kiện lọc. Nhấn "Thêm điều kiện" để bắt đầu.</p>
+                        <p className="text-[13px] text-[#64748B]">Chưa có điều kiện lọc. Nhấn "Thêm điều kiện" để bắt đầu.</p>
                       )}
                     </div>
                   </div>
@@ -1245,24 +1295,25 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
                 {/* Sort Panel */}
                 {showSortPanel && (
-                  <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                    <div className="flex flex-col gap-3">
+                  <div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg animate-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col gap-2">
                       {sortConditions.map((sc, i) => (
-                        <div key={sc.id} className="flex items-center gap-3">
+                        <div key={sc.id} className="flex items-center gap-2">
                           {i > 0 && (
-                            <span className="text-[12px] text-slate-400 font-medium w-8 text-right shrink-0">rồi</span>
+                            <span className="text-[13px] text-[#64748B] w-8 text-right shrink-0">rồi</span>
                           )}
                           {i === 0 && (
-                            <span className="text-[12px] text-slate-500 font-semibold w-8 text-right shrink-0">Theo</span>
+                            <span className="text-[13px] font-medium text-[#475569] w-8 text-right shrink-0">Theo</span>
                           )}
                           <select
+                            aria-label="Trường sắp xếp"
                             value={sc.field}
                             onChange={e => {
                               const updated = [...sortConditions];
                               updated[i] = { ...updated[i], field: e.target.value as SortCondition['field'] };
                               setSortConditions(updated);
                             }}
-                            className="flex-1 max-w-xs px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white"
+                            className={`${INPUT_CLS} flex-1 max-w-xs`}
                           >
                             <option value="name">Tên giá trị</option>
                             <option value="code">Mã</option>
@@ -1270,21 +1321,24 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                             <option value="updatedDate">Ngày cập nhật</option>
                           </select>
                           <select
+                            aria-label="Thứ tự sắp xếp"
                             value={sc.order}
                             onChange={e => {
                               const updated = [...sortConditions];
                               updated[i] = { ...updated[i], order: e.target.value as 'ASC' | 'DESC' };
                               setSortConditions(updated);
                             }}
-                            className="px-3 py-1.5 border border-slate-300 rounded text-[13px] w-44 focus:outline-none focus:border-blue-500 bg-white"
+                            className={`${INPUT_CLS} !w-44 shrink-0`}
                           >
                             <option value="ASC">Tăng dần (A → Z)</option>
                             <option value="DESC">Giảm dần (Z → A)</option>
                           </select>
                           <button
-                            onClick={() => setSortConditions(prev => prev.filter(s => s.id !== sc.id))}
-                            className="p-1.5 border border-red-200 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"
+                            type="button"
+                            aria-label="Xóa điều kiện"
                             title="Xóa điều kiện"
+                            onClick={() => setSortConditions(prev => prev.filter(s => s.id !== sc.id))}
+                            className={`${BTN_GHOST_ICON} !text-[#DC2626] hover:!bg-[#FEF2F2]`}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1292,37 +1346,40 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                       ))}
                       <div className="flex items-center gap-2 mt-1">
                         <button
+                          type="button"
                           onClick={() => setSortConditions(prev => [...prev, { id: Date.now().toString(), field: 'name', order: 'ASC' }])}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 rounded text-[13px] font-medium hover:bg-blue-50 bg-white transition-colors"
+                          className={BTN_OUTLINE}
                         >
-                          <Plus className="w-3.5 h-3.5" /> Thêm điều kiện
+                          <Plus className="w-4 h-4" /> Thêm điều kiện
                         </button>
                         <button
+                          type="button"
                           onClick={() => setSortConditions([])}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 text-slate-600 rounded text-[13px] font-medium hover:bg-slate-50 bg-white transition-colors"
+                          className={BTN_OUTLINE}
                         >
-                          <X className="w-3.5 h-3.5" /> Xóa bộ lọc
+                          <X className="w-4 h-4" /> Xóa bộ lọc
                         </button>
                       </div>
                       {sortConditions.length === 0 && (
-                        <p className="text-[13px] text-slate-400 italic">Chưa có điều kiện sắp xếp. Nhấn "Thêm điều kiện" để bắt đầu.</p>
+                        <p className="text-[13px] text-[#64748B]">Chưa có điều kiện sắp xếp. Nhấn "Thêm điều kiện" để bắt đầu.</p>
                       )}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Grid Table + Pagination */}
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+              {/* Grid Table + Pagination (compomennt.md 5.3) */}
+              <div className={TABLE_WRAP}>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
-                      <tr>
-                        <th className="px-4 py-4 w-10 text-center">
+                  <table className={TABLE_CLS}>
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={`${TH} text-center w-12`}>
                           {!readOnly && (
                             <input
                               type="checkbox"
                               title="Chọn tất cả bản ghi bản nháp"
+                              aria-label="Chọn tất cả bản ghi bản nháp"
                               checked={
                                 paginatedCategories.filter(c => c.status === 'draft').length > 0 &&
                                 paginatedCategories.filter(c => c.status === 'draft').every(c => selectedRecordIds.includes(c.id))
@@ -1335,135 +1392,114 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                                   setSelectedRecordIds(prev => prev.filter(id => !draftIds.includes(id)));
                                 }
                               }}
-                              className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              className={CHECKBOX_CLS}
                             />
                           )}
                         </th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-14 text-center">STT</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên giá trị</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mô tả</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái dữ liệu</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Trạng thái duyệt</th>
-                        <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-32">Thao tác</th>
+                        <th className={`${TH} text-center w-14`}>STT</th>
+                        <th className={`${TH} text-left`}>Mã</th>
+                        <th className={`${TH} text-left`}>Tên giá trị</th>
+                        <th className={`${TH} text-left`}>Mô tả</th>
+                        <th className={`${TH} text-left`}>Trạng thái dữ liệu</th>
+                        <th className={`${TH} text-left`}>Trạng thái duyệt</th>
+                        <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
+                    <tbody>
                       {paginatedCategories.length > 0 || addingRow ? (
                         <>
                           {paginatedCategories.map((category, index) => {
                             const isEditing = editingRowId === category.id;
+                            const isSelected = selectedRecordIds.includes(category.id);
                             return (
-                              <tr key={category.id} className={`hover:bg-slate-50/50 transition-all group border-b border-slate-100 ${isEditing ? 'bg-blue-50/10' : ''} ${selectedRecordIds.includes(category.id) ? 'bg-blue-50/30' : ''}`}>
-                                <td className="px-4 py-4 text-center">
+                              <tr key={category.id} className={rowCls(isSelected)}>
+                                <td className={`${TD} text-center`}>
                                   {!readOnly && (category.status === 'draft' ? (
                                     <input
                                       type="checkbox"
                                       title="Chọn bản ghi"
-                                      checked={selectedRecordIds.includes(category.id)}
+                                      aria-label="Chọn bản ghi"
+                                      checked={isSelected}
                                       onChange={(e) => {
                                         if (e.target.checked) setSelectedRecordIds(prev => [...prev, category.id]);
                                         else setSelectedRecordIds(prev => prev.filter(id => id !== category.id));
                                       }}
-                                      className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                      className={CHECKBOX_CLS}
                                     />
                                   ) : <span className="w-4 h-4 inline-block" />)}
                                 </td>
-                                <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                                <td className="px-6 py-4">
+                                <td className={`${TD} text-center`}>{(currentPageNum - 1) * pageSize + index + 1}</td>
+                                <td className={`${TD} max-w-[200px]`}>
                                   {isEditing ? (
                                     <input
                                       type="text"
                                       title="Mã"
                                       value={inlineEditData.code}
                                       onChange={(e) => setInlineEditData({ ...inlineEditData, code: e.target.value })}
-                                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono"
+                                      className={INLINE_INPUT}
                                       placeholder="Nhập mã"
                                     />
                                   ) : (
-                                    <span className="text-[13px] font-mono text-slate-700">
-                                      {category.code}
-                                    </span>
+                                    <TruncatedText text={category.code} />
                                   )}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className={`${TD} max-w-[360px]`}>
                                   {isEditing ? (
                                     <input
                                       type="text"
                                       title="Tên giá trị"
                                       value={inlineEditData.name}
                                       onChange={(e) => setInlineEditData({ ...inlineEditData, name: e.target.value })}
-                                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                      className={INLINE_INPUT}
                                       placeholder="Nhập tên giá trị"
                                     />
                                   ) : (
-                                    <div className="text-[13px] text-slate-900 font-normal">{category.name}</div>
+                                    <TruncatedText text={category.name} />
                                   )}
                                 </td>
-                                <td className="px-6 py-4 text-[13px] text-slate-600 font-normal">
+                                <td className={`${TD} max-w-[360px]`}>
                                   {isEditing ? (
                                     <input
                                       type="text"
                                       title="Mô tả"
                                       value={inlineEditData.description}
                                       onChange={(e) => setInlineEditData({ ...inlineEditData, description: e.target.value })}
-                                      className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                      className={INLINE_INPUT}
                                       placeholder="Nhập mô tả"
                                     />
                                   ) : (
-                                    category.description
+                                    <TruncatedText text={category.description} />
                                   )}
                                 </td>
-                                <td className="px-6 py-4 text-center">
-                                  {getDataStatusBadge(category.dataStatus)}
-                                </td>
-                                <td className="px-6 py-4 text-center">
-                                  {getRecordApprovalBadge(category.status)}
-                                </td>
-                                <td className="px-6 py-4 text-center">
+                                <td className={TD}>{getDataStatusBadge(category.dataStatus)}</td>
+                                <td className={TD}>{getRecordApprovalBadge(category.status)}</td>
+                                <td className={`${TD} text-center ${stickyTdCls(isSelected)}`}>
                                   {isEditing ? (
-                                    <div className="flex items-center justify-center gap-1.5">
-                                      <button
-                                        onClick={() => handleSaveInlineEdit(category.id)}
-                                        className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                                        title="Lưu"
-                                      >
+                                    <div className="flex items-center justify-center gap-1">
+                                      <RowIconAction label="Lưu" onClick={() => handleSaveInlineEdit(category.id)}>
                                         <Check className="w-4 h-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => setEditingRowId(null)}
-                                        className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                        title="Hủy"
-                                      >
+                                      </RowIconAction>
+                                      <RowIconAction label="Hủy" onClick={() => setEditingRowId(null)}>
                                         <X className="w-4 h-4" />
-                                      </button>
+                                      </RowIconAction>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
-                                      <button
-                                        onClick={() => { setViewingRecordDetail(category); setShowRecordDetailModal(true); }}
-                                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                        title="Xem chi tiết"
-                                      >
+                                    <div className="flex items-center justify-center gap-1">
+                                      <RowIconAction label="Xem chi tiết" onClick={() => { setViewingRecordDetail(category); setShowRecordDetailModal(true); }}>
                                         <Eye className="w-4 h-4" />
-                                      </button>
+                                      </RowIconAction>
                                       {!readOnly && (
                                         <>
-                                          <button
-                                            onClick={() => { setEditingRecord(category); setShowEditModal(true); }}
-                                            className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                            title="Chỉnh sửa"
-                                          >
+                                          <RowIconAction label="Chỉnh sửa" onClick={() => { setEditingRecord(category); setShowEditModal(true); }}>
                                             <SquarePen className="w-4 h-4" />
-                                          </button>
-                                          <button
-                                            disabled={category.status !== 'approved'}
+                                          </RowIconAction>
+                                          <RowIconAction
+                                            label="Ngừng áp dụng bản ghi"
+                                            disabledReason={category.status === 'approved' ? undefined : 'Chỉ có thể ngừng áp dụng bản ghi đã phê duyệt'}
                                             onClick={() => { setSelectedCategory(category); setShowArchiveModal(true); }}
-                                            className={`p-1.5 rounded-lg transition-colors ${category.status === 'approved' ? 'text-slate-500 hover:text-orange-600 hover:bg-orange-50 cursor-pointer' : 'text-slate-300 cursor-not-allowed'}`}
-                                            title={category.status === 'approved' ? 'Ngừng áp dụng bản ghi' : 'Chỉ có thể ngừng áp dụng bản ghi đã phê duyệt'}
                                           >
                                             <PowerOff className="w-4 h-4" />
-                                          </button>
+                                          </RowIconAction>
                                         </>
                                       )}
                                     </div>
@@ -1473,61 +1509,49 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                             );
                           })}
                           {addingRow && (
-                            <tr className="bg-blue-50/20 border-b border-slate-100">
-                              <td className="px-4 py-4" />
-                              <td className="px-6 py-4 text-[13px] text-slate-500 text-center">{(currentPageNum - 1) * pageSize + paginatedCategories.length + 1}</td>
-                              <td className="px-6 py-4">
+                            <tr className={rowCls(false)}>
+                              <td className={TD} />
+                              <td className={`${TD} text-center`}>{(currentPageNum - 1) * pageSize + paginatedCategories.length + 1}</td>
+                              <td className={TD}>
                                 <input
                                   type="text"
                                   title="Mã"
                                   value={inlineAddData.code}
                                   onChange={(e) => setInlineAddData({ ...inlineAddData, code: e.target.value })}
-                                  className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-mono"
+                                  className={INLINE_INPUT}
                                   placeholder="Mã *"
                                 />
                               </td>
-                              <td className="px-6 py-4">
+                              <td className={TD}>
                                 <input
                                   type="text"
                                   title="Tên giá trị"
                                   value={inlineAddData.name}
                                   onChange={(e) => setInlineAddData({ ...inlineAddData, name: e.target.value })}
-                                  className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                  className={INLINE_INPUT}
                                   placeholder="Tên giá trị *"
                                 />
                               </td>
-                              <td className="px-6 py-4">
+                              <td className={TD}>
                                 <input
                                   type="text"
                                   title="Mô tả"
                                   value={inlineAddData.description}
                                   onChange={(e) => setInlineAddData({ ...inlineAddData, description: e.target.value })}
-                                  className="w-full px-2 py-1 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                  className={INLINE_INPUT}
                                   placeholder="Mô tả"
                                 />
                               </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[12px] rounded-full whitespace-nowrap">Thêm mới</span>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 text-[12px] rounded-full whitespace-nowrap">Chưa duyệt</span>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <div className="flex items-center justify-center gap-1.5">
-                                  <button
-                                    onClick={handleSaveInlineAdd}
-                                    className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Lưu"
-                                  >
+                              <td className={TD}><Badge label="Thêm mới" variant="emerald" /></td>
+                              <td className={TD}><Badge label="Chưa duyệt" variant="slate" /></td>
+                              <td className={`${TD} text-center ${stickyTdCls(false)}`}>
+                                <div className="flex items-center justify-center gap-1">
+                                  <RowIconAction label="Lưu" onClick={handleSaveInlineAdd}>
                                     <Check className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => setAddingRow(false)}
-                                    className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                    title="Hủy"
-                                  >
+                                  </RowIconAction>
+                                  <RowIconAction label="Hủy" onClick={() => setAddingRow(false)}>
                                     <X className="w-4 h-4" />
-                                  </button>
+                                  </RowIconAction>
                                 </div>
                               </td>
                             </tr>
@@ -1535,7 +1559,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                         </>
                       ) : (
                         <tr>
-                          <td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
+                          <td colSpan={8} className={EMPTY_TD}>Không tìm thấy dữ liệu</td>
                         </tr>
                       )}
                     </tbody>
@@ -1547,30 +1571,24 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
           )}
 
           {activeTab === 'approval' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
 
               {activeApprovalTab === 'data-change' && (
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
-                     <h3 className="text-[18px] font-semibold text-slate-900">Phê duyệt danh mục cập nhật</h3>
-                    <p className="text-[13px] text-slate-500 mt-1">Quản lý các yêu cầu phê duyệt cập nhật danh mục</p>
+                    <h3 className="text-[16px] font-semibold text-[#020817]">Phê duyệt danh mục cập nhật</h3>
+                    <p className="text-[13px] text-[#64748B] mt-0.5">Quản lý các yêu cầu phê duyệt cập nhật danh mục</p>
                   </div>
                   {selectedApprovalIds.length > 0 && (
                     <div className="flex items-center gap-3">
-                      <span className="text-[13px] text-slate-600">
+                      <span className="text-[13px] text-[#475569]">
                         Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
                       </span>
-                      <button
-                        onClick={handleBulkApprove}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
-                      >
+                      <button type="button" onClick={handleBulkApprove} className={BTN_PRIMARY}>
                         <CheckCircle2 className="w-4 h-4" />
                         Phê duyệt hàng loạt
                       </button>
-                      <button
-                        onClick={handleBulkReject}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
-                      >
+                      <button type="button" onClick={handleBulkReject} className={BTN_DESTRUCTIVE}>
                         <XCircle className="w-4 h-4" />
                         Từ chối hàng loạt
                       </button>
@@ -1579,267 +1597,209 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                 </div>
               )}
 
-              {/* Stats Cards */}
+              {/* Stats Cards (compomennt.md 5.6.1) */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-orange-700">Chờ phê duyệt</p>
-                      <p className="text-2xl text-orange-900">{approvalStats.pending}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-green-700">Đã phê duyệt</p>
-                      <p className="text-2xl text-green-900">{approvalStats.approved}</p>
+                {approvalStatCards.map(card => (
+                  <div key={card.label} className={STAT_CARD}>
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${card.bg}`}>
+                        <card.icon className={`w-5 h-5 ${card.fg}`} />
+                      </div>
+                      <div>
+                        <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                        <div className="text-[16px] font-semibold text-[#0F172A]">{card.value}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                      <XCircle className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-red-700">Đã từ chối</p>
-                      <p className="text-2xl text-red-900">{approvalStats.rejected}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                      <Edit2 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-700">Tổng yêu cầu</p>
-                      <p className="text-2xl text-blue-900">{approvalStats.total}</p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {activeApprovalTab === 'data-change' && (
                 <>
-                  {/* Filters */}
-              <div className="bg-white border border-slate-200 rounded-lg p-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
-                      type="text"
-                      title="Tìm kiếm bản ghi phê duyệt"
-                      placeholder="Tìm kiếm theo mã, tên bản ghi..."
-                      value={searchTerm}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {[
-                      { value: 'all', label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
-                      { value: 'pending', label: 'Chờ phê duyệt', activeClass: 'bg-orange-500 text-white border-orange-500' },
-                      { value: 'approved', label: 'Đã phê duyệt', activeClass: 'bg-green-600 text-white border-green-600' },
-                      { value: 'rejected', label: 'Đã từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
-                    ].map(opt => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setApprovalStatusFilter(opt.value)}
-                        className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${
-                          approvalStatusFilter === opt.value
-                            ? opt.activeClass
-                            : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                        }`}
-                      >
-                        {opt.label}
+                  {/* Filters (compomennt.md 5.19) */}
+                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex-1 flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        title="Tìm kiếm bản ghi phê duyệt"
+                        aria-label="Tìm kiếm bản ghi phê duyệt"
+                        placeholder="Tìm kiếm theo mã, tên bản ghi..."
+                        value={searchInput}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                        className={SEARCH_INPUT_CLS}
+                      />
+                      <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+                        <Search className="w-5 h-5" />
                       </button>
-                    ))}
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[
+                        { value: 'all', label: 'Tất cả' },
+                        { value: 'pending', label: 'Chờ phê duyệt' },
+                        { value: 'approved', label: 'Đã phê duyệt' },
+                        { value: 'rejected', label: 'Đã từ chối' },
+                      ].map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          aria-pressed={approvalStatusFilter === opt.value}
+                          onClick={() => setApprovalStatusFilter(opt.value)}
+                          className={approvalStatusFilter === opt.value ? CHIP_ACTIVE : BTN_OUTLINE}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Table */}
-              <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50">
-                        <th className="px-4 py-3 text-left">
-                          <input
-                            type="checkbox"
-                            title="Chọn tất cả"
-                            checked={selectedApprovalIds.length === filteredApprovalRequests.filter(r => r.status === 'pending').length && filteredApprovalRequests.filter(r => r.status === 'pending').length > 0}
-                            onChange={toggleSelectAllApprovals}
-                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
-                          />
-                        </th>
-                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">STT</th>
-                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Mã bản ghi</th>
-                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Tên bản ghi</th>
-                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Mô tả</th>
-                        <th className="px-6 py-3 text-center text-[13px] font-medium text-slate-600">Trạng thái dữ liệu</th>
-                        <th className="px-6 py-3 text-center text-[13px] font-medium text-slate-600">Trạng thái</th>
-                        <th className="px-6 py-3 text-left text-[13px] font-medium text-slate-600">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredApprovalRequests.map((request, index) => (
-                        <tr key={request.id} className="border-b border-slate-100 hover:bg-slate-50">
-                          <td className="px-4 py-4">
-                            {request.status === 'pending' && (
+                  {/* Table */}
+                  <div className={TABLE_WRAP}>
+                    <div className="overflow-x-auto">
+                      <table className={TABLE_CLS}>
+                        <thead className="bg-[#F8FAFC]">
+                          <tr className="h-[42px]">
+                            <th className={`${TH} text-center w-12`}>
                               <input
                                 type="checkbox"
-                                title="Chọn bản ghi"
-                                checked={selectedApprovalIds.includes(request.id)}
-                                onChange={() => toggleSelectApproval(request.id)}
-                                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                                title="Chọn tất cả"
+                                aria-label="Chọn tất cả"
+                                checked={selectedApprovalIds.length === filteredApprovalRequests.filter(r => r.status === 'pending').length && filteredApprovalRequests.filter(r => r.status === 'pending').length > 0}
+                                onChange={toggleSelectAllApprovals}
+                                className={CHECKBOX_CLS}
                               />
-                            )}
-                          </td>
-                          <td className="px-6 py-3 text-[13px] text-slate-900">{index + 1}</td>
-                          <td className="px-6 py-3 text-[13px] text-slate-700">
-                            {request.recordCode}
-                          </td>
-                          <td className="px-6 py-3">
-                            <div className="text-[13px] text-slate-900">{request.recordName}</div>
-                          </td>
-                          <td className="px-6 py-3 text-[13px] text-slate-600">
-                            {request.description || '—'}
-                          </td>
-                          <td className="px-6 py-3 text-center">{getDataStatusBadge(request.dataStatus)}</td>
-                          <td className="px-6 py-3 text-center whitespace-nowrap">{getApprovalStatusBadge(request.status)}</td>
-                          <td className="px-6 py-3">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleViewApprovalDetail(request)}
-                                className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
-                                title="Xem chi tiết"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => request.status === 'pending' && handleApprove(request.id)}
-                                disabled={request.status !== 'pending'}
-                                className={`p-1 rounded transition-colors ${
-                                  request.status === 'pending'
-                                    ? 'text-green-600 hover:bg-green-50 cursor-pointer'
-                                    : 'text-slate-300 cursor-not-allowed'
-                                }`}
-                                title={request.status === 'pending' ? "Phê duyệt" : "Đã xử lý"}
-                              >
-                                <CheckCircle2 className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => request.status === 'pending' && handleReject(request.id)}
-                                disabled={request.status !== 'pending'}
-                                className={`p-1 rounded transition-colors ${
-                                  request.status === 'pending'
-                                    ? 'text-red-600 hover:bg-red-50 cursor-pointer'
-                                    : 'text-slate-300 cursor-not-allowed'
-                                }`}
-                                title={request.status === 'pending' ? "Từ chối" : "Đã xử lý"}
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              </>
+                            </th>
+                            <th className={`${TH} text-center w-14`}>STT</th>
+                            <th className={`${TH} text-left`}>Mã bản ghi</th>
+                            <th className={`${TH} text-left`}>Tên bản ghi</th>
+                            <th className={`${TH} text-left`}>Mô tả</th>
+                            <th className={`${TH} text-left`}>Trạng thái dữ liệu</th>
+                            <th className={`${TH} text-left`}>Trạng thái</th>
+                            <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredApprovalRequests.map((request, index) => {
+                            const isPending = request.status === 'pending';
+                            const isSelected = selectedApprovalIds.includes(request.id);
+                            return (
+                              <tr key={request.id} className={rowCls(isSelected)}>
+                                <td className={`${TD} text-center`}>
+                                  {isPending && (
+                                    <input
+                                      type="checkbox"
+                                      title="Chọn bản ghi"
+                                      aria-label="Chọn bản ghi"
+                                      checked={isSelected}
+                                      onChange={() => toggleSelectApproval(request.id)}
+                                      className={CHECKBOX_CLS}
+                                    />
+                                  )}
+                                </td>
+                                <td className={`${TD} text-center`}>{index + 1}</td>
+                                <td className={`${TD} max-w-[200px]`}><TruncatedText text={request.recordCode} /></td>
+                                <td className={`${TD} max-w-[360px]`}><TruncatedText text={request.recordName} /></td>
+                                <td className={`${TD} max-w-[360px]`}><TruncatedText text={request.description || '—'} /></td>
+                                <td className={TD}>{getDataStatusBadge(request.dataStatus)}</td>
+                                <td className={TD}>{getApprovalStatusBadge(request.status)}</td>
+                                <td className={`${TD} text-center ${stickyTdCls(isSelected)}`}>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <RowIconAction label="Xem chi tiết" onClick={() => handleViewApprovalDetail(request)}>
+                                      <Eye className="w-4 h-4" />
+                                    </RowIconAction>
+                                    <RowIconAction
+                                      label="Phê duyệt"
+                                      disabledReason={isPending ? undefined : 'Đã xử lý'}
+                                      onClick={() => { if (isPending) handleApprove(request.id); }}
+                                    >
+                                      <CheckCircle2 className="w-4 h-4" />
+                                    </RowIconAction>
+                                    <RowIconAction
+                                      label="Từ chối"
+                                      disabledReason={isPending ? undefined : 'Đã xử lý'}
+                                      onClick={() => { if (isPending) handleReject(request.id); }}
+                                    >
+                                      <XCircle className="w-4 h-4" />
+                                    </RowIconAction>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
               )}
 
               {activeApprovalTab === 'unpublish' && (
                 <>
                   {/* Phê duyệt hủy công khai danh mục */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg text-slate-900">Phê duyệt hủy công khai danh mục</h3>
-                      <p className="text-sm text-slate-500 mt-1">Quản lý các yêu cầu ngừng áp dụng (hủy công khai) danh mục</p>
-                    </div>
+                  <div>
+                    <h3 className="text-[16px] font-semibold text-[#020817]">Phê duyệt hủy công khai danh mục</h3>
+                    <p className="text-[13px] text-[#64748B] mt-0.5">Quản lý các yêu cầu ngừng áp dụng (hủy công khai) danh mục</p>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <div className={TABLE_WRAP}>
                     <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="bg-slate-50 border-b border-slate-200">
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-12">STT</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Mã danh mục</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tên danh mục</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Lý do hủy</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Người yêu cầu</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Thời gian yêu cầu</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Trạng thái</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider w-32">Thao tác</th>
+                      <table className={TABLE_CLS}>
+                        <thead className="bg-[#F8FAFC]">
+                          <tr className="h-[42px]">
+                            <th className={`${TH} text-center w-12`}>STT</th>
+                            <th className={`${TH} text-left`}>Mã danh mục</th>
+                            <th className={`${TH} text-left`}>Tên danh mục</th>
+                            <th className={`${TH} text-left`}>Lý do hủy</th>
+                            <th className={`${TH} text-left`}>Người yêu cầu</th>
+                            <th className={`${TH} text-left`}>Thời gian yêu cầu</th>
+                            <th className={`${TH} text-left`}>Trạng thái</th>
+                            <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
-                          {filteredUnpublishRequests.map((request, index) => (
-                            <tr key={request.id} className="hover:bg-slate-50">
-                              <td className="px-4 py-3 text-sm text-slate-900">{index + 1}</td>
-                              <td className="px-4 py-3 text-sm text-blue-600 font-medium">
-                                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md">
-                                  {request.categoryCode}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-sm text-slate-900 font-medium">{request.categoryName}</td>
-                              <td className="px-4 py-3 text-sm text-slate-600">{request.reason}</td>
-                              <td className="px-4 py-3 text-sm text-slate-900">{request.requestedBy}</td>
-                              <td className="px-4 py-3 text-sm text-slate-600">{request.requestedDate}</td>
-                              <td className="px-4 py-3">
-                                {request.status === 'pending' && (
-                                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Chờ duyệt</span>
-                                )}
-                                {request.status === 'approved' && (
-                                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Đã duyệt</span>
-                                )}
-                                {request.status === 'rejected' && (
-                                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">Từ chối</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex items-center justify-center gap-2">
-                                  {request.status === 'pending' && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          setSuccessNotificationMessage('Đã duyệt yêu cầu hủy công khai thành công!');
-                                          setShowSuccessNotification(true);
-                                          setTimeout(() => setShowSuccessNotification(false), 3000);
-                                        }}
-                                        className="p-1 text-green-600 hover:bg-green-50 rounded"
-                                        title="Phê duyệt"
-                                      >
-                                        <CheckCircle2 className="w-4 h-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => alert('Đã từ chối yêu cầu hủy công khai')}
-                                        className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                        title="Từ chối"
-                                      >
-                                        <XCircle className="w-4 h-4" />
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                        <tbody>
+                          {filteredUnpublishRequests.map((request, index) => {
+                            const [reqDate, ...reqTimeParts] = (request.requestedDate || '').split(' ');
+                            const reqTime = reqTimeParts.join(' ');
+                            return (
+                              <tr key={request.id} className={TR}>
+                                <td className={`${TD} text-center`}>{index + 1}</td>
+                                <td className={`${TD} max-w-[200px]`}><TruncatedText text={request.categoryCode} /></td>
+                                <td className={`${TD} max-w-[360px]`}><TruncatedText text={request.categoryName} /></td>
+                                <td className={`${TD} max-w-[360px]`}><TruncatedText text={request.reason} /></td>
+                                <td className={`${TD} max-w-[200px]`}><TruncatedText text={request.requestedBy} /></td>
+                                <td className={`${TD} whitespace-nowrap leading-[18px]`}>
+                                  <div>{reqDate}</div>
+                                  {reqTime && <div className="text-[#64748B]">{reqTime}</div>}
+                                </td>
+                                <td className={TD}>
+                                  {request.status === 'pending' && <Badge label="Chờ duyệt" variant="amber" />}
+                                  {request.status === 'approved' && <Badge label="Đã duyệt" variant="green" />}
+                                  {request.status === 'rejected' && <Badge label="Từ chối" variant="red" />}
+                                </td>
+                                <td className={`${TD} text-center ${STICKY_TD}`}>
+                                  <div className="flex items-center justify-center gap-1">
+                                    {request.status === 'pending' && (
+                                      <>
+                                        <RowIconAction
+                                          label="Phê duyệt"
+                                          onClick={() => {
+                                            setSuccessNotificationMessage('Đã duyệt yêu cầu hủy công khai thành công!');
+                                            setShowSuccessNotification(true);
+                                            setTimeout(() => setShowSuccessNotification(false), 3000);
+                                          }}
+                                        >
+                                          <CheckCircle2 className="w-4 h-4" />
+                                        </RowIconAction>
+                                        <RowIconAction label="Từ chối" onClick={() => toast.success('Đã từ chối yêu cầu hủy công khai')}>
+                                          <XCircle className="w-4 h-4" />
+                                        </RowIconAction>
+                                      </>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -1850,34 +1810,28 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
           )}
 
       {activeTab === 'publish' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Banner trạng thái công khai */}
-          <div className={`p-6 rounded-xl border flex items-center justify-between shadow-sm transition-all ${
-            publishStatus === 'published'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : publishStatus === 'stopped'
-              ? 'bg-red-50 border-red-200 text-red-950'
-              : 'bg-slate-50 border-slate-200 text-slate-900'
-          }`}>
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                publishStatus === 'published' ? 'bg-emerald-500 text-white' : publishStatus === 'stopped' ? 'bg-red-500 text-white' : 'bg-slate-300 text-slate-600'
-              }`}>
-                {publishStatus === 'published' ? <Globe className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+          <div className={`p-4 rounded-lg border flex items-center justify-between gap-4 flex-wrap ${publishTone.box}`}>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white">
+                {publishStatus === 'published'
+                  ? <Globe className={`w-5 h-5 ${publishTone.icon}`} />
+                  : <Lock className={`w-5 h-5 ${publishTone.icon}`} />}
               </div>
               <div>
-                <h4 className="font-bold text-[14px]">
+                <h4 className="text-[14px] font-semibold text-[#020817]">
                   Trạng thái: {publishStatus === 'published' ? 'ĐÃ CÔNG KHAI' : publishStatus === 'stopped' ? 'NGỪNG CÔNG KHAI' : 'CHƯA CÔNG KHAI'}
                 </h4>
-                <p className="text-[13px] text-slate-500 mt-1">
+                <p className="text-[13px] text-[#475569] mt-0.5">
                   {publishStatus === 'published' && (
                     <>
-                      Phạm vi chia sẻ: <strong>{shareScope === 'internal' ? 'Nội bộ' : shareScope === 'extended' ? 'Mở rộng' : 'Toàn dân'}</strong> | Người thực hiện: <strong>{publishActionInfo.user}</strong> | Ngày thực hiện: <strong>{publishActionInfo.date}</strong>
+                      Phạm vi chia sẻ: <strong className="font-medium text-[#020817]">{shareScope === 'internal' ? 'Nội bộ' : shareScope === 'extended' ? 'Mở rộng' : 'Toàn dân'}</strong> | Người thực hiện: <strong className="font-medium text-[#020817]">{publishActionInfo.user}</strong> | Ngày thực hiện: <strong className="font-medium text-[#020817]">{publishActionInfo.date}</strong>
                     </>
                   )}
                   {publishStatus === 'stopped' && (
                     <>
-                      Người thực hiện: <strong>{publishActionInfo.user}</strong> | Ngày thực hiện: <strong>{publishActionInfo.date}</strong> | Lý do: <span className="italic text-red-700 font-medium">"{publishActionInfo.reason || '—'}"</span>
+                      Người thực hiện: <strong className="font-medium text-[#020817]">{publishActionInfo.user}</strong> | Ngày thực hiện: <strong className="font-medium text-[#020817]">{publishActionInfo.date}</strong> | Lý do: <span className="text-[#B91C1C]">"{publishActionInfo.reason || '—'}"</span>
                     </>
                   )}
                   {publishStatus === 'unpublished' && (
@@ -1889,17 +1843,15 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
             <div>
               {publishStatus === 'published' ? (
                 <button
+                  type="button"
                   onClick={() => setShowUnpublishModal(true)}
-                  className="px-4 py-2 border border-red-200 bg-white text-red-600 rounded-lg hover:bg-red-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-2"
+                  className={`${BTN_OUTLINE} !text-[#DC2626] hover:!bg-[#FEF2F2]`}
                 >
                   <XCircle className="w-4 h-4" />
                   Hủy công khai
                 </button>
               ) : (
-                <button
-                  onClick={() => setShowPublishModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-2"
-                >
+                <button type="button" onClick={() => setShowPublishModal(true)} className={BTN_PRIMARY}>
                   <Globe className="w-4 h-4" />
                   Công khai
                 </button>
@@ -1909,48 +1861,44 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
           {/* Tiêu đề phần danh sách */}
           <div>
-            <h3 className="text-lg text-slate-900 font-semibold">Các trường dữ liệu của danh mục</h3>
-            <p className="text-sm text-slate-500 mt-1">Danh sách giá trị dữ liệu hiện có trong danh mục hệ thống</p>
+            <h3 className="text-[16px] font-semibold text-[#020817]">Các trường dữ liệu của danh mục</h3>
+            <p className="text-[13px] text-[#64748B] mt-0.5">Danh sách giá trị dữ liệu hiện có trong danh mục hệ thống</p>
           </div>
 
           {/* Table hiển thị dữ liệu không cần cột thao tác */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+          <div className={TABLE_WRAP}>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">STT</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mã</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên giá trị</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Mô tả</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trạng thái</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày tạo</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người tạo</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày cập nhật</th>
-                    <th className="px-6 py-4 text-left text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người cập nhật</th>
+              <table className={TABLE_CLS}>
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={`${TH} text-center w-14`}>STT</th>
+                    <th className={`${TH} text-left`}>Mã</th>
+                    <th className={`${TH} text-left`}>Tên giá trị</th>
+                    <th className={`${TH} text-left`}>Mô tả</th>
+                    <th className={`${TH} text-left`}>Trạng thái</th>
+                    <th className={`${TH} text-left`}>Ngày tạo</th>
+                    <th className={`${TH} text-left`}>Người tạo</th>
+                    <th className={`${TH} text-left`}>Ngày cập nhật</th>
+                    <th className={`${TH} text-left`}>Người cập nhật</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {categories.map((cat, idx) => (
-                    <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-slate-900">{idx + 1}</td>
-                      <td className="px-6 py-4 text-sm">
-                        <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
-                          {cat.code}
-                        </code>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-900 font-medium">{cat.name}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{cat.description || '—'}</td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap">{getStatusBadge(cat.status)}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{cat.createdDate}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{cat.createdBy || '—'}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{cat.updatedDate || '—'}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{cat.updatedBy || '—'}</td>
+                    <tr key={cat.id} className={TR}>
+                      <td className={`${TD} text-center`}>{idx + 1}</td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={cat.code} /></td>
+                      <td className={`${TD} max-w-[360px]`}><TruncatedText text={cat.name} /></td>
+                      <td className={`${TD} max-w-[360px]`}><TruncatedText text={cat.description || '—'} /></td>
+                      <td className={TD}>{getStatusBadge(cat.status)}</td>
+                      <td className={`${TD} whitespace-nowrap`}>{cat.createdDate}</td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={cat.createdBy || '—'} /></td>
+                      <td className={`${TD} whitespace-nowrap`}>{cat.updatedDate || '—'}</td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={cat.updatedBy || '—'} /></td>
                     </tr>
                   ))}
                   {categories.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-6 py-8 text-center text-[13px] text-slate-400 italic">Không tìm thấy dữ liệu</td>
+                      <td colSpan={9} className={EMPTY_TD}>Không tìm thấy dữ liệu</td>
                     </tr>
                   )}
                 </tbody>
@@ -1960,9 +1908,85 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
         </div>
       )}
 
-        </div>
+      {activeTab === 'version-history' && (
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-[16px] font-semibold text-[#020817]">Danh sách phiên bản</h3>
+            <p className="text-[13px] text-[#64748B] mt-0.5">Quản lý, tra cứu và đóng băng các phiên bản của danh mục hệ thống</p>
+          </div>
+          {/* Version History Table */}
+          <div className={TABLE_WRAP}>
+            <div className="overflow-x-auto">
+              <table className={TABLE_CLS}>
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={`${TH} text-left`}>Phiên bản</th>
+                    <th className={`${TH} text-left`}>Ngày thay đổi</th>
+                    <th className={`${TH} text-left`}>Ngày hiệu lực</th>
+                    <th className={`${TH} text-left`}>Người thay đổi</th>
+                    <th className={`${TH} text-left`}>Nội dung thay đổi</th>
+                    <th className={`${TH} text-left`}>Trạng thái</th>
+                    <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {versionHistoryList.map((history, index) => (
+                    <tr key={index} className={TR}>
+                      <td className={`${TD} whitespace-nowrap`}>{history.version}</td>
+                      <td className={`${TD} whitespace-nowrap`}>{history.date}</td>
+                      <td className={`${TD} whitespace-nowrap`}>{history.effectiveDate}</td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={history.user} /></td>
+                      <td className={`${TD} max-w-[360px]`}><TruncatedText text={history.changes} /></td>
+                      <td className={TD}>
+                        {history.status === 'active'
+                          ? <Badge label="Hiệu lực" variant="green" />
+                          : <Badge label="Lưu trữ" variant="slate" />}
+                      </td>
+                      <td className={`${TD} text-center ${STICKY_TD}`}>
+                        <div className="flex items-center justify-center gap-1">
+                          {/* 1. Xem chi tiết */}
+                          <RowIconAction label="Xem chi tiết" onClick={() => setShowCategoryInfoModal(true)}>
+                            <Eye className="w-4 h-4" />
+                          </RowIconAction>
 
-      {/* Add/Edit Modal */}
+                          {/* 2. Khóa / Mở khóa */}
+                          {history.status === 'locked' ? (
+                            <RowIconAction
+                              label="Mở tham chiếu"
+                              onClick={() => setVersionHistoryList(prev => prev.map((v, i) => i === index ? { ...v, status: 'archived' } : v))}
+                            >
+                              <Unlock className="w-4 h-4" />
+                            </RowIconAction>
+                          ) : (
+                            <RowIconAction
+                              label="Ngừng tham chiếu"
+                              disabledReason={history.status === 'active' ? 'Không thể khóa phiên bản đang hiệu lực' : undefined}
+                              onClick={() => setVersionHistoryList(prev => prev.map((v, i) => i === index ? { ...v, status: 'locked' } : v))}
+                            >
+                              <Lock className="w-4 h-4" />
+                            </RowIconAction>
+                          )}
+
+                          {/* 3. Tải xuống */}
+                          <RowIconAction
+                            label="Tải xuống"
+                            disabledReason={history.status === 'locked' ? 'Không thể tải xuống phiên bản đã ngừng tham chiếu' : undefined}
+                            onClick={() => toast.info('Đang tải xuống dữ liệu phiên bản ' + history.version)}
+                          >
+                            <Download className="w-4 h-4" />
+                          </RowIconAction>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+        </div>
 
       {/* Create Version Modal */}
       <CreateVersionModal
@@ -1978,85 +2002,64 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
       />
 
       {showPublishModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <Globe className="w-5 h-5 text-blue-600" />
-                Công khai danh mục
-              </h3>
-              <button
-                onClick={() => setShowPublishModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                title="Đóng"
-              >
-                <XCircle className="w-5 h-5" />
-              </button>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-md`}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Công khai danh mục</h3>
+              {closeIconBtn(() => setShowPublishModal(false))}
             </div>
-            <div className="p-6 space-y-4 text-[13px]">
-              <p className="text-slate-600 font-medium leading-relaxed">
-                Vui lòng lựa chọn phạm vi chia sẻ (phân quyền công khai) cho danh mục <strong>{categoryName}</strong>:
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <p className="text-[13px] text-[#020817]">
+                Vui lòng lựa chọn phạm vi chia sẻ (phân quyền công khai) cho danh mục <strong className="font-medium">{categoryName}</strong>:
               </p>
 
               {/* Thông tin nhanh của danh mục: Trạng thái phê duyệt / Phiên bản hiện hành / Quyền chia sẻ hiện tại */}
-              <div className="text-[13px] text-slate-500 space-y-1">
-                <p className="text-[13px]">Trạng thái phê duyệt: <span className="text-[13px] text-slate-700 font-medium">{lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}</span></p>
-                <p className="text-[13px]">Phiên bản hiện hành: <span className="text-[13px] text-slate-700 font-medium">v{currentCategoryEntity.version ?? 1}</span></p>
-                <p className="text-[13px]">Quyền chia sẻ: <span className="text-[13px] text-slate-700 font-medium">{scopeLabels[currentCategoryEntity.scope]}</span></p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Trạng thái phê duyệt</div>
+                  <div className={FIELD_VALUE}>{lifecycleLabels[currentCategoryEntity.lifecycleStatus].label}</div>
+                </div>
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Phiên bản hiện hành</div>
+                  <div className={FIELD_VALUE}>v{currentCategoryEntity.version ?? 1}</div>
+                </div>
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Quyền chia sẻ</div>
+                  <div className={FIELD_VALUE}>{scopeLabels[currentCategoryEntity.scope]}</div>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <input
-                    type="radio"
-                    name="shareScope"
-                    checked={shareScope === 'internal'}
-                    onChange={() => setShareScope('internal')}
-                    className="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                  />
-                  <div>
-                    <strong className="block text-slate-800">Nội bộ</strong>
-                    <span className="text-slate-500 text-[13px] mt-0.5 block">Dữ liệu chỉ được chia sẻ và sử dụng trong nội bộ đơn vị, cơ quan.</span>
-                  </div>
-                </label>
-                
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <input
-                    type="radio"
-                    name="shareScope"
-                    checked={shareScope === 'extended'}
-                    onChange={() => setShareScope('extended')}
-                    className="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                  />
-                  <div>
-                    <strong className="block text-slate-800">Mở rộng</strong>
-                    <span className="text-slate-500 text-[13px] mt-0.5 block">Chia sẻ cho các đơn vị liên kết, cơ quan thuộc Bộ Tư pháp.</span>
-                  </div>
-                </label>
-                
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  <input
-                    type="radio"
-                    name="shareScope"
-                    checked={shareScope === 'public'}
-                    onChange={() => setShareScope('public')}
-                    className="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                  />
-                  <div>
-                    <strong className="block text-slate-800">Toàn dân</strong>
-                    <span className="text-slate-500 text-[13px] mt-0.5 block">Dữ liệu mở, cho phép mọi người dân và doanh nghiệp khai thác tự do.</span>
-                  </div>
-                </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'internal' as const, title: 'Nội bộ', desc: 'Dữ liệu chỉ được chia sẻ và sử dụng trong nội bộ đơn vị, cơ quan.' },
+                  { value: 'extended' as const, title: 'Mở rộng', desc: 'Chia sẻ cho các đơn vị liên kết, cơ quan thuộc Bộ Tư pháp.' },
+                  { value: 'public' as const, title: 'Toàn dân', desc: 'Dữ liệu mở, cho phép mọi người dân và doanh nghiệp khai thác tự do.' },
+                ].map(opt => (
+                  <label
+                    key={opt.value}
+                    className={`flex items-start gap-3 p-3 border rounded-lg transition-colors cursor-pointer ${shareScope === opt.value ? 'border-[#BFDBFE] bg-[#EAF3FF]' : 'border-[#E2E8F0] hover:bg-[#F8FAFC]'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="shareScope"
+                      checked={shareScope === opt.value}
+                      onChange={() => setShareScope(opt.value)}
+                      className="mt-0.5 w-4 h-4 accent-blue-600 cursor-pointer"
+                    />
+                    <div>
+                      <span className="block text-[13px] font-medium text-[#020817]">{opt.title}</span>
+                      <span className="block text-[13px] text-[#64748B] mt-0.5">{opt.desc}</span>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-              <button
-                onClick={() => setShowPublishModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
-              >
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowPublishModal(false)} className={BTN_OUTLINE}>
                 Hủy bỏ
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setPublishStatus('published');
                   setPublishActionInfo({
@@ -2069,7 +2072,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   setShowSuccessNotification(true);
                   setTimeout(() => setShowSuccessNotification(false), 3000);
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5"
+                className={BTN_PRIMARY}
               >
                 <Check className="w-4 h-4" />
                 Xác nhận
@@ -2080,62 +2083,52 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
       )}
 
       {showUnpublishModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-red-700 uppercase tracking-wider flex items-center gap-2">
-                <XCircle className="w-5 h-5 text-red-600" />
-                Hủy công khai danh mục
-              </h3>
-              <button
-                onClick={() => {
-                  setShowUnpublishModal(false);
-                  setUnpublishReason('');
-                }}
-                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                title="Đóng"
-              >
-                <XCircle className="w-5 h-5" />
-              </button>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-md`}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Hủy công khai danh mục</h3>
+              {closeIconBtn(() => { setShowUnpublishModal(false); setUnpublishReason(''); })}
             </div>
-            <div className="p-6 space-y-4 text-[13px]">
-              <p className="text-slate-600 font-medium leading-relaxed">
-                Bạn có chắc chắn muốn hủy công khai danh mục <strong>{categoryName}</strong>? Vui lòng nhập lý do hủy công khai:
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <p className="text-[13px] text-[#020817]">
+                Bạn có chắc chắn muốn hủy công khai danh mục <strong className="font-medium">{categoryName}</strong>? Vui lòng nhập lý do hủy công khai:
               </p>
               {exploitingApiCount > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <p className="text-amber-800">
-                    Danh mục đang được khai thác bởi <strong>{exploitingApiCount}</strong> API.
+                <div className={BANNER_WARN}>
+                  <AlertCircle className="w-4 h-4 text-[#D97706] mt-0.5 shrink-0" />
+                  <p>
+                    Danh mục đang được khai thác bởi <strong className="font-medium">{exploitingApiCount}</strong> API.
                   </p>
                 </div>
               )}
               <div>
-                <label className="block text-slate-700 font-semibold mb-2">Lý do hủy công khai <span className="text-red-500">*</span></label>
+                <label className={LABEL_CLS}>Lý do hủy công khai <span className={REQUIRED_MARK}>*</span></label>
                 <textarea
                   title="Lý do hủy công khai"
                   value={unpublishReason}
                   onChange={(e) => setUnpublishReason(e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className={TEXTAREA_CLS}
                   placeholder="Nhập lý do chi tiết..."
                 />
               </div>
             </div>
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => {
                   setShowUnpublishModal(false);
                   setUnpublishReason('');
                 }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                className={BTN_OUTLINE}
               >
                 Hủy bỏ
               </button>
               <button
+                type="button"
                 onClick={() => {
                   if (!unpublishReason.trim()) {
-                    alert('Vui lòng nhập lý do hủy công khai!');
+                    toast.error('Vui lòng nhập lý do hủy công khai!');
                     return;
                   }
                   setPublishStatus('stopped');
@@ -2151,7 +2144,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   setTimeout(() => setShowSuccessNotification(false), 3000);
                   setUnpublishReason('');
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-[13px] transition-colors cursor-pointer active:scale-95 flex items-center gap-1.5"
+                className={BTN_DESTRUCTIVE}
               >
                 <Check className="w-4 h-4" />
                 Xác nhận
@@ -2163,49 +2156,37 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Archive Modal */}
       {showArchiveModal && selectedCategory && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                  <PowerOff className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg text-slate-900">Ngừng áp dụng bản ghi</h3>
-                  <p className="text-sm text-slate-500">Yêu cầu ngừng áp dụng bản ghi {selectedCategory.name}</p>
-                </div>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-lg`}>
+            <div className={MODAL_HEADER}>
+              <div>
+                <h3 className={MODAL_TITLE}>Ngừng áp dụng bản ghi</h3>
+                <p className={MODAL_SUBTITLE}>Yêu cầu ngừng áp dụng bản ghi {selectedCategory.name}</p>
               </div>
-              <button
-                onClick={() => {
-                  setShowArchiveModal(false);
-                  setSelectedCategory(null);
-                  setArchiveRequestData({ reason: '', approver: '' });
-                }}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {closeIconBtn(() => {
+                setShowArchiveModal(false);
+                setSelectedCategory(null);
+                setArchiveRequestData({ reason: '', approver: '' });
+              })}
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-red-800">
-                    Bản ghi ngừng áp dụng sẽ không được sử dụng ở các màn hình nhập liệu khác, nhưng vẫn giữ lại trong lịch sử dữ liệu.
-                  </div>
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <div className={BANNER_DANGER}>
+                <AlertCircle className="w-4 h-4 text-[#DC2626] mt-0.5 shrink-0" />
+                <div>
+                  Bản ghi ngừng áp dụng sẽ không được sử dụng ở các màn hình nhập liệu khác, nhưng vẫn giữ lại trong lịch sử dữ liệu.
                 </div>
               </div>
-              
+
               <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Người phê duyệt <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Người phê duyệt <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   title="Người phê duyệt"
                   value={archiveRequestData.approver}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setArchiveRequestData({ ...archiveRequestData, approver: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                 >
                   <option value="">Chọn người phê duyệt</option>
                   {approvers.map((approver) => (
@@ -2217,38 +2198,40 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
               </div>
 
               <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  Nội dung sao ngừng (Lý do) <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Nội dung sao ngừng (Lý do) <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <textarea
                   title="Lý do ngừng áp dụng"
                   value={archiveRequestData.reason}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setArchiveRequestData({ ...archiveRequestData, reason: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={TEXTAREA_CLS}
                   placeholder="Nhập lý do ngừng áp dụng bản ghi..."
                 />
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => {
                   setShowArchiveModal(false);
                   setSelectedCategory(null);
                   setArchiveRequestData({ reason: '', approver: '' });
                 }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                className={BTN_OUTLINE}
               >
                 Hủy bỏ
               </button>
               <button
+                type="button"
                 onClick={() => {
                   if (!archiveRequestData.approver || !archiveRequestData.reason.trim()) {
-                    alert('Vui lòng chọn người phê duyệt và nhập lý do ngừng áp dụng!');
+                    toast.error('Vui lòng chọn người phê duyệt và nhập lý do ngừng áp dụng!');
                     return;
                   }
-                  
+
                   const selectedApprover = approvers.find(a => a.id === archiveRequestData.approver);
                   setCategories(prev => prev.map(c =>
                     c.id === selectedCategory.id ? { ...c, status: 'pending' as const, dataStatus: 'inactive' as const } : c
@@ -2261,7 +2244,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   setSelectedCategory(null);
                   setArchiveRequestData({ reason: '', approver: '' });
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className={BTN_DESTRUCTIVE}
               >
                 <Send className="w-4 h-4" />
                 Gửi phê duyệt
@@ -2339,86 +2322,81 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
         }}
       />
 
-      {/* Xem chi tiết bản ghi (tab Dữ liệu) — lưới 2 cột, nhãn trên/giá trị dưới, theo mẫu "Chi tiết bản ghi" của Xem dữ liệu thu thập */}
+      {/* Xem chi tiết bản ghi (tab Dữ liệu) — lưới 2 cột nhãn–giá trị (compomennt.md 5.17) */}
       {showRecordDetailModal && viewingRecordDetail && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
-            <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-              <h3 className="text-xl font-bold text-slate-900">Chi tiết bản ghi</h3>
-              <button
-                onClick={() => { setShowRecordDetailModal(false); setViewingRecordDetail(null); }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer"
-                title="Đóng chi tiết"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-2xl`}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Chi tiết bản ghi</h3>
+              {closeIconBtn(() => { setShowRecordDetailModal(false); setViewingRecordDetail(null); }, 'Đóng chi tiết')}
             </div>
-            <div className="flex-1 overflow-auto px-8 py-6">
-              <div className="grid grid-cols-2 gap-x-10 gap-y-5">
+            <div className={MODAL_BODY}>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 <div>
-                  <div className="text-sm text-slate-500 mb-1">Mã</div>
-                  <div className="text-base text-slate-900 font-medium font-mono">{viewingRecordDetail.code}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Mã</div>
+                  <div className={FIELD_VALUE}>{viewingRecordDetail.code}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-slate-500 mb-1">Tên giá trị</div>
-                  <div className="text-base text-slate-900 font-medium">{viewingRecordDetail.name}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Tên giá trị</div>
+                  <div className={FIELD_VALUE}>{viewingRecordDetail.name}</div>
                 </div>
                 <div className="col-span-2">
-                  <div className="text-sm text-slate-500 mb-1">Mô tả</div>
-                  <div className="text-base text-slate-900 font-medium">{viewingRecordDetail.description || '—'}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Mô tả</div>
+                  <div className={FIELD_VALUE}>{viewingRecordDetail.description || '—'}</div>
                 </div>
 
-                <div className="col-span-2 border-t border-slate-100 pt-5 grid grid-cols-2 gap-x-10 gap-y-5">
+                <div className="col-span-2 border-t border-[#E2E8F0] pt-4 grid grid-cols-2 gap-x-6 gap-y-4">
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Trạng thái dữ liệu</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Trạng thái dữ liệu</div>
                     <div>{getDataStatusBadge(viewingRecordDetail.dataStatus)}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Trạng thái duyệt</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Trạng thái duyệt</div>
                     <div>{getRecordApprovalBadge(viewingRecordDetail.status)}</div>
                   </div>
                   {viewingRecordDetail.status === 'rejected' && (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-500 mb-1">Nội dung từ chối</div>
-                      <div className="text-base text-rose-700 font-medium bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                      <div className={`${FIELD_LABEL} mb-1`}>Nội dung từ chối</div>
+                      <div className={BANNER_DANGER}>
                         {viewingRecordDetail.rejectReason || 'Không có nội dung từ chối được ghi nhận.'}
                       </div>
                     </div>
                   )}
                   {viewingRecordDetail.status !== 'rejected' && viewingRecordDetail.status !== 'draft' && viewingRecordDetail.status !== 'pending' && (
                     <div className="col-span-2">
-                      <div className="text-sm text-slate-500 mb-1">Nội dung phê duyệt</div>
-                      <div className="text-base text-emerald-700 font-medium bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                      <div className={`${FIELD_LABEL} mb-1`}>Nội dung phê duyệt</div>
+                      <div className={BANNER_SUCCESS}>
                         {viewingRecordDetail.approvalNote || 'Không có ghi chú phê duyệt.'}
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="col-span-2 border-t border-slate-100 pt-5 grid grid-cols-2 gap-x-10 gap-y-5">
+                <div className="col-span-2 border-t border-[#E2E8F0] pt-4 grid grid-cols-2 gap-x-6 gap-y-4">
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Ngày tạo</div>
-                    <div className="text-base text-slate-900 font-medium">{viewingRecordDetail.createdDate}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Ngày tạo</div>
+                    <div className={FIELD_VALUE}>{viewingRecordDetail.createdDate}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Người tạo</div>
-                    <div className="text-base text-slate-900 font-medium">{viewingRecordDetail.createdBy || '—'}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Người tạo</div>
+                    <div className={FIELD_VALUE}>{viewingRecordDetail.createdBy || '—'}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Ngày cập nhật</div>
-                    <div className="text-base text-slate-900 font-medium">{viewingRecordDetail.updatedDate || '—'}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Ngày cập nhật</div>
+                    <div className={FIELD_VALUE}>{viewingRecordDetail.updatedDate || '—'}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-slate-500 mb-1">Người cập nhật</div>
-                    <div className="text-base text-slate-900 font-medium">{viewingRecordDetail.updatedBy || '—'}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Người cập nhật</div>
+                    <div className={FIELD_VALUE}>{viewingRecordDetail.updatedBy || '—'}</div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-end flex-shrink-0 bg-white">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => { setShowRecordDetailModal(false); setViewingRecordDetail(null); }}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors cursor-pointer"
+                className={BTN_OUTLINE}
               >
                 Đóng
               </button>
@@ -2472,98 +2450,6 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
         }}
       />
 
-      {activeTab === 'version-history' && (
-        <div className="space-y-4">
-          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
-             <h3 className="font-bold text-slate-800 text-[15px]">Danh sách phiên bản</h3>
-             <p className="text-sm text-slate-500 mt-1">Quản lý, tra cứu và đóng băng các phiên bản của danh mục hệ thống</p>
-          </div>
-          {/* Version History Table */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Phiên bản</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Ngày thay đổi</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Ngày hiệu lực</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Người thay đổi</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Nội dung thay đổi</th>
-                    <th className="px-4 py-3 text-left text-xs text-slate-600">Trạng thái</th>
-                    <th className="px-4 py-3 text-center text-xs text-slate-600">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {versionHistoryList.map((history, index) => (
-                    <tr key={index} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-900">{history.version}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{history.date}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{history.effectiveDate}</td>
-                      <td className="px-4 py-3 text-sm text-slate-900">{history.user}</td>
-                      <td className="px-4 py-3 text-sm text-slate-700">{history.changes}</td>
-                      <td className="px-4 py-3">
-                        {history.status === 'active' ? (
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-[13px] rounded-full">Hiệu lực</span>
-                        ) : (
-                          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[13px] rounded-full">Lưu trữ</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-2">
-                          {/* 1. Xem chi tiết */}
-                          <button
-                            onClick={() => {
-                               setShowCategoryInfoModal(true);
-                            }}
-                            className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
-                            title="Xem chi tiết"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-
-                          {/* 3. Khóa / Mở khóa */}
-                          {history.status === 'locked' ? (
-                            <button
-                              onClick={() => setVersionHistoryList(prev => prev.map((v, i) => i === index ? { ...v, status: 'archived' } : v))}
-                              className="p-1 text-slate-500 hover:bg-slate-100 rounded cursor-pointer"
-                              title="Mở tham chiếu"
-                            >
-                              <Unlock className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <button
-                              disabled={history.status === 'active'}
-                              onClick={() => setVersionHistoryList(prev => prev.map((v, i) => i === index ? { ...v, status: 'locked' } : v))}
-                              className={`p-1 rounded ${history.status === 'active' ? 'text-slate-300 cursor-not-allowed' : 'text-orange-600 hover:bg-orange-50 cursor-pointer'}`}
-                              title={history.status === 'active' ? 'Không thể khóa phiên bản đang hiệu lực' : 'Ngừng tham chiếu'}
-                            >
-                              <Lock className="w-4 h-4" />
-                            </button>
-                          )}
-
-                          {/* 4. Tải xuống */}
-                          <button
-                            disabled={history.status === 'locked'}
-                            onClick={() => alert('Đang tải xuống dữ liệu phiên bản ' + history.version)}
-                            className={`p-1 rounded ${history.status === 'locked' ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50 cursor-pointer'}`}
-                            title={history.status === 'locked' ? 'Không thể tải xuống phiên bản đã ngừng tham chiếu' : 'Tải xuống'}
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-
-        </div>
-      )}
-
       {/* Xem chi tiết danh mục (chỉ xem) — mở từ nút "Xem chi tiết" ở tab Phiên bản */}
       <CategoryInfoViewModal
         isOpen={showCategoryInfoModal}
@@ -2576,50 +2462,35 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
         onReject={() => {}}
       />
 
-
-
-
       {/* Add Field Modal */}
       {showAddFieldModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
-          style={{ zIndex: 99999 }}
-          onClick={() => setShowAddFieldModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
-              <button title="Đóng" aria-label="Đóng"
-                onClick={() => setShowAddFieldModal(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className={MODAL_OVERLAY} onClick={() => setShowAddFieldModal(false)}>
+          <div className={`${MODAL_BOX} max-w-2xl`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Thêm trường dữ liệu mới</h3>
+              {closeIconBtn(() => setShowAddFieldModal(false))}
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className={`${MODAL_BODY} space-y-4`}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Tên trường *</label>
+                  <label className={LABEL_CLS}>Tên trường <span className={REQUIRED_MARK}>*</span></label>
                   <input
                     type="text"
                     title="Tên trường"
                     value={newFieldData.name}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setNewFieldData({ ...newFieldData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                     placeholder="Nhập tên trường"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Kiểu dữ liệu *</label>
+                  <label className={LABEL_CLS}>Kiểu dữ liệu <span className={REQUIRED_MARK}>*</span></label>
                   <select
                     title="Kiểu dữ liệu"
                     value={newFieldData.dataType}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setNewFieldData({ ...newFieldData, dataType: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="TEXT">Text</option>
                     <option value="NUMBER">Number</option>
@@ -2631,39 +2502,37 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Bắt buộc *</label>
+                  <label className={LABEL_CLS}>Bắt buộc <span className={REQUIRED_MARK}>*</span></label>
                   <select
                     title="Trường bắt buộc"
                     value={newFieldData.required ? 'true' : 'false'}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setNewFieldData({ ...newFieldData, required: e.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="true">Có</option>
                     <option value="false">Không</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Giá trị mặc định</label>
+                  <label className={LABEL_CLS}>Giá trị mặc định</label>
                   <input
                     type="text"
                     title="Giá trị mặc định"
                     value={newFieldData.defaultValue || ''}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setNewFieldData({ ...newFieldData, defaultValue: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                     placeholder="Nhập giá trị mặc định"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <button title="Đóng" aria-label="Đóng"
-                onClick={() => setShowAddFieldModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-              >
+            <div className={MODAL_FOOTER}>
+              <button type="button" title="Đóng" aria-label="Đóng" onClick={() => setShowAddFieldModal(false)} className={BTN_OUTLINE}>
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={() => {
                   const currentDate = new Date().toLocaleDateString('vi-VN');
                   setNewCategoryFields([...newCategoryFields, { ...newFieldData, id: Date.now().toString() }]);
@@ -2677,7 +2546,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   }, ...prev]);
                   setNewFieldData({ name: '', dataType: 'TEXT', required: false, defaultValue: '', maxLength: 255, description: '', isPrimaryKey: false, isForeignKey: false, referenceTable: '', referenceField: '' });
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className={BTN_PRIMARY}
               >
                 <Plus className="w-4 h-4" />
                 Thêm trường
@@ -2689,29 +2558,17 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Field Form Modal */}
       {showFieldFormModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
-          style={{ zIndex: 99999 }}
-          onClick={() => setShowFieldFormModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Thêm trường dữ liệu mới</h3>
-              <button title="Đóng" aria-label="Đóng"
-                onClick={() => setShowFieldFormModal(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className={MODAL_OVERLAY} onClick={() => setShowFieldFormModal(false)}>
+          <div className={`${MODAL_BOX} max-w-2xl`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Thêm trường dữ liệu mới</h3>
+              {closeIconBtn(() => setShowFieldFormModal(false))}
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className={`${MODAL_BODY} space-y-4`}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Tên trường *</label>
+                  <label className={LABEL_CLS}>Tên trường <span className={REQUIRED_MARK}>*</span></label>
                   <input
                     type="text"
                     title="Tên trường"
@@ -2722,20 +2579,20 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                         setFieldErrors({ ...fieldErrors, name: '' });
                       }
                     }}
-                    className={`w-full px-3 py-2 border ${fieldErrors.name ? 'border-red-500' : 'border-slate-300'} rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    className={`${INPUT_CLS} ${fieldErrors.name ? '!border-[#DC2626]' : ''}`}
                     placeholder="Nhập tên trường"
                   />
                   {fieldErrors.name && (
-                    <p className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>
+                    <p className="text-[12px] text-[#DC2626] mt-1">{fieldErrors.name}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Kiểu dữ liệu *</label>
+                  <label className={LABEL_CLS}>Kiểu dữ liệu <span className={REQUIRED_MARK}>*</span></label>
                   <select
                     title="Kiểu dữ liệu"
                     value={newFieldData.dataType}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setNewFieldData({ ...newFieldData, dataType: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="TEXT">Text</option>
                     <option value="NUMBER">Number</option>
@@ -2749,7 +2606,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Khóa chính</label>
+                  <label className={LABEL_CLS}>Khóa chính</label>
                   <select
                     title="Khóa chính"
                     value={newFieldData.isPrimaryKey ? 'true' : 'false'}
@@ -2757,53 +2614,53 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                       const isPrimary = e.target.value === 'true';
                       setNewFieldData({ ...newFieldData, isPrimaryKey: isPrimary });
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="false">Không</option>
                     <option value="true">Có</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Bắt buộc *</label>
+                  <label className={LABEL_CLS}>Bắt buộc <span className={REQUIRED_MARK}>*</span></label>
                   <select
                     title="Trường bắt buộc"
                     value={newFieldData.required ? 'true' : 'false'}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setNewFieldData({ ...newFieldData, required: e.target.value === 'true' })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="true">Có</option>
                     <option value="false">Không</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-700 mb-1">Độ dài tối đa</label>
+                  <label className={LABEL_CLS}>Độ dài tối đa</label>
                   <input
                     type="number"
                     title="Độ dài tối đa"
                     value={newFieldData.maxLength || ''}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setNewFieldData({ ...newFieldData, maxLength: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                     placeholder="Nhập độ dài tối đa"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm text-slate-700 mb-1">Giá trị mặc định</label>
+                <label className={LABEL_CLS}>Giá trị mặc định</label>
                 <input
                   type="text"
                   title="Giá trị mặc định"
                   value={newFieldData.defaultValue || ''}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setNewFieldData({ ...newFieldData, defaultValue: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                   placeholder="Nhập giá trị mặc định"
                 />
               </div>
 
               {/* Foreign Key Section */}
-              <div className="border-t border-slate-200 pt-4">
+              <div className="border-t border-[#E2E8F0] pt-4">
                 <div className="mb-3">
-                  <label className="block text-sm text-slate-700 mb-1">Khóa ngoại</label>
+                  <label className={LABEL_CLS}>Khóa ngoại</label>
                   <select
                     title="Khóa ngoại"
                     value={newFieldData.isForeignKey ? 'true' : 'false'}
@@ -2811,7 +2668,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                       const isForeign = e.target.value === 'true';
                       setNewFieldData({ ...newFieldData, isForeignKey: isForeign });
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   >
                     <option value="false">Không</option>
                     <option value="true">Có</option>
@@ -2821,7 +2678,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                 {newFieldData.isForeignKey && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-slate-700 mb-1">Bảng tham chiếu *</label>
+                      <label className={LABEL_CLS}>Bảng tham chiếu <span className={REQUIRED_MARK}>*</span></label>
                       <select
                         title="Bảng tham chiếu"
                         value={newFieldData.referenceTable || ''}
@@ -2831,7 +2688,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                             setFieldErrors({ ...fieldErrors, referenceTable: '' });
                           }
                         }}
-                        className={`w-full px-3 py-2 border ${fieldErrors.referenceTable ? 'border-red-500' : 'border-slate-300'} rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        className={`${INPUT_CLS} ${fieldErrors.referenceTable ? '!border-[#DC2626]' : ''}`}
                       >
                         <option value="">Chọn bảng</option>
                         <option value="danh_muc_a">Biên tập danh mục A</option>
@@ -2839,11 +2696,11 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                         <option value="danh_muc_c">Danh mục C</option>
                       </select>
                       {fieldErrors.referenceTable && (
-                        <p className="text-xs text-red-600 mt-1">{fieldErrors.referenceTable}</p>
+                        <p className="text-[12px] text-[#DC2626] mt-1">{fieldErrors.referenceTable}</p>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm text-slate-700 mb-1">Trường tham chiếu *</label>
+                      <label className={LABEL_CLS}>Trường tham chiếu <span className={REQUIRED_MARK}>*</span></label>
                       <select
                         title="Trường tham chiếu"
                         value={newFieldData.referenceField || ''}
@@ -2853,7 +2710,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                             setFieldErrors({ ...fieldErrors, referenceField: '' });
                           }
                         }}
-                        className={`w-full px-3 py-2 border ${fieldErrors.referenceField ? 'border-red-500' : 'border-slate-300'} rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        className={`${INPUT_CLS} ${fieldErrors.referenceField ? '!border-[#DC2626]' : ''}`}
                       >
                         <option value="">Chọn trường</option>
                         <option value="id">ID</option>
@@ -2861,7 +2718,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                         <option value="ten">Tên</option>
                       </select>
                       {fieldErrors.referenceField && (
-                        <p className="text-xs text-red-600 mt-1">{fieldErrors.referenceField}</p>
+                        <p className="text-[12px] text-[#DC2626] mt-1">{fieldErrors.referenceField}</p>
                       )}
                     </div>
                   </div>
@@ -2869,26 +2726,24 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
               </div>
 
               <div>
-                <label className="block text-sm text-slate-700 mb-1">Mô tả</label>
+                <label className={LABEL_CLS}>Mô tả</label>
                 <textarea
                   rows={3}
                   title="Mô tả"
                   value={newFieldData.description || ''}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewFieldData({ ...newFieldData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={TEXTAREA_CLS}
                   placeholder="Nhập mô tả về trường..."
                 />
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                onClick={() => setShowFieldFormModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-              >
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowFieldFormModal(false)} className={BTN_OUTLINE}>
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={() => {
                   // Validation
                   const errors: { [key: string]: string } = {};
@@ -2951,7 +2806,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   setFieldErrors({});
                   setShowFieldFormModal(false);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className={BTN_PRIMARY}
               >
                 <Plus className="w-4 h-4" />
                 Thêm trường
@@ -2963,37 +2818,23 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Import Excel Modal */}
       {showImportModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
-          style={{ zIndex: 99999 }}
-          onClick={handleCancelImport}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Upload className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg text-slate-900">Nhập dữ liệu từ Excel</h3>
-                  <p className="text-sm text-slate-500">Tải lên file Excel để nhập hàng loạt danh mục</p>
-                </div>
+        <div className={MODAL_OVERLAY} onClick={handleCancelImport}>
+          <div className={`${MODAL_BOX} max-w-5xl`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <div>
+                <h3 className={MODAL_TITLE}>Nhập dữ liệu từ Excel</h3>
+                <p className={MODAL_SUBTITLE}>Tải lên file Excel để nhập hàng loạt danh mục</p>
               </div>
-              <button onClick={handleCancelImport} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
-                <X className="w-5 h-5" />
-              </button>
+              {closeIconBtn(handleCancelImport)}
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1">
+            <div className={`${MODAL_BODY} space-y-4`}>
               {/* File Upload Section */}
-              <div className="mb-6">
-                <label className="block text-sm text-slate-700 mb-2">
-                  Chọn file Excel <span className="text-red-500">*</span>
+              <div>
+                <label className={LABEL_CLS}>
+                  Chọn file Excel <span className={REQUIRED_MARK}>*</span>
                 </label>
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-[#CBD5E1] rounded-lg p-6 text-center hover:bg-[#F8FAFC] transition-colors">
                   <input title="Trường dữ liệu"
                     type="file"
                     accept=".xlsx,.xls,.csv"
@@ -3001,85 +2842,85 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                     className="hidden"
                     id="excel-upload"
                   />
-                  <label htmlFor="excel-upload" className="cursor-pointer">
-                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Upload className="w-8 h-8 text-green-600" />
+                  <label htmlFor="excel-upload" className="cursor-pointer block">
+                    <div className="p-3 rounded-lg bg-green-50 inline-flex mb-3">
+                      <Upload className="w-6 h-6 text-green-600" />
                     </div>
-                    <p className="text-sm text-slate-600 mb-1">
+                    <p className="text-[13px] text-[#020817] mb-1">
                       {importFile ? importFile.name : 'Nhấn để chọn file hoặc kéo thả file vào đây'}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[12px] text-[#64748B]">
                       Hỗ trợ: .xlsx, .xls, .csv (Tối đa 10MB)
                     </p>
                   </label>
                 </div>
 
                 {/* Template Download */}
-                <div className="mt-4 flex items-center gap-2 text-sm">
+                <div className="mt-3 flex items-center gap-2 text-[13px]">
                   <FileDown className="w-4 h-4 text-blue-600" />
                   <a href="#" className="text-blue-600 hover:underline">
                     Tải file mẫu Excel
                   </a>
-                  <span className="text-slate-500">để xem cấu trúc dữ liệu yêu cầu</span>
+                  <span className="text-[#64748B]">để xem cấu trúc dữ liệu yêu cầu</span>
                 </div>
               </div>
 
               {/* Format Guide */}
-              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm text-blue-900 mb-2 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  Định dạng file Excel yêu cầu
-                </h4>
-                <div className="text-xs text-blue-800 space-y-1">
-                  <p>• Cột 1: Mã danh mục (bắt buộc)</p>
-                  <p>• Cột 2: Tên danh mục (bắt buộc)</p>
-                  <p>• Cột 3: Mô tả</p>
-                  <p>• Cột 4: Loại danh mục (Tiêu chuẩn / Tham chiếu / Hệ thống)</p>
-                  <p>• Dòng đầu tiên là tiêu đề cột, dữ liệu bắt đầu từ dòng thứ 2</p>
+              <div className={BANNER_INFO}>
+                <AlertCircle className="w-4 h-4 text-[#155DFC] mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="font-medium mb-1">Định dạng file Excel yêu cầu</h4>
+                  <div className="space-y-1">
+                    <p>• Cột 1: Mã danh mục (bắt buộc)</p>
+                    <p>• Cột 2: Tên danh mục (bắt buộc)</p>
+                    <p>• Cột 3: Mô tả</p>
+                    <p>• Cột 4: Loại danh mục (Tiêu chuẩn / Tham chiếu / Hệ thống)</p>
+                    <p>• Dòng đầu tiên là tiêu đề cột, dữ liệu bắt đầu từ dòng thứ 2</p>
+                  </div>
                 </div>
               </div>
 
               {/* Errors */}
               {importErrors.length > 0 && (
-                <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="text-sm text-red-900 mb-2 flex items-center gap-2">
-                    <XCircle className="w-4 h-4" />
-                    Phát hiện {importErrors.length} lỗi
-                  </h4>
-                  <ul className="text-xs text-red-800 space-y-1 max-h-32 overflow-y-auto">
-                    {importErrors.map((error, index) => (
-                      <li key={index}>• {error}</li>
-                    ))}
-                  </ul>
+                <div className={BANNER_DANGER}>
+                  <XCircle className="w-4 h-4 text-[#DC2626] mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="font-medium mb-1">Phát hiện {importErrors.length} lỗi</h4>
+                    <ul className="space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                      {importErrors.map((error, index) => (
+                        <li key={index}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               )}
 
               {/* Preview Data */}
               {importPreviewData.length > 0 && (
                 <div>
-                  <h4 className="text-sm text-slate-900 mb-3">
+                  <h4 className={SECTION_TITLE}>
                     Xem trước dữ liệu ({importPreviewData.length} bản ghi)
                   </h4>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto max-h-96">
-                      <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50 sticky top-0">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-xs text-slate-600">STT</th>
-                            <th className="px-4 py-3 text-left text-xs text-slate-600">Mã danh mục</th>
-                            <th className="px-4 py-3 text-left text-xs text-slate-600">Tên danh mục</th>
-                            <th className="px-4 py-3 text-left text-xs text-slate-600">Mô tả</th>
-                            <th className="px-4 py-3 text-left text-xs text-slate-600">Loại</th>
+                  <div className={TABLE_WRAP}>
+                    <div className="overflow-x-auto max-h-96 custom-scrollbar">
+                      <table className={TABLE_CLS}>
+                        <thead className="bg-[#F8FAFC] sticky top-0">
+                          <tr className="h-[42px]">
+                            <th className={`${TH} text-center w-14`}>STT</th>
+                            <th className={`${TH} text-left`}>Mã danh mục</th>
+                            <th className={`${TH} text-left`}>Tên danh mục</th>
+                            <th className={`${TH} text-left`}>Mô tả</th>
+                            <th className={`${TH} text-left`}>Loại</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
+                        <tbody>
                           {importPreviewData.map((item, index) => (
-                            <tr key={index} className="hover:bg-slate-50">
-                              <td className="px-4 py-3 text-sm text-slate-600">{index + 1}</td>
-                              <td className="px-4 py-3 text-sm text-slate-900">{item.code}</td>
-                              <td className="px-4 py-3 text-sm text-slate-900">{item.name}</td>
-                              <td className="px-4 py-3 text-sm text-slate-600">{item.description}</td>
-                              <td className="px-4 py-3">{getTypeBadge(item.type)}</td>
+                            <tr key={index} className={TR}>
+                              <td className={`${TD} text-center`}>{index + 1}</td>
+                              <td className={`${TD} max-w-[200px]`}><TruncatedText text={item.code} /></td>
+                              <td className={`${TD} max-w-[360px]`}><TruncatedText text={item.name} /></td>
+                              <td className={`${TD} max-w-[360px]`}><TruncatedText text={item.description} /></td>
+                              <td className={TD}>{getTypeBadge(item.type)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -3090,23 +2931,21 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
-              <div className="text-sm text-slate-600">
+            <div className={`${MODAL_FOOTER} !justify-between items-center`}>
+              <div className="text-[13px] text-[#475569]">
                 {importPreviewData.length > 0 && (
                   <span>Sẵn sàng nhập {importPreviewData.length} bản ghi</span>
                 )}
               </div>
               <div className="flex gap-3">
-                <button title="Đóng" aria-label="Đóng"
-                  onClick={handleCancelImport}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                >
+                <button type="button" title="Đóng" aria-label="Đóng" onClick={handleCancelImport} className={BTN_OUTLINE}>
                   Hủy
                 </button>
                 <button
+                  type="button"
                   onClick={handleImportConfirm}
                   disabled={importPreviewData.length === 0 || importErrors.length > 0}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center gap-2"
+                  className={BTN_PRIMARY}
                 >
                   <Check className="w-4 h-4" />
                   Xác nhận nhập
@@ -3119,69 +2958,50 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Approval Detail Modal */}
       {showApprovalDetailModal && selectedApprovalRequest && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200"
-          style={{ zIndex: 99999 }}
-          onClick={() => setShowApprovalDetailModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Eye className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg text-slate-900">Chi tiết thay đổi</h3>
-                  <p className="text-sm text-slate-500">Xem các thay đổi của bản ghi</p>
-                </div>
+        <div className={MODAL_OVERLAY} onClick={() => setShowApprovalDetailModal(false)}>
+          <div className={`${MODAL_BOX} max-w-3xl`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <div>
+                <h3 className={MODAL_TITLE}>Chi tiết thay đổi</h3>
+                <p className={MODAL_SUBTITLE}>Xem các thay đổi của bản ghi</p>
               </div>
-              <button title="Đóng" aria-label="Đóng"
-                onClick={() => setShowApprovalDetailModal(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {closeIconBtn(() => setShowApprovalDetailModal(false))}
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1">
+            <div className={`${MODAL_BODY} space-y-4`}>
               {/* Record Info */}
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1">Mã bản ghi</label>
-                    <code className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">
-                      {selectedApprovalRequest.recordCode}
-                    </code>
+                    <div className={`${FIELD_LABEL} mb-1`}>Mã bản ghi</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalRequest.recordCode}</div>
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1">Tên bản ghi</label>
-                    <div className="text-sm text-slate-900">{selectedApprovalRequest.recordName}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Tên bản ghi</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalRequest.recordName}</div>
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1">Người thay đổi</label>
-                    <div className="text-sm text-slate-900">{selectedApprovalRequest.changedBy}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Người thay đổi</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalRequest.changedBy}</div>
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1">Thời gian thay đổi</label>
-                    <div className="text-sm text-slate-900">{selectedApprovalRequest.changedDate}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Thời gian thay đổi</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalRequest.changedDate}</div>
                   </div>
                   {selectedApprovalRequest.approvedDate && (
                     <>
                       <div>
-                        <label className="block text-xs text-slate-600 mb-1">Người phê duyệt</label>
-                        <div className="text-sm text-slate-900">{selectedApprovalRequest.approvedBy}</div>
+                        <div className={`${FIELD_LABEL} mb-1`}>Người phê duyệt</div>
+                        <div className={FIELD_VALUE}>{selectedApprovalRequest.approvedBy}</div>
                       </div>
                       <div>
-                        <label className="block text-xs text-slate-600 mb-1">Thời gian phê duyệt</label>
-                        <div className="text-sm text-slate-900">{selectedApprovalRequest.approvedDate}</div>
+                        <div className={`${FIELD_LABEL} mb-1`}>Thời gian phê duyệt</div>
+                        <div className={FIELD_VALUE}>{selectedApprovalRequest.approvedDate}</div>
                       </div>
                     </>
                   )}
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
+                    <div className={`${FIELD_LABEL} mb-1`}>Trạng thái</div>
                     {getApprovalStatusBadge(selectedApprovalRequest.status)}
                   </div>
                 </div>
@@ -3189,24 +3009,24 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
               {/* Changes */}
               <div>
-                <h4 className="text-sm text-slate-900 mb-3">Các thay đổi ({selectedApprovalRequest.changedFields.length})</h4>
-                <div className="space-y-4">
+                <h4 className={SECTION_TITLE}>Các thay đổi ({selectedApprovalRequest.changedFields.length})</h4>
+                <div className="space-y-3">
                   {Object.entries(selectedApprovalRequest.changes).map(([fieldName, values]: [string, any]) => (
-                    <div key={fieldName} className="border border-slate-200 rounded-lg p-4">
-                      <div className="text-sm text-slate-700 mb-3 flex items-center gap-2">
-                        <Tag className="w-4 h-4 text-slate-500" />
-                        <strong>{fieldName}</strong>
+                    <div key={fieldName} className="rounded-2xl border border-[#E2E8F0] p-4">
+                      <div className="text-[13px] font-medium text-[#020817] mb-3 flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-[#64748B]" />
+                        {fieldName}
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-slate-500 mb-2">Giá trị cũ</label>
-                          <div className="bg-red-50 border border-red-200 rounded px-3 py-2 text-sm text-red-900">
+                          <div className="text-[13px] text-[#64748B] mb-1">Giá trị cũ</div>
+                          <div className="bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg px-3 py-2 text-[13px] text-[#B91C1C]">
                             {values.old}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-500 mb-2">Giá trị mới</label>
-                          <div className="bg-green-50 border border-green-200 rounded px-3 py-2 text-sm text-green-900">
+                          <div className="text-[13px] text-[#64748B] mb-1">Giá trị mới</div>
+                          <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-lg px-3 py-2 text-[13px] text-[#15803D]">
                             {values.new}
                           </div>
                         </div>
@@ -3218,41 +3038,40 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
               {/* Rejection Reason */}
               {selectedApprovalRequest.status === 'rejected' && selectedApprovalRequest.rejectionReason && (
-                <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="text-sm text-red-900 mb-2 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    Lý do từ chối
-                  </h4>
-                  <p className="text-sm text-red-800">{selectedApprovalRequest.rejectionReason}</p>
+                <div className={BANNER_DANGER}>
+                  <AlertCircle className="w-4 h-4 text-[#DC2626] mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="font-medium mb-1">Lý do từ chối</h4>
+                    <p>{selectedApprovalRequest.rejectionReason}</p>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
-              <button
-                onClick={() => setShowApprovalDetailModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-              >
+            <div className={`${MODAL_FOOTER} !justify-between items-center`}>
+              <button type="button" onClick={() => setShowApprovalDetailModal(false)} className={BTN_OUTLINE}>
                 Đóng
               </button>
               {selectedApprovalRequest.status === 'pending' && (
                 <div className="flex gap-3">
                   <button
+                    type="button"
                     onClick={() => {
                       handleReject(selectedApprovalRequest.id);
                       setShowApprovalDetailModal(false);
                     }}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                    className={BTN_DESTRUCTIVE}
                   >
                     <XCircle className="w-4 h-4" />
                     Từ chối
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       handleApprove(selectedApprovalRequest.id);
                       setShowApprovalDetailModal(false);
                     }}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                    className={BTN_PRIMARY}
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     Phê duyệt
@@ -3266,72 +3085,64 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Approval Modal */}
       {showApprovalModal && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+        <div
+          className={MODAL_OVERLAY}
           onClick={() => {
             setShowApprovalModal(false);
             setApprovalComment('');
             setPendingApprovalIds([]);
           }}
         >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg text-slate-900">Xác nhận phê duyệt</h3>
-                  <p className="text-sm text-slate-500">Phê duyệt {pendingApprovalIds.length} yêu cầu thay đổi</p>
-                </div>
+          <div className={`${MODAL_BOX} max-w-lg`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <div>
+                <h3 className={MODAL_TITLE}>Xác nhận phê duyệt</h3>
+                <p className={MODAL_SUBTITLE}>Phê duyệt {pendingApprovalIds.length} yêu cầu thay đổi</p>
               </div>
+              {closeIconBtn(() => {
+                setShowApprovalModal(false);
+                setApprovalComment('');
+                setPendingApprovalIds([]);
+              })}
             </div>
 
-            <div className="p-6">
+            <div className={`${MODAL_BODY} space-y-4`}>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
-                  Nội dung phê duyệt <span className="text-slate-400">(Không bắt buộc)</span>
+                <label className={LABEL_CLS}>
+                  Nội dung phê duyệt <span className="font-normal text-[#94A3B8]">(Không bắt buộc)</span>
                 </label>
                 <textarea
                   title="Ghi chú phê duyệt"
                   value={approvalComment}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setApprovalComment(e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={TEXTAREA_CLS}
                   placeholder="Nhập nội dung phê duyệt, ghi chú hoặc ý kiến (nếu có)..."
                 />
               </div>
 
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-xs text-blue-700">
-                    <p className="font-medium">Lưu ý:</p>
-                    <p className="mt-1">Sau khi phê duyệt, các thay đổi sẽ được áp dụng vào hệ thống và không thể hoàn tác.</p>
-                  </div>
+              <div className={BANNER_INFO}>
+                <AlertCircle className="w-4 h-4 text-[#155DFC] mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-medium">Lưu ý:</p>
+                  <p className="mt-1">Sau khi phê duyệt, các thay đổi sẽ được áp dụng vào hệ thống và không thể hoàn tác.</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => {
                   setShowApprovalModal(false);
                   setApprovalComment('');
                   setPendingApprovalIds([]);
                 }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                className={BTN_OUTLINE}
               >
                 Hủy
               </button>
-              <button
-                onClick={confirmApproval}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
+              <button type="button" onClick={confirmApproval} className={BTN_PRIMARY}>
                 <CheckCircle2 className="w-4 h-4" />
                 Xác nhận phê duyệt
               </button>
@@ -3342,72 +3153,64 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Reject Modal */}
       {showRejectModal && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
+        <div
+          className={MODAL_OVERLAY}
           onClick={() => {
             setShowRejectModal(false);
             setApprovalComment('');
             setPendingApprovalIds([]);
           }}
         >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                  <XCircle className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg text-slate-900">Xác nhận từ chối</h3>
-                  <p className="text-sm text-slate-500">Từ chối {pendingApprovalIds.length} yêu cầu thay đổi</p>
-                </div>
+          <div className={`${MODAL_BOX} max-w-lg`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <div>
+                <h3 className={MODAL_TITLE}>Xác nhận từ chối</h3>
+                <p className={MODAL_SUBTITLE}>Từ chối {pendingApprovalIds.length} yêu cầu thay đổi</p>
               </div>
+              {closeIconBtn(() => {
+                setShowRejectModal(false);
+                setApprovalComment('');
+                setPendingApprovalIds([]);
+              })}
             </div>
 
-            <div className="p-6">
+            <div className={`${MODAL_BODY} space-y-4`}>
               <div>
-                <label className="block text-sm text-slate-700 mb-2">
-                  Lý do từ chối <span className="text-red-600">*</span>
+                <label className={LABEL_CLS}>
+                  Lý do từ chối <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <textarea
                   title="Lý do từ chối"
                   value={approvalComment}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setApprovalComment(e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={TEXTAREA_CLS}
                   placeholder="Nhập lý do từ chối yêu cầu thay đổi..."
                 />
               </div>
 
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-xs text-red-700">
-                    <p className="font-medium">Lưu ý:</p>
-                    <p className="mt-1">Vui lòng nhập rõ lý do từ chối để người yêu cầu có thể hiểu và chỉnh sửa lại.</p>
-                  </div>
+              <div className={BANNER_DANGER}>
+                <AlertCircle className="w-4 h-4 text-[#DC2626] mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-medium">Lưu ý:</p>
+                  <p className="mt-1">Vui lòng nhập rõ lý do từ chối để người yêu cầu có thể hiểu và chỉnh sửa lại.</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => {
                   setShowRejectModal(false);
                   setApprovalComment('');
                   setPendingApprovalIds([]);
                 }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                className={BTN_OUTLINE}
               >
                 Hủy
               </button>
-              <button
-                onClick={confirmReject}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
+              <button type="button" onClick={confirmReject} className={BTN_DESTRUCTIVE}>
                 <XCircle className="w-4 h-4" />
                 Xác nhận từ chối
               </button>
@@ -3419,20 +3222,22 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
       {/* Success Notification */}
       {showSuccessNotification && (
         <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg flex items-center gap-3 min-w-[420px]">
-            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <Check className="w-5 h-5 text-white" />
+          <div className="bg-white border border-[#DCFCE7] rounded-lg p-4 shadow-lg flex items-start gap-3 min-w-[420px]">
+            <div className="p-2 rounded-lg bg-green-50 shrink-0">
+              <Check className="w-5 h-5 text-green-600" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm text-green-900">Gửi yêu cầu thành công</h4>
-              <p className="text-xs text-green-700 mt-1">
+              <h4 className="text-[14px] font-medium text-[#020817]">Gửi yêu cầu thành công</h4>
+              <p className="text-[13px] text-[#475569] mt-0.5">
                 {successNotificationMessage || 'Yêu cầu chỉnh sửa danh mục đã được gửi đến bộ phận phê duyệt'}
               </p>
             </div>
             <button
+              type="button"
               onClick={() => setShowSuccessNotification(false)}
               title="Đóng thông báo"
-              className="text-green-600 hover:text-green-800"
+              aria-label="Đóng thông báo"
+              className={BTN_GHOST_ICON}
             >
               <X className="w-4 h-4" />
             </button>
@@ -3442,94 +3247,85 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Compare Modal */}
       {showCompareModal && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
-          onClick={() => setShowCompareModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-800">
-                 <BarChart3 className="w-5 h-5 text-blue-600"/>
-                 <h3 className="text-[17px] font-bold">So sánh phiên bản dữ liệu</h3>
+        <div className={MODAL_OVERLAY} onClick={() => setShowCompareModal(false)}>
+          <div className={`${MODAL_BOX} max-w-4xl`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>So sánh phiên bản dữ liệu</h3>
+              {closeIconBtn(() => setShowCompareModal(false))}
+            </div>
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <div className={BANNER_INFO}>
+                <BarChart3 className="w-4 h-4 text-[#155DFC] mt-0.5 shrink-0" />
+                <div>
+                  <p>Đang so sánh <strong className="font-medium">v2.0</strong> với <strong className="font-medium">v3.2 (Hiện tại)</strong></p>
+                  <p className="text-[#475569] mt-1">Phát hiện <span className="font-medium text-[#DC2626]">3 thay đổi</span> về cấu trúc và <span className="font-medium text-[#D97706]">1 thay đổi</span> về quy tắc.</p>
+                </div>
               </div>
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowCompareModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+
+              <div className={TABLE_WRAP}>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className="h-[42px]">
+                      <th className={`${TH} text-left w-1/4`}>Tên trường / Thuộc tính</th>
+                      <th className={`${TH} text-left w-[15%]`}>Hành động</th>
+                      <th className={`${TH} text-left w-[30%]`}>Phiên bản cũ (v2.0)</th>
+                      <th className={`${TH} text-left w-[30%]`}>Phiên bản mới (v3.2)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Added Field */}
+                    <tr className={TR}>
+                      <td className={TD}>Số điện thoại liên hệ</td>
+                      <td className={TD}><Badge label="Thêm mới" variant="green" /></td>
+                      <td className={`${TD} text-[#64748B]`}>Chưa có</td>
+                      <td className={`${TD} py-2`}>
+                        <div className="flex flex-col gap-1">
+                          <span>Kiểu dữ liệu: <span className="text-blue-600">string</span></span>
+                          <span>Chiều dài: 20</span>
+                        </div>
+                      </td>
+                    </tr>
+                    {/* Modified Field - DataType */}
+                    <tr className={TR}>
+                      <td className={TD}>Mã tỉnh</td>
+                      <td className={TD}><Badge label="Sửa kiểu dữ liệu" variant="blue" /></td>
+                      <td className={TD}>
+                        Kiểu dữ liệu: <span className="text-[#DC2626]">number</span>
+                      </td>
+                      <td className={TD}>
+                        Kiểu dữ liệu: <span className="text-[#15803D]">string</span>
+                      </td>
+                    </tr>
+                    {/* Modified Field - Constraint */}
+                    <tr className={TR}>
+                      <td className={TD}>Mã tỉnh</td>
+                      <td className={TD}><Badge label="Sửa ràng buộc" variant="purple" /></td>
+                      <td className={TD}>
+                        Unique Index: <span className="text-[#DC2626]">Không có</span>
+                      </td>
+                      <td className={TD}>
+                        Unique Index: <span className="text-[#15803D]">Đã thiết lập</span>
+                      </td>
+                    </tr>
+                    {/* Removed Field */}
+                    <tr className={TR}>
+                      <td className={TD}>Ghi chú phụ</td>
+                      <td className={TD}><Badge label="Xóa bỏ" variant="red" /></td>
+                      <td className={TD}>
+                        Trường dữ liệu kiểu string
+                      </td>
+                      <td className={`${TD} text-[#64748B]`}>
+                        Đã gỡ bỏ khỏi cấu trúc
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className={MODAL_FOOTER}>
+              <button type="button" title="Đóng" aria-label="Đóng" onClick={() => setShowCompareModal(false)} className={BTN_OUTLINE}>
+                Đóng
               </button>
-            </div>
-            <div className="p-6">
-              <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mb-4">
-                 <p className="text-[14px] text-blue-800">Đang so sánh <strong>v2.0</strong> với <strong>v3.2 (Hiện tại)</strong></p>
-                 <p className="text-[13px] text-slate-600 mt-1">Phát hiện <span className="font-bold text-red-600">3 thay đổi</span> về cấu trúc và <span className="font-bold text-orange-600">1 thay đổi</span> về quy tắc.</p>
-              </div>
-              
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                 <table className="w-full text-left text-[13px]">
-                   <thead className="bg-[#f8fafc] border-b border-slate-200 text-slate-700">
-                     <tr>
-                       <th className="px-4 py-3 font-semibold w-1/4">Tên trường / Thuộc tính</th>
-                       <th className="px-4 py-3 font-semibold w-[15%]">Hành động</th>
-                       <th className="px-4 py-3 font-semibold w-[30%]">Phiên bản cũ (v2.0)</th>
-                       <th className="px-4 py-3 font-semibold w-[30%]">Phiên bản mới (v3.2)</th>
-                     </tr>
-                   </thead>
-                   <tbody className="divide-y divide-slate-100">
-                     {/* Added Field */}
-                     <tr className="bg-green-50/30">
-                       <td className="px-4 py-3 font-medium text-slate-800">Số điện thoại liên hệ</td>
-                       <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">Thêm mới</span></td>
-                       <td className="px-4 py-3 text-slate-500 italic">Chưa có</td>
-                       <td className="px-4 py-3 text-slate-800">
-                         <div className="flex flex-col gap-1">
-                           <span>Kiểu dữ liệu: <code className="bg-white border border-slate-200 px-1 rounded text-blue-600">string</code></span>
-                           <span>Chiều dài: <code className="bg-white border border-slate-200 px-1 rounded">20</code></span>
-                         </div>
-                       </td>
-                     </tr>
-                     {/* Modified Field - DataType */}
-                     <tr className="bg-blue-50/30">
-                       <td className="px-4 py-3 font-medium text-slate-800">Mã tỉnh</td>
-                       <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">Sửa kiểu dữ liệu</span></td>
-                       <td className="px-4 py-3 text-slate-800">
-                         Kiểu dữ liệu: <code className="bg-white border border-slate-200 px-1 rounded text-red-600">number</code>
-                       </td>
-                       <td className="px-4 py-3 text-green-700 font-medium">
-                         Kiểu dữ liệu: <code className="bg-white border border-slate-200 px-1 rounded text-green-600">string</code>
-                       </td>
-                     </tr>
-                     {/* Modified Field - Constraint */}
-                     <tr className="bg-purple-50/30">
-                       <td className="px-4 py-3 font-medium text-slate-800">Mã tỉnh</td>
-                       <td className="px-4 py-3"><span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded">Sửa ràng buộc</span></td>
-                       <td className="px-4 py-3 text-slate-800">
-                         Unique Index: <span className="text-red-500 font-medium">Không có</span>
-                       </td>
-                       <td className="px-4 py-3 text-green-700 font-medium">
-                         Unique Index: <span className="text-green-600 font-medium">Đã thiết lập</span>
-                       </td>
-                     </tr>
-                     {/* Removed Field */}
-                     <tr className="bg-red-50/30">
-                       <td className="px-4 py-3 font-medium text-slate-800">Ghi chú phụ</td>
-                       <td className="px-4 py-3"><span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded">Xóa bỏ</span></td>
-                       <td className="px-4 py-3 text-slate-800">
-                         Trường dữ liệu kiểu <code className="bg-white border border-slate-200 px-1 rounded">string</code>
-                       </td>
-                       <td className="px-4 py-3 text-slate-500 italic">
-                         Đã gỡ bỏ khỏi cấu trúc
-                       </td>
-                     </tr>
-                   </tbody>
-                 </table>
-              </div>
-            </div>
-            <div className="p-5 border-t border-slate-200 flex justify-end gap-3 bg-slate-50">
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowCompareModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px]">
- Đóng
- </button>
             </div>
           </div>
         </div>
@@ -3537,49 +3333,51 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Version Detail Modal */}
       {showVersionDetailModal && selectedVersionData && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
-          onClick={() => setShowVersionDetailModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                 <Eye className="w-5 h-5 text-blue-600"/>
-                 <h3 className="text-[17px] font-bold text-slate-800">Chi tiết phiên bản {selectedVersionData.version}</h3>
-              </div>
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowVersionDetailModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
+        <div className={MODAL_OVERLAY} onClick={() => setShowVersionDetailModal(false)}>
+          <div className={`${MODAL_BOX} max-w-2xl`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Chi tiết phiên bản {selectedVersionData.version}</h3>
+              {closeIconBtn(() => setShowVersionDetailModal(false))}
             </div>
-            <div className="p-5 space-y-4">
-               <div className="grid grid-cols-2 gap-4 text-[13px]">
-                  <div><span className="text-slate-500">Người thực hiện:</span> <strong className="text-slate-800 block text-[14px]">{selectedVersionData.user}</strong></div>
-                  <div><span className="text-slate-500">Ngày thay đổi:</span> <strong className="text-slate-800 block text-[14px]">{selectedVersionData.date}</strong></div>
-                  <div><span className="text-slate-500">Ngày hiệu lực:</span> <strong className="text-slate-800 block text-[14px]">{selectedVersionData.effectiveDate || '--'}</strong></div>
-                  <div><span className="text-slate-500">Trạng thái:</span> <span className={`inline-block px-2.5 py-1 mt-1 rounded-full text-xs font-medium ${
-                      selectedVersionData.status === 'active' ? 'bg-green-100 text-green-700' :
-                      selectedVersionData.status === 'draft' ? 'bg-amber-100 text-amber-700' :
-                      selectedVersionData.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>{
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Người thực hiện</div>
+                  <div className={FIELD_VALUE}>{selectedVersionData.user}</div>
+                </div>
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Ngày thay đổi</div>
+                  <div className={FIELD_VALUE}>{selectedVersionData.date}</div>
+                </div>
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Ngày hiệu lực</div>
+                  <div className={FIELD_VALUE}>{selectedVersionData.effectiveDate || '--'}</div>
+                </div>
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Trạng thái</div>
+                  <Badge
+                    label={
                       selectedVersionData.status === 'active' ? 'Hiệu lực' :
                       selectedVersionData.status === 'draft' ? 'Bản nháp' :
                       selectedVersionData.status === 'pending' ? 'Chờ duyệt' : 'Hết hiệu lực'
-                    }</span></div>
-               </div>
-               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                 <h4 className="font-semibold text-slate-700 mb-2 text-[13px]">Nội dung thay đổi chi tiết</h4>
-                 <p className="text-[14px] text-slate-800">{selectedVersionData.changes}</p>
-               </div>
+                    }
+                    variant={
+                      selectedVersionData.status === 'active' ? 'green' :
+                      selectedVersionData.status === 'draft' ? 'amber' :
+                      selectedVersionData.status === 'pending' ? 'orange' : 'slate'
+                    }
+                  />
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className="text-[13px] font-medium text-[#020817] mb-2">Nội dung thay đổi chi tiết</h4>
+                <p className={FIELD_VALUE}>{selectedVersionData.changes}</p>
+              </div>
             </div>
-            <div className="p-5 border-t border-slate-200 flex justify-end bg-slate-50">
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowVersionDetailModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px]">
- Đóng
- </button>
+            <div className={MODAL_FOOTER}>
+              <button type="button" title="Đóng" aria-label="Đóng" onClick={() => setShowVersionDetailModal(false)} className={BTN_OUTLINE}>
+                Đóng
+              </button>
             </div>
           </div>
         </div>
@@ -3587,40 +3385,33 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Restore Modal */}
       {showRestoreModal && selectedVersionData && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
-          onClick={() => setShowRestoreModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-md w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-slate-200">
-              <div className="flex flex-col items-center gap-3 text-center">
-                 <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                   <Clock className="w-6 h-6"/>
-                 </div>
-                 <div>
-                    <h3 className="text-[18px] font-bold text-slate-800">Đặt làm phiên bản chính</h3>
-                    <p className="text-[14px] text-slate-500 mt-1">Xác nhận đặt phiên bản <strong>{selectedVersionData.version}</strong> làm phiên bản chính?</p>
-                 </div>
+        <div className={MODAL_OVERLAY} onClick={() => setShowRestoreModal(false)}>
+          <div className={`${MODAL_BOX} max-w-md`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <div>
+                <h3 className={MODAL_TITLE}>Đặt làm phiên bản chính</h3>
+                <p className={MODAL_SUBTITLE}>Xác nhận đặt phiên bản <strong className="font-medium">{selectedVersionData.version}</strong> làm phiên bản chính?</p>
               </div>
+              {closeIconBtn(() => setShowRestoreModal(false))}
             </div>
-            <div className="p-5 text-[14px] text-slate-600 text-center">
+            <div className={`${MODAL_BODY} text-[13px] text-[#020817]`}>
               Hệ thống sẽ chuyển đổi trạng thái của phiên bản {selectedVersionData.version} sang "Chờ duyệt". Phiên bản hiện tại đang sử dụng vẫn giữ nguyên trạng thái "Hiệu lực".
             </div>
-            <div className="p-5 border-t border-slate-200 flex justify-center gap-3 bg-slate-50">
-              <button onClick={() => setShowRestoreModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors text-[14px] flex-1">
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowRestoreModal(false)} className={BTN_OUTLINE}>
                 Hủy bỏ
               </button>
-              <button onClick={() => {
-                setVersionHistoryList(versionHistoryList.map(v => v.version === selectedVersionData.version ? { ...v, status: 'pending' } : v));
-                setShowRestoreModal(false);
-                setSuccessNotificationMessage(`Yêu cầu đặt phiên bản ${selectedVersionData.version} làm phiên bản chính đã được gửi duyệt thành công!`);
-                setShowSuccessNotification(true);
-              }} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-[14px] flex-1 flex items-center justify-center gap-2">
-                <Check className="w-5 h-5"/> Xác nhận
+              <button
+                type="button"
+                onClick={() => {
+                  setVersionHistoryList(versionHistoryList.map(v => v.version === selectedVersionData.version ? { ...v, status: 'pending' } : v));
+                  setShowRestoreModal(false);
+                  setSuccessNotificationMessage(`Yêu cầu đặt phiên bản ${selectedVersionData.version} làm phiên bản chính đã được gửi duyệt thành công!`);
+                  setShowSuccessNotification(true);
+                }}
+                className={BTN_PRIMARY}
+              >
+                <Check className="w-4 h-4" /> Xác nhận
               </button>
             </div>
           </div>
@@ -3629,62 +3420,57 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
       {/* Create Version Modal */}
       {showCreateVersionModal && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center z-[99999] p-4 animate-in fade-in duration-200" 
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99999 }}
-          onClick={() => setShowCreateVersionModal(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-[16px]">Tạo phiên bản mới</h3>
-              <button title="Đóng" aria-label="Đóng" onClick={() => setShowCreateVersionModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5"/>
+        <div className={MODAL_OVERLAY} onClick={() => setShowCreateVersionModal(false)}>
+          <div className={`${MODAL_BOX} max-w-lg`} onClick={(e) => e.stopPropagation()}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Tạo phiên bản mới</h3>
+              {closeIconBtn(() => setShowCreateVersionModal(false))}
+            </div>
+            <div className={`${MODAL_BODY} space-y-4`}>
+              <div className={BANNER_INFO}>
+                <AlertCircle className="w-4 h-4 text-[#155DFC] mt-0.5 shrink-0" />
+                <p>Hệ thống sẽ sao chép cấu trúc và nội dung từ bản ghi hiện tại để tạo thành nền tảng cho phiên bản nâng cấp tiếp theo.</p>
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Tên phiên bản <span className={REQUIRED_MARK}>*</span></label>
+                <input title="Tên phiên bản" type="text" className={INPUT_CLS} value={newVersionName} onChange={(e) => setNewVersionName(e.target.value)} />
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Ngày hiệu lực <span className={REQUIRED_MARK}>*</span></label>
+                <input title="Ngày hiệu lực" type="date" className={INPUT_CLS} value={newEffectiveDate} onChange={(e) => setNewEffectiveDate(e.target.value)} />
+              </div>
+
+              <div>
+                <label className={LABEL_CLS}>Mô tả thay đổi</label>
+                <textarea title="Mô tả thay đổi" rows={3} className={TEXTAREA_CLS} placeholder="Nhập lý do tạo mới hoặc các nội dung dự kiến thay đổi..." value={newChangeDesc} onChange={(e) => setNewChangeDesc(e.target.value)}></textarea>
+              </div>
+            </div>
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowCreateVersionModal(false)} className={BTN_OUTLINE}>Hủy bỏ</button>
+              <button
+                type="button"
+                onClick={() => {
+                  const todayStr = new Date().toLocaleDateString('vi-VN');
+                  const formattedDate = newEffectiveDate ? new Date(newEffectiveDate).toLocaleDateString('vi-VN') : todayStr;
+                  const newItem = {
+                    version: newVersionName || 'v3.3',
+                    date: todayStr,
+                    effectiveDate: formattedDate,
+                    user: 'Nguyễn Văn A',
+                    changes: newChangeDesc || 'Khởi tạo bản nháp phiên bản mới từ phiên bản hiện tại',
+                    status: 'draft'
+                  };
+                  setVersionHistoryList([newItem, ...versionHistoryList]);
+                  setShowCreateVersionModal(false);
+                  setSuccessNotificationMessage(`Đã tạo thành công bản nháp phiên bản mới ${newItem.version} từ phiên bản trước.`);
+                  setShowSuccessNotification(true);
+                }}
+                className={BTN_PRIMARY}
+              >
+                <Save className="w-4 h-4" /> Lưu phiên bản
               </button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-[13px] text-blue-800 flex gap-2">
-                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5"/>
-                 <p>Hệ thống sẽ sao chép cấu trúc và nội dung từ bản ghi hiện tại để tạo thành nền tảng cho phiên bản nâng cấp tiếp theo.</p>
-              </div>
-
-              <div>
-                 <label className="block text-sm font-semibold text-slate-700 mb-1">Tên phiên bản <span className="text-red-500">*</span></label>
-                 <input title="Tên phiên bản" type="text" className="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none" value={newVersionName} onChange={(e) => setNewVersionName(e.target.value)} />
-              </div>
-              
-              <div>
-                 <label className="block text-sm font-semibold text-slate-700 mb-1">Ngày hiệu lực <span className="text-red-500">*</span></label>
-                 <input title="Ngày hiệu lực" type="date" className="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none" value={newEffectiveDate} onChange={(e) => setNewEffectiveDate(e.target.value)} />
-              </div>
-
-              <div>
-                 <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả thay đổi</label>
-                 <textarea title="Mô tả thay đổi" rows={3} className="w-full px-3 py-2 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Nhập lý do tạo mới hoặc các nội dung dự kiến thay đổi..." value={newChangeDesc} onChange={(e) => setNewChangeDesc(e.target.value)}></textarea>
-              </div>
-            </div>
-            <div className="p-5 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-lg">
-               <button onClick={() => setShowCreateVersionModal(false)} className="px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-700 hover:bg-slate-50">Hủy bỏ</button>
-               <button onClick={() => {
-                 const todayStr = new Date().toLocaleDateString('vi-VN');
-                 const formattedDate = newEffectiveDate ? new Date(newEffectiveDate).toLocaleDateString('vi-VN') : todayStr;
-                 const newItem = {
-                   version: newVersionName || 'v3.3',
-                   date: todayStr,
-                   effectiveDate: formattedDate,
-                   user: 'Nguyễn Văn A',
-                   changes: newChangeDesc || 'Khởi tạo bản nháp phiên bản mới từ phiên bản hiện tại',
-                   status: 'draft'
-                 };
-                 setVersionHistoryList([newItem, ...versionHistoryList]);
-                 setShowCreateVersionModal(false);
-                 setSuccessNotificationMessage(`Đã tạo thành công bản nháp phiên bản mới ${newItem.version} từ phiên bản trước.`);
-                 setShowSuccessNotification(true);
-               }} className="px-5 py-2.5 bg-blue-600 rounded-xl text-sm text-white hover:bg-blue-700 flex items-center gap-2">
-                 <Save className="w-4 h-4"/> Lưu phiên bản
-               </button>
             </div>
           </div>
         </div>

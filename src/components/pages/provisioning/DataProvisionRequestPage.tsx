@@ -1,5 +1,10 @@
-import React, { useMemo, useState } from 'react';
-import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe, X, Clock } from 'lucide-react';
+import React, { useMemo, useState, type ReactNode } from 'react';
+import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe, X, Clock, Calendar, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch } from '../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 import { ProvisionDataRequestModal, CreateDataRequestPayload } from './modals/ProvisionDataRequestModal';
 import { ProvisionRequestApprovalModal } from './modals/ProvisionRequestApprovalModal';
 import { ProvisionRequestExportModal } from './modals/ProvisionRequestExportModal';
@@ -8,6 +13,21 @@ import { ProvisionServicePublishModal } from './modals/ProvisionServicePublishMo
 import { ProvisionServiceUnpublishModal } from './modals/ProvisionServiceUnpublishModal';
 import { ProvisionHandoverDetailModal } from './modals/ProvisionHandoverDetailModal';
 import { ProvisionPublishDetailModal } from './modals/ProvisionPublishDetailModal';
+
+// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
+const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
+  <DropdownMenuItem
+    disabled={!!reason}
+    onClick={reason ? undefined : onSelect}
+    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
+  >
+    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
+    <span className="flex flex-col">
+      <span>{label}</span>
+      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
+    </span>
+  </DropdownMenuItem>
+);
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '';
@@ -90,51 +110,153 @@ export function DataProvisionRequestPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // Mock đủ mọi trạng thái để thử cột Thao tác (PM 07/10/2026): Chờ xử lý, Đã phê duyệt, Từ chối, Đã kết xuất,
+  // Đã bàn giao, Đã công khai, Đã hủy công khai — mỗi bản ghi có đủ nội dung, khoảng thời gian, định dạng và chi tiết theo trạng thái
   const [requests, setRequests] = useState<DataRequest[]>([
     {
       id: 'YC-2026-0429',
       org: 'Sở Nội vụ Lạng Sơn',
+      requestContent: 'Đề nghị cung cấp số liệu đăng ký khai sinh, khai tử, kết hôn năm 2025 theo từng huyện để phục vụ báo cáo biến động dân số.',
       dataType: 'Dữ liệu Hộ tịch điện tử',
       purpose: 'Thống kê tình hình biến động hộ tịch',
       requestDate: '2026-04-29 08:00:00',
+      fromDate: '2025-01-01',
+      toDate: '2025-12-31',
       format: 'excel',
       status: 'CHO_XU_LY',
     },
     {
-      id: 'YC-2026-0315',
-      org: 'Công an Lạng Sơn',
-      dataType: 'Dữ liệu Thi hành án',
-      purpose: 'Đồng bộ danh sách đối tượng theo dõi',
-      requestDate: '2026-03-15 08:00:00',
+      id: 'YC-2026-0602',
+      org: 'Sở Y tế Bắc Ninh',
+      requestContent: 'Cung cấp danh sách trẻ em được đăng ký khai sinh 6 tháng đầu năm 2026 để lập kế hoạch tiêm chủng mở rộng.',
+      dataType: 'Dữ liệu Hộ tịch điện tử',
+      purpose: 'Lập kế hoạch tiêm chủng mở rộng',
+      requestDate: '2026-06-02 09:15:00',
+      fromDate: '2026-01-01',
+      toDate: '2026-06-30',
       format: 'csv',
-      status: 'DA_XUAT',
+      status: 'CHO_XU_LY',
     },
     {
       id: 'YC-2026-0518',
       org: 'Sở Tư pháp Lạng Sơn',
+      requestContent: 'Đề nghị cung cấp thông tin án tích của các cá nhân trong danh sách đính kèm phục vụ cấp phiếu lý lịch tư pháp.',
       dataType: 'Dữ liệu Lý lịch tư pháp',
       purpose: 'Tra cứu thông tin án tích',
       requestDate: '2026-05-18 08:00:00',
+      fromDate: '2020-01-01',
+      toDate: '2026-05-01',
       format: 'json',
       status: 'DA_PHE_DUYET',
     },
+    {
+      id: 'YC-2026-0611',
+      org: 'Cục Thống kê tỉnh Bắc Giang',
+      requestContent: 'Cung cấp số liệu tổng hợp hồ sơ thi hành án dân sự đã giải quyết theo quý năm 2025.',
+      dataType: 'Dữ liệu Thi hành án',
+      purpose: 'Tổng hợp số liệu thống kê ngành',
+      requestDate: '2026-06-11 14:30:00',
+      fromDate: '2025-01-01',
+      toDate: '2025-12-31',
+      format: 'xml',
+      status: 'DA_PHE_DUYET',
+    },
+    {
+      id: 'YC-2026-0315',
+      org: 'Công an Lạng Sơn',
+      requestContent: 'Đồng bộ danh sách đối tượng phải thi hành án đang theo dõi trên địa bàn tỉnh.',
+      dataType: 'Dữ liệu Thi hành án',
+      purpose: 'Đồng bộ danh sách đối tượng theo dõi',
+      requestDate: '2026-03-15 08:00:00',
+      fromDate: '2025-07-01',
+      toDate: '2026-03-01',
+      format: 'csv',
+      status: 'DA_XUAT',
+    },
+    {
+      id: 'YC-2026-0407',
+      org: 'Sở Lao động - Thương binh và Xã hội Hà Nam',
+      requestContent: 'Cung cấp dữ liệu đăng ký kết hôn có yếu tố nước ngoài giai đoạn 2023 - 2025.',
+      dataType: 'Dữ liệu Hộ tịch điện tử',
+      purpose: 'Rà soát chính sách hỗ trợ phụ nữ kết hôn với người nước ngoài',
+      requestDate: '2026-04-07 10:20:00',
+      fromDate: '2023-01-01',
+      toDate: '2025-12-31',
+      format: 'excel',
+      status: 'TU_CHOI',
+      rejectReason: 'Phạm vi dữ liệu chứa thông tin cá nhân nhạy cảm, đề nghị bổ sung văn bản đồng ý của chủ thể dữ liệu.',
+    },
+    {
+      id: 'YC-2026-0220',
+      org: 'UBND huyện Văn Lãng',
+      requestContent: 'Cung cấp danh sách tổ chức đấu giá tài sản đang hoạt động trên địa bàn tỉnh.',
+      dataType: 'Dữ liệu Đấu giá tài sản',
+      purpose: 'Lựa chọn tổ chức đấu giá quyền sử dụng đất',
+      requestDate: '2026-02-20 15:45:00',
+      fromDate: '2026-01-01',
+      toDate: '2026-02-15',
+      format: 'excel',
+      status: 'DA_BAN_GIAO',
+      handoverDetails: { receivingUnit: 'UBND huyện Văn Lãng', receiverName: 'Nguyễn Thị Hoa', file: null, date: '2026-02-27T09:30:00' },
+    },
+    {
+      id: 'YC-2026-0112',
+      org: 'Sở Kế hoạch và Đầu tư Lạng Sơn',
+      requestContent: 'Công khai số liệu tổng hợp đăng ký khai sinh theo tháng năm 2025 trên cổng dữ liệu mở.',
+      dataType: 'Dữ liệu Hộ tịch điện tử',
+      purpose: 'Công khai dữ liệu mở phục vụ nghiên cứu',
+      requestDate: '2026-01-12 08:30:00',
+      fromDate: '2025-01-01',
+      toDate: '2025-12-31',
+      format: 'csv',
+      status: 'DA_CONG_KHAI',
+      publishDetails: { platforms: ['national', 'lgsp'], reason: 'Dữ liệu tổng hợp, không chứa thông tin cá nhân.', publishDate: '2026-01-20T10:00:00' },
+    },
+    {
+      id: 'YC-2025-1203',
+      org: 'Trường Đại học Luật Hà Nội',
+      requestContent: 'Công khai bộ dữ liệu thống kê văn bản quy phạm pháp luật được ban hành năm 2024.',
+      dataType: 'Dữ liệu Văn bản pháp luật',
+      purpose: 'Phục vụ nghiên cứu khoa học',
+      requestDate: '2025-12-03 13:00:00',
+      fromDate: '2024-01-01',
+      toDate: '2024-12-31',
+      format: 'json',
+      status: 'HUY_CONG_KHAI',
+      publishDetails: {
+        platforms: ['national'],
+        reason: 'Dữ liệu thống kê phục vụ nghiên cứu.',
+        publishDate: '2025-12-10T08:00:00',
+        unpublishReason: 'Phát hiện sai lệch số liệu tháng 11, tạm hủy công khai để rà soát.',
+        unpublishDate: '2026-01-05T16:20:00',
+      },
+    },
   ]);
 
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm nút Tìm kiếm hoặc Enter (mục 5.19)
+  const [applied, setApplied] = useState({ query: '', filterStatus: 'ALL' as 'ALL' | RequestStatus, filterType: 'ALL', filterFromDate: '', filterToDate: '' });
+
+  const runSearch = () => {
+    setApplied({ query, filterStatus, filterType, filterFromDate, filterToDate });
+    setCurrentPage(1);
+  };
+
   const filteredRequests = useMemo(() => {
+    const { query, filterStatus, filterType, filterFromDate, filterToDate } = applied;
     return requests.filter((item) => {
-      const q = query.trim().toLowerCase();
+      const q = normalizeSearch(query);
       const keywordOk =
         !q ||
-        item.id.toLowerCase().includes(q) ||
-        item.org.toLowerCase().includes(q) ||
-        item.dataType.toLowerCase().includes(q);
+        normalizeSearch(item.id).includes(q) ||
+        normalizeSearch(item.org).includes(q) ||
+        normalizeSearch(item.dataType).includes(q);
       const statusOk = filterStatus === 'ALL' || item.status === filterStatus;
       const typeOk = filterType === 'ALL' || item.dataType === filterType;
       const fromOk = !filterFromDate || item.requestDate >= filterFromDate;
       const toOk = !filterToDate || item.requestDate <= filterToDate;
       return keywordOk && statusOk && typeOk && fromOk && toOk;
     });
-  }, [requests, query, filterStatus, filterType, filterFromDate, filterToDate]);
+  }, [requests, applied]);
 
   const paginatedRequests = useMemo(() => {
     return filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -237,148 +359,61 @@ export function DataProvisionRequestPage() {
     setShowPublishDetailModal(true);
   };
 
-  const statusBadgeStyle: Record<RequestStatus, string> = {
-    CHO_XU_LY: 'bg-amber-50 text-amber-700 border border-amber-200',
-    DA_PHE_DUYET: 'bg-blue-50 text-blue-700 border border-blue-200',
-    TU_CHOI: 'bg-red-50 text-red-700 border border-red-200',
-    DA_XUAT: 'bg-orange-50 text-orange-700 border border-orange-200',
-    DA_BAN_GIAO: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
-    DA_CONG_KHAI: 'bg-green-50 text-green-700 border border-green-200',
-    HUY_CONG_KHAI: 'bg-slate-50 text-slate-500 border border-slate-200',
+  // Tông badge trạng thái (mục 5.8) — giữ ý nghĩa màu cũ
+  const statusBadgeVariant: Record<RequestStatus, string> = {
+    CHO_XU_LY: 'amber',
+    DA_PHE_DUYET: 'blue',
+    TU_CHOI: 'red',
+    DA_XUAT: 'orange',
+    DA_BAN_GIAO: 'indigo',
+    DA_CONG_KHAI: 'green',
+    HUY_CONG_KHAI: 'slate',
   };
 
-  const renderPagination = (totalItems: number) => {
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-    return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị</span>
-          <select aria-label="Select record count" 
-            value={itemsPerPage}
-            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600">bản ghi/trang</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600">
-            {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Trước
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                  currentPage === page
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => {
-                if (currentPage < totalPages) {
-                  setCurrentPage(currentPage + 1);
-                }
-              }}
-              disabled={currentPage === totalPages || totalItems === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Thẻ thống kê theo từng tab (thay cho phần mô tả tiêu đề)
+  // Thẻ thống kê theo từng tab (thay cho phần mô tả tiêu đề) — mục 5.6.1
   const cnt = (s: RequestStatus) => requests.filter((r) => r.status === s).length;
-  const totalCard = { label: 'Tổng yêu cầu', value: requests.length, Icon: FileText, box: 'bg-blue-50 text-blue-600' };
+  const totalCard = { label: 'Tổng yêu cầu', value: requests.length, Icon: FileText, box: 'bg-blue-50', icon: 'text-blue-600' };
   const statCards =
     activeTab === 'tra_cuu'
       ? [
           totalCard,
-          { label: statusLabel.CHO_XU_LY, value: cnt('CHO_XU_LY'), Icon: Clock, box: 'bg-amber-50 text-amber-600' },
-          { label: statusLabel.DA_PHE_DUYET, value: cnt('DA_PHE_DUYET'), Icon: CheckCircle, box: 'bg-blue-50 text-blue-600' },
-          { label: statusLabel.DA_XUAT, value: cnt('DA_XUAT'), Icon: Download, box: 'bg-orange-50 text-orange-600' },
+          { label: statusLabel.CHO_XU_LY, value: cnt('CHO_XU_LY'), Icon: Clock, box: 'bg-amber-50', icon: 'text-amber-600' },
+          { label: statusLabel.DA_PHE_DUYET, value: cnt('DA_PHE_DUYET'), Icon: CheckCircle, box: 'bg-blue-50', icon: 'text-blue-600' },
+          { label: statusLabel.DA_XUAT, value: cnt('DA_XUAT'), Icon: Download, box: 'bg-orange-50', icon: 'text-orange-600' },
         ]
       : activeTab === 'ban_giao'
       ? [
           totalCard,
-          { label: statusLabel.DA_XUAT, value: cnt('DA_XUAT'), Icon: Download, box: 'bg-orange-50 text-orange-600' },
-          { label: statusLabel.DA_BAN_GIAO, value: cnt('DA_BAN_GIAO'), Icon: Send, box: 'bg-indigo-50 text-indigo-600' },
-          { label: statusLabel.DA_CONG_KHAI, value: cnt('DA_CONG_KHAI'), Icon: Globe, box: 'bg-green-50 text-green-600' },
+          { label: statusLabel.DA_XUAT, value: cnt('DA_XUAT'), Icon: Download, box: 'bg-orange-50', icon: 'text-orange-600' },
+          { label: statusLabel.DA_BAN_GIAO, value: cnt('DA_BAN_GIAO'), Icon: Send, box: 'bg-indigo-50', icon: 'text-indigo-600' },
+          { label: statusLabel.DA_CONG_KHAI, value: cnt('DA_CONG_KHAI'), Icon: Globe, box: 'bg-green-50', icon: 'text-green-600' },
         ]
       : [
           totalCard,
-          { label: statusLabel.CHO_XU_LY, value: cnt('CHO_XU_LY'), Icon: Clock, box: 'bg-amber-50 text-amber-600' },
-          { label: statusLabel.DA_PHE_DUYET, value: cnt('DA_PHE_DUYET'), Icon: CheckCircle, box: 'bg-green-50 text-green-600' },
-          { label: statusLabel.TU_CHOI, value: cnt('TU_CHOI'), Icon: XCircle, box: 'bg-red-50 text-red-600' },
+          { label: statusLabel.CHO_XU_LY, value: cnt('CHO_XU_LY'), Icon: Clock, box: 'bg-amber-50', icon: 'text-amber-600' },
+          { label: statusLabel.DA_PHE_DUYET, value: cnt('DA_PHE_DUYET'), Icon: CheckCircle, box: 'bg-green-50', icon: 'text-green-600' },
+          { label: statusLabel.TU_CHOI, value: cnt('TU_CHOI'), Icon: XCircle, box: 'bg-red-50', icon: 'text-red-600' },
         ];
 
+  const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+  const TD = 'px-3 py-1 text-[13px] text-black';
+
   return (
-    <div className="api-requests-page-root" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <style dangerouslySetInnerHTML={{__html: `
-        .api-requests-page-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="h-full flex flex-col bg-slate-50 min-h-screen animate-in fade-in duration-300">
-        
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-slate-200 px-6">
-          <div className="flex gap-6">
-            <button
-              onClick={() => { setActiveTab('tiep_nhan'); setCurrentPage(1); }}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'tiep_nhan'
-                  ? 'border-blue-600 text-blue-600 font-semibold'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <FileText className="w-5 h-5" />
+    <div className="h-full flex flex-col bg-[#F8FAFC] min-h-screen animate-in fade-in duration-300">
+
+        {/* Navigation Tabs (mục 5.9) */}
+        <div className="bg-white border-b border-[#E2E8F0] px-6">
+          <div className="flex">
+            <button type="button" onClick={() => { setActiveTab('tiep_nhan'); setCurrentPage(1); }} className={`${tabClass(activeTab === 'tiep_nhan')} whitespace-nowrap`}>
+              <FileText className="w-4 h-4" />
               Tiếp nhận yêu cầu ({requests.length})
             </button>
-            <button
-              onClick={() => { setActiveTab('tra_cuu'); setCurrentPage(1); }}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'tra_cuu'
-                  ? 'border-blue-600 text-blue-600 font-semibold'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Search className="w-5 h-5" />
+            <button type="button" onClick={() => { setActiveTab('tra_cuu'); setCurrentPage(1); }} className={`${tabClass(activeTab === 'tra_cuu')} whitespace-nowrap`}>
+              <Search className="w-4 h-4" />
               Tra cứu & Kết xuất ({requests.filter(r => r.status === 'CHO_XU_LY' || r.status === 'DA_PHE_DUYET' || r.status === 'DA_XUAT').length})
             </button>
-            <button
-              onClick={() => { setActiveTab('ban_giao'); setCurrentPage(1); }}
-              className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeTab === 'ban_giao'
-                  ? 'border-blue-600 text-blue-600 font-semibold'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Share className="w-5 h-5" />
+            <button type="button" onClick={() => { setActiveTab('ban_giao'); setCurrentPage(1); }} className={`${tabClass(activeTab === 'ban_giao')} whitespace-nowrap`}>
+              <Share className="w-4 h-4" />
               Bàn giao dữ liệu ({requests.filter(r => r.status === 'DA_XUAT' || r.status === 'DA_BAN_GIAO' || r.status === 'DA_CONG_KHAI' || r.status === 'HUY_CONG_KHAI').length})
             </button>
           </div>
@@ -386,54 +421,57 @@ export function DataProvisionRequestPage() {
 
         {/* Content Container */}
         <div className="flex-1 overflow-auto p-6">
-          <div className="space-y-6">
-            
-            {/* Statistic cards (thay cho phần mô tả tiêu đề, đổi theo từng tab) */}
-            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-              {statCards.map(({ label, value, Icon, box }, i) => (
-                <div key={i} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${box}`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500 font-medium">{label}</p>
-                    <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+          <div className="space-y-4">
+
+            {/* Statistic cards (mục 5.6.1, đổi theo từng tab) */}
+            <div className="grid grid-cols-4 gap-4">
+              {statCards.map(({ label, value, Icon, box, icon }, i) => (
+                <div key={i} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${box}`}>
+                      <Icon className={`w-5 h-5 ${icon}`} />
+                    </div>
+                    <div>
+                      <div className="text-[16px] text-[#64748B]">{label}</div>
+                      <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{value}</div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Filters and Actions */}
-            <div className="mb-6">
+            {/* Filters and Actions (mục 5.19) */}
+            <div>
               <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 flex items-center gap-3">
+                <div className="flex-1 flex items-center gap-1.5">
                   <div className="relative flex-1">
                     <input
                       type="text"
+                      aria-label="Tìm kiếm yêu cầu"
                       placeholder="Tìm theo mã YC, cơ quan, loại dữ liệu..."
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                      className={SEARCH_INPUT_CLS}
                       value={query}
-                      onChange={(e) => { setQuery(e.target.value); setCurrentPage(1); }}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
                     />
                   </div>
-                  <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+                  <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
                     <Search className="w-5 h-5" />
                   </button>
                   <button
+                    type="button"
+                    aria-label="Bộ lọc"
+                    aria-expanded={showAdvancedFilter}
                     onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                    className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showAdvancedFilter ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+                    className={filterBtnClass(showAdvancedFilter)}
                     title="Bộ lọc"
                   >
                     {showAdvancedFilter ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
                   </button>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setShowRequestModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium whitespace-nowrap"
-                    title="Tạo yêu cầu"
-                  >
+                <div className="flex items-center gap-1.5">
+                  <button type="button" onClick={() => setShowRequestModal(true)} className={`${BTN_PRIMARY} whitespace-nowrap`} title="Tạo yêu cầu">
                     <Plus className="w-4 h-4" />
                     Tạo yêu cầu
                   </button>
@@ -442,14 +480,14 @@ export function DataProvisionRequestPage() {
 
               {/* Advanced Filters Panel */}
               {showAdvancedFilter && (
-                <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative z-20">
-                  <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+                <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
                   <div>
-                    <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái yêu cầu</label>
+                    <label className={FILTER_LABEL}>Trạng thái yêu cầu</label>
                     <select
+                      aria-label="Trạng thái yêu cầu"
                       value={filterStatus}
-                      onChange={(e) => { setFilterStatus(e.target.value as 'ALL' | RequestStatus); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                      onChange={(e) => setFilterStatus(e.target.value as 'ALL' | RequestStatus)}
+                      className={`${INPUT_CLS} cursor-pointer`}
                     >
                       <option value="ALL">Tất cả trạng thái</option>
                       <option value="CHO_XU_LY">Chờ xử lý</option>
@@ -462,11 +500,12 @@ export function DataProvisionRequestPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Loại dữ liệu</label>
+                    <label className={FILTER_LABEL}>Loại dữ liệu</label>
                     <select
+                      aria-label="Loại dữ liệu"
                       value={filterType}
-                      onChange={(e) => { setFilterType(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
+                      onChange={(e) => setFilterType(e.target.value)}
+                      className={`${INPUT_CLS} cursor-pointer`}
                     >
                       {dataTypeOptions.map((type) => (
                         <option key={type} value={type}>
@@ -476,184 +515,175 @@ export function DataProvisionRequestPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Từ ngày</label>
-                    <input
-                      type="date"
-                      value={filterFromDate}
-                      onChange={(e) => { setFilterFromDate(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                    />
+                    <label className={FILTER_LABEL}>Từ ngày</label>
+                    <div className={DATE_BOX_CLS}>
+                      <input
+                        type="date"
+                        aria-label="Từ ngày"
+                        value={filterFromDate}
+                        onChange={(e) => setFilterFromDate(e.target.value)}
+                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0 cursor-pointer"
+                      />
+                      <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Đến ngày</label>
-                    <input
-                      type="date"
-                      value={filterToDate}
-                      onChange={(e) => { setFilterToDate(e.target.value); setCurrentPage(1); }}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm cursor-pointer"
-                    />
+                    <label className={FILTER_LABEL}>Đến ngày</label>
+                    <div className={DATE_BOX_CLS}>
+                      <input
+                        type="date"
+                        aria-label="Đến ngày"
+                        value={filterToDate}
+                        onChange={(e) => setFilterToDate(e.target.value)}
+                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0 cursor-pointer"
+                      />
+                      <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Table / Grid list */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Table (mục 5.3) */}
+            <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse table-auto">
-                  <thead>
-                    <tr className="bg-slate-50 text-[13px] font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-tight">
-                      <th className="py-3 px-4 text-left font-semibold">Mã YC</th>
-                      <th className="py-3 px-4 text-left font-semibold">Đơn vị đề nghị</th>
-                      <th className="py-3 px-4 text-left font-semibold">Nguồn CSDL yêu cầu</th>
-                      <th className="py-3 px-4 text-left font-semibold">Mục đích khai thác</th>
-                      <th className="py-3 px-4 text-left font-semibold">Ngày gửi</th>
-                      <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
-                      <th className="py-3 px-4 text-center font-semibold">Thao tác</th>
+                <table className="w-full border-collapse collection-table text-[13px]">
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className="h-[42px]">
+                      <th className={`${TH} text-left`}>Mã YC</th>
+                      <th className={`${TH} text-left`}>Đơn vị đề nghị</th>
+                      <th className={`${TH} text-left`}>Nguồn CSDL yêu cầu</th>
+                      <th className={`${TH} text-left`}>Mục đích khai thác</th>
+                      <th className={`${TH} text-left`}>Ngày gửi</th>
+                      <th className={`${TH} text-left`}>Trạng thái</th>
+                      <th className={`${TH} text-center sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700 text-[13px]">
+                  <tbody>
                     {paginatedRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-8 text-center text-slate-500 font-medium">
+                        <td colSpan={7} className="py-16 text-center text-[13px] text-[#64748B]">
                           Không tìm thấy yêu cầu nào.
                         </td>
                       </tr>
                     ) : (
-                      paginatedRequests.map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-50/50 transition-all border-b border-slate-100 group">
-                          <td className="py-3 px-4 text-left font-semibold text-slate-900 leading-snug">
-                            {item.id}
+                      paginatedRequests.map((item) => {
+                        const [sentDate, sentTime] = formatDateTime(item.requestDate).split(' ');
+                        const editReason = item.status === 'DA_XUAT' || item.status === 'DA_PHE_DUYET' ? 'Yêu cầu đã phê duyệt hoặc đã kết xuất' : undefined;
+                        const handoverReason = item.status !== 'DA_XUAT' ? 'Chỉ áp dụng cho yêu cầu Đã kết xuất' : undefined;
+                        const hasPublishDetail = item.status === 'DA_CONG_KHAI' || item.status === 'HUY_CONG_KHAI';
+                        return (
+                        <tr key={item.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.id}</td>
+                          <td className={`${TD} text-left max-w-[240px]`}>
+                            <TruncatedText text={item.org} />
                           </td>
-                          <td className="py-3 px-4 text-left text-slate-600">
-                            {item.org}
+                          <td className={`${TD} text-left max-w-[240px]`}>
+                            <TruncatedText text={item.dataType} />
                           </td>
-                          <td className="py-3 px-4 text-left text-slate-600">
-                            {item.dataType}
+                          <td className={`${TD} text-left max-w-[280px]`}>
+                            <TruncatedText text={item.purpose} />
                           </td>
-                          <td className="py-3 px-4 text-left text-slate-600">
-                            {item.purpose}
+                          <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                            <div>{sentDate}</div>
+                            {sentTime && <div className="text-[#64748B]">{sentTime}</div>}
                           </td>
-                          <td className="py-3 px-4 text-left font-mono text-slate-400 text-xs">
-                            {formatDateTime(item.requestDate)}
+                          <td className={`${TD} text-left`}>
+                            <Badge label={statusLabel[item.status]} variant={statusBadgeVariant[item.status]} />
                           </td>
-                          <td className="py-3 px-4 text-left">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-normal ${statusBadgeStyle[item.status]}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                                item.status === 'CHO_XU_LY' ? 'bg-amber-500 animate-pulse' :
-                                item.status === 'DA_PHE_DUYET' ? 'bg-blue-500' :
-                                item.status === 'TU_CHOI' ? 'bg-red-500' :
-                                item.status === 'DA_XUAT' ? 'bg-orange-500' :
-                                item.status === 'DA_BAN_GIAO' ? 'bg-indigo-500' :
-                                item.status === 'DA_CONG_KHAI' ? 'bg-green-500 animate-pulse' : 'bg-slate-400'
-                              }`}></span>
-                              {statusLabel[item.status]}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <div className="flex items-center justify-center gap-1.5 flex-nowrap">
+                          <td className="px-3 py-1 text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]">
+                            {/* Cột thao tác (mục 5.3.2) */}
+                            <div className="inline-flex items-center justify-center gap-1 flex-nowrap">
                               {/* TIEP_NHAN: Edit chỉ cho CHO_XU_LY, Eye cho tất cả trạng thái */}
                               {activeTab === 'tiep_nhan' && (
                                 <>
-                                  <button
-                                    title="Chỉnh sửa"
-                                    onClick={() => { if (item.status !== 'DA_XUAT' && item.status !== 'DA_PHE_DUYET') { setSelectedRequest(item); setShowRequestModal(true); } }}
-                                    disabled={item.status === 'DA_XUAT' || item.status === 'DA_PHE_DUYET'}
-                                    className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-500 disabled:hover:bg-transparent"
+                                  <RowIconAction label="Xem chi tiết" onClick={() => handleViewRequest(item)}>
+                                    <Eye className="w-4 h-4" />
+                                  </RowIconAction>
+                                  <RowIconAction
+                                    label="Chỉnh sửa"
+                                    disabledReason={editReason}
+                                    onClick={() => { setSelectedRequest(item); setShowRequestModal(true); }}
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    title="Xem chi tiết"
-                                    onClick={() => handleViewRequest(item)}
-                                    className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </button>
+                                  </RowIconAction>
                                 </>
                               )}
-                              {/* TRA_CUU tab */}
-                              {activeTab === 'tra_cuu' && item.status === 'CHO_XU_LY' && (
-                                <button
-                                  title="Tiếp nhận"
-                                  onClick={() => { setSelectedRequest(item); setShowApprovalModal(true); }}
-                                  className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                </button>
+                              {/* TRA_CUU tab: luôn đủ 3 nút (PM 07/10/2026) — nút không áp dụng bị khóa kèm lý do (5.3.2)
+                                  Chờ xử lý: Xem + Tiếp nhận & phê duyệt; Đã phê duyệt (và Đã xuất như trước): Xem + Thiết lập kết xuất;
+                                  Đã bàn giao / Đã công khai / Hủy công khai / Từ chối: chỉ Xem */}
+                              {activeTab === 'tra_cuu' && (
+                                <>
+                                  <RowIconAction label="Xem chi tiết" onClick={() => handleViewRequest(item)}>
+                                    <Eye className="w-4 h-4" />
+                                  </RowIconAction>
+                                  <RowIconAction
+                                    label="Tiếp nhận & phê duyệt"
+                                    disabledReason={item.status === 'CHO_XU_LY' ? undefined : 'Chỉ phê duyệt yêu cầu ở trạng thái Chờ xử lý'}
+                                    onClick={() => { setSelectedRequest(item); setShowApprovalModal(true); }}
+                                  >
+                                    <CheckCircle className="w-4 h-4" />
+                                  </RowIconAction>
+                                  <RowIconAction
+                                    label="Thiết lập kết xuất"
+                                    disabledReason={item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT' ? undefined : 'Chỉ thiết lập kết xuất khi yêu cầu đã được phê duyệt'}
+                                    onClick={() => handleExportClick(item)}
+                                  >
+                                    <Settings className="w-4 h-4" />
+                                  </RowIconAction>
+                                </>
                               )}
-                              {activeTab === 'tra_cuu' && (item.status === 'DA_PHE_DUYET' || item.status === 'DA_XUAT') && (
-                                <button
-                                  title="Thiết lập kết xuất"
-                                  onClick={() => handleExportClick(item)}
-                                  className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                >
-                                  <Settings className="w-4 h-4" />
-                                </button>
-                              )}
-                              {/* BAN_GIAO tab */}
+                              {/* BAN_GIAO tab: luôn hiện đủ 4 nút (PM 07/10/2026) — Xem chi tiết, Hủy công khai, Công khai, Bàn giao dữ liệu;
+                                  nút không áp dụng bị khóa kèm lý do (5.3.2) */}
                               {activeTab === 'ban_giao' && (
                                 <>
-                                  <button
-                                    title="Bàn giao"
-                                    onClick={() => handleHandoverClick(item)}
-                                    disabled={item.status !== 'DA_XUAT'}
-                                    className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-700 disabled:hover:bg-transparent"
+                                  <RowIconAction
+                                    label="Xem chi tiết"
+                                    onClick={() => {
+                                      if (item.status === 'DA_BAN_GIAO') handleViewHandoverDetail(item);
+                                      else if (hasPublishDetail) handleViewPublishDetail(item);
+                                      else handleViewRequest(item);
+                                    }}
                                   >
-                                    <Send className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    title="Công khai"
-                                    onClick={() => handlePublishClick(item)}
-                                    disabled={item.status !== 'DA_XUAT'}
-                                    className="p-1.5 text-slate-700 hover:text-black hover:bg-slate-100 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-slate-700 disabled:hover:bg-transparent"
+                                    <Eye className="w-4 h-4" />
+                                  </RowIconAction>
+                                  <RowIconAction
+                                    label="Hủy công khai"
+                                    disabledReason={item.status === 'DA_CONG_KHAI' ? undefined : 'Chỉ áp dụng cho yêu cầu Đã công khai'}
+                                    onClick={() => handleUnpublishClick(item)}
                                   >
+                                    <XCircle className={`w-4 h-4 ${item.status === 'DA_CONG_KHAI' ? 'text-[#DC2626]' : ''}`} />
+                                  </RowIconAction>
+                                  <RowIconAction label="Công khai" disabledReason={handoverReason} onClick={() => handlePublishClick(item)}>
                                     <Globe className="w-4 h-4" />
-                                  </button>
-                                  {item.status === 'DA_BAN_GIAO' && (
-                                    <button
-                                      title="Xem chi tiết Bàn giao"
-                                      onClick={() => handleViewHandoverDetail(item)}
-                                      className="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </button>
-                                  )}
-                                  {(item.status === 'DA_CONG_KHAI' || item.status === 'HUY_CONG_KHAI') && (
-                                    <button
-                                      title="Xem chi tiết Công khai"
-                                      onClick={() => handleViewPublishDetail(item)}
-                                      className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </button>
-                                  )}
-                                  {item.status === 'DA_CONG_KHAI' && (
-                                    <button
-                                      title="Hủy công khai"
-                                      onClick={() => handleUnpublishClick(item)}
-                                      className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-200 bg-red-50/50 rounded-[6px] transition-all inline-flex items-center justify-center cursor-pointer shadow-sm"
-                                    >
-                                      <XCircle className="w-4 h-4" />
-                                    </button>
-                                  )}
+                                  </RowIconAction>
+                                  <RowIconAction label="Bàn giao dữ liệu" disabledReason={handoverReason} onClick={() => handleHandoverClick(item)}>
+                                    <Send className="w-4 h-4" />
+                                  </RowIconAction>
                                 </>
                               )}
                             </div>
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
               </div>
-              {renderPagination(filteredRequests.length)}
+              <Pagination
+                className="border-t border-[#E2E8F0]"
+                currentPage={currentPage}
+                totalItems={filteredRequests.length}
+                pageSize={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setItemsPerPage}
+              />
             </div>
 
           </div>
         </div>
 
-      </div>
       <ProvisionDataRequestModal isOpen={showRequestModal} onClose={() => { setShowRequestModal(false); setSelectedRequest(null); }} onCreate={handleCreateRequest} requestData={selectedRequest} />
       <ProvisionDataRequestModal viewOnly isOpen={showViewRequestModal} onClose={() => { setShowViewRequestModal(false); setSelectedRequest(null); }} requestData={selectedRequest} />
       <ProvisionRequestApprovalModal isOpen={showApprovalModal} onClose={() => setShowApprovalModal(false)} requestData={selectedRequest} onApprove={handleApprove} onReject={handleReject} />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, GitCompare, PlusCircle, MinusCircle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Badge, BTN_OUTLINE, BTN_GHOST_ICON, FIELD_LABEL, FIELD_VALUE } from '../../collection/collectionUi';
 
 interface ApiVersionCompareModalProps {
   isOpen: boolean;
@@ -24,31 +25,27 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, versionA, ver
   ];
 
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 api-version-compare-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .api-version-compare-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg border border-blue-100">
-              <GitCompare className="w-5 h-5" />
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+
+        {/* Header (mục 5.4) */}
+        <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-[#E2E8F0]">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-blue-50 rounded-lg shrink-0">
+              <GitCompare className="w-5 h-5 text-blue-600" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-black">
+            <div className="min-w-0">
+              <h2 className="text-[16px] font-medium text-[#020817] leading-6">
                 So sánh cấu trúc phiên bản API
               </h2>
-              <p className="text-xs text-black font-medium mt-0.5">Dịch vụ: {apiName}</p>
+              <p className="text-[13px] text-[#64748B] truncate">Dịch vụ: {apiName}</p>
             </div>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className={BTN_GHOST_ICON}
+            aria-label="Đóng"
             title="Đóng"
           >
             <X className="w-5 h-5" />
@@ -56,82 +53,82 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, versionA, ver
         </div>
 
         {/* Modal content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
-          
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+
           {/* Info Summary row */}
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between rounded-2xl border border-[#E2E8F0] p-4">
             <div>
-              <span className="text-xs font-bold text-black uppercase tracking-wider block">API được so sánh</span>
-              <span className="text-sm font-bold text-black block mt-1">{apiName}</span>
+              <span className={`${FIELD_LABEL} block`}>API được so sánh</span>
+              <span className={`${FIELD_VALUE} block mt-1`}>{apiName}</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-center px-4 py-1.5 bg-slate-100 rounded-lg border border-slate-200">
-                <span className="text-xs text-black font-medium block">Phiên bản cũ</span>
-                <span className="text-sm font-bold text-black font-mono">{versionB}</span>
+              <div className="text-center px-4 py-1.5 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <span className="text-[12px] text-[#64748B] block">Phiên bản cũ</span>
+                <span className="text-[13px] font-medium text-[#020817]">{versionB}</span>
               </div>
-              <div className="text-slate-400 font-mono text-xs text-black">→</div>
-              <div className="text-center px-4 py-1.5 bg-blue-50 rounded-lg border border-blue-200">
-                <span className="text-xs text-black font-bold block">Phiên bản mới</span>
-                <span className="text-sm font-extrabold text-black font-mono">{versionA}</span>
+              <div className="text-[13px] text-[#64748B]">→</div>
+              <div className="text-center px-4 py-1.5 bg-[#EAF3FF] rounded-lg border border-[#BFDBFE]">
+                <span className="text-[12px] text-[#155DFC] block">Phiên bản mới</span>
+                <span className="text-[13px] font-medium text-[#020817]">{versionA}</span>
               </div>
             </div>
           </div>
 
           {/* Side by side diff container */}
-          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
-            
+          <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden text-[13px]">
+
             {/* Split Titles Header */}
-            <div className="grid grid-cols-2 bg-slate-100/80 border-b border-slate-200 font-bold text-black">
-              <div className="px-6 py-3 border-r border-slate-200 flex items-center justify-between">
+            <div className="grid grid-cols-2 bg-[#F8FAFC] border-b border-[#E2E8F0] text-[14px] font-medium text-[#020817]">
+              <div className="px-6 py-3 border-r border-[#E2E8F0] flex items-center justify-between gap-2">
                 <span>PHIÊN BẢN CŨ ({versionB})</span>
-                <span className="text-xs font-medium text-black bg-slate-200/60 px-2 py-0.5 rounded">Trước cập nhật</span>
+                <Badge label="Trước cập nhật" variant="slate" />
               </div>
-              <div className="px-6 py-3 flex items-center justify-between">
+              <div className="px-6 py-3 flex items-center justify-between gap-2">
                 <span>PHIÊN BẢN MỚI ({versionA})</span>
-                <span className="text-xs font-bold text-black bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Sau cập nhật</span>
+                <Badge label="Sau cập nhật" variant="blue" />
               </div>
             </div>
 
             {/* Sub headers */}
-            <div className="grid grid-cols-2 bg-slate-50/50 border-b border-slate-200 text-black text-xs font-bold uppercase tracking-wider">
+            <div className="grid grid-cols-2 bg-[#F8FAFC] border-b border-[#E2E8F0] text-black text-[13px] font-bold leading-4">
               {/* Old Side Header */}
-              <div className="flex border-r border-slate-200 py-2.5">
+              <div className="flex border-r border-[#E2E8F0] py-[13px]">
                 <div className="w-1/2 px-6">Trường thuộc tính</div>
                 <div className="w-1/2 px-4">Kiểu dữ liệu</div>
               </div>
               {/* New Side Header */}
-              <div className="flex py-2.5">
+              <div className="flex py-[13px]">
                 <div className="w-1/2 px-6">Trường thuộc tính</div>
                 <div className="w-1/2 px-4">Kiểu dữ liệu</div>
               </div>
             </div>
 
             {/* Split Comparison Rows */}
-            <div className="divide-y divide-slate-100">
+            <div>
               {diffProperties.map((prop, idx) => {
                 const isAdded = prop.status === 'added';
                 const isDeleted = prop.status === 'deleted';
                 const isModified = prop.status === 'modified';
 
                 return (
-                  <div key={idx} className="grid grid-cols-2 hover:bg-slate-50/30 transition-colors">
-                    
+                  <div key={idx} className="grid grid-cols-2 border-b border-[#E0E0E0] last:border-b-0 text-black">
+
                     {/* Old version column */}
-                    <div className={`flex items-center border-r border-slate-200 py-3 ${
-                      isDeleted ? 'bg-red-50/20' : (isModified ? 'bg-amber-50/10' : '')
+                    <div className={`flex items-center min-h-12 border-r border-[#E2E8F0] py-1 ${
+                      isDeleted ? 'bg-[#FEF2F2]' : (isModified ? 'bg-[#FFF7ED]' : '')
                     }`}>
                       {isAdded ? (
-                        <div className="w-full px-6 py-3.5 text-center text-black italic font-medium">
+                        <div className="w-full px-6 text-center text-[#64748B] italic">
                           (Không tồn tại ở phiên bản cũ {versionB})
                         </div>
                       ) : (
                         <>
-                          <div className="w-1/2 px-6">
-                            <span className={`font-mono font-bold ${isDeleted ? 'text-black line-through' : 'text-black'}`}>
+                          <div className="w-1/2 px-6 break-all">
+                            <span className={isDeleted ? 'line-through' : ''}>
                               {prop.name}
                             </span>
                           </div>
-                          <div className="w-1/2 px-4 font-mono text-xs text-black">
+                          <div className="w-1/2 px-4 break-words">
                             {prop.typeB}
                           </div>
                         </>
@@ -139,21 +136,19 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, versionA, ver
                     </div>
 
                     {/* New version column */}
-                    <div className={`flex items-center py-3 ${
-                      isAdded ? 'bg-emerald-50/20' : (isModified ? 'bg-amber-50/15' : '')
+                    <div className={`flex items-center min-h-12 py-1 ${
+                      isAdded ? 'bg-[#F0FDF4]' : (isModified ? 'bg-[#FFF7ED]' : '')
                     }`}>
                       {isDeleted ? (
-                        <div className="w-full px-6 py-3.5 text-center text-black italic font-medium">
+                        <div className="w-full px-6 text-center text-[#64748B] italic">
                           (Đã lược bỏ ở phiên bản mới {versionA})
                         </div>
                       ) : (
                         <>
-                          <div className="w-1/2 px-6 font-mono font-bold">
-                            <span className="font-mono font-bold text-black">
-                              {prop.name}
-                            </span>
+                          <div className="w-1/2 px-6 break-all">
+                            {prop.name}
                           </div>
-                          <div className="w-1/2 px-4 font-mono text-xs text-black">
+                          <div className="w-1/2 px-4 break-words">
                             {prop.typeA}
                           </div>
                         </>
@@ -170,11 +165,11 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, versionA, ver
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end bg-slate-50">
+        <div className="px-6 py-4 border-t border-[#E2E8F0] flex justify-end gap-3 bg-[#F8FAFC]">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-[13px] rounded-lg transition-colors shadow-sm"
+            className={BTN_OUTLINE}
           >
             Đóng so sánh
           </button>

@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
-import { Search, Download, FileText, Printer, TrendingUp, AlertCircle, Calendar, Filter, X, ChevronDown, Check, BarChart2, Eye, Layers, ChevronLeft, ArrowRight, Edit } from 'lucide-react';
+import { Search, Download, FileText, Printer, TrendingUp, AlertCircle, Calendar, Filter, X, ChevronDown, Check, BarChart2, Eye, Layers, ChevronLeft, ArrowRight, Edit, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, BTN_FOCUS,
+  INPUT_CLS, FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
+  normalizeSearch,
+} from '../collection/collectionUi';
 import {
   LineChart, Line as LineR, BarChart, Bar as BarR, XAxis as XAxisR, YAxis as YAxisR,
   CartesianGrid, Tooltip as TooltipR, ResponsiveContainer, Cell
@@ -52,15 +58,62 @@ const LIFECYCLE_STAGE_LABEL: Record<LifecycleStage, string> = {
 
 // Màu quy định cho cột "Số ngày còn lại" và badge "Vòng đời" — dùng chung 1 nguồn để không lệch ngưỡng
 const LIFECYCLE_STAGE_TEXT_COLOR: Record<LifecycleStage, string> = {
-  active: 'text-green-700',
-  warning: 'text-yellow-600',
-  expired: 'text-red-700',
+  active: 'text-[#15803D]',
+  warning: 'text-[#D97706]',
+  expired: 'text-[#B91C1C]',
 };
 
-const LIFECYCLE_STAGE_BADGE_CLASS: Record<LifecycleStage, string> = {
-  active: 'bg-green-50 text-green-700 border border-green-200',
-  warning: 'bg-orange-50 text-orange-700 border border-orange-200',
-  expired: 'bg-red-50 text-red-700 border border-red-200',
+// Tông Badge (compomennt.md 5.8) — giữ ý nghĩa màu cũ: xanh lá / cam / đỏ
+const LIFECYCLE_STAGE_BADGE_VARIANT: Record<LifecycleStage, string> = {
+  active: 'green',
+  warning: 'orange',
+  expired: 'red',
+};
+
+// Bảng (compomennt.md 5.3)
+const TABLE_WRAP = 'bg-white rounded-lg border border-[#E2E8F0] overflow-hidden';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TOTAL_TR = 'h-12 bg-[#F8FAFC] font-semibold border-b border-[#E0E0E0]';
+const EMPTY_TD = 'px-3 py-16 text-center text-[13px] text-[#64748B]';
+// Cột Thao tác ghim phải khi bảng cuộn ngang (compomennt.md 5.3.2)
+const STICKY_TH = 'sticky right-0 z-[1] bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]';
+const STICKY_TD = 'sticky right-0 z-[1] bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]';
+// Khung bảng có tiêu đề (giống CategoryTrendAndStatsSection)
+const TABLE_HEADER = 'px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between gap-3';
+const TABLE_TITLE = 'text-[14px] font-medium text-[#020817]';
+// Thẻ biểu đồ
+const CHART_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4';
+const CHART_TICK = { fontSize: 12, fill: '#64748B' };
+const CHART_TOOLTIP_PROPS = {
+  contentStyle: { fontSize: 12, borderRadius: 8, border: '1px solid #E2E8F0' },
+  labelStyle: { color: '#64748B' },
+};
+// Khung điều kiện báo cáo + nút "Truy xuất" (giống CategoryReportStatusPage)
+const CONTROL_PANEL = 'bg-white p-4 rounded-2xl border border-[#E2E8F0] relative z-30';
+const RUN_BTN_CLS = `h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[#10B981] text-white text-[13px] font-medium hover:bg-[#059669] transition-colors ${BTN_FOCUS}`;
+const EXPORT_MENU = 'absolute right-0 top-full mt-1 w-44 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1 z-50';
+const EXPORT_MENU_ITEM = 'w-full text-left min-h-8 px-3 py-1.5 rounded-md hover:bg-[#F1F5F9] text-[13px] text-[#020817] transition-colors cursor-pointer';
+// Modal (compomennt.md 5.4)
+const MODAL_OVERLAY = 'fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4';
+const MODAL_HEADER = 'px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-3 shrink-0';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0';
+
+// Giá trị bộ lọc "Loại dữ liệu" → nhãn loại dữ liệu trong bản ghi (dùng khi lọc kết quả tra cứu)
+const DATA_TYPE_FILTER_LABEL: Record<string, string> = {
+  congchung: 'Công chứng',
+  dangkykinhdoanh: 'Đăng ký kinh doanh',
+  tgpl: 'Trợ giúp pháp lý',
+  hotich: 'Hộ tịch',
+};
+
+// dd/mm/yyyy → yyyy-mm-dd để so sánh với ô chọn ngày
+const toIsoDate = (d: string) => {
+  const [dd, mm, yyyy] = d.split('/');
+  return yyyy && mm && dd ? `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` : '';
 };
 
 // Dữ liệu "Ngày hết hạn/Số ngày còn lại" cho báo cáo vòng đời — không có trong bảng quy định chính thức
@@ -352,6 +405,10 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
   const [showUsageExportMenu, setShowUsageExportMenu] = useState(false);
   const [hasSearchedUsage, setHasSearchedUsage] = useState(false);
   const [appliedUsageReports, setAppliedUsageReports] = useState(mockUsageReports);
+  // Điều kiện đã áp dụng — chỉ cập nhật khi bấm "Truy xuất báo cáo"
+  const [appliedUsageReportType, setAppliedUsageReportType] = useState<'access' | 'consumption' | 'stats'>('access');
+  const [appliedUsageDateRange, setAppliedUsageDateRange] = useState('6months');
+  const [appliedUsageStatMonth, setAppliedUsageStatMonth] = useState(new Date().getMonth() + 1);
 
   // ─── Báo cáo vòng đời dữ liệu chủ ───────────────────────────────────────
   // Chỉ chọn 1 thực thể dữ liệu chủ (không còn "Tất cả thực thể"), bảng dưới lấy đúng bản ghi
@@ -387,41 +444,57 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
   const handleExportLifecycleFile = (format: string) => {
     setShowLifecycleExportMenu(false);
-    alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
+    toast.info(`Đang xuất dữ liệu sang định dạng ${format}...`);
   };
 
   const handleSearchUsage = () => {
     setAppliedUsageReports(mockUsageReports);
+    setAppliedUsageReportType(usageReportType);
+    setAppliedUsageDateRange(usageDateRange);
+    setAppliedUsageStatMonth(usageStatMonth);
     setHasSearchedUsage(true);
   };
 
   const handleExportUsageFile = (format: string) => {
     setShowUsageExportMenu(false);
-    alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
+    toast.info(`Đang xuất dữ liệu sang định dạng ${format}...`);
   };
 
   const totalPages = Math.max(1, Math.ceil(searchResults.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
   const paginatedResults = searchResults.slice((safePage - 1) * pageSize, safePage * pageSize);
   const startItem = searchResults.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
-  const endItem = Math.min(safePage * pageSize, searchResults.length);
 
-  const handleSearch = () => {
-    // Mock search logic
-    console.log('Searching with filters:', searchFilters);
-    // In real app, call API with filters
+  // Tìm kiếm/bộ lọc chỉ áp dụng khi bấm Tìm kiếm hoặc Enter (compomennt.md 5.19)
+  const applySearchFilters = (filters: SearchFilter) => {
+    const kw = normalizeSearch(filters.keyword);
+    const typeLabel = DATA_TYPE_FILTER_LABEL[filters.dataType];
+    setSearchResults(mockSearchResults.filter(r => {
+      if (kw && !normalizeSearch(r.recordCode).includes(kw) && !normalizeSearch(r.fullName).includes(kw)) return false;
+      if (typeLabel && r.dataType !== typeLabel) return false;
+      if (filters.approvalStatus && r.approvalStatus !== filters.approvalStatus) return false;
+      const iso = toIsoDate(r.updateDate);
+      if (filters.dateFrom && iso < filters.dateFrom) return false;
+      if (filters.dateTo && iso > filters.dateTo) return false;
+      return true;
+    }));
     setCurrentPage(1);
   };
 
+  const handleSearch = () => {
+    applySearchFilters(searchFilters);
+  };
+
   const handleResetFilters = () => {
-    setSearchFilters({
+    const empty: SearchFilter = {
       keyword: '',
       dataType: '',
       approvalStatus: '',
       dateFrom: '',
       dateTo: '',
-    });
-    setCurrentPage(1);
+    };
+    setSearchFilters(empty);
+    applySearchFilters(empty);
   };
 
   const handleViewDetail = (record: any) => {
@@ -436,11 +509,11 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
   };
 
   const handleExportExcel = () => {
-    alert('Đang xuất file Excel...');
+    toast.info('Đang xuất file Excel...');
   };
 
   const handleExportPDF = () => {
-    alert('Đang xuất file PDF...');
+    toast.info('Đang xuất file PDF...');
   };
 
   const handlePrint = () => {
@@ -448,42 +521,33 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-slate-50">
+    <div className="flex-1 overflow-auto bg-[#F8FAFC]">
       <div className="p-6">
-        {/* Tabs */}
+        {/* Tabs (compomennt.md 5.9) */}
         <div className="mb-6">
-          <div className="flex border-b border-slate-200 overflow-x-auto bg-white">
+          <div className="flex border-b border-[#E2E8F0] overflow-x-auto bg-white">
             <button
+              type="button"
               onClick={() => setActiveTab('search')}
-              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-                activeTab === 'search'
-                  ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
+              className={`${tabClass(activeTab === 'search')} whitespace-nowrap`}
             >
-              <Search className={`w-4 h-4 ${activeTab === 'search' ? 'text-blue-600' : 'text-slate-400'}`} />
+              <Search className="w-4 h-4" />
               Tra cứu dữ liệu chủ
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('usage')}
-              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-                activeTab === 'usage'
-                  ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
+              className={`${tabClass(activeTab === 'usage')} whitespace-nowrap`}
             >
-              <TrendingUp className={`w-4 h-4 ${activeTab === 'usage' ? 'text-blue-600' : 'text-slate-400'}`} />
+              <TrendingUp className="w-4 h-4" />
               Báo cáo sử dụng dữ liệu chủ
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('lifecycle')}
-              className={`flex items-center gap-2 px-6 py-4 text-[13px] font-medium transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-                activeTab === 'lifecycle'
-                  ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-bold'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-              }`}
+              className={`${tabClass(activeTab === 'lifecycle')} whitespace-nowrap`}
             >
-              <Calendar className={`w-4 h-4 ${activeTab === 'lifecycle' ? 'text-blue-600' : 'text-slate-400'}`} />
+              <Calendar className="w-4 h-4" />
               Báo cáo vòng đời dữ liệu
             </button>
           </div>
@@ -492,48 +556,50 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
           <div className="pt-6">
             {/* Search Tab */}
             {activeTab === 'search' && (
-              <div className="space-y-6">
-                {/* Filter Section */}
-                {showFilters && (
-                  <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-slate-500" />
-                        <h3 className="text-[13px] font-medium text-slate-700">Bộ lọc tìm kiếm</h3>
-                      </div>
-                      <button
-                        onClick={() => setShowFilters(false)}
-                        className="p-1 hover:bg-slate-200 rounded transition-colors"
-                      >
-                        <X className="w-4 h-4 text-slate-500" />
-                      </button>
+              <div className="space-y-4">
+                {/* Thanh tìm kiếm + bộ lọc (compomennt.md 5.19) — chỉ áp dụng khi bấm Tìm kiếm hoặc Enter */}
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        aria-label="Tìm kiếm theo mã, tên bản ghi dữ liệu chủ"
+                        title="Tìm kiếm theo mã, tên bản ghi dữ liệu chủ"
+                        value={searchFilters.keyword}
+                        onChange={(e) =>
+                          setSearchFilters({ ...searchFilters, keyword: e.target.value })
+                        }
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                        placeholder="Nhập mã hoặc tên bản ghi..."
+                        className={SEARCH_INPUT_CLS}
+                      />
                     </div>
+                    <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={handleSearch} className={SEARCH_BTN_CLS}>
+                      <Search className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Bộ lọc tìm kiếm"
+                      title="Bộ lọc tìm kiếm"
+                      aria-expanded={showFilters}
+                      onClick={() => setShowFilters(prev => !prev)}
+                      className={filterBtnClass(showFilters)}
+                    >
+                      {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                    </button>
+                  </div>
 
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-slate-700">
-                          Tìm kiếm theo mã, tên bản ghi dữ liệu chủ
-                        </label>
-                        <input
-                          type="text"
-                          value={searchFilters.keyword}
-                          onChange={(e) =>
-                            setSearchFilters({ ...searchFilters, keyword: e.target.value })
-                          }
-                          placeholder="Nhập mã hoặc tên bản ghi..."
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-slate-700">
-                          Loại dữ liệu
-                        </label>
+                  {showFilters && (
+                    <div className={FILTER_GRID_CLS}>
+                      <div>
+                        <label className={FILTER_LABEL}>Loại dữ liệu</label>
                         <select
+                          title="Loại dữ liệu"
                           value={searchFilters.dataType}
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, dataType: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                          className={INPUT_CLS}
                         >
                           <option value="">Tất cả</option>
                           <option value="congchung">Công chứng</option>
@@ -542,16 +608,15 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                           <option value="hotich">Hộ tịch</option>
                         </select>
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-slate-700">
-                          Trạng thái phê duyệt
-                        </label>
+                      <div>
+                        <label className={FILTER_LABEL}>Trạng thái phê duyệt</label>
                         <select
+                          title="Trạng thái phê duyệt"
                           value={searchFilters.approvalStatus}
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, approvalStatus: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                          className={INPUT_CLS}
                         >
                           <option value="">Tất cả</option>
                           <option value="draft">Chưa phê duyệt</option>
@@ -562,229 +627,125 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                           <option value="deleted">Đã xóa</option>
                         </select>
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-slate-700">
-                          Từ ngày
-                        </label>
+                      <div>
+                        <label className={FILTER_LABEL}>Từ ngày</label>
                         <input
                           type="date"
+                          title="Từ ngày"
                           value={searchFilters.dateFrom}
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, dateFrom: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                          className={INPUT_CLS}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-slate-700">
-                          Đến ngày
-                        </label>
+                      <div>
+                        <label className={FILTER_LABEL}>Đến ngày</label>
                         <input
                           type="date"
+                          title="Đến ngày"
                           value={searchFilters.dateTo}
                           onChange={(e) =>
                             setSearchFilters({ ...searchFilters, dateTo: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                          className={INPUT_CLS}
                         />
                       </div>
+                      <div className="flex items-end">
+                        <button type="button" onClick={handleResetFilters} className={`${BTN_OUTLINE} w-full`}>
+                          Xóa bộ lọc
+                        </button>
+                      </div>
                     </div>
-
-                    <div className="flex items-center justify-end gap-3">
-                      <button
-                        onClick={handleResetFilters}
-                        className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-[13px] shadow-sm"
-                      >
-                        Xóa bộ lọc
-                      </button>
-                      <button
-                        onClick={handleSearch}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm"
-                      >
-                        <Search className="w-4 h-4" />
-                        Tìm kiếm
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {!showFilters && (
-                  <button
-                    onClick={() => setShowFilters(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm"
-                  >
-                    <Filter className="w-4 h-4" />
-                    Hiển thị bộ lọc
-                  </button>
-                )}
+                  )}
+                </div>
 
                 {/* Results Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
+                <div className={TABLE_WRAP}>
+                  <div className={TABLE_HEADER}>
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-slate-500" />
-                      <h3 className="text-[13px] font-medium text-slate-700">
-                        Kết quả tìm kiếm ({searchResults.length} bản ghi)
+                      <FileText className="w-4 h-4 text-[#64748B]" />
+                      <h3 className={TABLE_TITLE}>
+                        Kết quả tìm kiếm (<span className="tabular-nums">{searchResults.length}</span> bản ghi)
                       </h3>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={handlePrint}
-                        className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2 text-[13px]"
-                      >
+                      <button type="button" onClick={handlePrint} className={BTN_OUTLINE}>
                         <Printer className="w-4 h-4" />
                         In
                       </button>
-                      <button
-                        onClick={handleExportExcel}
-                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-[13px]"
-                      >
+                      <button type="button" onClick={handleExportExcel} className={BTN_OUTLINE}>
                         <Download className="w-4 h-4" />
                         Excel
                       </button>
-                      <button
-                        onClick={handleExportPDF}
-                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-[13px]"
-                      >
+                      <button type="button" onClick={handleExportPDF} className={BTN_OUTLINE}>
                         <Download className="w-4 h-4" />
                         PDF
                       </button>
                     </div>
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-slate-50 border-b border-slate-200">
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px]">
+                          <th className={`${TH} text-center w-14`}>STT</th>
+                          <th className={`${TH} text-left`}>Mã dữ liệu</th>
+                          <th className={`${TH} text-left`}>Tên dữ liệu chủ</th>
+                          <th className={`${TH} text-left`}>Loại dữ liệu</th>
+                          <th className={`${TH} text-left`}>Cơ quan quản lý</th>
+                          <th className={`${TH} text-left`}>Ngày cập nhật</th>
+                          <th className={`${TH} text-left`}>Trạng thái phê duyệt</th>
+                          <th className={`${TH} text-center ${STICKY_TH}`}>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedResults.length === 0 && (
                           <tr>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              STT
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Mã dữ liệu
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Tên dữ liệu chủ
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Loại dữ liệu
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Cơ quan quản lý
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Ngày cập nhật
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Trạng thái phê duyệt
-                            </th>
-                            <th className="px-4 py-3 text-left text-[13px] text-slate-600">
-                              Thao tác
-                            </th>
+                            <td colSpan={8} className={EMPTY_TD}>Không tìm thấy bản ghi phù hợp</td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                          {paginatedResults.map((record, index) => (
-                            <tr key={record.id} className="hover:bg-slate-50">
-                              <td className="px-4 py-3 text-[13px] text-slate-900">{startItem + index}</td>
-                              <td className="px-4 py-3 text-[13px] text-blue-600">
-                                {record.recordCode}
-                              </td>
-                              <td className="px-4 py-3 text-[13px] text-slate-900">
-                                {record.fullName}
-                              </td>
-                              <td className="px-4 py-3 text-[13px] text-slate-600">
-                                {record.dataType}
-                              </td>
-                              <td className="px-4 py-3 text-[13px] text-slate-600">
-                                {record.agency}
-                              </td>
-                              <td className="px-4 py-3 text-[13px] text-slate-600">
-                                {record.updateDate}
-                              </td>
-                              <td className="px-4 py-3">
-                                <ApprovalBadge status={record.approvalStatus} />
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    onClick={() => handleViewDetail(record)}
-                                    className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                                    title="Xem chi tiết bản ghi"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleGoToUpdate(record)}
-                                    className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                                    title="Xem dữ liệu tại Cập nhật dữ liệu chủ"
-                                  >
-                                    <Layers className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Pagination */}
-                    {searchResults.length > 0 && (
-                      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-                        <div className="flex items-center gap-2">
-                          <span className="text-slate-600 font-normal">Hiển thị</span>
-                          <select
-                            aria-label="Số bản ghi trên trang"
-                            value={pageSize}
-                            onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-                            title="Số bản ghi trên trang"
-                          >
-                            {PAGE_SIZE_OPTIONS.map(n => (
-                              <option key={n} value={n}>{n}</option>
-                            ))}
-                          </select>
-                          <span className="text-slate-600 font-normal">bản ghi/trang</span>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <span className="text-slate-600 font-normal">
-                            {startItem} - {endItem} / {searchResults.length}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
-                              disabled={safePage === 1}
-                              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                            >
-                              Trước
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                              <button
-                                key={page}
-                                onClick={() => setCurrentPage(page)}
-                                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${
-                                  safePage === page
-                                    ? 'bg-blue-600 border-blue-600 text-white'
-                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                                }`}
-                              >
-                                {page}
-                              </button>
-                            ))}
-                            <button
-                              onClick={() => setCurrentPage(Math.min(totalPages, safePage + 1))}
-                              disabled={safePage === totalPages}
-                              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                            >
-                              Sau
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                        )}
+                        {paginatedResults.map((record, index) => (
+                          <tr key={record.id} className={TR}>
+                            <td className={`${TD} text-center`}>{startItem + index}</td>
+                            <td className={`${TD} text-left whitespace-nowrap text-blue-600`}>{record.recordCode}</td>
+                            <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={record.fullName} /></td>
+                            <td className={`${TD} text-left max-w-[240px]`}><TruncatedText text={record.dataType} /></td>
+                            <td className={`${TD} text-left max-w-[280px]`}><TruncatedText text={record.agency} /></td>
+                            <td className={`${TD} text-left whitespace-nowrap`}>{record.updateDate}</td>
+                            <td className={`${TD} text-left`}>
+                              <ApprovalBadge status={record.approvalStatus} />
+                            </td>
+                            <td className={`${TD} text-center ${STICKY_TD}`}>
+                              <div className="flex items-center justify-center gap-1">
+                                <RowIconAction label="Xem chi tiết bản ghi" onClick={() => handleViewDetail(record)}>
+                                  <Eye className="w-4 h-4" />
+                                </RowIconAction>
+                                <RowIconAction label="Xem dữ liệu tại Cập nhật dữ liệu chủ" onClick={() => handleGoToUpdate(record)}>
+                                  <Layers className="w-4 h-4" />
+                                </RowIconAction>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+
+                  {/* Pagination (compomennt.md 5.14) */}
+                  {searchResults.length > 0 && (
+                    <Pagination
+                      className="border-t border-[#E2E8F0]"
+                      currentPage={safePage}
+                      totalItems={searchResults.length}
+                      pageSize={pageSize}
+                      pageSizeOptions={PAGE_SIZE_OPTIONS}
+                      onPageChange={setCurrentPage}
+                      onPageSizeChange={setPageSize}
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -793,17 +754,17 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
             {activeTab === 'usage' && (
               <div className="space-y-6">
                 {/* Control Panel */}
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-30">
+                <div className={CONTROL_PANEL}>
                   <div className="flex flex-wrap items-end gap-3">
 
                     {/* Loại báo cáo: Truy cập / Tiêu thụ / Thống kê */}
                     <div className="flex-1 min-w-[220px]">
-                      <label className="block text-[12px] text-slate-500 mb-1 font-medium">Loại báo cáo</label>
+                      <label className={FILTER_LABEL}>Loại báo cáo</label>
                       <select
                         title="Loại báo cáo"
                         value={usageReportType}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageReportType(e.target.value as typeof usageReportType)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className={INPUT_CLS}
                       >
                         <option value="access">Truy cập</option>
                         <option value="consumption">Tiêu thụ</option>
@@ -813,12 +774,12 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                     {/* Thời gian */}
                     <div className="flex-1 min-w-[220px]">
-                      <label className="block text-[12px] text-slate-500 mb-1 font-medium">Thời gian thống kê</label>
+                      <label className={FILTER_LABEL}>Thời gian thống kê</label>
                       <select
                         title="Thời gian thống kê"
                         value={usageDateRange}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageDateRange(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className={INPUT_CLS}
                       >
                         <option value="this_month">Trong tháng</option>
                         <option value="6months">6 tháng</option>
@@ -828,13 +789,13 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                     {/* Chọn tháng — chỉ hiện khi Thời gian thống kê = Trong tháng */}
                     {usageDateRange === 'this_month' && (
-                      <div className="min-w-[140px]">
-                        <label className="block text-[12px] text-slate-500 mb-1 font-medium">Chọn tháng</label>
+                      <div className="min-w-[160px]">
+                        <label className={FILTER_LABEL}>Chọn tháng</label>
                         <select
                           title="Chọn tháng"
                           value={usageStatMonth}
                           onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageStatMonth(Number(e.target.value))}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          className={INPUT_CLS}
                         >
                           {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                             <option key={m} value={m}>{`Tháng ${m}/${currentYear}`}</option>
@@ -845,13 +806,13 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                     {/* Chọn năm — chỉ hiện khi Thời gian thống kê = Trong năm */}
                     {usageDateRange === 'year' && (
-                      <div className="min-w-[140px]">
-                        <label className="block text-[12px] text-slate-500 mb-1 font-medium">Chọn năm</label>
+                      <div className="min-w-[160px]">
+                        <label className={FILTER_LABEL}>Chọn năm</label>
                         <select
                           title="Chọn năm"
                           value={usageStatYear}
                           onChange={(e: ChangeEvent<HTMLSelectElement>) => setUsageStatYear(Number(e.target.value))}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          className={INPUT_CLS}
                         >
                           {[currentYear, currentYear - 1, currentYear - 2].map(y => (
                             <option key={y} value={y}>{`Năm ${y}`}</option>
@@ -863,7 +824,7 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                     <button
                       type="button"
                       onClick={handleSearchUsage}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+                      className={`${RUN_BTN_CLS} shrink-0`}
                     >
                       <Search className="w-4 h-4" />
                       Truy xuất báo cáo
@@ -873,20 +834,20 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                       <button
                         type="button"
                         onClick={() => setShowUsageExportMenu(prev => !prev)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
+                        className={BTN_OUTLINE}
                       >
                         <FileText className="w-4 h-4" />
                         Xuất File
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       {showUsageExportMenu && (
-                        <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                        <div className={EXPORT_MENU}>
                           {['Excel', 'PDF', 'CSV'].map(fmt => (
                             <button
                               key={fmt}
                               type="button"
                               onClick={() => handleExportUsageFile(fmt)}
-                              className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 transition-colors"
+                              className={EXPORT_MENU_ITEM}
                             >
                               {fmt}
                             </button>
@@ -899,15 +860,15 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                 {/* Chưa truy xuất — empty state */}
                 {!hasSearchedUsage && (
-                  <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col items-center justify-center py-20 gap-4 text-slate-400">
-                    <BarChart2 className="w-12 h-12 opacity-30" />
-                    <p className="text-[13px] font-medium">Chọn điều kiện lọc và bấm <span className="text-slate-600 font-semibold">Truy xuất báo cáo</span> để xem kết quả</p>
+                  <div className="bg-white border border-[#E2E8F0] rounded-2xl flex flex-col items-center justify-center py-20 gap-4">
+                    <BarChart2 className="w-12 h-12 text-[#CBD5E1]" />
+                    <p className="text-[13px] text-[#64748B]">Chọn điều kiện lọc và bấm <span className="text-[#334155] font-medium">Truy xuất báo cáo</span> để xem kết quả</p>
                   </div>
                 )}
 
                 {/* Thống kê — tổng lượt truy cập theo thời gian (gộp mọi thực thể, tránh rối khi số thực
                     thể dữ liệu chủ tăng lên) + tần suất khai thác chi tiết theo từng thực thể */}
-                {hasSearchedUsage && usageReportType === 'stats' && (() => {
+                {hasSearchedUsage && appliedUsageReportType === 'stats' && (() => {
                   const monthlyTrendData = usageTrendData.map(row => ({
                     name: row.name,
                     total: appliedUsageReports.reduce(
@@ -926,30 +887,30 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                     return { name: `${day}`, total: Math.round(dailyBase * variation) };
                   });
 
-                  const isMonthView = usageDateRange === 'this_month';
+                  const isMonthView = appliedUsageDateRange === 'this_month';
                   const totalAccessTrendData = isMonthView ? dailyTrendData : monthlyTrendData;
 
                   return (
                     <div className="space-y-4">
-                      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-                        <p className="text-[18px] font-semibold text-slate-700 mb-3">
+                      <div className={CHART_CARD}>
+                        <p className="text-[14px] font-medium text-[#020817] mb-3">
                           {isMonthView
-                            ? `Tổng lượt truy cập dữ liệu chủ theo ngày trong Tháng ${usageStatMonth}/${currentYear} (lượt truy cập)`
+                            ? `Tổng lượt truy cập dữ liệu chủ theo ngày trong Tháng ${appliedUsageStatMonth}/${currentYear} (lượt truy cập)`
                             : 'Tổng lượt truy cập dữ liệu chủ theo thời gian (lượt truy cập)'}
                         </p>
                         <div className={isMonthView ? 'h-72' : 'h-64'}>
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={totalAccessTrendData} margin={{ top: 10, right: 30, left: 0, bottom: isMonthView ? 20 : 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                               <XAxis
                                 dataKey="name"
-                                tick={{ fontSize: 12, fill: '#374151' }}
+                                tick={CHART_TICK}
                                 interval={isMonthView ? 1 : 0}
                                 height={isMonthView ? 50 : 30}
-                                label={isMonthView ? { value: '(Ngày)', position: 'insideBottomLeft', offset: -18, fontSize: 12, fill: '#374151' } : undefined}
+                                label={isMonthView ? { value: '(Ngày)', position: 'insideBottomLeft', offset: -18, fontSize: 12, fill: '#64748B' } : undefined}
                               />
-                              <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
-                              <Tooltip />
+                              <YAxis tick={CHART_TICK} />
+                              <Tooltip {...CHART_TOOLTIP_PROPS} />
                               <Line
                                 type="monotone"
                                 dataKey="total"
@@ -963,8 +924,8 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                         </div>
                       </div>
 
-                      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-                        <p className="text-[18px] font-semibold text-slate-700 mb-3">Tần suất khai thác dữ liệu chủ theo thực thể (tổng lượt truy cập trong kỳ)</p>
+                      <div className={CHART_CARD}>
+                        <p className="text-[14px] font-medium text-[#020817] mb-3">Tần suất khai thác dữ liệu chủ theo thực thể (tổng lượt truy cập trong kỳ)</p>
                         <div className="h-72">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart
@@ -972,20 +933,20 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                               margin={{ top: 10, right: 30, left: 0, bottom: 40 }}
                               barCategoryGap="20%"
                             >
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                               <XAxis
                                 dataKey="name"
                                 interval={0}
                                 angle={-30}
                                 textAnchor="end"
                                 height={60}
-                                tick={{ fontSize: 11, fill: '#374151' }}
+                                tick={CHART_TICK}
                               />
-                              <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
-                              <Tooltip />
+                              <YAxis tick={CHART_TICK} />
+                              <Tooltip {...CHART_TOOLTIP_PROPS} />
                               <Bar dataKey="totalAccess" name="Lượt truy cập" radius={[4, 4, 0, 0]} maxBarSize={24}>
                                 {appliedUsageReports.map(rep => (
-                                  <Cell key={rep.dataType} fill={DATA_TYPE_COLORS[rep.dataType] ?? '#94a3b8'} />
+                                  <Cell key={rep.dataType} fill={DATA_TYPE_COLORS[rep.dataType] ?? '#94A3B8'} />
                                 ))}
                               </Bar>
                             </BarChart>
@@ -998,7 +959,7 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                 {/* Tiêu thụ — đúng 3 thực thể dữ liệu chủ chính thức đang có trong Cập nhật dữ liệu chủ,
                     bảng + biểu đồ tăng trưởng chia 2 cột cùng hàng */}
-                {hasSearchedUsage && usageReportType === 'consumption' && (() => {
+                {hasSearchedUsage && appliedUsageReportType === 'consumption' && (() => {
                   const consumptionRows = [
                     ...(Object.keys(CATEGORY_LABELS) as DataCategory[]).map(cat => ({
                       category: CATEGORY_LABELS[cat],
@@ -1010,65 +971,65 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                   const totalUnitUsageMB = mockUnitConsumption.reduce((acc, r) => acc + r.usageMB, 0);
                   return (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-                      <div className="flex flex-col gap-3">
-                        <p className="text-[18px] font-semibold text-slate-700">Báo cáo tiêu thụ dữ liệu theo thực thể</p>
-                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                          <div className="overflow-auto h-[320px]">
-                            <table className="master-data-consumption-table w-full text-left border-collapse table-auto text-[13px]">
-                              <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-tight">
-                                  <th className="py-3 px-4 text-center w-12">STT</th>
-                                  <th className="py-3 px-4">Thực thể dữ liệu chủ</th>
-                                  <th className="py-3 px-4 text-right">Dung lượng tiêu thụ ước tính</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100 text-slate-700">
-                                {consumptionRows.map((item, idx) => (
-                                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                                    <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
-                                    <td className="py-3 px-4 font-medium text-slate-900">{item.category}</td>
-                                    <td className="py-3 px-4 text-right text-blue-600 font-medium">
-                                      {item.usageMB.toFixed(1)} MB
-                                    </td>
-                                  </tr>
-                                ))}
-                                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                                  <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase">Tổng tiêu thụ</td>
-                                  <td className="py-3 px-4 text-right text-blue-600">
-                                    {totalUsageMB.toFixed(1)} MB
+                      <div className={`${TABLE_WRAP} flex flex-col`}>
+                        <div className={TABLE_HEADER}>
+                          <p className={TABLE_TITLE}>Báo cáo tiêu thụ dữ liệu theo thực thể</p>
+                        </div>
+                        <div className="overflow-auto h-[320px] custom-scrollbar">
+                          <table className={`master-data-consumption-table ${TABLE_CLS}`}>
+                            <thead className="sticky top-0 z-10 bg-[#F8FAFC]">
+                              <tr className="h-[42px]">
+                                <th className={`${TH} text-center w-12`}>STT</th>
+                                <th className={`${TH} text-left`}>Thực thể dữ liệu chủ</th>
+                                <th className={`${TH} text-right`}>Dung lượng tiêu thụ ước tính</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {consumptionRows.map((item, idx) => (
+                                <tr key={idx} className={TR}>
+                                  <td className={`${TD} text-center`}>{idx + 1}</td>
+                                  <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={item.category} /></td>
+                                  <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>
+                                    {item.usageMB.toFixed(1)} MB
                                   </td>
                                 </tr>
-                              </tbody>
-                            </table>
-                          </div>
+                              ))}
+                              <tr className={TOTAL_TR}>
+                                <td colSpan={2} className={`${TD} text-center`}>Tổng tiêu thụ</td>
+                                <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>
+                                  {totalUsageMB.toFixed(1)} MB
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-3">
-                        <p className="text-[18px] font-semibold text-slate-700">Báo cáo tiêu thụ dữ liệu chủ theo đơn vị được cấp quyền</p>
-                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                          <div className="overflow-auto h-[320px]">
-                            <table className="master-data-consumption-table w-full text-left border-collapse table-auto text-[13px]">
-                              <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-500 uppercase tracking-tight">
-                                  <th className="py-3 px-4">Đơn vị</th>
-                                  <th className="py-3 px-4 text-right">Dung lượng tiêu thụ (MB)</th>
+                      <div className={`${TABLE_WRAP} flex flex-col`}>
+                        <div className={TABLE_HEADER}>
+                          <p className={TABLE_TITLE}>Báo cáo tiêu thụ dữ liệu chủ theo đơn vị được cấp quyền</p>
+                        </div>
+                        <div className="overflow-auto h-[320px] custom-scrollbar">
+                          <table className={`master-data-consumption-table ${TABLE_CLS}`}>
+                            <thead className="sticky top-0 z-10 bg-[#F8FAFC]">
+                              <tr className="h-[42px]">
+                                <th className={`${TH} text-left`}>Đơn vị</th>
+                                <th className={`${TH} text-right`}>Dung lượng tiêu thụ (MB)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {mockUnitConsumption.map((item, idx) => (
+                                <tr key={idx} className={TR}>
+                                  <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={item.unit} /></td>
+                                  <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{item.usageMB.toFixed(1)} MB</td>
                                 </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100 text-slate-700">
-                                {mockUnitConsumption.map((item, idx) => (
-                                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                                    <td className="py-3 px-4 font-medium text-slate-900">{item.unit}</td>
-                                    <td className="py-3 px-4 text-right text-blue-600 font-medium">{item.usageMB.toFixed(1)} MB</td>
-                                  </tr>
-                                ))}
-                                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                                  <td className="py-3 px-4 text-center text-slate-700 uppercase">Tổng tiêu thụ</td>
-                                  <td className="py-3 px-4 text-right text-blue-600">{totalUnitUsageMB.toFixed(1)} MB</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
+                              ))}
+                              <tr className={TOTAL_TR}>
+                                <td className={`${TD} text-center`}>Tổng tiêu thụ</td>
+                                <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{totalUnitUsageMB.toFixed(1)} MB</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
@@ -1077,7 +1038,7 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                 {/* Truy cập — bảng thống kê danh mục dữ liệu chủ đang chia sẻ qua API, giống thiết kế bảng
                     thống kê danh mục tại CategoryTrendAndStatsSection.tsx (Báo cáo khai thác danh mục) */}
-                {hasSearchedUsage && usageReportType === 'access' && (() => {
+                {hasSearchedUsage && appliedUsageReportType === 'access' && (() => {
                   const accessRows = (Object.keys(CATEGORY_LABELS) as DataCategory[]).map(cat => ({
                     category: CATEGORY_LABELS[cat],
                     ...mockCategoryApiStats[cat],
@@ -1086,59 +1047,67 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                   const totalStableApiCount = accessRows.reduce((acc, curr) => acc + curr.stableApiCount, 0);
                   const totalApiCalls = accessRows.reduce((acc, curr) => acc + curr.apiCalls, 0);
                   return (
-                    <>
-                      <p className="text-[18px] font-bold text-slate-700">Báo cáo truy cập dữ liệu thực thể chủ</p>
-                      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                          <table className="exploitation-report-table w-full text-left border-collapse table-auto">
-                          <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
-                              <th className="py-3 px-4 text-center w-12">STT</th>
-                              <th className="py-3 px-4">Thực thể dữ liệu chủ</th>
-                              <th className="py-3 px-4 text-right">Số API đang chia sẻ</th>
-                              <th className="py-3 px-4 text-right">Lượt gọi API</th>
-                              <th className="py-3 px-4 text-center">Tỷ lệ API ổn định</th>
-                              <th className="py-3 px-4 text-center">Truy cập gần nhất</th>
+                    <div className={TABLE_WRAP}>
+                      <div className={TABLE_HEADER}>
+                        <p className={TABLE_TITLE}>Báo cáo truy cập dữ liệu thực thể chủ</p>
+                      </div>
+                      <div className="overflow-x-auto custom-scrollbar">
+                        <table className={`exploitation-report-table ${TABLE_CLS}`}>
+                          <thead className="bg-[#F8FAFC]">
+                            <tr className="h-[42px]">
+                              <th className={`${TH} text-center w-12`}>STT</th>
+                              <th className={`${TH} text-left`}>Thực thể dữ liệu chủ</th>
+                              <th className={`${TH} text-right`}>Số API đang chia sẻ</th>
+                              <th className={`${TH} text-right`}>Lượt gọi API</th>
+                              <th className={`${TH} text-left`}>Tỷ lệ API ổn định</th>
+                              <th className={`${TH} text-left`}>Truy cập gần nhất</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 text-[13px] text-slate-700">
+                          <tbody>
                             {accessRows.length === 0 && (
                               <tr>
-                                <td colSpan={6} className="py-6 px-4 text-center text-slate-400 italic">Không có dữ liệu phù hợp</td>
+                                <td colSpan={6} className={EMPTY_TD}>Không có dữ liệu phù hợp</td>
                               </tr>
                             )}
-                            {accessRows.map((item, idx) => (
-                              <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                                <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
-                                <td className="py-3 px-4 font-medium text-slate-900">{item.category}</td>
-                                <td className="py-3 px-4 text-right text-slate-700">{item.apiCount}</td>
-                                <td className="py-3 px-4 text-right text-slate-700">{item.apiCalls.toLocaleString()}</td>
-                                <td className={`py-3 px-4 text-center font-medium ${
-                                  item.stableApiCount === item.apiCount ? 'text-green-600' : 'text-amber-600'
-                                }`}>
-                                  {item.stableApiCount}/{item.apiCount} API ổn định
-                                </td>
-                                <td className="py-3 px-4 text-center text-slate-500">{item.lastAccess}</td>
-                              </tr>
-                            ))}
+                            {accessRows.map((item, idx) => {
+                              const [datePart, timePart] = item.lastAccess.split(' ');
+                              return (
+                                <tr key={idx} className={TR}>
+                                  <td className={`${TD} text-center`}>{idx + 1}</td>
+                                  <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={item.category} /></td>
+                                  <td className={`${TD} text-right tabular-nums`}>{item.apiCount}</td>
+                                  <td className={`${TD} text-right tabular-nums`}>{item.apiCalls.toLocaleString()}</td>
+                                  <td className={`${TD} text-left`}>
+                                    <Badge
+                                      label={`${item.stableApiCount}/${item.apiCount} API ổn định`}
+                                      variant={item.stableApiCount === item.apiCount ? 'green' : 'amber'}
+                                    />
+                                  </td>
+                                  <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                                    <div>{datePart}</div>
+                                    {timePart && <div className="text-[#64748B]">{timePart}</div>}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                             {accessRows.length > 0 && (
-                              <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                                <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase text-[13px]">Tổng cộng</td>
-                                <td className="py-3 px-4 text-right text-blue-600">{totalApiCount}</td>
-                                <td className="py-3 px-4 text-right text-blue-600">{totalApiCalls.toLocaleString()}</td>
-                                <td className={`py-3 px-4 text-center ${
-                                  totalStableApiCount === totalApiCount ? 'text-green-600' : 'text-amber-600'
-                                }`}>
-                                  {totalStableApiCount}/{totalApiCount} API ổn định
+                              <tr className={TOTAL_TR}>
+                                <td colSpan={2} className={`${TD} text-center`}>Tổng cộng</td>
+                                <td className={`${TD} text-right tabular-nums`}>{totalApiCount}</td>
+                                <td className={`${TD} text-right tabular-nums`}>{totalApiCalls.toLocaleString()}</td>
+                                <td className={`${TD} text-left`}>
+                                  <Badge
+                                    label={`${totalStableApiCount}/${totalApiCount} API ổn định`}
+                                    variant={totalStableApiCount === totalApiCount ? 'green' : 'amber'}
+                                  />
                                 </td>
-                                <td className="py-3 px-4 text-center text-slate-400">—</td>
+                                <td className={`${TD} text-left text-[#94A3B8]`}>—</td>
                               </tr>
                             )}
                           </tbody>
                         </table>
                       </div>
-                      </div>
-                    </>
+                    </div>
                   );
                 })()}
               </div>
@@ -1148,17 +1117,17 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
             {activeTab === 'lifecycle' && (
               <div className="space-y-6">
                 {/* Control Panel */}
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-30">
+                <div className={CONTROL_PANEL}>
                   <div className="flex flex-wrap items-end gap-3">
 
                     {/* Chọn 1 thực thể dữ liệu chủ (không còn "Tất cả thực thể") */}
                     <div className="flex-1 min-w-[260px]">
-                      <label className="block text-[12px] text-slate-500 mb-1 font-medium">Chọn thực thể dữ liệu chủ</label>
+                      <label className={FILTER_LABEL}>Chọn thực thể dữ liệu chủ</label>
                       <select
                         title="Chọn thực thể dữ liệu chủ"
                         value={lifecycleCategory}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setLifecycleCategory(e.target.value as DataCategory)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        className={INPUT_CLS}
                       >
                         {(Object.keys(CATEGORY_LABELS) as DataCategory[]).map(cat => (
                           <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
@@ -1169,7 +1138,7 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                     <button
                       type="button"
                       onClick={handleSearchLifecycle}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+                      className={`${RUN_BTN_CLS} shrink-0`}
                     >
                       <Search className="w-4 h-4" />
                       Truy xuất báo cáo
@@ -1179,20 +1148,20 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                       <button
                         type="button"
                         onClick={() => setShowLifecycleExportMenu(prev => !prev)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
+                        className={BTN_OUTLINE}
                       >
                         <FileText className="w-4 h-4" />
                         Xuất File
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       {showLifecycleExportMenu && (
-                        <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                        <div className={EXPORT_MENU}>
                           {['Excel', 'PDF', 'CSV'].map(fmt => (
                             <button
                               key={fmt}
                               type="button"
                               onClick={() => handleExportLifecycleFile(fmt)}
-                              className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 transition-colors"
+                              className={EXPORT_MENU_ITEM}
                             >
                               {fmt}
                             </button>
@@ -1205,9 +1174,9 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
                 {/* Chưa truy xuất — empty state */}
                 {!hasSearchedLifecycle && (
-                  <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col items-center justify-center py-20 gap-4 text-slate-400">
-                    <BarChart2 className="w-12 h-12 opacity-30" />
-                    <p className="text-[13px] font-medium">Chọn thực thể dữ liệu chủ và bấm <span className="text-slate-600 font-semibold">Truy xuất báo cáo</span> để xem kết quả</p>
+                  <div className="bg-white border border-[#E2E8F0] rounded-2xl flex flex-col items-center justify-center py-20 gap-4">
+                    <BarChart2 className="w-12 h-12 text-[#CBD5E1]" />
+                    <p className="text-[13px] text-[#64748B]">Chọn thực thể dữ liệu chủ và bấm <span className="text-[#334155] font-medium">Truy xuất báo cáo</span> để xem kết quả</p>
                   </div>
                 )}
 
@@ -1221,139 +1190,123 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                   const activeCount = appliedLifecycleData.filter(d => getLifecycleStage(getDaysRemaining(d)) === 'active').length;
                   const warningCount = appliedLifecycleData.filter(d => getLifecycleStage(getDaysRemaining(d)) === 'warning').length;
                   const expiredCount = appliedLifecycleData.filter(d => getLifecycleStage(getDaysRemaining(d)) === 'expired').length;
+                  const lifecycleCards = [
+                    { label: 'Còn hiệu lực', value: activeCount, note: 'Còn hơn 30 ngày', icon: CheckCircle2, bg: 'bg-green-50', fg: 'text-green-600' },
+                    { label: 'Sắp hết hiệu lực', value: warningCount, note: 'Còn từ 0-30 ngày', icon: Clock, bg: 'bg-orange-50', fg: 'text-orange-600' },
+                    { label: 'Đã hết hiệu lực', value: expiredCount, note: 'Cần xử lý ngay', icon: XCircle, bg: 'bg-red-50', fg: 'text-red-600' },
+                  ];
                   return (
                     <>
                       {/* Warning Alert */}
                       {(warningCount > 0 || expiredCount > 0) && (
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div className="bg-[#FFF7ED] border border-[#FED7AA] rounded-lg p-4">
                           <div className="flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <AlertCircle className="w-5 h-5 text-[#D97706] flex-shrink-0" />
                             <div>
-                              <h4 className="text-[13px] font-medium text-orange-900 mb-1">
+                              <h4 className="text-[13px] font-medium text-[#020817] mb-1">
                                 Cảnh báo dữ liệu sắp hết hiệu lực
                               </h4>
-                              <p className="text-[13px] text-orange-700">
-                                Có <strong>{warningCount} bản ghi</strong> sắp hết hiệu lực trong 30 ngày tới và{' '}
-                                <strong>{expiredCount} bản ghi</strong> đã hết hiệu lực cần xử lý.
+                              <p className="text-[13px] text-[#020817]">
+                                Có <strong className="font-semibold">{warningCount} bản ghi</strong> sắp hết hiệu lực trong 30 ngày tới và{' '}
+                                <strong className="font-semibold">{expiredCount} bản ghi</strong> đã hết hiệu lực cần xử lý.
                               </p>
                             </div>
                           </div>
                         </div>
                       )}
 
-                      {/* Lifecycle Status Cards */}
+                      {/* Lifecycle Status Cards (compomennt.md 5.6.1) */}
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-white border border-green-200 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-[13px] font-medium text-slate-700">Còn hiệu lực</div>
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                          </div>
-                          <div className="text-2xl text-slate-900 mb-1">{activeCount}</div>
-                          <div className="text-[13px] text-slate-600">Còn hơn 30 ngày</div>
-                        </div>
-                        <div className="bg-white border border-orange-200 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-[13px] font-medium text-slate-700">Sắp hết hiệu lực</div>
-                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                          </div>
-                          <div className="text-2xl text-slate-900 mb-1">{warningCount}</div>
-                          <div className="text-[13px] text-slate-600">Còn từ 0-30 ngày</div>
-                        </div>
-                        <div className="bg-white border border-red-200 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="text-[13px] font-medium text-slate-700">Đã hết hiệu lực</div>
-                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                          </div>
-                          <div className="text-2xl text-slate-900 mb-1">{expiredCount}</div>
-                          <div className="text-[13px] text-slate-600">Cần xử lý ngay</div>
-                        </div>
+                        {lifecycleCards.map(card => {
+                          const Icon = card.icon;
+                          return (
+                            <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                              <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-lg ${card.bg}`}>
+                                  <Icon className={`w-5 h-5 ${card.fg}`} />
+                                </div>
+                                <div>
+                                  <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                                  <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{card.value}</div>
+                                  <div className="text-[12px] text-[#64748B]">{card.note}</div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
 
                       {/* Lifecycle Table — giá trị các bản ghi thật của thực thể đã chọn (lấy từ Cập nhật dữ liệu chủ) */}
-                      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-                        <div className="p-4 border-b border-slate-200">
-                          <h3 className="text-[13px] font-medium text-slate-700">
+                      <div className={TABLE_WRAP}>
+                        <div className={TABLE_HEADER}>
+                          <h3 className={TABLE_TITLE}>
                             Chi tiết vòng đời dữ liệu — {CATEGORY_LABELS[appliedLifecycleCategory]}
                           </h3>
                         </div>
 
-                        <div>
-                          <div className="overflow-x-auto">
-                            <table className="w-full">
-                              <thead className="bg-slate-50 border-b border-slate-200">
+                        <div className="overflow-x-auto custom-scrollbar">
+                          <table className={TABLE_CLS}>
+                            <thead className="bg-[#F8FAFC]">
+                              <tr className="h-[42px]">
+                                <th className={`${TH} text-center w-14`}>STT</th>
+                                {visibleCols.map(col => (
+                                  <th key={col.key} className={`${TH} text-left`}>
+                                    {col.label}
+                                  </th>
+                                ))}
+                                <th className={`${TH} text-left`}>Hiệu lực</th>
+                                <th className={`${TH} text-left`}>Số ngày còn lại</th>
+                                <th className={`${TH} text-left`}>Vòng đời</th>
+                                <th className={`${TH} text-center ${STICKY_TH}`}>Thao tác</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {appliedLifecycleData.length === 0 && (
                                 <tr>
-                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600 whitespace-nowrap">
-                                    STT
-                                  </th>
-                                  {visibleCols.map(col => (
-                                    <th key={col.key} className="px-4 py-3 text-left text-[13px] text-slate-600 whitespace-nowrap">
-                                      {col.label}
-                                    </th>
-                                  ))}
-                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600 whitespace-nowrap">
-                                    Hiệu lực
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600 whitespace-nowrap">
-                                    Số ngày còn lại
-                                  </th>
-                                  <th className="px-4 py-3 text-left text-[13px] text-slate-600 whitespace-nowrap">
-                                    Vòng đời
-                                  </th>
-                                  <th className="px-4 py-3 text-center text-[13px] text-slate-600 whitespace-nowrap">
-                                    Thao tác
-                                  </th>
+                                  <td colSpan={visibleCols.length + 5} className={EMPTY_TD}>
+                                    Không có bản ghi phù hợp với thực thể đã chọn
+                                  </td>
                                 </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-200">
-                                {appliedLifecycleData.length === 0 && (
-                                  <tr>
-                                    <td colSpan={visibleCols.length + 5} className="px-4 py-6 text-center text-[13px] text-slate-400 italic">
-                                      Không có bản ghi phù hợp với thực thể đã chọn
+                              )}
+                              {appliedLifecycleData.map((row, index) => {
+                                const info = expiryMap[row.id];
+                                const daysRemaining = info?.daysRemaining ?? 0;
+                                const stage = getLifecycleStage(daysRemaining);
+                                return (
+                                  <tr key={row.id} className={TR}>
+                                    <td className={`${TD} text-center`}>{index + 1}</td>
+                                    {visibleCols.map(col => (
+                                      <td key={col.key} className={`${TD} text-left max-w-[220px]`}>
+                                        {row[col.key]
+                                          ? <TruncatedText text={row[col.key]} />
+                                          : <span className="text-[#94A3B8]">(trống)</span>}
+                                      </td>
+                                    ))}
+                                    <td className={`${TD} text-left whitespace-nowrap`}>
+                                      {row.hieuLuc || <span className="text-[#94A3B8]">(trống)</span>}
+                                    </td>
+                                    <td className={`${TD} text-left whitespace-nowrap`}>
+                                      <span className={LIFECYCLE_STAGE_TEXT_COLOR[stage]}>
+                                        {daysRemaining < 0
+                                          ? `Quá hạn ${Math.abs(daysRemaining)} ngày`
+                                          : `${daysRemaining} ngày`}
+                                      </span>
+                                    </td>
+                                    <td className={`${TD} text-left`}>
+                                      <Badge label={LIFECYCLE_STAGE_LABEL[stage]} variant={LIFECYCLE_STAGE_BADGE_VARIANT[stage]} />
+                                    </td>
+                                    <td className={`${TD} text-center ${STICKY_TD}`}>
+                                      <div className="flex items-center justify-center">
+                                        <RowIconAction label="Xem chi tiết bản ghi" onClick={() => setLifecycleDetailRow(row)}>
+                                          <Eye className="w-4 h-4" />
+                                        </RowIconAction>
+                                      </div>
                                     </td>
                                   </tr>
-                                )}
-                                {appliedLifecycleData.map((row, index) => {
-                                  const info = expiryMap[row.id];
-                                  const daysRemaining = info?.daysRemaining ?? 0;
-                                  const stage = getLifecycleStage(daysRemaining);
-                                  return (
-                                    <tr key={row.id} className="hover:bg-slate-50">
-                                      <td className="px-4 py-3 text-[13px] text-slate-900">{index + 1}</td>
-                                      {visibleCols.map(col => (
-                                        <td key={col.key} className="px-4 py-3 text-[13px] text-slate-700 whitespace-nowrap max-w-[220px] truncate">
-                                          {row[col.key] || <span className="text-slate-400 italic">(trống)</span>}
-                                        </td>
-                                      ))}
-                                      <td className="px-4 py-3 text-[13px] text-slate-600 whitespace-nowrap">
-                                        {row.hieuLuc || <span className="text-slate-400 italic">(trống)</span>}
-                                      </td>
-                                      <td className="px-4 py-3 text-[13px] whitespace-nowrap">
-                                        <span className={LIFECYCLE_STAGE_TEXT_COLOR[stage]}>
-                                          {daysRemaining < 0
-                                            ? `Quá hạn ${Math.abs(daysRemaining)} ngày`
-                                            : `${daysRemaining} ngày`}
-                                        </span>
-                                      </td>
-                                      <td className="px-4 py-3">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] whitespace-nowrap ${LIFECYCLE_STAGE_BADGE_CLASS[stage]}`}>
-                                          {LIFECYCLE_STAGE_LABEL[stage]}
-                                        </span>
-                                      </td>
-                                      <td className="px-4 py-3 text-center">
-                                        <button
-                                          onClick={() => setLifecycleDetailRow(row)}
-                                          className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                                          title="Xem chi tiết bản ghi"
-                                        >
-                                          <Eye className="w-4 h-4" />
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
+                                );
+                              })}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </>
@@ -1372,57 +1325,55 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
         const daysRemaining = info?.daysRemaining ?? 0;
         const stage = getLifecycleStage(daysRemaining);
         return (
-          <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-              <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-blue-600" />
-                  Chi tiết bản ghi vòng đời dữ liệu chủ
-                </h3>
+          <div className={MODAL_OVERLAY}>
+            <div role="dialog" aria-modal="true" className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+              <div className={MODAL_HEADER}>
+                <h3 className={MODAL_TITLE}>Chi tiết bản ghi vòng đời dữ liệu chủ</h3>
                 <button
+                  type="button"
                   onClick={() => setLifecycleDetailRow(null)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  className={BTN_GHOST_ICON}
+                  aria-label="Đóng"
                   title="Đóng"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-3 text-[13px] overflow-y-auto">
+              <div className="px-6 py-4 overflow-y-auto custom-scrollbar space-y-4">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-500">Trạng thái:</span>
+                    <span className={FIELD_LABEL}>Trạng thái:</span>
                     <ApprovalBadge status={lifecycleDetailRow.approvalStatus} />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-500">Vòng đời:</span>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] ${LIFECYCLE_STAGE_BADGE_CLASS[stage]}`}>
-                      {LIFECYCLE_STAGE_LABEL[stage]}
-                    </span>
+                    <span className={FIELD_LABEL}>Vòng đời:</span>
+                    <Badge label={LIFECYCLE_STAGE_LABEL[stage]} variant={LIFECYCLE_STAGE_BADGE_VARIANT[stage]} />
                   </div>
                 </div>
-                <div className="border border-slate-200 rounded-lg divide-y divide-slate-100">
+                <div className="rounded-2xl border border-[#E2E8F0] p-4 grid grid-cols-2 gap-x-6 gap-y-4">
                   {detailCols.map(col => (
-                    <div key={col.key} className="flex px-3 py-2">
-                      <span className="w-40 shrink-0 text-slate-500">{col.label}</span>
-                      <span className="flex-1 text-slate-800 font-medium break-words">
-                        {lifecycleDetailRow[col.key] || <span className="text-slate-400 italic">(trống)</span>}
-                      </span>
+                    <div key={col.key} className="min-w-0">
+                      <div className={`${FIELD_LABEL} mb-1`}>{col.label}</div>
+                      <div className={`${FIELD_VALUE} break-words`}>
+                        {lifecycleDetailRow[col.key] || <span className="text-[#94A3B8]">(trống)</span>}
+                      </div>
                     </div>
                   ))}
-                  <div className="flex px-3 py-2">
-                    <span className="w-40 shrink-0 text-slate-500">Số ngày còn lại</span>
-                    <span className={`flex-1 font-medium ${LIFECYCLE_STAGE_TEXT_COLOR[stage]}`}>
+                  <div className="min-w-0">
+                    <div className={`${FIELD_LABEL} mb-1`}>Số ngày còn lại</div>
+                    <div className={`text-[13px] ${LIFECYCLE_STAGE_TEXT_COLOR[stage]}`}>
                       {daysRemaining < 0 ? `Quá hạn ${Math.abs(daysRemaining)} ngày` : `${daysRemaining} ngày`}
-                    </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
+              <div className={MODAL_FOOTER}>
                 <button
+                  type="button"
                   onClick={() => setLifecycleDetailRow(null)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium text-[13px] transition-colors cursor-pointer active:scale-95"
+                  className={BTN_OUTLINE}
                 >
                   Đóng
                 </button>
@@ -1434,137 +1385,130 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
 
       {/* Detail Modal — giống modal "Xem chi tiết thực thể dữ liệu chủ" tại Mô hình dữ liệu chủ */}
       {showDetailModal && selectedRecord && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <h3 className="text-[15px] font-bold text-slate-800">Xem chi tiết thực thể dữ liệu chủ</h3>
+        <div className={MODAL_OVERLAY}>
+          <div role="dialog" aria-modal="true" className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Xem chi tiết thực thể dữ liệu chủ</h3>
               <button
+                type="button"
                 onClick={() => setShowDetailModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                className={BTN_GHOST_ICON}
+                aria-label="Đóng"
                 title="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Stepper */}
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+            {/* Stepper — #155DFC (đang xem/đã qua), #E2E8F0 (chưa) */}
+            <div className="px-6 py-4 border-b border-[#E2E8F0] shrink-0">
               <div className="flex items-start justify-between">
-                {VIEW_STEPS.map((step, index) => (
-                  <div key={step.number} className="flex items-start flex-1">
-                    <div className="flex flex-col items-center flex-1">
-                      <button
-                        type="button"
-                        onClick={() => setViewStep(step.number)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] transition-colors cursor-pointer flex-shrink-0 ${
-                          viewStep === step.number
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-green-600 text-white hover:bg-green-700'
-                        }`}
-                        title={step.title}
-                      >
-                        {viewStep === step.number ? step.number : <Check className="w-4 h-4" />}
-                      </button>
-                      <p className={`text-[12px] mt-1.5 text-center ${viewStep === step.number ? 'text-blue-600 font-medium' : 'text-slate-500'}`}>
-                        {step.title}
-                      </p>
+                {VIEW_STEPS.map((step, index) => {
+                  const isActive = viewStep === step.number;
+                  return (
+                    <div key={step.number} className="flex items-start flex-1">
+                      <div className="flex flex-col items-center flex-1">
+                        <button
+                          type="button"
+                          onClick={() => setViewStep(step.number)}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center border-2 text-[13px] transition-colors flex-shrink-0 ${BTN_FOCUS} ${
+                            isActive
+                              ? 'border-[#155DFC] bg-[#155DFC] text-white'
+                              : 'border-[#155DFC] bg-white text-[#155DFC] hover:bg-[#EAF3FF]'
+                          }`}
+                          title={step.title}
+                          aria-label={step.title}
+                          aria-current={isActive ? 'step' : undefined}
+                        >
+                          {isActive ? step.number : <Check className="w-4 h-4" />}
+                        </button>
+                        <p className={`text-[13px] mt-1.5 text-center ${isActive ? 'text-[#155DFC] font-medium' : 'text-[#64748B]'}`}>
+                          {step.title}
+                        </p>
+                      </div>
+                      {index < VIEW_STEPS.length - 1 && (
+                        <div className="flex-1 h-0.5 bg-[#155DFC] mx-1 mt-4" />
+                      )}
                     </div>
-                    {index < VIEW_STEPS.length - 1 && (
-                      <div className="flex-1 h-0.5 bg-slate-200 mx-1 mt-4" />
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
-            <div className="p-6 space-y-4 text-[13px] overflow-y-auto">
+            <div className="px-6 py-4 overflow-y-auto custom-scrollbar">
               {viewStep === 1 ? (
-                <>
+                <div className="rounded-2xl border border-[#E2E8F0] p-4 grid grid-cols-2 gap-x-6 gap-y-4">
                   <div>
-                    <label className="block text-slate-500 mb-1">Mã thực thể</label>
-                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 font-semibold text-slate-800">
-                      {selectedRecord.recordCode}
-                    </div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Mã thực thể</div>
+                    <div className={FIELD_VALUE}>{selectedRecord.recordCode}</div>
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Tên dữ liệu chủ</label>
-                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
-                      Bộ dữ liệu chủ {selectedRecord.dataType}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-slate-500 mb-1">Loại thực thể</label>
-                      <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
-                        Thực thể Cá nhân
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-slate-500 mb-1">Phạm vi sử dụng</label>
-                      <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
-                        Cấp quốc gia
-                      </div>
-                    </div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Tên dữ liệu chủ</div>
+                    <div className={FIELD_VALUE}>Bộ dữ liệu chủ {selectedRecord.dataType}</div>
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Đơn vị chủ quản</label>
-                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
-                      {selectedRecord.agency}
-                    </div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Loại thực thể</div>
+                    <div className={FIELD_VALUE}>Thực thể Cá nhân</div>
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Mô tả đối tượng</label>
-                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800 min-h-[64px]">
+                    <div className={`${FIELD_LABEL} mb-1`}>Phạm vi sử dụng</div>
+                    <div className={FIELD_VALUE}>Cấp quốc gia</div>
+                  </div>
+                  <div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Đơn vị chủ quản</div>
+                    <div className={FIELD_VALUE}>{selectedRecord.agency}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className={`${FIELD_LABEL} mb-1`}>Mô tả đối tượng</div>
+                    <div className={FIELD_VALUE}>
                       Dữ liệu chuẩn về {selectedRecord.dataType.toLowerCase()} bao gồm thông tin cá nhân như họ tên, ngày sinh, số CCCD, nơi sinh theo hồ sơ {selectedRecord.recordCode}.
                     </div>
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Tên cơ sở dữ liệu / Hệ thống</label>
-                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
-                      {DATA_TYPE_SYSTEM_NAME[selectedRecord.dataType] ?? 'CSDL hộ tịch điện tử'}
-                    </div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Tên cơ sở dữ liệu / Hệ thống</div>
+                    <div className={FIELD_VALUE}>{DATA_TYPE_SYSTEM_NAME[selectedRecord.dataType] ?? 'CSDL hộ tịch điện tử'}</div>
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Trạng thái vòng đời</label>
-                    <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-800">
-                      {APPROVAL_TO_LIFECYCLE_LABEL[selectedRecord.approvalStatus as ApprovalStatus] ?? '—'}
-                    </div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Trạng thái vòng đời</div>
+                    <div className={FIELD_VALUE}>{APPROVAL_TO_LIFECYCLE_LABEL[selectedRecord.approvalStatus as ApprovalStatus] ?? '—'}</div>
                   </div>
-                </>
+                </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-400 italic">
+                <div className="flex flex-col items-center justify-center py-16 text-[13px] text-[#64748B]">
                   (Chưa có dữ liệu demo cho bước "{VIEW_STEPS.find(s => s.number === viewStep)?.title}")
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3 shrink-0">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setShowDetailModal(false)}
-                className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                className={BTN_OUTLINE}
               >
                 <Edit className="w-4 h-4" /> Chỉnh sửa
               </button>
               {viewStep > 1 && (
                 <button
+                  type="button"
                   onClick={() => setViewStep(viewStep - 1)}
-                  className="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  className={BTN_OUTLINE}
                 >
                   <ChevronLeft className="w-4 h-4" /> Quay lại
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => setShowDetailModal(false)}
-                className={`px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm ${
-                  viewStep < 7 ? 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50' : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                className={viewStep < 7 ? BTN_OUTLINE : BTN_PRIMARY}
               >
                 Đóng
               </button>
               {viewStep < 7 && (
                 <button
+                  type="button"
                   onClick={() => setViewStep(viewStep + 1)}
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg font-medium text-[13px] flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  className={BTN_PRIMARY}
                 >
                   Tiếp theo <ArrowRight className="w-4 h-4" />
                 </button>

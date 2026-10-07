@@ -1,6 +1,9 @@
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent, type ReactNode } from 'react';
 import { CheckCircle2, XCircle, Clock, Database, Eye, AlertCircle, Search, Info, Table2, GitMerge, Share2, Hash } from 'lucide-react';
+import { toast } from 'sonner';
 import { BaseModal } from '../../common/BaseModal';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE, TOOLTIP_CLS, normalizeSearch } from '../collection/collectionUi';
 
 type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 type DataType = 'standard' | 'reference' | 'transactional';
@@ -464,11 +467,12 @@ const lifecycleStatusLabels: Record<LifecycleStatus, string> = {
   archived: 'Đã lưu trữ',
 };
 
+// Variant Badge chuẩn theo loại quan hệ
 const relTypeColors: Record<RelType, string> = {
-  '1-1': 'bg-teal-50 text-teal-700 border-teal-200',
-  '1-n': 'bg-blue-50 text-blue-700 border-blue-200',
-  'n-1': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  'n-n': 'bg-purple-50 text-purple-700 border-purple-200',
+  '1-1': 'emerald',
+  '1-n': 'blue',
+  'n-1': 'indigo',
+  'n-n': 'purple',
 };
 
 const groupRuleLabels: Record<GroupRuleType, string> = {
@@ -512,10 +516,11 @@ const separatorLabels: Record<SeparatorType, string> = {
   '/': 'Gạch chéo (/)',
 };
 
+// Variant Badge chuẩn theo trạng thái phê duyệt
 const statusBadgeClass: Record<ApprovalStatus, string> = {
-  pending: 'bg-orange-50 text-orange-600 border-orange-200',
-  approved: 'bg-green-50 text-green-700 border-green-200',
-  rejected: 'bg-red-50 text-red-600 border-red-200'
+  pending: 'orange',
+  approved: 'green',
+  rejected: 'red'
 };
 
 const statusLabels: Record<ApprovalStatus, string> = {
@@ -523,6 +528,42 @@ const statusLabels: Record<ApprovalStatus, string> = {
   approved: 'Đã phê duyệt',
   rejected: 'Từ chối'
 };
+
+// Bảng chuẩn (mục 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TABLE_CLS = 'w-full border-collapse collection-table approval-detail-table text-[13px]';
+const CHECKBOX_CLS = 'w-4 h-4 accent-blue-600 rounded cursor-pointer align-middle';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
+// Thẻ nhóm + tiêu đề nhóm trong modal chi tiết
+const GROUP_CARD = 'rounded-2xl border border-[#E2E8F0] bg-white';
+const GROUP_TITLE = 'text-[14px] font-medium text-[#020817]';
+const GROUP_DESC = 'text-[13px] text-[#64748B] mt-0.5';
+// Nút lọc nhanh dạng chip: đang chọn nền #EAF3FF viền #BFDBFE chữ #155DFC; thường = BTN_OUTLINE
+const chipClass = (active: boolean) => active ? `${BTN_OUTLINE} !bg-[#EAF3FF] !border-[#BFDBFE] !text-[#155DFC]` : BTN_OUTLINE;
+
+// Cặp nhãn – giá trị chỉ đọc (mục 5.17)
+function InfoField({ label, children, className = '' }: { label: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <div className={`min-w-0 ${className}`}>
+      <div className={FIELD_LABEL}>{label}</div>
+      <div className={`${FIELD_VALUE} mt-1 break-words`}>{children}</div>
+    </div>
+  );
+}
+
+// Ngày + giờ hiển thị 2 dòng (giờ màu #64748B)
+function DateTimeCell({ value }: { value: string }) {
+  const [d, ...t] = (value || '').split(' ');
+  const time = t.join(' ');
+  return (
+    <div className="leading-[18px]">
+      <div>{d}</div>
+      {time && <div className="text-[#64748B]">{time}</div>}
+    </div>
+  );
+}
 
 export function ApprovalTab() {
   const [records, setRecords] = useState<ApprovalRecord[]>(mockApprovalRecords);
@@ -538,8 +579,10 @@ export function ApprovalTab() {
   const [bulkTargetIds, setBulkTargetIds] = useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Search
+  // Search — searchInput: giá trị đang gõ; searchTerm: giá trị đã áp dụng (chỉ cập nhật khi bấm Tìm kiếm / Enter)
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const runSearch = () => setSearchTerm(searchInput);
 
   // Pagination
   const [pageSize, setPageSize] = useState(10);
@@ -552,14 +595,13 @@ export function ApprovalTab() {
 
   const filteredRecords = records.filter(r => {
     const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
-    const q = searchTerm.trim().toLowerCase();
-    const matchesSearch = !q || r.code.toLowerCase().includes(q) || r.name.toLowerCase().includes(q);
+    const q = normalizeSearch(searchTerm);
+    const matchesSearch = !q || normalizeSearch(r.code).includes(q) || normalizeSearch(r.name).includes(q);
     return matchesStatus && matchesSearch;
   });
 
   useEffect(() => { setCurrentPage(1); setSelectedIds([]); }, [filterStatus, searchTerm]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
   const paginatedRecords = filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const pendingIds = filteredRecords.filter(r => r.status === 'pending').map(r => r.id);
 
@@ -618,7 +660,7 @@ export function ApprovalTab() {
     if (targetIds.length === 0) return;
 
     if (approvalAction === 'reject' && !comment.trim()) {
-      alert('Vui lòng nhập lý do từ chối');
+      toast.error('Vui lòng nhập lý do từ chối');
       return;
     }
 
@@ -652,270 +694,223 @@ export function ApprovalTab() {
     setComment('');
 
     const actionText = approvalAction === 'approve' ? 'phê duyệt' : 'từ chối';
-    alert(`✅ Đã ${actionText} thành công ${targetIds.length} bản ghi!`);
+    toast.success(`Đã ${actionText} thành công ${targetIds.length} bản ghi!`);
   };
 
-  return (
-    <div className="space-y-5">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-[18px] font-bold text-slate-800">Phê duyệt dữ liệu chủ</h2>
-        <p className="text-[13px] text-slate-500 mt-0.5">Lãnh đạo nghiệp vụ xem xét và phê duyệt các bộ dữ liệu chủ chờ phê duyệt</p>
-      </div>
+  const statCards = [
+    { label: 'Chờ phê duyệt', value: pendingCount, icon: Clock, bg: 'bg-orange-50', fg: 'text-orange-600' },
+    { label: 'Đã phê duyệt', value: approvedCount, icon: CheckCircle2, bg: 'bg-green-50', fg: 'text-green-600' },
+    { label: 'Từ chối', value: rejectedCount, icon: XCircle, bg: 'bg-red-50', fg: 'text-red-600' },
+    { label: 'Tổng dữ liệu chủ', value: totalCount, icon: Database, bg: 'bg-blue-50', fg: 'text-blue-600' },
+  ];
 
-      {/* Bulk action bar */}
-      {selectedIds.length > 0 && (
-        <div className="flex items-center gap-3">
-          <span className="text-[13px] text-slate-600">
-            Đã chọn: <span className="font-semibold text-blue-600">{selectedIds.length}</span> bản ghi
-          </span>
-          <button
-            onClick={() => handleQuickApprove(selectedIds)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            Phê duyệt nhanh
-          </button>
-          <button
-            onClick={() => handleQuickReject(selectedIds)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
-          >
-            <XCircle className="w-4 h-4" />
-            Từ chối nhanh
-          </button>
+  const detailTabs = [
+    { key: 'general' as const, label: 'Thông tin chung', icon: Info },
+    { key: 'attributes' as const, label: 'Thuộc tính', icon: Table2 },
+    { key: 'merge' as const, label: 'Quy tắc hợp nhất', icon: GitMerge },
+    { key: 'relations' as const, label: 'Quan hệ', icon: Share2 },
+    { key: 'identifier' as const, label: 'Định danh', icon: Hash },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Page Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-[16px] font-semibold text-[#020817]">Phê duyệt dữ liệu chủ</h2>
+          <p className="text-[13px] text-[#64748B] mt-0.5">Lãnh đạo nghiệp vụ xem xét và phê duyệt các bộ dữ liệu chủ chờ phê duyệt</p>
         </div>
-      )}
+
+        {/* Bulk action bar */}
+        {selectedIds.length > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="text-[13px] text-[#475569]">
+              Đã chọn: <span className="font-medium text-blue-600">{selectedIds.length}</span> bản ghi
+            </span>
+            <button
+              type="button"
+              onClick={() => handleQuickApprove(selectedIds)}
+              className={BTN_PRIMARY}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Phê duyệt nhanh
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickReject(selectedIds)}
+              className={BTN_DESTRUCTIVE}
+            >
+              <XCircle className="w-4 h-4" />
+              Từ chối nhanh
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-              <Clock className="w-5 h-5 text-white" />
+        {statCards.map(card => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${card.bg}`}>
+                  <Icon className={`w-5 h-5 ${card.fg}`} />
+                </div>
+                <div>
+                  <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                  <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{card.value}</div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[13px] text-orange-700">Chờ phê duyệt</p>
-              <p className="text-2xl text-orange-900">{pendingCount}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[13px] text-green-700">Đã phê duyệt</p>
-              <p className="text-2xl text-green-900">{approvedCount}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-              <XCircle className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[13px] text-red-700">Từ chối</p>
-              <p className="text-2xl text-red-900">{rejectedCount}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Database className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-[13px] text-blue-700">Tổng dữ liệu chủ</p>
-              <p className="text-2xl text-blue-900">{totalCount}</p>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
       {/* Search & Status Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              title="Tìm kiếm bộ dữ liệu chủ"
-              placeholder="Tìm kiếm theo mã, tên bộ dữ liệu chủ..."
-              value={searchTerm}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {[
-              { key: 'all' as const, label: `Tất cả (${totalCount})`, activeClass: 'bg-slate-700 text-white border-slate-700' },
-              { key: 'pending' as const, label: `Chờ phê duyệt (${pendingCount})`, activeClass: 'bg-orange-500 text-white border-orange-500' },
-              { key: 'approved' as const, label: `Đã phê duyệt (${approvedCount})`, activeClass: 'bg-green-600 text-white border-green-600' },
-              { key: 'rejected' as const, label: `Từ chối (${rejectedCount})`, activeClass: 'bg-red-500 text-white border-red-500' },
-            ].map(opt => (
-              <button
-                key={opt.key}
-                onClick={() => setFilterStatus(opt.key)}
-                className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${filterStatus === opt.key
-                  ? opt.activeClass
-                  : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                  }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex-1 flex items-center gap-1.5">
+          <input
+            type="text"
+            aria-label="Tìm kiếm bộ dữ liệu chủ"
+            title="Tìm kiếm bộ dữ liệu chủ"
+            placeholder="Tìm kiếm theo mã, tên bộ dữ liệu chủ..."
+            value={searchInput}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+            className={SEARCH_INPUT_CLS}
+          />
+          <button
+            type="button"
+            aria-label="Tìm kiếm"
+            title="Tìm kiếm"
+            onClick={runSearch}
+            className={SEARCH_BTN_CLS}
+          >
+            <Search className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {[
+            { key: 'all' as const, label: `Tất cả (${totalCount})` },
+            { key: 'pending' as const, label: `Chờ phê duyệt (${pendingCount})` },
+            { key: 'approved' as const, label: `Đã phê duyệt (${approvedCount})` },
+            { key: 'rejected' as const, label: `Từ chối (${rejectedCount})` },
+          ].map(opt => (
+            <button
+              key={opt.key}
+              type="button"
+              aria-pressed={filterStatus === opt.key}
+              onClick={() => setFilterStatus(opt.key)}
+              className={chipClass(filterStatus === opt.key)}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-4 py-3 text-left w-10">
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-[#F8FAFC]">
+              <tr className="h-[42px] border-b border-[#E0E0E0]">
+                <th className={`${TH} text-center w-12`}>
                   <input
                     type="checkbox"
                     title="Chọn tất cả"
+                    aria-label="Chọn tất cả"
                     checked={pendingIds.length > 0 && selectedIds.length === pendingIds.length}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    className={CHECKBOX_CLS}
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">STT</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Mã</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên dữ liệu chủ</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Loại dữ liệu</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cơ quan quản lý</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Ngày gửi</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Người gửi</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-[13px] font-semibold text-slate-500 whitespace-nowrap">Thao tác</th>
+                <th className={`${TH} text-center w-14`}>STT</th>
+                <th className={`${TH} text-left`}>Mã</th>
+                <th className={`${TH} text-left`}>Tên dữ liệu chủ</th>
+                <th className={`${TH} text-left`}>Loại dữ liệu</th>
+                <th className={`${TH} text-left`}>Cơ quan quản lý</th>
+                <th className={`${TH} text-left`}>Ngày gửi</th>
+                <th className={`${TH} text-left`}>Người gửi</th>
+                <th className={`${TH} text-left`}>Trạng thái</th>
+                <th className={`${TH} text-center w-[120px] sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="p-12 text-center">
-                    <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 text-[13px]">Không có dữ liệu chủ nào trong trạng thái này</p>
+                  <td colSpan={10} className="py-16 text-center">
+                    <AlertCircle className="w-12 h-12 text-[#CBD5E1] stroke-[1.5] mx-auto mb-3" />
+                    <p className="text-[13px] text-[#64748B]">Không có dữ liệu chủ nào trong trạng thái này</p>
                   </td>
                 </tr>
               ) : (
-                paginatedRecords.map((record, index) => (
-                  <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      {record.status === 'pending' && (
-                        <input
-                          type="checkbox"
-                          title="Chọn bản ghi"
-                          checked={selectedIds.includes(record.id)}
-                          onChange={() => toggleSelectOne(record.id)}
-                          className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                        />
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-slate-600">{(currentPage - 1) * pageSize + index + 1}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-700">{record.code}</td>
-                    <td className="px-4 py-3 text-[13px] font-semibold text-slate-800">{record.name}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-600">{dataTypeLabels[record.dataType]}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-600">{record.managingAgency}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-600">{record.submittedDate}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-600">{record.submittedBy}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[13px] border whitespace-nowrap ${statusBadgeClass[record.status]}`}>
-                        {statusLabels[record.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleViewDetail(record)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
-                          title="Xem chi tiết"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => record.status === 'pending' && handleApprove(record)}
-                          disabled={record.status !== 'pending'}
-                          className={`p-1 rounded transition-colors ${record.status === 'pending' ? 'text-green-600 hover:bg-green-50 cursor-pointer' : 'text-slate-300 cursor-not-allowed'
-                            }`}
-                          title={record.status === 'pending' ? 'Phê duyệt' : 'Đã xử lý'}
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => record.status === 'pending' && handleReject(record)}
-                          disabled={record.status !== 'pending'}
-                          className={`p-1 rounded transition-colors ${record.status === 'pending' ? 'text-red-600 hover:bg-red-50 cursor-pointer' : 'text-slate-300 cursor-not-allowed'
-                            }`}
-                          title={record.status === 'pending' ? 'Từ chối' : 'Đã xử lý'}
-                        >
-                          <XCircle className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                paginatedRecords.map((record, index) => {
+                  const isPending = record.status === 'pending';
+                  return (
+                    <tr key={record.id} className={`group ${TR}`}>
+                      <td className={`${TD} text-center`}>
+                        {isPending && (
+                          <input
+                            type="checkbox"
+                            title="Chọn bản ghi"
+                            aria-label="Chọn bản ghi"
+                            checked={selectedIds.includes(record.id)}
+                            onChange={() => toggleSelectOne(record.id)}
+                            className={CHECKBOX_CLS}
+                          />
+                        )}
+                      </td>
+                      <td className={`${TD} text-center`}>{(currentPage - 1) * pageSize + index + 1}</td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={record.code} /></td>
+                      <td className={`${TD} max-w-[360px]`}><TruncatedText text={record.name} /></td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={dataTypeLabels[record.dataType]} /></td>
+                      <td className={`${TD} max-w-[260px]`}><TruncatedText text={record.managingAgency} /></td>
+                      <td className={`${TD} whitespace-nowrap`}><DateTimeCell value={record.submittedDate} /></td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={record.submittedBy} /></td>
+                      <td className={TD}>
+                        <Badge label={statusLabels[record.status]} variant={statusBadgeClass[record.status]} />
+                      </td>
+                      <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>
+                        <div className="flex items-center justify-center gap-1">
+                          <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(record)}>
+                            <Eye className="w-4 h-4" />
+                          </RowIconAction>
+                          <RowIconAction
+                            label="Phê duyệt"
+                            onClick={() => { if (isPending) handleApprove(record); }}
+                            disabledReason={isPending ? undefined : 'Đã xử lý'}
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </RowIconAction>
+                          <RowIconAction
+                            label="Từ chối"
+                            onClick={() => { if (isPending) handleReject(record); }}
+                            disabledReason={isPending ? undefined : 'Đã xử lý'}
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </RowIconAction>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
         {filteredRecords.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600 font-normal">Hiển thị</span>
-              <select
-                aria-label="Số bản ghi trên trang"
-                value={pageSize}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-slate-600 font-normal">bản ghi/trang</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-slate-600 font-normal">
-                {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filteredRecords.length)} / {filteredRecords.length}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                >
-                  Trước
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPage === page ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                >
-                  Sau
-                </button>
-              </div>
-            </div>
-          </div>
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPage}
+            totalItems={filteredRecords.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+            pageSizeOptions={[10, 20, 50]}
+          />
         )}
       </div>
 
@@ -926,505 +921,408 @@ export function ApprovalTab() {
         title="Chi tiết dữ liệu chủ"
         subtitle={selectedRecord ? `${selectedRecord.code} · ${selectedRecord.name}` : undefined}
         maxWidth="max-w-4xl"
-        customHeaderIcon={<Eye className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
         footer={
           <button
+            type="button"
             onClick={() => setShowDetailModal(false)}
-            className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className={BTN_OUTLINE}
           >
             Đóng
           </button>
         }
       >
         {selectedRecord && (
-            <div className="space-y-6">
-              {/* Tabs */}
-              <div className="flex gap-6 border-b border-slate-200 -mt-2">
-                <button
-                  onClick={() => setDetailTab('general')}
-                  className={`pb-3 pt-1 text-[13px] transition-colors border-b-2 flex items-center gap-1.5 ${detailTab === 'general' ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
-                >
-                  <Info className="w-4 h-4" /> Thông tin chung
-                </button>
-                <button
-                  onClick={() => setDetailTab('attributes')}
-                  className={`pb-3 pt-1 text-[13px] transition-colors border-b-2 flex items-center gap-1.5 ${detailTab === 'attributes' ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
-                >
-                  <Table2 className="w-4 h-4" /> Thuộc tính
-                </button>
-                <button
-                  onClick={() => setDetailTab('merge')}
-                  className={`pb-3 pt-1 text-[13px] transition-colors border-b-2 flex items-center gap-1.5 ${detailTab === 'merge' ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
-                >
-                  <GitMerge className="w-4 h-4" /> Quy tắc hợp nhất
-                </button>
-                <button
-                  onClick={() => setDetailTab('relations')}
-                  className={`pb-3 pt-1 text-[13px] transition-colors border-b-2 flex items-center gap-1.5 ${detailTab === 'relations' ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
-                >
-                  <Share2 className="w-4 h-4" /> Quan hệ
-                </button>
-                <button
-                  onClick={() => setDetailTab('identifier')}
-                  className={`pb-3 pt-1 text-[13px] transition-colors border-b-2 flex items-center gap-1.5 ${detailTab === 'identifier' ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
-                >
-                  <Hash className="w-4 h-4" /> Định danh
-                </button>
-              </div>
+          <div className="space-y-6 text-left">
+            {/* Tabs */}
+            <div className="flex items-center border-b border-[#E2E8F0] -mt-2 overflow-x-auto">
+              {detailTabs.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setDetailTab(tab.key)}
+                    className={`${tabClass(detailTab === tab.key)} whitespace-nowrap`}
+                  >
+                    <Icon className="w-4 h-4" /> {tab.label}
+                  </button>
+                );
+              })}
+            </div>
 
-              {detailTab === 'general' && (
-                <div className="space-y-6">
-                  {/* Basic Info */}
-                  <div>
-                    <h4 className="text-[13px] text-slate-900 mb-3">Thông tin cơ bản</h4>
-                    <div className="grid grid-cols-2 gap-4 text-[13px]">
-                      <div>
-                        <span className="text-slate-500">Mã thực thể:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.code}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Tên dữ liệu chủ:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.name}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Loại thực thể:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{dataTypeLabels[selectedRecord.dataType]}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Phạm vi sử dụng:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{scopeTypeLabels[selectedRecord.scope]}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Đơn vị chủ quản:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.managingAgency}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Trạng thái vòng đời:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{lifecycleStatusLabels[selectedRecord.lifecycleStatus]}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Tên CSDL/Hệ thống:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.systemName || '—'}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500 inline-flex items-center gap-1.5">
+            {detailTab === 'general' && (
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <div>
+                  <h4 className={SECTION_TITLE}>Thông tin cơ bản</h4>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    <InfoField label="Mã thực thể:">{selectedRecord.code}</InfoField>
+                    <InfoField label="Tên dữ liệu chủ:">{selectedRecord.name}</InfoField>
+                    <InfoField label="Loại thực thể:">{dataTypeLabels[selectedRecord.dataType]}</InfoField>
+                    <InfoField label="Phạm vi sử dụng:">{scopeTypeLabels[selectedRecord.scope]}</InfoField>
+                    <InfoField label="Đơn vị chủ quản:">{selectedRecord.managingAgency}</InfoField>
+                    <InfoField label="Trạng thái vòng đời:">{lifecycleStatusLabels[selectedRecord.lifecycleStatus]}</InfoField>
+                    <InfoField label="Tên CSDL/Hệ thống:">{selectedRecord.systemName || '—'}</InfoField>
+                    <InfoField
+                      label={
+                        <span className="inline-flex items-center gap-1.5">
                           Ngày hiệu lực:
-                          <span className="relative inline-flex items-center group">
-                            <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-72 bg-slate-900 text-white text-xs rounded-lg p-3 z-10 shadow-lg leading-relaxed normal-case">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button type="button" aria-label="Giải thích ngày hiệu lực" className="inline-flex text-[#94A3B8] hover:text-[#475569] cursor-help rounded outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+                                <Info className="w-4 h-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" sideOffset={4} className={`${TOOLTIP_CLS} w-72 font-normal leading-relaxed`}>
                               Thời gian hiệu lực sẽ được gán với từng bản ghi trong thực thể dữ liệu chủ, hiệu lực của bản ghi có thể chỉnh sửa khi thực hiện rà soát bản ghi.
-                              <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900" />
-                            </span>
-                          </span>
+                            </TooltipContent>
+                          </Tooltip>
                         </span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.effectiveDate || '—'}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Nguồn dữ liệu đăng ký:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.sources.length > 0 ? selectedRecord.sources.map(s => s.name).join(', ') : '—'}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <span className="text-slate-500">Mô tả đối tượng:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.description}</p>
-                      </div>
-                    </div>
+                      }
+                    >
+                      {selectedRecord.effectiveDate || '—'}
+                    </InfoField>
+                    <InfoField label="Nguồn dữ liệu đăng ký:">{selectedRecord.sources.length > 0 ? selectedRecord.sources.map(s => s.name).join(', ') : '—'}</InfoField>
+                    <InfoField label="Mô tả đối tượng:" className="col-span-2">{selectedRecord.description}</InfoField>
                   </div>
+                </div>
 
-                  {/* Submission Info */}
-                  <div className="border-t border-slate-200 pt-6">
-                    <h4 className="text-[13px] text-slate-900 mb-3">Thông tin gửi phê duyệt</h4>
-                    <div className="grid grid-cols-2 gap-4 text-[13px] mb-3">
-                      <div>
-                        <span className="text-slate-500">Người gửi:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.submittedBy}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-500">Ngày gửi:</span>
-                        <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.submittedDate}</p>
-                      </div>
-                    </div>
-                    <div className="text-[13px]">
-                      <span className="text-slate-500">Nội dung gửi duyệt:</span>
-                      <p className="text-[13px] text-slate-900 mt-1 bg-slate-50 border border-slate-200 rounded p-3">
-                        {selectedRecord.history.find(h => h.action === 'submitted')?.comment || '—'}
-                      </p>
-                    </div>
+                {/* Submission Info */}
+                <div className="border-t border-[#E2E8F0] pt-6">
+                  <h4 className={SECTION_TITLE}>Thông tin gửi phê duyệt</h4>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
+                    <InfoField label="Người gửi:">{selectedRecord.submittedBy}</InfoField>
+                    <InfoField label="Ngày gửi:">{selectedRecord.submittedDate}</InfoField>
                   </div>
+                  <div className={FIELD_LABEL}>Nội dung gửi duyệt:</div>
+                  <p className={`${FIELD_VALUE} mt-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3`}>
+                    {selectedRecord.history.find(h => h.action === 'submitted')?.comment || '—'}
+                  </p>
+                </div>
 
-                  {/* Review Info */}
-                  {selectedRecord.reviewedBy && (
-                    <div className="border-t border-slate-200 pt-6">
-                      <h4 className="text-[13px] text-slate-900 mb-3">Thông tin phê duyệt</h4>
-                      <div className="grid grid-cols-2 gap-4 text-[13px] mb-3">
-                        <div>
-                          <span className="text-slate-500">Người phê duyệt:</span>
-                          <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.reviewedBy}</p>
-                        </div>
-                        <div>
-                          <span className="text-slate-500">Ngày phê duyệt:</span>
-                          <p className="text-[13px] text-slate-900 mt-1">{selectedRecord.reviewedDate}</p>
-                        </div>
-                      </div>
-                      {selectedRecord.reviewComment && (
-                        <div className="text-[13px]">
-                          <span className="text-slate-500">Nhận xét:</span>
-                          <p className="text-[13px] text-slate-900 mt-1 bg-slate-50 border border-slate-200 rounded p-3">
-                            {selectedRecord.reviewComment}
-                          </p>
-                        </div>
-                      )}
+                {/* Review Info */}
+                {selectedRecord.reviewedBy && (
+                  <div className="border-t border-[#E2E8F0] pt-6">
+                    <h4 className={SECTION_TITLE}>Thông tin phê duyệt</h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
+                      <InfoField label="Người phê duyệt:">{selectedRecord.reviewedBy}</InfoField>
+                      <InfoField label="Ngày phê duyệt:">{selectedRecord.reviewedDate}</InfoField>
                     </div>
-                  )}
+                    {selectedRecord.reviewComment && (
+                      <>
+                        <div className={FIELD_LABEL}>Nhận xét:</div>
+                        <p className={`${FIELD_VALUE} mt-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3`}>
+                          {selectedRecord.reviewComment}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
 
-                  {/* History Timeline */}
-                  <div className="border-t border-slate-200 pt-6">
-                    <h4 className="text-[13px] text-slate-900 mb-3">Lịch sử cập nhật ({selectedRecord.history.length})</h4>
-                    <div className="space-y-3">
-                      {selectedRecord.history.map((h, index) => (
-                        <div key={h.id} className="flex gap-3">
-                          <div className="flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${h.action === 'approved' ? 'bg-green-100' :
-                              h.action === 'rejected' ? 'bg-red-100' :
-                                'bg-blue-100'
-                              }`}>
-                              {h.action === 'approved' ? <CheckCircle2 className="w-4 h-4 text-green-600" /> :
-                                h.action === 'rejected' ? <XCircle className="w-4 h-4 text-red-600" /> :
-                                  <Clock className="w-4 h-4 text-blue-600" />}
-                            </div>
-                            {index < selectedRecord.history.length - 1 && (
-                              <div className="w-0.5 h-8 bg-slate-300" />
-                            )}
+                {/* History Timeline */}
+                <div className="border-t border-[#E2E8F0] pt-6">
+                  <h4 className={SECTION_TITLE}>Lịch sử cập nhật ({selectedRecord.history.length})</h4>
+                  <div className="space-y-3">
+                    {selectedRecord.history.map((h, index) => (
+                      <div key={h.id} className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${h.action === 'approved' ? 'bg-green-50' :
+                            h.action === 'rejected' ? 'bg-red-50' :
+                              'bg-blue-50'
+                            }`}>
+                            {h.action === 'approved' ? <CheckCircle2 className="w-4 h-4 text-green-600" /> :
+                              h.action === 'rejected' ? <XCircle className="w-4 h-4 text-red-600" /> :
+                                <Clock className="w-4 h-4 text-blue-600" />}
                           </div>
-                          <div className="flex-1 pb-3">
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="text-[13px] text-slate-900">
-                                {h.action === 'submitted' ? 'Gửi phê duyệt' :
-                                  h.action === 'approved' ? 'Đã phê duyệt' :
-                                    h.action === 'rejected' ? 'Từ chối' : 'Cập nhật'}
-                              </span>
-                              <span className="text-[13px] text-slate-500">• {h.performedDate}</span>
-                            </div>
-                            <p className="text-[13px] text-slate-700 mb-1">Bởi: <strong>{h.performedBy}</strong></p>
-                            {h.comment && (
-                              <p className="text-[13px] text-slate-600 bg-white border border-slate-200 rounded p-2 mt-2">
-                                {h.comment}
-                              </p>
-                            )}
+                          {index < selectedRecord.history.length - 1 && (
+                            <div className="w-0.5 h-8 bg-[#E2E8F0]" />
+                          )}
+                        </div>
+                        <div className="flex-1 pb-3 min-w-0">
+                          <div className="flex items-baseline gap-2 mb-1">
+                            <span className="text-[13px] font-medium text-[#020817]">
+                              {h.action === 'submitted' ? 'Gửi phê duyệt' :
+                                h.action === 'approved' ? 'Đã phê duyệt' :
+                                  h.action === 'rejected' ? 'Từ chối' : 'Cập nhật'}
+                            </span>
+                            <span className="text-[13px] text-[#64748B]">• {h.performedDate}</span>
+                          </div>
+                          <p className="text-[13px] text-[#475569] mb-1">Bởi: <span className="font-medium text-[#020817]">{h.performedBy}</span></p>
+                          {h.comment && (
+                            <p className="text-[13px] text-[#020817] bg-white border border-[#E2E8F0] rounded-lg p-2 mt-2">
+                              {h.comment}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {detailTab === 'attributes' && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className={GROUP_TITLE}>Các trường dữ liệu</h4>
+                  <Badge label={`${selectedRecord.fields.length} trường`} variant="blue" />
+                </div>
+                {selectedRecord.fields.length === 0 ? (
+                  <p className="text-[13px] text-[#64748B] text-center py-4">Chưa có trường dữ liệu nào</p>
+                ) : (
+                  <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-x-auto">
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px] border-b border-[#E0E0E0]">
+                          <th className={`${TH} text-left`}>Thuộc tính</th>
+                          {selectedRecord.sources.map(src => (
+                            <th key={src.id} className={`${TH} text-left`}>{src.name}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedRecord.fields.map(f => (
+                          <tr key={f.fieldName} className={TR}>
+                            <td className={`${TD} max-w-[280px] leading-[18px]`}>
+                              <TruncatedText text={f.displayName} />
+                              <TruncatedText text={f.fieldName} className="text-[#64748B]" />
+                            </td>
+                            {selectedRecord.sources.map(src => (
+                              <td key={src.id} className={`${TD} max-w-[200px]`}>
+                                <TruncatedText text={selectedRecord.mapping[f.fieldName]?.[src.id] || '—'} />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Gom nguồn 1:n — chỉ hiện khi có ít nhất 1 nguồn độ mịn 1:n */}
+                {selectedRecord.sources.filter(s => s.grain === '1:n').length > 0 && (
+                  <div className={`${GROUP_CARD} overflow-hidden mt-6`}>
+                    <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between gap-3">
+                      <h4 className={GROUP_TITLE}>Gom nguồn 1:n</h4>
+                      <Badge label={`${selectedRecord.sources.filter(s => s.grain === '1:n').length} nguồn 1:n`} variant="emerald" />
+                    </div>
+                    <div className="p-4 space-y-4">
+                      <p className="text-[13px] text-[#64748B]">Với nguồn có độ mịn 1:n, chọn quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
+                      {selectedRecord.sources.filter(s => s.grain === '1:n').map(src => (
+                        <div key={src.id} className="border border-[#E2E8F0] rounded-lg overflow-hidden">
+                          <div className="px-4 py-2 bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                            <span className="text-[13px] font-medium text-[#020817]">Nguồn (1:n): {src.name}</span>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className={TABLE_CLS}>
+                              <thead className="bg-[#F8FAFC]">
+                                <tr className="h-[42px] border-b border-[#E0E0E0]">
+                                  <th className={`${TH} text-left`}>Thuộc tính</th>
+                                  <th className={`${TH} text-left`}>Rule gom</th>
+                                  <th className={`${TH} text-left`}>Cột mốc thời gian</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {selectedRecord.fields.map(f => {
+                                  const gr = selectedRecord.groupRules?.[src.id]?.[f.fieldName];
+                                  return (
+                                    <tr key={f.fieldName} className={TR}>
+                                      <td className={`${TD} max-w-[280px] leading-[18px]`}>
+                                        <TruncatedText text={f.displayName} />
+                                        <TruncatedText text={f.fieldName} className="text-[#64748B]" />
+                                      </td>
+                                      <td className={TD}>{gr ? groupRuleLabels[gr.ruleType] : '—'}</td>
+                                      <td className={`${TD} ${gr?.timeColumn ? '' : 'text-[#64748B]'}`}>{gr?.timeColumn || '—'}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            )}
 
-              {detailTab === 'attributes' && (
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-[13px] text-slate-900">Các trường dữ liệu</h4>
-                    <span className="text-[13px] text-blue-600">{selectedRecord.fields.length} trường</span>
-                  </div>
-                  {selectedRecord.fields.length === 0 ? (
-                    <p className="text-[13px] text-slate-500 text-center py-4">Chưa có trường dữ liệu nào</p>
-                  ) : (
-                    <div className="border border-slate-200 rounded-lg overflow-x-auto">
-                      <table className="w-full text-[13px] approval-detail-table">
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-[13px] text-slate-600 font-medium">Thuộc tính</th>
-                            {selectedRecord.sources.map(src => (
-                              <th key={src.id} className="px-3 py-2 text-left text-[13px] text-slate-600 font-medium">{src.name}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {selectedRecord.fields.map(f => (
-                            <tr key={f.fieldName}>
-                              <td className="px-3 py-2">
-                                <span className="text-[13px] text-slate-900 font-bold">{f.displayName}</span>
-                                <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{f.fieldName}</code>
-                              </td>
-                              {selectedRecord.sources.map(src => (
-                                <td key={src.id} className="px-3 py-2 text-[13px] text-slate-700">{selectedRecord.mapping[f.fieldName]?.[src.id] || '—'}</td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {/* Gom nguồn 1:n — chỉ hiện khi có ít nhất 1 nguồn độ mịn 1:n */}
-                  {selectedRecord.sources.filter(s => s.grain === '1:n').length > 0 && (
-                    <div className="border border-slate-200 rounded-lg overflow-hidden mt-6">
-                      <div className="px-4 py-2.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                        <h4 className="text-[13px] font-semibold text-slate-700">Gom nguồn 1:n</h4>
-                        <span className="text-[13px] px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-medium">
-                          {selectedRecord.sources.filter(s => s.grain === '1:n').length} nguồn 1:n
-                        </span>
-                      </div>
-                      <div className="p-4 space-y-4">
-                        <p className="text-[13px] text-slate-500">Với nguồn có độ mịn 1:n, chọn quy tắc gom nhiều bản ghi thành một giá trị cho từng thuộc tính</p>
-                        {selectedRecord.sources.filter(s => s.grain === '1:n').map(src => (
-                          <div key={src.id} className="border border-slate-200 rounded-lg overflow-hidden">
-                            <div className="px-4 py-2 bg-emerald-50 border-b border-emerald-100">
-                              <span className="text-[13px] font-semibold text-emerald-800">Nguồn (1:n): {src.name}</span>
-                            </div>
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-[13px] approval-detail-table">
-                                <thead className="bg-slate-50 border-b border-slate-200">
-                                  <tr>
-                                    <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Thuộc tính</th>
-                                    <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Rule gom</th>
-                                    <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Cột mốc thời gian</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                  {selectedRecord.fields.map(f => {
-                                    const gr = selectedRecord.groupRules?.[src.id]?.[f.fieldName];
-                                    return (
-                                      <tr key={f.fieldName}>
-                                        <td className="px-3 py-2">
-                                          <span className="text-[13px] font-medium text-slate-700">{f.displayName}</span>
-                                          <code className="ml-1.5 text-[13px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{f.fieldName}</code>
-                                        </td>
-                                        <td className="px-3 py-2 text-[13px] text-slate-700">{gr ? groupRuleLabels[gr.ruleType] : '—'}</td>
-                                        <td className="px-3 py-2 text-[13px] text-slate-500">{gr?.timeColumn || '—'}</td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {detailTab === 'identifier' && (
-                <div>
-                  {!selectedRecord.identifierConfig ? (
-                    <p className="text-[13px] text-red-600">Chưa thiết lập quy tắc định danh</p>
-                  ) : (() => {
-                    const ic = selectedRecord.identifierConfig;
-                    const sep = ic.separator === 'none' ? '' : ic.separator;
-                    const genCode = (n: number) => [ic.prefix, String(n).padStart(ic.digits, '0'), ic.suffix].filter(Boolean).join(sep) || '—';
-                    return (
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <div className="border border-slate-200 rounded-lg p-4 bg-white space-y-3">
-                            <p className="text-[13px] font-semibold text-slate-700">Cấu trúc mã định danh</p>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div><span className="text-[13px] text-slate-500">Tiền tố:</span><p className="text-[13px] text-slate-900 mt-1">{ic.prefix || '(không có)'}</p></div>
-                              <div><span className="text-[13px] text-slate-500">Hậu tố:</span><p className="text-[13px] text-slate-900 mt-1">{ic.suffix || '(không có)'}</p></div>
-                              <div><span className="text-[13px] text-slate-500">Ký tự phân cách:</span><p className="text-[13px] text-slate-900 mt-1">{separatorLabels[ic.separator]}</p></div>
-                              <div><span className="text-[13px] text-slate-500">Độ dài số thứ tự:</span><p className="text-[13px] text-slate-900 mt-1">{ic.digits} chữ số</p></div>
-                            </div>
-                          </div>
-
-                          <div className="border border-slate-200 rounded-lg p-4 bg-white space-y-3">
-                            <p className="text-[13px] font-semibold text-slate-700">Số tự tăng</p>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div><span className="text-[13px] text-slate-500">Bắt đầu từ:</span><p className="text-[13px] text-slate-900 mt-1">{ic.startFrom}</p></div>
-                              <div><span className="text-[13px] text-slate-500">Bước tăng:</span><p className="text-[13px] text-slate-900 mt-1">{ic.increment}</p></div>
-                            </div>
-                          </div>
-
-                          <div className="border border-slate-200 rounded-lg p-4 bg-white">
-                            <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
-                            <p className={`text-[13px] mt-1 font-medium ${ic.checkDuplicate ? 'text-green-700' : 'text-slate-500'}`}>{ic.checkDuplicate ? 'Bật' : 'Tắt'}</p>
+            {detailTab === 'identifier' && (
+              <div>
+                {!selectedRecord.identifierConfig ? (
+                  <p className="text-[13px] text-[#DC2626]">Chưa thiết lập quy tắc định danh</p>
+                ) : (() => {
+                  const ic = selectedRecord.identifierConfig;
+                  const sep = ic.separator === 'none' ? '' : ic.separator;
+                  const genCode = (n: number) => [ic.prefix, String(n).padStart(ic.digits, '0'), ic.suffix].filter(Boolean).join(sep) || '—';
+                  return (
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className={`${GROUP_CARD} p-4 space-y-4`}>
+                          <p className={GROUP_TITLE}>Cấu trúc mã định danh</p>
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                            <InfoField label="Tiền tố:">{ic.prefix || '(không có)'}</InfoField>
+                            <InfoField label="Hậu tố:">{ic.suffix || '(không có)'}</InfoField>
+                            <InfoField label="Ký tự phân cách:">{separatorLabels[ic.separator]}</InfoField>
+                            <InfoField label="Độ dài số thứ tự:">{ic.digits} chữ số</InfoField>
                           </div>
                         </div>
 
-                        <div className="space-y-4">
-                          <div className="border border-blue-200 rounded-lg p-4 bg-blue-50 space-y-4">
-                            <p className="text-[13px] font-semibold text-blue-900">Mẫu mã định danh</p>
-                            <div className="bg-white border border-blue-200 rounded-lg px-4 py-6 text-center">
-                              <code className="text-[13px] font-mono font-bold text-blue-700 tracking-widest">{genCode(ic.startFrom)}</code>
+                        <div className={`${GROUP_CARD} p-4 space-y-4`}>
+                          <p className={GROUP_TITLE}>Số tự tăng</p>
+                          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                            <InfoField label="Bắt đầu từ:"><span className="tabular-nums">{ic.startFrom}</span></InfoField>
+                            <InfoField label="Bước tăng:"><span className="tabular-nums">{ic.increment}</span></InfoField>
+                          </div>
+                        </div>
+
+                        <div className={`${GROUP_CARD} p-4`}>
+                          <p className={FIELD_LABEL}>Kiểm tra trùng lặp khi tạo mới</p>
+                          <div className="mt-1">
+                            <Badge label={ic.checkDuplicate ? 'Bật' : 'Tắt'} variant={ic.checkDuplicate ? 'green' : 'slate'} />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="border border-[#BFDBFE] rounded-2xl p-4 bg-[#EAF3FF] space-y-4">
+                          <p className={GROUP_TITLE}>Mẫu mã định danh</p>
+                          <div className="bg-white border border-[#BFDBFE] rounded-lg px-4 py-6 text-center">
+                            <span className="text-[16px] font-semibold text-blue-600 tracking-wider">{genCode(ic.startFrom)}</span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center py-1 border-b border-[#BFDBFE]">
+                              <span className="text-[13px] text-[#475569]">Mã thứ 1:</span>
+                              <span className="text-[13px] font-medium text-[#020817]">{genCode(ic.startFrom)}</span>
                             </div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center py-1 border-b border-blue-100">
-                                <span className="text-[13px] text-slate-600">Mã thứ 1:</span>
-                                <code className="text-[13px] font-mono font-semibold text-slate-800">{genCode(ic.startFrom)}</code>
-                              </div>
-                              <div className="flex justify-between items-center py-1 border-b border-blue-100">
-                                <span className="text-[13px] text-slate-600">Mã thứ 2:</span>
-                                <code className="text-[13px] font-mono font-semibold text-slate-800">{genCode(ic.startFrom + ic.increment)}</code>
-                              </div>
-                              <div className="flex justify-between items-center py-1">
-                                <span className="text-[13px] text-slate-600">Mã thứ 3:</span>
-                                <code className="text-[13px] font-mono font-semibold text-slate-800">{genCode(ic.startFrom + ic.increment * 2)}</code>
-                              </div>
+                            <div className="flex justify-between items-center py-1 border-b border-[#BFDBFE]">
+                              <span className="text-[13px] text-[#475569]">Mã thứ 2:</span>
+                              <span className="text-[13px] font-medium text-[#020817]">{genCode(ic.startFrom + ic.increment)}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1">
+                              <span className="text-[13px] text-[#475569]">Mã thứ 3:</span>
+                              <span className="text-[13px] font-medium text-[#020817]">{genCode(ic.startFrom + ic.increment * 2)}</span>
                             </div>
                           </div>
                         </div>
                       </div>
-                    );
-                  })()}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {detailTab === 'merge' && (
+              <div className="space-y-4">
+                {/* Ngưỡng — chỉ xem, không cấu hình */}
+                <div className={`${GROUP_CARD} p-4`}>
+                  <p className={`${FIELD_LABEL} mb-1`}>Ngưỡng tự động gộp (≥)</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium text-[#020817] tabular-nums">{selectedRecord.mergeSummary.autoThreshold}%</span>
+                    <span className="text-[13px] text-[#64748B]">Điểm khớp từ ngưỡng này trở lên sẽ được gộp tự động</span>
+                  </div>
                 </div>
-              )}
 
-              {detailTab === 'merge' && (
-                <div className="space-y-4">
-                  {/* Ngưỡng — chỉ xem, không cấu hình */}
-                  <div className="border border-slate-200 rounded-lg bg-white p-4">
-                    <div>
-                      <p className="text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-slate-900">{selectedRecord.mergeSummary.autoThreshold}%</span>
-                        <span className="text-[13px] text-slate-400">Điểm khớp từ ngưỡng này trở lên sẽ được gộp tự động</span>
-                      </div>
-                    </div>
+                {/* Bảng quy tắc so khớp — chỉ xem */}
+                <div className={`${GROUP_CARD} overflow-hidden`}>
+                  <div className="px-4 py-3 border-b border-[#E2E8F0]">
+                    <p className={GROUP_TITLE}>Quy tắc so khớp</p>
+                    <p className={GROUP_DESC}>Xác định khi nào hai bản ghi từ hai nguồn được coi là cùng một thực thể</p>
                   </div>
-
-                  {/* Bảng quy tắc so khớp — chỉ xem */}
-                  <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-                      <p className="text-[13px] font-semibold text-slate-700">Quy tắc so khớp</p>
-                      <p className="text-[13px] text-slate-500">Xác định khi nào hai bản ghi từ hai nguồn được coi là cùng một thực thể</p>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-[13px] approval-detail-table">
-                        <thead className="bg-slate-50 border-b border-slate-200">
+                  <div className="overflow-x-auto">
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px] border-b border-[#E0E0E0]">
+                          <th className={`${TH} text-left`}>Trường đối chiếu</th>
+                          <th className={`${TH} text-left`}>Kiểu so khớp</th>
+                          <th className={`${TH} text-left`}>Thuật toán</th>
+                          <th className={`${TH} text-right`}>Ngưỡng (%)</th>
+                          <th className={`${TH} text-right`}>Trọng số (%)</th>
+                          <th className={`${TH} text-center`}>Điều kiện</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedRecord.matchingRules.length === 0 ? (
                           <tr>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Trường đối chiếu</th>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Kiểu so khớp</th>
-                            <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Thuật toán</th>
-                            <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Ngưỡng (%)</th>
-                            <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Trọng số (%)</th>
-                            <th className="px-3 py-2 text-center text-[13px] font-medium text-slate-600">Điều kiện</th>
+                            <td colSpan={6} className="py-6 text-center text-[13px] text-[#64748B]">Chưa có quy tắc so khớp</td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {selectedRecord.matchingRules.length === 0 ? (
-                            <tr>
-                              <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">Chưa có quy tắc so khớp</td>
-                            </tr>
-                          ) : (
-                            selectedRecord.matchingRules.map(rule => {
-                              const fieldLabel = selectedRecord.fields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName;
-                              return (
-                                <tr key={rule.id}>
-                                  <td className="px-3 py-2 text-[13px] text-slate-900">{fieldLabel}</td>
-                                  <td className="px-3 py-2 text-[13px] text-slate-700">{matchMethodLabels[rule.method]}</td>
-                                  <td className="px-3 py-2 text-[13px] text-slate-700">{rule.method === 'fuzzy' && rule.algorithm ? fuzzyAlgorithmLabels[rule.algorithm] : '—'}</td>
-                                  <td className="px-3 py-2 text-center text-[13px] text-slate-700">{rule.method === 'fuzzy' ? rule.fuzzyThreshold : '—'}</td>
-                                  <td className="px-3 py-2 text-center text-[13px] text-slate-700">{rule.weight}</td>
-                                  <td className="px-3 py-2 text-center text-[13px] text-slate-500">{rule.operator || '—'}</td>
-                                </tr>
-                              );
-                            })
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Trường hard-block — chỉ xem */}
-                  <div className="border border-slate-200 rounded-lg bg-white p-4 space-y-3">
-                    <div>
-                      <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
-                      <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {selectedRecord.hardBlockFields.length === 0 ? (
-                        <span className="text-[13px] text-slate-400">Không có trường hard-block nào</span>
-                      ) : (
-                        selectedRecord.hardBlockFields.map(fieldName => (
-                          <span key={fieldName} className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
-                            {selectedRecord.fields.find(f => f.fieldName === fieldName)?.displayName || fieldName}
-                          </span>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Hợp nhất giá trị (Survivorship) — chỉ xem */}
-                  <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-                      <p className="text-[13px] font-semibold text-slate-700">Hợp nhất giá trị (Survivorship)</p>
-                      <p className="text-[13px] text-slate-500">Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
-                    </div>
-                    {selectedRecord.survivorRules.length === 0 ? (
-                      <p className="text-[13px] text-slate-400 text-center py-6">Không có quy tắc hợp nhất giá trị</p>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-[13px] approval-detail-table">
-                          <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                              <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Trường</th>
-                              <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Chiến lược</th>
-                              <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Nguồn dữ liệu</th>
-                              <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Xử lý null</th>
-                              <th className="px-3 py-2 text-left text-[13px] font-medium text-slate-600">Khi hết vẫn trống</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
-                            {selectedRecord.survivorRules.map(rule => (
-                              <tr key={rule.fieldName}>
-                                <td className="px-3 py-2 text-[13px] text-slate-900">
-                                  {selectedRecord.fields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName}
-                                </td>
-                                <td className="px-3 py-2 text-[13px] text-slate-700">{conflictStrategyLabels[rule.conflictStrategy]}</td>
-                                <td className="px-3 py-2 text-[13px] text-slate-700">
-                                  {rule.conflictStrategy === 'source'
-                                    ? (selectedRecord.sources.find(s => s.id === rule.primarySource)?.name || '—')
-                                    : (rule.priorityOrder || []).map(sid => selectedRecord.sources.find(s => s.id === sid)?.name || sid).join(' → ')}
-                                </td>
-                                <td className="px-3 py-2 text-[13px] text-slate-700">{nullHandlingLabels[rule.nullHandling]}</td>
-                                <td className="px-3 py-2 text-[13px] text-slate-700">{onEmptyLabels[rule.onEmpty]}</td>
+                        ) : (
+                          selectedRecord.matchingRules.map(rule => {
+                            const fieldLabel = selectedRecord.fields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName;
+                            return (
+                              <tr key={rule.id} className={TR}>
+                                <td className={`${TD} max-w-[220px]`}><TruncatedText text={fieldLabel} /></td>
+                                <td className={TD}>{matchMethodLabels[rule.method]}</td>
+                                <td className={TD}>{rule.method === 'fuzzy' && rule.algorithm ? fuzzyAlgorithmLabels[rule.algorithm] : '—'}</td>
+                                <td className={`${TD} text-right tabular-nums`}>{rule.method === 'fuzzy' ? rule.fuzzyThreshold : '—'}</td>
+                                <td className={`${TD} text-right tabular-nums`}>{rule.weight}</td>
+                                <td className={`${TD} text-center ${rule.operator ? '' : 'text-[#64748B]'}`}>{rule.operator || '—'}</td>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Trường hard-block — chỉ xem */}
+                <div className={`${GROUP_CARD} p-4 space-y-3`}>
+                  <div>
+                    <p className={GROUP_TITLE}>Trường hard-block</p>
+                    <p className={GROUP_DESC}>Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {selectedRecord.hardBlockFields.length === 0 ? (
+                      <span className="text-[13px] text-[#64748B]">Không có trường hard-block nào</span>
+                    ) : (
+                      selectedRecord.hardBlockFields.map(fieldName => (
+                        <Badge
+                          key={fieldName}
+                          label={selectedRecord.fields.find(f => f.fieldName === fieldName)?.displayName || fieldName}
+                          variant="blue"
+                        />
+                      ))
                     )}
                   </div>
                 </div>
-              )}
 
-              {detailTab === 'relations' && (
-                <div>
-                  <div className="flex items-center justify-end mb-3">
-                    <span className="text-[13px] text-blue-600">{selectedRecord.relationships.length} quan hệ</span>
+                {/* Hợp nhất giá trị (Survivorship) — chỉ xem */}
+                <div className={`${GROUP_CARD} overflow-hidden`}>
+                  <div className="px-4 py-3 border-b border-[#E2E8F0]">
+                    <p className={GROUP_TITLE}>Hợp nhất giá trị (Survivorship)</p>
+                    <p className={GROUP_DESC}>Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
                   </div>
-                  {selectedRecord.relationships.length === 0 ? (
-                    <p className="text-[13px] text-slate-500 text-center py-4">Chưa thiết lập quan hệ nào</p>
+                  {selectedRecord.survivorRules.length === 0 ? (
+                    <p className="text-[13px] text-[#64748B] text-center py-6">Không có quy tắc hợp nhất giá trị</p>
                   ) : (
-                    <div className="border border-slate-200 rounded-lg overflow-x-auto">
-                      <table className="w-full border-collapse text-left text-[13px] approval-detail-table">
-                        <thead>
-                          <tr className="bg-slate-50 border-b border-slate-200">
-                            <th className="px-4 py-3 font-semibold text-slate-500 text-center w-12">STT</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Thực thể đích</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500 text-center w-24">Loại</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Khóa nguồn</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Khóa đích</th>
-                            <th className="px-4 py-3 font-semibold text-slate-500">Trường hiển thị / Bảng liên kết</th>
+                    <div className="overflow-x-auto">
+                      <table className={TABLE_CLS}>
+                        <thead className="bg-[#F8FAFC]">
+                          <tr className="h-[42px] border-b border-[#E0E0E0]">
+                            <th className={`${TH} text-left`}>Trường</th>
+                            <th className={`${TH} text-left`}>Chiến lược</th>
+                            <th className={`${TH} text-left`}>Nguồn dữ liệu</th>
+                            <th className={`${TH} text-left`}>Xử lý null</th>
+                            <th className={`${TH} text-left`}>Khi hết vẫn trống</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {selectedRecord.relationships.map((rel, idx) => (
-                            <tr key={rel.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
-                              <td className="px-4 py-3">
-                                <span className="font-medium text-slate-800">{rel.targetEntityName}</span>
+                        <tbody>
+                          {selectedRecord.survivorRules.map(rule => (
+                            <tr key={rule.fieldName} className={TR}>
+                              <td className={`${TD} max-w-[220px]`}>
+                                <TruncatedText text={selectedRecord.fields.find(f => f.fieldName === rule.fieldName)?.displayName || rule.fieldName} />
                               </td>
-                              <td className="px-4 py-3 text-center">
-                                <span className={`px-2 py-0.5 rounded border text-[13px] font-semibold ${relTypeColors[rel.type]}`}>{rel.type}</span>
+                              <td className={TD}>{conflictStrategyLabels[rule.conflictStrategy]}</td>
+                              <td className={`${TD} max-w-[260px]`}>
+                                <TruncatedText
+                                  text={rule.conflictStrategy === 'source'
+                                    ? (selectedRecord.sources.find(s => s.id === rule.primarySource)?.name || '—')
+                                    : (rule.priorityOrder || []).map(sid => selectedRecord.sources.find(s => s.id === sid)?.name || sid).join(' → ')}
+                                />
                               </td>
-                              <td className="px-4 py-3 font-mono text-slate-600">{rel.sourceKey || '—'}</td>
-                              <td className="px-4 py-3 font-mono text-slate-600">{rel.targetKey || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">
-                                {rel.type === 'n-n' ? (
-                                  rel.mappingTable ? <code className="text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-mono">{rel.mappingTable}</code> : <span className="text-slate-400">—</span>
-                                ) : (
-                                  rel.displayField ? <code className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">{rel.displayField}</code> : <span className="text-slate-400">—</span>
-                                )}
-                              </td>
+                              <td className={TD}>{nullHandlingLabels[rule.nullHandling]}</td>
+                              <td className={TD}>{onEmptyLabels[rule.onEmpty]}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1432,8 +1330,56 @@ export function ApprovalTab() {
                     </div>
                   )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {detailTab === 'relations' && (
+              <div>
+                <div className="flex items-center justify-end mb-3">
+                  <Badge label={`${selectedRecord.relationships.length} quan hệ`} variant="blue" />
+                </div>
+                {selectedRecord.relationships.length === 0 ? (
+                  <p className="text-[13px] text-[#64748B] text-center py-4">Chưa thiết lập quan hệ nào</p>
+                ) : (
+                  <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-x-auto">
+                    <table className={TABLE_CLS}>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px] border-b border-[#E0E0E0]">
+                          <th className={`${TH} text-center w-14`}>STT</th>
+                          <th className={`${TH} text-left`}>Thực thể đích</th>
+                          <th className={`${TH} text-left w-24`}>Loại</th>
+                          <th className={`${TH} text-left`}>Khóa nguồn</th>
+                          <th className={`${TH} text-left`}>Khóa đích</th>
+                          <th className={`${TH} text-left`}>Trường hiển thị / Bảng liên kết</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedRecord.relationships.map((rel, idx) => {
+                          const linkValue = rel.type === 'n-n' ? rel.mappingTable : rel.displayField;
+                          return (
+                            <tr key={rel.id} className={TR}>
+                              <td className={`${TD} text-center`}>{idx + 1}</td>
+                              <td className={`${TD} max-w-[260px]`}><TruncatedText text={rel.targetEntityName} /></td>
+                              <td className={TD}>
+                                <Badge label={rel.type} variant={relTypeColors[rel.type]} />
+                              </td>
+                              <td className={`${TD} max-w-[200px]`}><TruncatedText text={rel.sourceKey || '—'} /></td>
+                              <td className={`${TD} max-w-[200px]`}><TruncatedText text={rel.targetKey || '—'} /></td>
+                              <td className={`${TD} max-w-[220px]`}>
+                                {linkValue
+                                  ? <TruncatedText text={linkValue} />
+                                  : <span className="text-[#64748B]">—</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </BaseModal>
 
@@ -1444,24 +1390,19 @@ export function ApprovalTab() {
         title={approvalAction === 'approve' ? 'Phê duyệt dữ liệu chủ' : 'Từ chối dữ liệu chủ'}
         subtitle={targetRecords.length > 1 ? `${targetRecords.length} bản ghi` : undefined}
         maxWidth="max-w-2xl"
-        customHeaderIcon={approvalAction === 'approve'
-          ? <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
-          : <XCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0" />
-        }
         footer={
           <>
             <button
+              type="button"
               onClick={() => setShowApprovalForm(false)}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className={BTN_OUTLINE}
             >
               Hủy
             </button>
             <button
+              type="button"
               onClick={handleSubmitApproval}
-              className={`flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-white rounded-lg transition-colors ${approvalAction === 'approve'
-                ? 'bg-green-600 hover:bg-green-700'
-                : 'bg-red-600 hover:bg-red-700'
-                }`}
+              className={approvalAction === 'approve' ? BTN_PRIMARY : BTN_DESTRUCTIVE}
             >
               {approvalAction === 'approve' ? (
                 <>
@@ -1478,63 +1419,60 @@ export function ApprovalTab() {
           </>
         }
       >
-            <div className="space-y-4">
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 max-h-40 overflow-y-auto space-y-2">
-                {targetRecords.map(r => (
-                  <p key={r.id} className="text-sm text-slate-700">
-                    <strong>{r.name}</strong> <span className="text-slate-500">({r.code})</span>
-                  </p>
-                ))}
-              </div>
+        <div className="space-y-4 text-left">
+          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-4 max-h-40 overflow-y-auto custom-scrollbar space-y-2">
+            {targetRecords.map(r => (
+              <p key={r.id} className="text-[13px] text-[#020817]">
+                <span className="font-medium">{r.name}</span> <span className="text-[#64748B]">({r.code})</span>
+              </p>
+            ))}
+          </div>
 
-              <div>
-                <label className="block text-sm text-slate-700 mb-1">
-                  {approvalAction === 'approve' ? 'Nhận xét (tùy chọn)' : 'Lý do từ chối'}
-                  {approvalAction === 'reject' && <span className="text-red-600"> *</span>}
-                </label>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder={
-                    approvalAction === 'approve'
-                      ? 'Nhập nhận xét của bạn...'
-                      : 'Vui lòng nhập lý do từ chối để người quản trị có thể chỉnh sửa...'
-                  }
-                  rows={4}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+          <div>
+            <label htmlFor="md-approval-comment" className={LABEL_CLS}>
+              {approvalAction === 'approve' ? 'Nhận xét (tùy chọn)' : 'Lý do từ chối'}
+              {approvalAction === 'reject' && <span className={REQUIRED_MARK}> *</span>}
+            </label>
+            <textarea
+              id="md-approval-comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder={
+                approvalAction === 'approve'
+                  ? 'Nhập nhận xét của bạn...'
+                  : 'Vui lòng nhập lý do từ chối để người quản trị có thể chỉnh sửa...'
+              }
+              rows={4}
+              className={TEXTAREA_CLS}
+            />
+          </div>
 
-              {approvalAction === 'approve' ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-green-900">
-                        Sau khi phê duyệt, dữ liệu chủ sẽ được kích hoạt và có thể sử dụng trong hệ thống.
-                      </p>
-                      <p className="text-sm text-green-700 mt-1">
-                        Thông báo sẽ được gửi đến người quản trị tương ứng.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-red-900">
-                        Sau khi từ chối, dữ liệu chủ sẽ được trả về cho người quản trị để chỉnh sửa.
-                      </p>
-                      <p className="text-sm text-red-700 mt-1">
-                        Thông báo kèm lý do từ chối sẽ được gửi đến người quản trị tương ứng.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+          {approvalAction === 'approve' ? (
+            <div className="flex items-start gap-2 p-3 bg-[#F0FDF4] border border-[#DCFCE7] rounded-lg">
+              <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+              <div className="text-[13px]">
+                <p className="text-[#020817]">
+                  Sau khi phê duyệt, dữ liệu chủ sẽ được kích hoạt và có thể sử dụng trong hệ thống.
+                </p>
+                <p className="text-[#475569] mt-1">
+                  Thông báo sẽ được gửi đến người quản trị tương ứng.
+                </p>
+              </div>
             </div>
+          ) : (
+            <div className="flex items-start gap-2 p-3 bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg">
+              <AlertCircle className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+              <div className="text-[13px]">
+                <p className="text-[#020817]">
+                  Sau khi từ chối, dữ liệu chủ sẽ được trả về cho người quản trị để chỉnh sửa.
+                </p>
+                <p className="text-[#475569] mt-1">
+                  Thông báo kèm lý do từ chối sẽ được gửi đến người quản trị tương ứng.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </BaseModal>
     </div>
   );

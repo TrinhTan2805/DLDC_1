@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, ReactNode } from 'react';
-import { Trash2, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
+import { Trash2, AlertTriangle, Info, CheckCircle2, X } from 'lucide-react';
 import { Portal } from './Portal';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON } from '../pages/collection/collectionUi';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -15,36 +16,19 @@ interface ConfirmModalProps {
   type?: 'delete' | 'warning' | 'info' | 'success';
 }
 
+// Màu theo bảng màu compomennt.md (mục 2). delete/warning là thao tác nguy hiểm → nút Destructive;
+// info/success → nút Primary (mục 5.1).
 const typeConfig = {
-  delete: {
-    icon: Trash2,
-    iconColor: 'text-red-600',
-    iconBg: 'bg-red-50',
-    confirmBg: 'bg-red-600 hover:bg-red-700'
-  },
-  warning: {
-    icon: AlertTriangle,
-    iconColor: 'text-amber-600',
-    iconBg: 'bg-amber-50',
-    confirmBg: 'bg-red-600 hover:bg-red-700'
-  },
-  info: {
-    icon: Info,
-    iconColor: 'text-blue-600',
-    iconBg: 'bg-blue-50',
-    confirmBg: 'bg-blue-600 hover:bg-blue-700'
-  },
-  success: {
-    icon: CheckCircle2,
-    iconColor: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    confirmBg: 'bg-blue-600 hover:bg-blue-700'
-  }
+  delete: { icon: Trash2, iconTone: 'bg-[#FEF2F2] text-[#DC2626]', confirmCls: BTN_DESTRUCTIVE },
+  warning: { icon: AlertTriangle, iconTone: 'bg-[#FFF7ED] text-[#D97706]', confirmCls: BTN_DESTRUCTIVE },
+  info: { icon: Info, iconTone: 'bg-[#EAF3FF] text-[#155DFC]', confirmCls: BTN_PRIMARY },
+  success: { icon: CheckCircle2, iconTone: 'bg-[#F0FDF4] text-[#16A34A]', confirmCls: BTN_PRIMARY },
 };
 
 /**
- * ConfirmModal chuẩn bộ thẻ giao diện mới theo hình ảnh yêu cầu.
- * Sử dụng 100% Core Tailwind Classes để tránh JIT compiler lỗi dãn màn hình.
+ * Hộp thoại xác nhận dùng chung — theo compomennt.md mục 5.4:
+ * nền mờ 50%, khung bo 16px, header (tiêu đề 16px/500 + nút X), thân 13px, chân nền #F8FAFC nút căn phải.
+ * Modal chồng nhau: mỗi modal mở sau có lớp nền riêng (z-index tăng dần theo thứ tự mở).
  */
 export function ConfirmModal({
   isOpen,
@@ -77,72 +61,68 @@ export function ConfirmModal({
   const config = typeConfig[type] || typeConfig.delete;
   const Icon = config.icon;
 
+  // Giữ thang z-index riêng để luôn nằm trên các modal khác đang mở (mục 5.4 – modal chồng nhau)
   const currentZIndex = 9100 + modalIndex * 10;
 
   return (
     <Portal>
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-        style={{ 
-          zIndex: currentZIndex
-        }}
-        onClick={(e: React.MouseEvent) => {
+        style={{ zIndex: currentZIndex }}
+        onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
       >
-        <div 
-          className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-           // Fallback chắc chắn 100% không bị giãn
-          onClick={(e: any) => e.stopPropagation()}
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="confirm-modal-title"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6">
-            
-            {/* Top Section: Icon & Headers */}
-            <div className="flex items-start gap-4 mb-5">
-              <div className={`w-12 h-12 shrink-0 rounded-full flex items-center justify-center ${config.iconBg} ${config.iconColor}`}>
-                <Icon className="w-6 h-6" strokeWidth={2} />
-              </div>
-              <div className="pt-1">
-                <h3 className="text-[18px] font-bold text-slate-800 leading-snug">
-                  {title}
-                </h3>
-                {subtitle && (
-                  <p className="text-[13px] text-slate-500 mt-1 font-medium">
-                    {subtitle}
-                  </p>
-                )}
-              </div>
+          {/* Header: icon + tiêu đề 16px/500 + phụ đề, nút X góc phải */}
+          <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start gap-3">
+            <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${config.iconTone}`}>
+              <Icon className="w-5 h-5" strokeWidth={2} />
             </div>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <h3 id="confirm-modal-title" className="text-[16px] font-medium text-[#020817] leading-6">
+                {title}
+              </h3>
+              {subtitle && (
+                <p className="text-[13px] text-[#64748B] mt-0.5 leading-5">{subtitle}</p>
+              )}
+            </div>
+            <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            {/* Middle Section: Grey Box Details */}
-            {message && (
-              <div className="bg-slate-50 rounded-xl p-4 text-[13px] text-slate-700 leading-relaxed min-h-20 border border-slate-100">
+          {/* Thân: nội dung 13px */}
+          {message && (
+            <div className="px-6 py-4">
+              <div className="bg-[#F8FAFC] rounded-lg p-4 text-[13px] text-[#020817] leading-5 border border-[#E2E8F0]">
                 {message}
               </div>
-            )}
-
-            {/* Bottom Section: Actions */}
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 py-2.5 bg-white text-[#020817] rounded-lg hover:bg-slate-50 transition-colors text-[13px] border border-[#e2e8f0] font-medium shadow-sm"
-              >
-                {cancelText}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onConfirm();
-                  onClose();
-                }}
-                className={`flex-1 py-2.5 ${config.confirmBg} text-white rounded-lg transition-colors text-[13px] shadow-sm font-medium`}
-              >
-                {confirmText}
-              </button>
             </div>
-            
+          )}
+
+          {/* Chân: nền #F8FAFC, nút căn phải (Hủy → Xác nhận) */}
+          <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
+            <button type="button" onClick={onClose} className={BTN_OUTLINE}>
+              {cancelText}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onConfirm();
+                onClose();
+              }}
+              className={config.confirmCls}
+            >
+              {confirmText}
+            </button>
           </div>
         </div>
       </div>

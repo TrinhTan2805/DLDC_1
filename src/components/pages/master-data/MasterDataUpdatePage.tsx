@@ -22,8 +22,8 @@ export function MasterDataUpdatePage({ initialMasterId }: MasterDataUpdatePagePr
   const selected = MASTER_DATA_ITEMS.find(m => m.id === selectedId) || MASTER_DATA_ITEMS[0];
 
   return (
-    <div className="flex gap-6 min-h-[calc(100vh-140px)]">
-      <div className="flex-shrink-0 sticky top-0 self-start">
+    <div className="flex gap-6 h-full min-h-[calc(100vh-140px)]">
+      <div className="flex-shrink-0 sticky top-0 h-fit self-start">
         <InnerSidebar
           title="Cập nhật dữ liệu chủ"
           items={MASTER_DATA_ITEMS}

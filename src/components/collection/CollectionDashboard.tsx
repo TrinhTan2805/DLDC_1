@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { DateInput, toLocalIsoDate } from '../pages/collection/collectionUi';
 import { Download, Database, Building2, Building, ChevronLeft, ChevronRight, XCircle, Calendar, FileText, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, Legend, Label, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { mockCollectionServices } from '../pages/collection/mockCollectionServices';
@@ -394,10 +395,10 @@ function SummaryCard({ title, value, icon, bgColor, iconColor }: SummaryCardProp
 
 export function CollectionDashboard() {
   const todayObj = new Date();
-  const today = todayObj.toISOString().split('T')[0];
+  const today = toLocalIsoDate(todayObj);
   // Mặc định hiển thị các ngày trong tháng hiện tại; giới hạn tối đa ~1 tháng
   const firstOfMonthObj = new Date(todayObj.getFullYear(), todayObj.getMonth(), 1);
-  const firstOfMonth = firstOfMonthObj.toISOString().split('T')[0];
+  const firstOfMonth = toLocalIsoDate(firstOfMonthObj);
   const MAX_RANGE_DAYS = 31;
 
   const [fromDate, setFromDate] = React.useState(firstOfMonth);
@@ -639,22 +640,9 @@ export function CollectionDashboard() {
             headerRight={
               <div className="flex items-center gap-2">
                 <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap">Từ ngày</label>
-                <input
-                  type="date"
-                  max={toDate || today}
-                  value={fromDate}
-                  onChange={(e) => handleFromDateChange(e.target.value)}
-                  className="w-40 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
+                <DateInput ariaLabel="Từ ngày" max={toDate || today} value={fromDate} onChange={handleFromDateChange} className="w-40" />
                 <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap ml-2">Đến ngày</label>
-                <input
-                  type="date"
-                  max={today}
-                  min={fromDate}
-                  value={toDate}
-                  onChange={(e) => handleToDateChange(e.target.value)}
-                  className="w-40 px-2.5 py-1.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                />
+                <DateInput ariaLabel="Đến ngày" max={today} min={fromDate} value={toDate} onChange={handleToDateChange} className="w-40" />
               </div>
             }
           />

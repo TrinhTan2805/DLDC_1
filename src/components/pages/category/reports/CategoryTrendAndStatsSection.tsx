@@ -2,11 +2,18 @@ import {
   LineChart, Line as LineR, XAxis as XAxisR, YAxis as YAxisR,
   CartesianGrid, Tooltip as TooltipR, ResponsiveContainer
 } from 'recharts';
+import { INPUT_CLS, TruncatedText } from '../../collection/collectionUi';
 
 const Line = LineR as any;
 const XAxis = XAxisR as any;
 const YAxis = YAxisR as any;
 const Tooltip = TooltipR as any;
+
+// Bảng (compomennt.md 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TOTAL_TR = 'h-12 bg-[#F8FAFC] font-semibold border-b border-[#E0E0E0]';
 
 export interface CategoryStatRow {
   category: string;
@@ -39,7 +46,7 @@ interface CategoryTrendAndStatsSectionProps {
   unitRatio: number;
 }
 
-// Gộp biểu đồ xu hướng + bảng thống kê danh mục vào 1 khung trắng chung, tách biệt với bảng theo hệ thống khai thác ở dưới
+// Biểu đồ xu hướng (mỗi biểu đồ 1 thẻ) + bảng thống kê danh mục, tách biệt với bảng theo hệ thống khai thác ở dưới
 export function CategoryTrendAndStatsSection({
   trendData, categories, selectedCount,
   exploitUnits, unitFilter, onUnitFilterChange, unitRatio,
@@ -55,57 +62,59 @@ export function CategoryTrendAndStatsSection({
 
   const unitLabel = exploitUnits.find(u => u.value === unitFilter)?.label ?? 'Tất cả đơn vị';
 
-  // Dropdown chọn đơn vị/hệ thống khai thác — dùng chung cho header biểu đồ và bảng gọi API
+  // Dropdown chọn đơn vị/hệ thống khai thác — dùng chung cho header biểu đồ và bảng gọi API (lọc trực tiếp, không có nút)
   const UnitSelect = () => (
     <div className="flex items-center gap-2 shrink-0">
-      <span className="text-[12px] text-slate-500 font-medium whitespace-nowrap">Đơn vị khai thác:</span>
-      <select
-        title="Đơn vị / Hệ thống khai thác"
-        value={unitFilter}
-        onChange={(e) => onUnitFilterChange(e.target.value)}
-        className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-[12px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none max-w-[240px]"
-      >
-        {exploitUnits.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
-      </select>
+      <span className="text-[13px] text-[#64748B] whitespace-nowrap">Đơn vị khai thác:</span>
+      <div className="w-[240px]">
+        <select
+          title="Đơn vị / Hệ thống khai thác"
+          value={unitFilter}
+          onChange={(e) => onUnitFilterChange(e.target.value)}
+          className={INPUT_CLS}
+        >
+          {exploitUnits.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+        </select>
+      </div>
     </div>
   );
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-6">
-      {/* 2 biểu đồ tách biệt: Lượt gọi API (khai thác qua API) và Lượt truy cập (người dùng xem trên màn tra cứu) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-4">
+      {/* 2 biểu đồ tách biệt, mỗi biểu đồ 1 thẻ: Lượt gọi API (khai thác qua API) và Lượt truy cập (người dùng xem trên màn tra cứu) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Biểu đồ 1: Lượt gọi API */}
-        <div>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
-              <p className="text-[16px] font-bold text-slate-700 mb-1">Xu hướng lượt gọi API theo thời gian</p>
-              <p className="text-[12px] text-slate-400">Khai thác qua API — {unitFilter === 'all' ? 'theo đơn vị khai thác (máy gọi máy)' : unitLabel}</p>
+              <p className="text-[14px] font-medium text-[#020817] mb-1">Xu hướng lượt gọi API theo thời gian</p>
+              <p className="text-[13px] text-[#64748B]">Khai thác qua API — {unitFilter === 'all' ? 'theo đơn vị khai thác (máy gọi máy)' : unitLabel}</p>
             </div>
             <UnitSelect />
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={apiTrendData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#374151' }} />
-                <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748B' }} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748B' }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="apiCalls" name="Lượt gọi API" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="apiCalls" name="Lượt gọi API" stroke="#155DFC" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Biểu đồ 2: Lượt truy cập */}
-        <div>
-          <p className="text-[16px] font-bold text-slate-700 mb-1">Xu hướng lượt truy cập theo thời gian</p>
-          <p className="text-[12px] text-slate-400 mb-3">Truy cập giao diện — người dùng đăng nhập xem danh mục</p>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+          <p className="text-[14px] font-medium text-[#020817] mb-1">Xu hướng lượt truy cập theo thời gian</p>
+          <p className="text-[13px] text-[#64748B] mb-3">Truy cập giao diện — người dùng đăng nhập xem danh mục</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#374151' }} />
-                <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748B' }} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748B' }} />
                 <Tooltip />
                 <Line type="monotone" dataKey="accessCount" name="Lượt truy cập" stroke="#10B981" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
@@ -113,78 +122,76 @@ export function CategoryTrendAndStatsSection({
           </div>
         </div>
       </div>
-      <p className="text-[12px] text-slate-400">
+      <p className="text-[12px] text-[#64748B]">
         * Mỗi điểm là tổng của {selectedCount === 0 ? 'tất cả danh mục' : `${selectedCount} danh mục đang lọc`} trong tháng đó. Lượt gọi API (hệ thống khai thác) và lượt truy cập (người dùng xem giao diện) là hai kênh khác nhau.
       </p>
 
-      {/* Bảng 1: Lượt gọi API theo danh mục (kênh khai thác qua API) */}
-      <div>
-        <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
-          <p className="text-[15px] font-bold text-slate-700">Lượt gọi API theo danh mục <span className="font-normal text-slate-400 text-[12px]">(khai thác qua API — hệ thống gọi)</span></p>
+      {/* Bảng 1: Lượt gọi API theo danh mục (kênh khai thác qua API) — compomennt.md 5.3 */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+        <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-[14px] font-medium text-[#020817]">Lượt gọi API theo danh mục <span className="font-normal text-[#64748B] text-[13px]">(khai thác qua API — hệ thống gọi)</span></p>
           <UnitSelect />
         </div>
-        <div className="border border-slate-200 rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
-            <table className="exploitation-report-table w-full text-left border-collapse table-auto">
-              <thead className="sticky top-0 z-10">
-                <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
-                  <th className="py-3 px-4 text-center w-12">STT</th>
-                  <th className="py-3 px-4">Danh mục</th>
-                  <th className="py-3 px-4 text-right">Số API đang chia sẻ</th>
-                  <th className="py-3 px-4 text-right">Lượt gọi API</th>
+        <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
+          <table className="exploitation-report-table w-full border-collapse collection-table text-[13px]">
+            <thead className="sticky top-0 z-10 bg-[#F8FAFC]">
+              <tr className="h-[42px]">
+                <th className={`${TH} text-center w-12`}>STT</th>
+                <th className={`${TH} text-left`}>Danh mục</th>
+                <th className={`${TH} text-right`}>Số API đang chia sẻ</th>
+                <th className={`${TH} text-right`}>Lượt gọi API</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apiCategories.map((item, idx) => (
+                <tr key={idx} className={TR}>
+                  <td className={`${TD} text-center`}>{idx + 1}</td>
+                  <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={item.category} /></td>
+                  <td className={`${TD} text-right tabular-nums`}>{item.apiCount}</td>
+                  <td className={`${TD} text-right tabular-nums`}>{item.apiCalls.toLocaleString()}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-[13px] text-slate-700">
-                {apiCategories.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                    <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
-                    <td className="py-3 px-4 font-medium text-slate-900">{item.category}</td>
-                    <td className="py-3 px-4 text-right text-slate-700">{item.apiCount}</td>
-                    <td className="py-3 px-4 text-right text-slate-700">{item.apiCalls.toLocaleString()}</td>
-                  </tr>
-                ))}
-                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                  <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase text-[13px]">Tổng cộng</td>
-                  <td className="py-3 px-4 text-right text-blue-600">{totalApiCount}</td>
-                  <td className="py-3 px-4 text-right text-blue-600">{totalApiCalls.toLocaleString()}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+              <tr className={TOTAL_TR}>
+                <td colSpan={2} className={`${TD} text-center`}>Tổng cộng</td>
+                <td className={`${TD} text-right tabular-nums`}>{totalApiCount}</td>
+                <td className={`${TD} text-right tabular-nums`}>{totalApiCalls.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Bảng 2: Lượt truy cập theo danh mục (kênh truy cập giao diện) */}
-      <div>
-        <p className="text-[15px] font-bold text-slate-700 mb-2">Lượt truy cập theo danh mục <span className="font-normal text-slate-400 text-[12px]">(truy cập giao diện — người dùng đăng nhập xem)</span></p>
-        <div className="border border-slate-200 rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
-            <table className="exploitation-report-table w-full text-left border-collapse table-auto">
-              <thead className="sticky top-0 z-10">
-                <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
-                  <th className="py-3 px-4 text-center w-12">STT</th>
-                  <th className="py-3 px-4">Danh mục</th>
-                  <th className="py-3 px-4 text-right">Số người dùng truy cập</th>
-                  <th className="py-3 px-4 text-right">Lượt truy cập</th>
+      {/* Bảng 2: Lượt truy cập theo danh mục (kênh truy cập giao diện) — compomennt.md 5.3 */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+        <div className="px-4 py-3 border-b border-[#E2E8F0]">
+          <p className="text-[14px] font-medium text-[#020817]">Lượt truy cập theo danh mục <span className="font-normal text-[#64748B] text-[13px]">(truy cập giao diện — người dùng đăng nhập xem)</span></p>
+        </div>
+        <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
+          <table className="exploitation-report-table w-full border-collapse collection-table text-[13px]">
+            <thead className="sticky top-0 z-10 bg-[#F8FAFC]">
+              <tr className="h-[42px]">
+                <th className={`${TH} text-center w-12`}>STT</th>
+                <th className={`${TH} text-left`}>Danh mục</th>
+                <th className={`${TH} text-right`}>Số người dùng truy cập</th>
+                <th className={`${TH} text-right`}>Lượt truy cập</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((item, idx) => (
+                <tr key={idx} className={TR}>
+                  <td className={`${TD} text-center`}>{idx + 1}</td>
+                  <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={item.category} /></td>
+                  <td className={`${TD} text-right tabular-nums`}>{item.userCount.toLocaleString()}</td>
+                  <td className={`${TD} text-right tabular-nums`}>{item.accessCount.toLocaleString()}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-[13px] text-slate-700">
-                {categories.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                    <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
-                    <td className="py-3 px-4 font-medium text-slate-900">{item.category}</td>
-                    <td className="py-3 px-4 text-right text-slate-700">{item.userCount.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right text-slate-700">{item.accessCount.toLocaleString()}</td>
-                  </tr>
-                ))}
-                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                  <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase text-[13px]">Tổng cộng</td>
-                  <td className="py-3 px-4 text-right text-emerald-600">{totalUserCount.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-right text-emerald-600">{totalAccessCount.toLocaleString()}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+              <tr className={TOTAL_TR}>
+                <td colSpan={2} className={`${TD} text-center`}>Tổng cộng</td>
+                <td className={`${TD} text-right tabular-nums`}>{totalUserCount.toLocaleString()}</td>
+                <td className={`${TD} text-right tabular-nums`}>{totalAccessCount.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

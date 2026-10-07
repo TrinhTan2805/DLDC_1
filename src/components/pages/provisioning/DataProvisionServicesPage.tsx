@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, Check, X, Filter } from 'lucide-react';
+import { Search, Eye, X, Filter, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 import { provisionServicesData, ProvisionService } from '../../../data/provisionServicesData';
 import { SharedFieldsConfigModal } from './modals/SharedFieldsConfigModal';
 import { InnerSidebar } from '../collection/InnerSidebar';
+import { Badge, TruncatedText, RowIconAction, Pagination, BTN_OUTLINE, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch } from '../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
 const categoryLabels: Record<ProvisionService['category'], string> = {
   internal: 'CSDL Trong ngành',
@@ -36,11 +40,17 @@ export function DataProvisionServicesPage({ category, group, description }: Data
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [selectedApiForConfig, setSelectedApiForConfig] = useState<any>(null);
 
-  // Success message toast
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Thông báo thành công (sonner)
   const triggerToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    toast.success(msg);
+  };
+
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm Tìm kiếm hoặc Enter (mục 5.19)
+  const EMPTY_FILTERS = { searchText: '', startDate: '', endDate: '', status: 'All' };
+  const [applied, setApplied] = useState(EMPTY_FILTERS);
+  const runSearch = () => {
+    setApplied({ searchText: searchRightText, startDate: filterStartDate, endDate: filterEndDate, status: filterStatus });
+    setCurrentPage(1);
   };
 
   // Check if we are on CSDL Hộ tịch điện tử screen
@@ -142,26 +152,24 @@ export function DataProvisionServicesPage({ category, group, description }: Data
   };
 
   const filteredConsumerApis = consumerApis.filter(api => {
-    const matchesSearch = 
-      api.unit.toLowerCase().includes(searchRightText.toLowerCase()) ||
-      api.code.toLowerCase().includes(searchRightText.toLowerCase()) ||
-      api.receiver.toLowerCase().includes(searchRightText.toLowerCase()) ||
-      api.name.toLowerCase().includes(searchRightText.toLowerCase());
+    const q = normalizeSearch(applied.searchText);
+    const matchesSearch = q === '' ||
+      [api.unit, api.code, api.receiver, api.name].some((v: string) => normalizeSearch(v).includes(q));
 
-    const matchesStatus = filterStatus === 'All' || api.status === filterStatus;
+    const matchesStatus = applied.status === 'All' || api.status === applied.status;
 
     let matchesDate = true;
-    if (filterStartDate || filterEndDate) {
+    if (applied.startDate || applied.endDate) {
       const datePart = api.time.split(' ')[0];
       const dateParts = datePart.split('/');
       if (dateParts.length === 3) {
         const apiDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-        if (filterStartDate) {
-          const startDate = new Date(filterStartDate);
+        if (applied.startDate) {
+          const startDate = new Date(applied.startDate);
           if (apiDate < startDate) matchesDate = false;
         }
-        if (filterEndDate) {
-          const endDate = new Date(filterEndDate);
+        if (applied.endDate) {
+          const endDate = new Date(applied.endDate);
           if (apiDate > endDate) matchesDate = false;
         }
       }
@@ -175,82 +183,10 @@ export function DataProvisionServicesPage({ category, group, description }: Data
     currentPage * itemsPerPage
   );
 
-  const renderPagination = (totalItems: number) => {
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-    return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600">Hiển thị</span>
-          <select aria-label="Select record count" 
-            value={itemsPerPage}
-            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600">bản ghi/trang</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600">
-            {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors cursor-pointer ${
-                  currentPage === page
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => {
-                if (currentPage < totalPages) {
-                  setCurrentPage(currentPage + 1);
-                }
-              }}
-              disabled={currentPage === totalPages || totalItems === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const hasSidebar = groupData.length > 0;
 
   return (
     <div className={hasSidebar ? "flex gap-6 relative" : "space-y-4 relative"}>
-
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-4 right-4 z-[9999] bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300 font-medium text-sm">
-          <Check className="w-4 h-4 text-emerald-400" />
-          {toastMessage}
-        </div>
-      )}
 
       {/* Left Sidebar - Danh sách dữ liệu chia sẻ */}
       {hasSidebar && (
@@ -279,176 +215,177 @@ export function DataProvisionServicesPage({ category, group, description }: Data
               <div className="space-y-4">
                 
                 {/* Header Title */}
-                <div className="pb-2">
-                  <h2 className="text-[18px] font-bold text-slate-800 mb-1" style={{ fontSize: '18px' }}>{selectedService.name}</h2>
-                  <p className="text-xs text-slate-400">
-                    Nguồn dữ liệu: <strong className="text-slate-600">{selectedService.group || categoryLabels[selectedService.category]}</strong>
+                <div>
+                  <h2 className="text-[20px] font-bold text-[#2A0F0F] leading-8">{selectedService.name}</h2>
+                  <p className="text-[13px] text-[#64748B]">
+                    Nguồn dữ liệu: <span className="text-[#020817] font-medium">{selectedService.group || categoryLabels[selectedService.category]}</span>
                   </p>
                 </div>
-                
-                {/* Tabbed Content */}
-                    {/* General Search Toolbar directly below tabs container */}
-                    {/* General Search Toolbar & Advanced Filters in a single white container */}
-                    <div className="space-y-4 mb-4">
-                      {/* Row 1: Search input + Blue Search Button + Filter Toggle Button */}
-                      <div className="flex items-center gap-3">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            placeholder="Tìm theo mã YC, cơ quan, loại dữ liệu..."
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                            value={searchRightText}
-                            onChange={(e) => { setSearchRightText(e.target.value); setCurrentPage(1); }}
-                          />
-                        </div>
-                        <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center cursor-pointer">
-                          <Search className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                          className={`p-2 rounded-lg transition-colors flex items-center justify-center border cursor-pointer ${
-                            showAdvancedFilter 
-                              ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                              : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                          }`}
-                          title="Bộ lọc"
-                        >
-                          {showAdvancedFilter ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-                        </button>
-                      </div>
 
-                      {/* Row 2: Advanced Filter Panel */}
-                      {showAdvancedFilter && (
-                        <div className="grid grid-cols-4 gap-4 pt-4 border-t border-slate-100 animate-in slide-in-from-top-2 duration-200">
-                          <div>
-                            <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Từ ngày)</label>
-                            <input
-                              type="date"
-                              value={filterStartDate}
-                              onChange={(e) => { setFilterStartDate(e.target.value); setCurrentPage(1); }}
-                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Khoảng thời gian (Đến ngày)</label>
-                            <input
-                              type="date"
-                              value={filterEndDate}
-                              onChange={(e) => { setFilterEndDate(e.target.value); setCurrentPage(1); }}
-                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[13px] text-slate-600 mb-1.5 font-medium">Trạng thái xử lý / kết nối</label>
-                            <select
-                              value={filterStatus}
-                              onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
-                            >
-                              <option value="All">-- Tất cả trạng thái --</option>
-                              <option value="Hoạt động">Hoạt động</option>
-                              <option value="Tạm ngưng">Tạm ngưng</option>
-                            </select>
-                          </div>
-                          <div className="flex items-end">
-                            <button
-                              onClick={() => {
-                                setFilterStartDate('');
-                                setFilterEndDate('');
-                                setFilterStatus('All');
-                                setSearchRightText('');
-                                setCurrentPage(1);
-                              }}
-                              className="w-full px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer shadow-sm text-center"
-                            >
-                              Thiết lập lại
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                {/* Tìm kiếm & bộ lọc (mục 5.19) — chỉ áp dụng khi bấm Tìm kiếm hoặc Enter */}
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        aria-label="Tìm kiếm"
+                        placeholder="Tìm theo mã YC, cơ quan, loại dữ liệu..."
+                        className={SEARCH_INPUT_CLS}
+                        value={searchRightText}
+                        onChange={(e) => setSearchRightText(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                      />
                     </div>
+                    <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+                      <Search className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Bộ lọc"
+                      aria-expanded={showAdvancedFilter}
+                      onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+                      className={filterBtnClass(showAdvancedFilter)}
+                      title="Bộ lọc"
+                    >
+                      {showAdvancedFilter ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                    </button>
+                  </div>
 
-                    {/* Quản lý API đang lấy dữ liệu */}
-                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left border-collapse table-auto" style={{ fontSize: '13px' }}>
-                            <thead>
-                              <tr className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-tight" style={{ fontSize: '13px' }}>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Mã API</th>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Tên API</th>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đơn vị sử dụng</th>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Đầu mối tiếp nhận</th>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Cổng Endpoint / Giao thức</th>
-
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thời gian cập nhật</th>
-                                <th className="px-4 py-3 font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Trạng thái</th>
-                                <th className="px-4 py-3 text-center font-semibold text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>Thao tác</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-slate-700" style={{ fontSize: '13px' }}>
-                              {paginatedConsumerApis.map(api => (
-                                <tr key={api.id} className="hover:bg-slate-50/50 transition-colors" style={{ fontSize: '13px' }}>
-                                  <td className="px-4 py-3 text-slate-500 font-mono text-[13px]" style={{ fontSize: '13px' }}>
-                                    {api.code}
-                                  </td>
-                                  <td className="px-4 py-3 font-bold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
-                                    {api.name}
-                                  </td>
-                                  <td className="px-4 py-3 font-semibold text-slate-800 text-[13px]" style={{ fontSize: '13px' }}>
-                                    {api.unit}
-                                  </td>
-                                  <td className="px-4 py-3 text-slate-600 text-[13px]" style={{ fontSize: '13px' }}>
-                                    {api.receiver}
-                                  </td>
-                                  <td className="px-4 py-3 text-[13px]" style={{ fontSize: '13px' }}>
-                                    <div className="flex items-center gap-1.5 text-[13px]" style={{ fontSize: '13px' }}>
-                                      <span className="font-mono text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100">
-                                        {api.method}
-                                      </span>
-                                      <span className="font-mono text-slate-500 text-[13px]" style={{ fontSize: '13px' }}>{api.endpoint}</span>
-                                    </div>
-                                  </td>
-
-                                  <td className="px-4 py-3 text-slate-500 font-mono text-[13px]" style={{ fontSize: '13px' }}>
-                                    {api.time}
-                                  </td>
-                                  <td className="px-4 py-3 text-[13px]" style={{ fontSize: '13px' }}>
-                                    {api.status === 'Hoạt động' ? (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-normal bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap" style={{ fontSize: '12px' }}>
-                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                                        Hoạt động
-                                      </span>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-normal bg-amber-50 text-amber-700 border border-amber-100 whitespace-nowrap" style={{ fontSize: '12px' }}>
-                                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                                        Tạm ngưng
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-3 text-center text-[13px]" style={{ fontSize: '13px' }}>
-                                    <button
-                                      onClick={() => handleOpenFieldsConfig(api)}
-                                      className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-[6px] transition-colors inline-flex items-center justify-center cursor-pointer"
-                                      title="Xem chi tiết"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </button>
-                                  </td>
-
-                                </tr>
-                              ))}
-                              {paginatedConsumerApis.length === 0 && (
-                                <tr>
-                                  <td colSpan={9} className="text-center py-8 text-slate-400">
-                                    Không tìm thấy API nào phù hợp với từ khóa tìm kiếm
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
+                  {showAdvancedFilter && (
+                    <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+                      <div>
+                        <label className={FILTER_LABEL}>Khoảng thời gian (Từ ngày)</label>
+                        <div className={DATE_BOX_CLS}>
+                          <input
+                            type="date"
+                            aria-label="Khoảng thời gian (Từ ngày)"
+                            value={filterStartDate}
+                            onChange={(e) => setFilterStartDate(e.target.value)}
+                            className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
+                          />
+                          <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
                         </div>
-                        {renderPagination(filteredConsumerApis.length)}
                       </div>
+                      <div>
+                        <label className={FILTER_LABEL}>Khoảng thời gian (Đến ngày)</label>
+                        <div className={DATE_BOX_CLS}>
+                          <input
+                            type="date"
+                            aria-label="Khoảng thời gian (Đến ngày)"
+                            value={filterEndDate}
+                            onChange={(e) => setFilterEndDate(e.target.value)}
+                            className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
+                          />
+                          <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={FILTER_LABEL}>Trạng thái xử lý / kết nối</label>
+                        <select
+                          aria-label="Trạng thái xử lý / kết nối"
+                          value={filterStatus}
+                          onChange={(e) => setFilterStatus(e.target.value)}
+                          className={INPUT_CLS}
+                        >
+                          <option value="All">-- Tất cả trạng thái --</option>
+                          <option value="Hoạt động">Hoạt động</option>
+                          <option value="Tạm ngưng">Tạm ngưng</option>
+                        </select>
+                      </div>
+                      <div className="flex items-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFilterStartDate('');
+                            setFilterEndDate('');
+                            setFilterStatus('All');
+                            setSearchRightText('');
+                            setApplied(EMPTY_FILTERS);
+                            setCurrentPage(1);
+                          }}
+                          className={`${BTN_OUTLINE} w-full`}
+                        >
+                          Thiết lập lại
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quản lý API đang lấy dữ liệu */}
+                <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse collection-table text-[13px]">
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px]">
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Mã API</th>
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px] min-w-[200px]">Tên API</th>
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Đơn vị sử dụng</th>
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Đầu mối tiếp nhận</th>
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Cổng Endpoint / Giao thức</th>
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Thời gian cập nhật</th>
+                          <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Trạng thái</th>
+                          <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap text-[13px] sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedConsumerApis.map(api => (
+                          <tr key={api.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                            <td className="px-3 py-1 text-[13px] text-black whitespace-nowrap">{api.code}</td>
+                            <td className="px-3 py-1 text-[13px] text-black max-w-[360px]">
+                              <TruncatedText text={api.name} />
+                            </td>
+                            <td className="px-3 py-1 text-[13px] text-black max-w-[240px]">
+                              <TruncatedText text={api.unit} />
+                            </td>
+                            <td className="px-3 py-1 text-[13px] text-black max-w-[240px]">
+                              <TruncatedText text={api.receiver} />
+                            </td>
+                            <td className="px-3 py-1 text-[13px] text-black">
+                              <div className="flex items-center gap-1.5">
+                                <Badge label={api.method} variant="blue" />
+                                <span className="text-[13px] text-[#020817] whitespace-nowrap">{api.endpoint}</span>
+                              </div>
+                            </td>
+                            <td className="px-3 py-1 text-[13px] text-black whitespace-nowrap leading-[18px]">
+                              <div>{api.time.split(' ')[0]}</div>
+                              <div className="text-[#64748B]">{api.time.split(' ')[1]}</div>
+                            </td>
+                            <td className="px-3 py-1 text-[13px] text-black">
+                              {api.status === 'Hoạt động' ? (
+                                <Badge label="Hoạt động" variant="green" />
+                              ) : (
+                                <Badge label="Tạm ngưng" variant="amber" />
+                              )}
+                            </td>
+                            <td className="px-3 py-1 text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]">
+                              <div className="flex items-center justify-center">
+                                <RowIconAction label="Xem chi tiết" onClick={() => handleOpenFieldsConfig(api)}>
+                                  <Eye className="w-4 h-4" />
+                                </RowIconAction>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {paginatedConsumerApis.length === 0 && (
+                          <tr>
+                            <td colSpan={8} className="text-center py-16 text-[13px] text-[#64748B]">
+                              Không tìm thấy API nào phù hợp với từ khóa tìm kiếm
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <Pagination
+                    className="border-t border-[#E2E8F0]"
+                    currentPage={currentPage}
+                    totalItems={filteredConsumerApis.length}
+                    pageSize={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={setItemsPerPage}
+                  />
+                </div>
               </div>
             </div>
           </>

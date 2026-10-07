@@ -1,8 +1,23 @@
 import React, { useState } from 'react';
-import { History, GitCompare } from 'lucide-react';
+import { GitCompare } from 'lucide-react';
 import { MasterDataEntity } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
 import { EntityVersionDiffModal, EntityVersionDiff } from './EntityVersionDiffModal';
+import { Badge, TruncatedText, RowIconAction, BTN_OUTLINE } from '../../../collection/collectionUi';
+
+const TH_CLS = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD_CLS = 'px-3 py-1 text-[13px] text-black';
+
+// Ngày + giờ → 2 dòng (giờ màu #64748B)
+const DateTimeCell = ({ value }: { value: string }) => {
+  const [d, ...t] = (value || '').split(' ');
+  return (
+    <div className="leading-[18px] whitespace-nowrap">
+      <div>{d || '--'}</div>
+      {t.length > 0 && <div className="text-[#64748B]">{t.join(' ')}</div>}
+    </div>
+  );
+};
 
 // ── Kiểu dữ liệu lịch sử phiên bản ──────────────────────────────────────────
 
@@ -141,63 +156,51 @@ export function EntityVersionHistoryModal({ isOpen, onClose, entity }: Props) {
         title="Quản lý phiên bản danh mục"
         subtitle={entity.name}
         maxWidth="max-w-4xl"
-        customHeaderIcon={
-          <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center mr-3 shrink-0">
-            <History className="w-5 h-5 text-violet-600" />
-          </div>
-        }
         footer={
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[13px]"
-          >
+          <button onClick={onClose} className={BTN_OUTLINE}>
             Đóng
           </button>
         }
       >
         <div className="space-y-4">
           {/* Main Grid Table - cùng cột với danh sách báo cáo phiên bản danh mục */}
-          <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-[#f8fafc] border-b border-slate-200">
-                  <tr>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700 w-12 text-center">STT</th>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Phiên bản</th>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày thay đổi</th>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày hiệu lực</th>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người thay đổi</th>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700">Nội dung thay đổi</th>
-                    <th className="px-5 py-4 text-[13px] font-semibold text-slate-700 text-center w-16">Thao tác</th>
+          <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full border-collapse collection-table text-[13px] text-left">
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={`${TH_CLS} w-12 text-center`}>STT</th>
+                    <th className={TH_CLS}>Phiên bản</th>
+                    <th className={TH_CLS}>Ngày thay đổi</th>
+                    <th className={TH_CLS}>Ngày hiệu lực</th>
+                    <th className={TH_CLS}>Người thay đổi</th>
+                    <th className={TH_CLS}>Nội dung thay đổi</th>
+                    <th className={`${TH_CLS} text-center w-16`}>Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody>
                   {historyList.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                      <td className="px-5 py-4 text-[13px] text-slate-500 text-center">{index + 1}</td>
-                      <td className="px-5 py-4">
-                        <span className="px-2.5 py-0.5 bg-green-50 text-green-700 border border-green-100 rounded-full text-[12px] font-semibold">
-                          v{item.versionTo}.0
-                        </span>
+                    <tr key={item.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                      <td className={`${TD_CLS} text-center`}>{index + 1}</td>
+                      <td className={TD_CLS}>
+                        <Badge label={`v${item.versionTo}.0`} variant="green" />
                       </td>
-                      <td className="px-5 py-4 text-[13px] text-slate-500 whitespace-nowrap">{item.date}</td>
-                      <td className="px-5 py-4 text-[13px] text-slate-500 whitespace-nowrap">{item.effectiveDate || '--'}</td>
-                      <td className="px-5 py-4 text-[13px] text-slate-800 whitespace-nowrap">{item.author}</td>
-                      <td className="px-5 py-4 text-[13px] text-slate-700">{item.description}</td>
-                      <td className="px-5 py-4 text-center">
-                        <button
-                          onClick={() => setSelectedItem(item)}
-                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                          title="So sánh với phiên bản trước đó"
-                        >
-                          <GitCompare className="w-4 h-4" />
-                        </button>
+                      <td className={TD_CLS}><DateTimeCell value={item.date} /></td>
+                      <td className={`${TD_CLS} whitespace-nowrap`}>{item.effectiveDate || '--'}</td>
+                      <td className={`${TD_CLS} whitespace-nowrap`}>{item.author}</td>
+                      <td className={`${TD_CLS} max-w-[360px]`}><TruncatedText text={item.description} /></td>
+                      <td className={`${TD_CLS} text-center`}>
+                        <div className="flex items-center justify-center">
+                          <RowIconAction label="So sánh với phiên bản trước đó" onClick={() => setSelectedItem(item)}>
+                            <GitCompare className="w-4 h-4" />
+                          </RowIconAction>
+                        </div>
                       </td>
                     </tr>
                   ))}
                   {historyList.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-5 py-8 text-center text-[13px] text-slate-400 italic">
+                      <td colSpan={7} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                         Chưa có lịch sử phiên bản
                       </td>
                     </tr>

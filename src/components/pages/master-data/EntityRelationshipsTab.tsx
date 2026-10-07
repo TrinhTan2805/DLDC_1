@@ -1,6 +1,23 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Save, Network, ArrowRight, Key, Link as LinkIcon, ChevronDown, AlertCircle, Send } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Network, ArrowRight, Key, Table, AlertCircle, Send } from 'lucide-react';
+import { toast } from 'sonner';
 import { BaseModal } from '../../common/BaseModal';
+import { Badge, TruncatedText, RowIconAction, Pagination, BTN_PRIMARY, BTN_OUTLINE, INPUT_CLS, LABEL_CLS, REQUIRED_MARK } from '../collection/collectionUi';
+
+// Bảng chuẩn (mục 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+// Tiêu đề nhóm trong form modal + chữ hướng dẫn
+const GROUP_TITLE = 'text-[14px] font-medium text-[#020817] border-b border-[#E2E8F0] pb-2';
+const HELP_TEXT = 'text-[13px] text-[#64748B] mt-1';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
+
+// Màu badge theo loại quan hệ (variant của Badge chuẩn) — đồng bộ với màn Danh mục dùng chung
+const relationTypeVariants: Record<RelationType, string> = {
+  'one-to-many': 'blue',
+  'many-to-many': 'purple',
+  'one-to-one': 'emerald',
+};
 
 // Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
 const SHOW_EDIT_DELETE_ACTIONS = false;
@@ -168,24 +185,24 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
 
   const handleSubmit = () => {
     if (!formData.sourceEntityId || !formData.targetEntityId) {
-      alert('Vui lòng chọn đầy đủ thực thể nguồn và thực thể đích');
+      toast.error('Vui lòng chọn đầy đủ thực thể nguồn và thực thể đích');
       return;
     }
 
     if (formData.sourceEntityId === formData.targetEntityId) {
-      alert('Thực thể nguồn và thực thể đích phải khác nhau');
+      toast.error('Thực thể nguồn và thực thể đích phải khác nhau');
       return;
     }
 
     // Validate based on relation type
     if (formData.relationType === 'many-to-many') {
       if (!formData.junctionTable || !formData.junctionSourceKey || !formData.junctionTargetKey) {
-        alert('Quan hệ n-n cần có đầy đủ: Bảng liên kết, Khóa nguồn, Khóa đích');
+        toast.error('Quan hệ n-n cần có đầy đủ: Bảng liên kết, Khóa nguồn, Khóa đích');
         return;
       }
     } else {
       if (!formData.foreignKey || !formData.referencedKey) {
-        alert('Quan hệ 1-n hoặc 1-1 cần có đầy đủ: Khóa ngoại, Khóa tham chiếu');
+        toast.error('Quan hệ 1-n hoặc 1-1 cần có đầy đủ: Khóa ngoại, Khóa tham chiếu');
         return;
       }
     }
@@ -243,7 +260,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
 
   const handleConfirmApprove = () => {
     if (!approvalRelationship || !selectedApprover) return;
-    alert('Đã gửi phê duyệt quan hệ thực thể thành công!');
+    toast.success('Đã gửi phê duyệt quan hệ thực thể thành công!');
     handleCloseApprovalModal();
   };
 
@@ -280,23 +297,23 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
   const filteredRelationships = selectedEntityFilter
     ? relationships.filter(rel => rel.sourceEntityId === selectedEntityFilter || rel.targetEntityId === selectedEntityFilter)
     : relationships;
-  const totalPages = Math.max(1, Math.ceil(filteredRelationships.length / pageSize));
   const paginatedRelationships = filteredRelationships.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-[18px] font-bold text-slate-900">Thiết lập quan hệ giữa thực thể</h2>
-          <p className="text-sm text-slate-600 mt-1">
+          <h2 className="text-[16px] font-semibold text-[#020817]">Thiết lập quan hệ giữa thực thể</h2>
+          <p className="text-[13px] text-[#64748B] mt-0.5">
             Quản trị hệ thống chọn 2 thực thể và định nghĩa liên kết giữa chúng (1-n, n-n)
           </p>
         </div>
         {!readOnly && (
           <button
+            type="button"
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className={`${BTN_PRIMARY} whitespace-nowrap`}
           >
             <Plus className="w-4 h-4" />
             Thêm quan hệ mới
@@ -305,148 +322,104 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
       </div>
 
       {/* Entity Filter */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <label className="block text-[13px] text-slate-700 mb-2">
+      <div className="bg-white p-4 border border-[#E2E8F0] rounded-2xl">
+        <label htmlFor="er-entity-filter" className={LABEL_CLS}>
           Xem theo thực thể dữ liệu chủ
         </label>
-        <div className="relative">
-          <select
-            value={selectedEntityFilter}
-            onChange={(e) => { setSelectedEntityFilter(e.target.value); setCurrentPage(1); }}
-            className="w-full pl-3 pr-8 py-2 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[13px] appearance-none cursor-pointer"
-          >
-            <option value="">Tất cả thực thể dữ liệu chủ</option>
-            {mockEntities.map(entity => (
-              <option key={entity.id} value={entity.id}>{entity.code} - {entity.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-        </div>
+        <select
+          id="er-entity-filter"
+          value={selectedEntityFilter}
+          onChange={(e) => { setSelectedEntityFilter(e.target.value); setCurrentPage(1); }}
+          className={`${INPUT_CLS} cursor-pointer`}
+        >
+          <option value="">Tất cả thực thể dữ liệu chủ</option>
+          {mockEntities.map(entity => (
+            <option key={entity.id} value={entity.id}>{entity.code} - {entity.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Relationships Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-16">STT</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thực thể Nguồn</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Khóa Nguồn</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-24">Loại</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Thực thể Đích</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Khóa Đích</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trường hiển thị</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-20">Thao tác</th>
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-[#F8FAFC]">
+              <tr className="h-[42px] border-b border-[#E0E0E0]">
+                <th className={`${TH} text-center w-14`}>STT</th>
+                <th className={`${TH} text-left`}>Thực thể Nguồn</th>
+                <th className={`${TH} text-left`}>Khóa Nguồn</th>
+                <th className={`${TH} text-left w-24`}>Loại</th>
+                <th className={`${TH} text-left`}>Thực thể Đích</th>
+                <th className={`${TH} text-left`}>Khóa Đích</th>
+                <th className={`${TH} text-left`}>Trường hiển thị</th>
+                <th className={`${TH} text-center w-[100px] sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredRelationships.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center">
-                    <Network className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500">
+                  <td colSpan={8} className="py-16 text-center">
+                    <Network className="w-12 h-12 text-[#CBD5E1] stroke-[1.5] mx-auto mb-3" />
+                    <p className="text-[13px] text-[#64748B]">
                       Thực thể dữ liệu chủ chưa có quan hệ nào, thêm mới quan hệ
                     </p>
                   </td>
                 </tr>
               ) : (
-                paginatedRelationships.map((relationship, idx) => (
-                    <tr key={relationship.id} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 text-center text-[13px] text-slate-500 font-medium">
+                paginatedRelationships.map((relationship, idx) => {
+                  const displayValue = relationship.relationType === 'many-to-many'
+                    ? (relationship.junctionTable || '')
+                    : (relationship.displayField || '');
+                  return (
+                    <tr key={relationship.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                      <td className={`${TD} text-center`}>
                         {(currentPage - 1) * pageSize + idx + 1}
                       </td>
-                      <td className="px-6 py-4 text-[13px] text-slate-900">{relationship.sourceEntityName}</td>
-                      <td className="px-6 py-4 font-mono text-[13px] text-slate-600">{getSourceKey(relationship) || '--'}</td>
-                      <td className="px-6 py-4 text-center text-[13px] text-slate-600">
-                        {relationTypeIcons[relationship.relationType]}
+                      <td className={`${TD} max-w-[260px]`}><TruncatedText text={relationship.sourceEntityName} /></td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={getSourceKey(relationship) || '--'} /></td>
+                      <td className={TD}>
+                        <Badge label={relationTypeIcons[relationship.relationType]} variant={relationTypeVariants[relationship.relationType]} />
                       </td>
-                      <td className="px-6 py-4 text-[13px] text-blue-600">{relationship.targetEntityName}</td>
-                      <td className="px-6 py-4 font-mono text-[13px] text-slate-600">{getTargetKey(relationship) || '--'}</td>
-                      <td className="px-6 py-4 text-[13px] text-slate-600">
-                        {relationship.relationType === 'many-to-many'
-                          ? (relationship.junctionTable || '--')
-                          : (relationship.displayField || '--')}
+                      <td className={`${TD} max-w-[260px]`}><TruncatedText text={relationship.targetEntityName} className="text-blue-600" /></td>
+                      <td className={`${TD} max-w-[200px]`}><TruncatedText text={getTargetKey(relationship) || '--'} /></td>
+                      <td className={`${TD} max-w-[220px]`}>
+                        {displayValue
+                          ? <TruncatedText text={displayValue} />
+                          : <span className="text-[#64748B]">--</span>}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>
+                        <div className="flex items-center justify-center gap-1">
                           {readOnly || !SHOW_EDIT_DELETE_ACTIONS ? (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-[#94A3B8]">—</span>
                           ) : (
                             <>
-                              <button
-                                onClick={() => handleEdit(relationship)}
-                                className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                                title="Chỉnh sửa"
-                              >
+                              <RowIconAction label="Chỉnh sửa" onClick={() => handleEdit(relationship)}>
                                 <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(relationship.id)}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                title="Xóa"
-                              >
+                              </RowIconAction>
+                              <RowIconAction label="Xóa" onClick={() => handleDelete(relationship.id)}>
                                 <Trash2 className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                             </>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
         {filteredRelationships.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600 font-normal">Hiển thị</span>
-              <select
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-slate-600 font-normal">bản ghi/trang</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-slate-600 font-normal">
-                {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filteredRelationships.length)} / {filteredRelationships.length}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                >
-                  Trước
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPage === page
-                        ? 'bg-blue-600 border-blue-600 text-white'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-                >
-                  Sau
-                </button>
-              </div>
-            </div>
-          </div>
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPage}
+            totalItems={filteredRelationships.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+            pageSizeOptions={[10, 20, 50]}
+          />
         )}
       </div>
 
@@ -456,18 +429,19 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
         onClose={handleCloseForm}
         title={editingRelationship ? 'Chỉnh sửa quan hệ thực thể' : 'Thêm quan hệ thực thể mới'}
         maxWidth="max-w-4xl"
-        customHeaderIcon={<LinkIcon className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
         footer={
           <>
             <button
+              type="button"
               onClick={handleCloseForm}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className={BTN_OUTLINE}
             >
               Hủy
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className={BTN_PRIMARY}
             >
               <Save className="w-4 h-4" />
               {editingRelationship ? 'Cập nhật' : 'Lưu quan hệ'}
@@ -475,247 +449,263 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
           </>
         }
       >
-        <div className="space-y-5">
-              {/* 1. Chọn thực thể liên kết */}
-              <div className="space-y-3">
-                <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">1. Chọn thực thể liên kết</h4>
+        <div className="space-y-6 text-left">
+          {/* 1. Chọn thực thể liên kết */}
+          <div className="space-y-4">
+            <h4 className={GROUP_TITLE}>1. Chọn thực thể liên kết</h4>
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                      Thực thể nguồn <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.sourceEntityId}
-                      onChange={(e) => setFormData({ ...formData, sourceEntityId: e.target.value })}
-                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                    >
-                      <option value="">-- Chọn thực thể nguồn --</option>
-                      {mockEntities.map(entity => (
-                        <option key={entity.id} value={entity.id}>
-                          {entity.code} - {entity.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                      Thực thể đích <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.targetEntityId}
-                      onChange={(e) => setFormData({ ...formData, targetEntityId: e.target.value })}
-                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
-                    >
-                      <option value="">-- Chọn thực thể đích --</option>
-                      {mockEntities
-                        .filter(entity => entity.id !== formData.sourceEntityId)
-                        .map(entity => (
-                          <option key={entity.id} value={entity.id}>
-                            {entity.code} - {entity.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                </div>
-
-                {formData.sourceEntityId && formData.targetEntityId && (
-                  <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-8">
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-[13px]">A</div>
-                      <span className="text-[13px] font-semibold text-slate-800">
-                        {mockEntities.find(e => e.id === formData.sourceEntityId)?.name}
-                      </span>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-9 h-9 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold text-[13px]">B</div>
-                      <span className="text-[13px] font-semibold text-slate-800">
-                        {mockEntities.find(e => e.id === formData.targetEntityId)?.name}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Loại quan hệ */}
-              <div className="space-y-3">
-                <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2">2. Loại quan hệ</h4>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="er-source-entity" className={LABEL_CLS}>
+                  Thực thể nguồn <span className={REQUIRED_MARK}>*</span>
+                </label>
                 <select
-                  value={formData.relationType}
-                  onChange={(e) => setFormData({ ...formData, relationType: e.target.value as RelationType })}
-                  className="w-64 px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                  id="er-source-entity"
+                  value={formData.sourceEntityId}
+                  onChange={(e) => setFormData({ ...formData, sourceEntityId: e.target.value })}
+                  className={`${INPUT_CLS} cursor-pointer`}
                 >
-                  {Object.entries(relationTypeLabels)
-                    .map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
+                  <option value="">-- Chọn thực thể nguồn --</option>
+                  {mockEntities.map(entity => (
+                    <option key={entity.id} value={entity.id}>
+                      {entity.code} - {entity.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* 3. Điều kiện liên kết */}
-              <div className="space-y-3">
-                <h4 className="text-[13px] font-semibold text-slate-700 border-b border-slate-200 pb-2 flex items-center justify-between">
-                  <span>3. Điều kiện liên kết</span>
-                  {!(formData.sourceEntityId && formData.targetEntityId) && (
-                    <span className="text-[13px] text-orange-600 bg-orange-50 font-normal px-2 py-0.5 rounded border border-orange-100">Chọn đủ 2 thực thể để cấu hình khóa liên kết</span>
-                  )}
-                </h4>
-
-                {formData.sourceEntityId && formData.targetEntityId ? (
-                  formData.relationType === 'many-to-many' ? (
-                    // Many-to-Many: Junction Table
-                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-4">
-                      <p className="text-[13px] font-semibold text-purple-900">Bảng liên kết (Mapping Table)</p>
-                      <div>
-                        <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                          Tên bảng liên kết <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.junctionTable}
-                          onChange={(e) => setFormData({ ...formData, junctionTable: e.target.value })}
-                          placeholder="VD: citizen_organization_mapping"
-                          className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                            Khoá ngoại Nguồn <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={formData.junctionSourceKey}
-                            onChange={(e) => setFormData({ ...formData, junctionSourceKey: e.target.value })}
-                            className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
-                          >
-                            <option value="">-- Chọn trường Nguồn --</option>
-                            {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
-                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                            Khoá ngoại Đích <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={formData.junctionTargetKey}
-                            onChange={(e) => setFormData({ ...formData, junctionTargetKey: e.target.value })}
-                            className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 font-mono"
-                          >
-                            <option value="">-- Chọn trường Đích --</option>
-                            {BASE_TARGET_FIELDS.map(f => (
-                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    // One-to-Many or One-to-One: Foreign Key
-                    <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Key className="w-4 h-4 text-blue-600" />
-                        <span className="text-[13px] font-semibold text-blue-900">Khóa ngoại (Foreign Key)</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                            Khóa nguồn <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={formData.foreignKey}
-                            onChange={(e) => setFormData({ ...formData, foreignKey: e.target.value })}
-                            className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
-                          >
-                            <option value="">-- Chọn trường Nguồn --</option>
-                            {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
-                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
-                            ))}
-                          </select>
-                          <p className="text-[13px] text-slate-400 mt-1">Trường trong thực thể nguồn</p>
-                        </div>
-
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                            Khóa đích <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={formData.referencedKey}
-                            onChange={(e) => setFormData({ ...formData, referencedKey: e.target.value })}
-                            className="w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono"
-                          >
-                            <option value="">-- Chọn trường Đích --</option>
-                            {BASE_TARGET_FIELDS.map(f => (
-                              <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
-                            ))}
-                          </select>
-                          <p className="text-[13px] text-slate-400 mt-1">Trường dùng để join (thường là ID/Code)</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t border-blue-100">
-                        <label className="block text-[13px] font-medium text-emerald-700 mb-1.5">
-                          Trường hiển thị (Lookup Display) <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
-                        </label>
-                        <select
-                          value={formData.displayField || ''}
-                          onChange={(e) => setFormData({ ...formData, displayField: e.target.value })}
-                          className="w-full max-w-xs px-3 py-2 border border-emerald-300 bg-white rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-mono"
-                        >
-                          <option value="">-- Không chọn --</option>
-                          {BASE_TARGET_FIELDS.map(f => (
-                            <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  )
-                ) : (
-                  <div className="bg-slate-50 border border-dashed border-slate-200 rounded-lg p-6 text-center text-[13px] text-slate-400">
-                    Hãy chọn đầy đủ thực thể nguồn và đích ở mục 1 để cấu hình khóa liên kết
-                  </div>
-                )}
-              </div>
-
               <div>
-                <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
-                  Mô tả quan hệ
+                <label htmlFor="er-target-entity" className={LABEL_CLS}>
+                  Thực thể đích <span className={REQUIRED_MARK}>*</span>
                 </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="VD: Quan hệ giữa văn bản pháp luật và cơ quan ban hành"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <select
+                  id="er-target-entity"
+                  value={formData.targetEntityId}
+                  onChange={(e) => setFormData({ ...formData, targetEntityId: e.target.value })}
+                  className={`${INPUT_CLS} cursor-pointer`}
+                >
+                  <option value="">-- Chọn thực thể đích --</option>
+                  {mockEntities
+                    .filter(entity => entity.id !== formData.sourceEntityId)
+                    .map(entity => (
+                      <option key={entity.id} value={entity.id}>
+                        {entity.code} - {entity.name}
+                      </option>
+                    ))}
+                </select>
               </div>
+            </div>
 
-              {formData.sourceEntityId && formData.targetEntityId && (
-                <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-[13px] text-amber-800">
-                    <p className="mb-1">
-                      {editingRelationship ? 'Khi chỉnh sửa quan hệ, ' : 'Khi thêm mới quan hệ, '}
-                      phiên bản của <strong>cả 2 thực thể</strong> liên quan sẽ tự động tăng lên phiên bản kế tiếp:
-                    </p>
-                    <ul className="list-disc list-inside space-y-0.5">
-                      <li>
-                        {mockEntities.find(e => e.id === formData.sourceEntityId)?.name}: v{mockEntities.find(e => e.id === formData.sourceEntityId)?.version ?? 1} → v{(mockEntities.find(e => e.id === formData.sourceEntityId)?.version ?? 1) + 1}
-                      </li>
-                      <li>
-                        {mockEntities.find(e => e.id === formData.targetEntityId)?.name}: v{mockEntities.find(e => e.id === formData.targetEntityId)?.version ?? 1} → v{(mockEntities.find(e => e.id === formData.targetEntityId)?.version ?? 1) + 1}
-                      </li>
-                    </ul>
-                    <p className="mt-1">Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
+            {formData.sourceEntityId && formData.targetEntityId && (
+              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-4 flex items-center justify-center gap-6">
+                <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-medium text-[13px] shrink-0">A</div>
+                  <TruncatedText
+                    text={mockEntities.find(e => e.id === formData.sourceEntityId)?.name || ''}
+                    className="text-[13px] font-medium text-[#020817] text-center w-full"
+                  />
+                </div>
+                <ArrowRight className="w-5 h-5 text-[#94A3B8] shrink-0" />
+                <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-green-50 text-green-600 rounded-full flex items-center justify-center font-medium text-[13px] shrink-0">B</div>
+                  <TruncatedText
+                    text={mockEntities.find(e => e.id === formData.targetEntityId)?.name || ''}
+                    className="text-[13px] font-medium text-[#020817] text-center w-full"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Loại quan hệ */}
+          <div className="space-y-3">
+            <h4 className={GROUP_TITLE}>2. Loại quan hệ</h4>
+            <select
+              title="Chọn loại quan hệ"
+              aria-label="Loại quan hệ"
+              value={formData.relationType}
+              onChange={(e) => setFormData({ ...formData, relationType: e.target.value as RelationType })}
+              className={`${INPUT_CLS} max-w-xs cursor-pointer`}
+            >
+              {Object.entries(relationTypeLabels)
+                .map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+            </select>
+          </div>
+
+          {/* 3. Điều kiện liên kết */}
+          <div className="space-y-3">
+            <h4 className={`${GROUP_TITLE} flex items-center justify-between gap-3`}>
+              <span>3. Điều kiện liên kết</span>
+              {!(formData.sourceEntityId && formData.targetEntityId) && (
+                <span className="text-[13px] text-[#D97706] bg-[#FFF7ED] font-normal px-2 py-0.5 rounded-lg border border-[#FED7AA]">Chọn đủ 2 thực thể để cấu hình khóa liên kết</span>
+              )}
+            </h4>
+
+            {formData.sourceEntityId && formData.targetEntityId ? (
+              formData.relationType === 'many-to-many' ? (
+                // Many-to-Many: Junction Table
+                <div className="rounded-2xl border border-[#E2E8F0] p-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Table className="w-4 h-4 text-blue-600" />
+                    <span className="text-[14px] font-medium text-[#020817]">Bảng liên kết (Mapping Table)</span>
+                  </div>
+                  <div>
+                    <label htmlFor="er-junction-table" className={LABEL_CLS}>
+                      Tên bảng liên kết <span className={REQUIRED_MARK}>*</span>
+                    </label>
+                    <input
+                      id="er-junction-table"
+                      type="text"
+                      value={formData.junctionTable}
+                      onChange={(e) => setFormData({ ...formData, junctionTable: e.target.value })}
+                      placeholder="VD: citizen_organization_mapping"
+                      className={INPUT_CLS}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="er-junction-source" className={LABEL_CLS}>
+                        Khoá ngoại Nguồn <span className={REQUIRED_MARK}>*</span>
+                      </label>
+                      <select
+                        id="er-junction-source"
+                        value={formData.junctionSourceKey}
+                        onChange={(e) => setFormData({ ...formData, junctionSourceKey: e.target.value })}
+                        className={`${INPUT_CLS} cursor-pointer`}
+                      >
+                        <option value="">-- Chọn trường Nguồn --</option>
+                        {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
+                          <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="er-junction-target" className={LABEL_CLS}>
+                        Khoá ngoại Đích <span className={REQUIRED_MARK}>*</span>
+                      </label>
+                      <select
+                        id="er-junction-target"
+                        value={formData.junctionTargetKey}
+                        onChange={(e) => setFormData({ ...formData, junctionTargetKey: e.target.value })}
+                        className={`${INPUT_CLS} cursor-pointer`}
+                      >
+                        <option value="">-- Chọn trường Đích --</option>
+                        {BASE_TARGET_FIELDS.map(f => (
+                          <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
-              )}
+              ) : (
+                // One-to-Many or One-to-One: Foreign Key
+                <div className="rounded-2xl border border-[#E2E8F0] p-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Key className="w-4 h-4 text-blue-600" />
+                    <span className="text-[14px] font-medium text-[#020817]">Khóa ngoại (Foreign Key)</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="er-foreign-key" className={LABEL_CLS}>
+                        Khóa nguồn <span className={REQUIRED_MARK}>*</span>
+                      </label>
+                      <select
+                        id="er-foreign-key"
+                        value={formData.foreignKey}
+                        onChange={(e) => setFormData({ ...formData, foreignKey: e.target.value })}
+                        className={`${INPUT_CLS} cursor-pointer`}
+                      >
+                        <option value="">-- Chọn trường Nguồn --</option>
+                        {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
+                          <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                        ))}
+                      </select>
+                      <p className={HELP_TEXT}>Trường trong thực thể nguồn</p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="er-referenced-key" className={LABEL_CLS}>
+                        Khóa đích <span className={REQUIRED_MARK}>*</span>
+                      </label>
+                      <select
+                        id="er-referenced-key"
+                        value={formData.referencedKey}
+                        onChange={(e) => setFormData({ ...formData, referencedKey: e.target.value })}
+                        className={`${INPUT_CLS} cursor-pointer`}
+                      >
+                        <option value="">-- Chọn trường Đích --</option>
+                        {BASE_TARGET_FIELDS.map(f => (
+                          <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                        ))}
+                      </select>
+                      <p className={HELP_TEXT}>Trường dùng để join (thường là ID/Code)</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-[#E2E8F0]">
+                    <label htmlFor="er-display-field" className={LABEL_CLS}>
+                      Trường hiển thị (Lookup Display) <span className="text-[#64748B] font-normal">(Không bắt buộc)</span>
+                    </label>
+                    <select
+                      id="er-display-field"
+                      value={formData.displayField || ''}
+                      onChange={(e) => setFormData({ ...formData, displayField: e.target.value })}
+                      className={`${INPUT_CLS} max-w-xs cursor-pointer`}
+                    >
+                      <option value="">-- Không chọn --</option>
+                      {BASE_TARGET_FIELDS.map(f => (
+                        <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="bg-[#F8FAFC] border border-dashed border-[#E2E8F0] rounded-lg p-6 text-center text-[13px] text-[#64748B]">
+                Hãy chọn đầy đủ thực thể nguồn và đích ở mục 1 để cấu hình khóa liên kết
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="er-description" className={LABEL_CLS}>
+              Mô tả quan hệ
+            </label>
+            <textarea
+              id="er-description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="VD: Quan hệ giữa văn bản pháp luật và cơ quan ban hành"
+              rows={3}
+              className={TEXTAREA_CLS}
+            />
+          </div>
+
+          {formData.sourceEntityId && formData.targetEntityId && (
+            <div className="flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg">
+              <AlertCircle className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
+              <div className="text-[13px] text-[#020817]">
+                <p className="mb-1">
+                  {editingRelationship ? 'Khi chỉnh sửa quan hệ, ' : 'Khi thêm mới quan hệ, '}
+                  phiên bản của <strong className="font-medium">cả 2 thực thể</strong> liên quan sẽ tự động tăng lên phiên bản kế tiếp:
+                </p>
+                <ul className="list-disc list-inside space-y-0.5">
+                  <li>
+                    {mockEntities.find(e => e.id === formData.sourceEntityId)?.name}: v{mockEntities.find(e => e.id === formData.sourceEntityId)?.version ?? 1} → v{(mockEntities.find(e => e.id === formData.sourceEntityId)?.version ?? 1) + 1}
+                  </li>
+                  <li>
+                    {mockEntities.find(e => e.id === formData.targetEntityId)?.name}: v{mockEntities.find(e => e.id === formData.targetEntityId)?.version ?? 1} → v{(mockEntities.find(e => e.id === formData.targetEntityId)?.version ?? 1) + 1}
+                  </li>
+                </ul>
+                <p className="mt-1">Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
+              </div>
+            </div>
+          )}
         </div>
       </BaseModal>
 
@@ -726,22 +716,20 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
         title="Gửi phê duyệt"
         subtitle={approvalRelationship ? `Quan hệ: ${approvalRelationship.sourceEntityName} → ${approvalRelationship.targetEntityName}` : undefined}
         maxWidth="max-w-2xl"
-        customHeaderIcon={<Send className="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0" />}
         footer={
           <>
             <button
+              type="button"
               onClick={handleCloseApprovalModal}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className={BTN_OUTLINE}
             >
               Hủy
             </button>
             <button
+              type="button"
               onClick={handleConfirmApprove}
               disabled={!selectedApprover}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${selectedApprover
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
+              className={BTN_PRIMARY}
             >
               <Send className="w-4 h-4" />
               Gửi trình duyệt
@@ -750,15 +738,16 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
         }
       >
         {approvalRelationship && (
-          <div className="space-y-4">
+          <div className="space-y-4 text-left">
             <div>
-              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                Chọn người duyệt <span className="text-red-500">*</span>
+              <label htmlFor="er-approver" className={LABEL_CLS}>
+                Chọn người duyệt <span className={REQUIRED_MARK}>*</span>
               </label>
               <select
+                id="er-approver"
                 value={selectedApprover}
                 onChange={e => setSelectedApprover(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+                className={`${INPUT_CLS} cursor-pointer`}
               >
                 <option value="">-- Chọn người duyệt --</option>
                 {MOCK_APPROVERS.map(u => (
@@ -770,36 +759,37 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
             </div>
 
             <div>
-              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+              <label htmlFor="er-approval-note" className={LABEL_CLS}>
                 Nội dung yêu cầu
               </label>
               <textarea
+                id="er-approval-note"
                 value={approvalNote}
                 onChange={e => setApprovalNote(e.target.value)}
                 rows={4}
                 placeholder="Nhập nội dung gửi kèm (nếu có)..."
-                className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                className={TEXTAREA_CLS}
               />
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-              <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin quan hệ thực thể</h4>
+            <div className="rounded-2xl border border-[#E2E8F0] p-4">
+              <h4 className="text-[14px] font-medium text-[#020817] mb-3">Thông tin quan hệ thực thể</h4>
               <div className="space-y-2 text-[13px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Thực thể nguồn:</span>
-                  <span className="text-slate-800 font-medium">{approvalRelationship.sourceEntityName}</span>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#64748B]">Thực thể nguồn:</span>
+                  <span className="text-[#020817] text-right">{approvalRelationship.sourceEntityName}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Thực thể đích:</span>
-                  <span className="text-slate-800 font-medium">{approvalRelationship.targetEntityName}</span>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#64748B]">Thực thể đích:</span>
+                  <span className="text-[#020817] text-right">{approvalRelationship.targetEntityName}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Loại quan hệ:</span>
-                  <span className="text-slate-800 font-medium">{relationTypeIcons[approvalRelationship.relationType]}</span>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#64748B]">Loại quan hệ:</span>
+                  <Badge label={relationTypeIcons[approvalRelationship.relationType]} variant={relationTypeVariants[approvalRelationship.relationType]} />
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Phiên bản mới:</span>
-                  <span className="text-slate-800">
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#64748B]">Phiên bản mới:</span>
+                  <span className="text-[#020817] tabular-nums">
                     v{(mockEntities.find(e => e.id === approvalRelationship.sourceEntityId)?.version ?? 1) + 1} / v{(mockEntities.find(e => e.id === approvalRelationship.targetEntityId)?.version ?? 1) + 1}
                   </span>
                 </div>

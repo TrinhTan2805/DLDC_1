@@ -2,6 +2,63 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Send, Upload, X, FileSpreadsheet, Info, Plus, Key, Clock, Database, Trash2, Edit, PlusCircle, PauseCircle, PlayCircle, Edit2, SquarePen, Shield, Menu, Save, AlertTriangle, ArrowRight } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { toast } from 'sonner';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, tabClass,
+  BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON,
+  INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, formatDateVN
+} from '../collection/collectionUi';
+
+// --- Lớp giao diện dùng chung trong file (compomennt.md 5.3, 5.4) ---
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const THEAD_ROW = 'h-[42px]';
+const TABLE_WRAP = 'bg-white rounded-lg border border-[#E2E8F0] overflow-hidden';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+const STICKY_TH = 'sticky right-0 bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]';
+const STICKY_TD = 'sticky right-0 bg-white group-hover:bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]';
+const CHECKBOX_CLS = 'w-4 h-4 accent-blue-600 rounded cursor-pointer align-middle';
+const EMPTY_TD = 'py-16 text-center text-[13px] text-[#64748B]';
+const MODAL_OVERLAY = 'fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200';
+const MODAL_OVERLAY_PORTAL = 'fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200';
+const MODAL_BOX = 'bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] flex flex-col overflow-hidden';
+const MODAL_HEADER = 'px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 shrink-0';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar flex-1';
+const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600';
+const GROUP_CARD = 'rounded-2xl border border-[#E2E8F0] p-4';
+const CHIP_ACTIVE = `${BTN_OUTLINE} !bg-[#EAF3FF] !border-[#BFDBFE] !text-[#155DFC]`;
+const BANNER_INFO = 'bg-[#EAF3FF] border border-[#BFDBFE] rounded-lg px-4 py-3 text-[13px] text-[#020817]';
+const BANNER_WARN = 'bg-[#FFF7ED] border border-[#FED7AA] rounded-lg px-4 py-3 text-[13px] text-[#020817]';
+const BANNER_SUCCESS = 'bg-[#F0FDF4] border border-[#DCFCE7] rounded-lg px-4 py-3 text-[13px] text-[#020817]';
+const BANNER_DANGER = 'bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg px-4 py-3 text-[13px] text-[#020817]';
+// Bảng phụ trong modal (chỉ đọc)
+const SUB_TABLE_WRAP = 'border border-[#E2E8F0] rounded-lg overflow-x-auto bg-white';
+const SUB_TH = 'h-[42px] px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px] text-left';
+const SUB_TD = 'px-3 py-1 text-[13px] text-black';
+const SUB_TR = 'h-12 bg-white border-b border-[#E0E0E0] last:border-b-0 hover:bg-[#F8FAFC] transition-colors';
+
+// Ngày + giờ hiển thị 2 dòng (compomennt.md 5.3.3); giá trị khác giữ nguyên
+const DateTimeCell = ({ value }: { value: string }) => {
+  const m = /^(\d{2}\/\d{2}\/\d{4})\s+(.+)$/.exec(value || '');
+  if (!m) return <span>{value}</span>;
+  return (
+    <div className="leading-[18px]">
+      <div>{m[1]}</div>
+      <div className="text-[#64748B]">{m[2]}</div>
+    </div>
+  );
+};
+
+const STATUS_BADGE: Record<string, { label: string; variant: string }> = {
+  approved: { label: 'Đã công bố', variant: 'green' },
+  pending: { label: 'Chờ công bố', variant: 'purple' },
+  rejected: { label: 'Từ chối', variant: 'red' },
+  draft: { label: 'Bản nháp', variant: 'slate' },
+};
 
 interface PublishedData {
   id: string;
@@ -842,10 +899,26 @@ export function OpenDataPublishedListPage() {
   const [selectedScheduleFrequency, setSelectedScheduleFrequency] = useState<string>('all');
   const [selectedScheduleStatus, setSelectedScheduleStatus] = useState<string>('all');
 
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm nút Tìm kiếm hoặc Enter (compomennt.md 5.19)
+  const EMPTY_APPLIED = { search: '', status: 'all', category: 'all', publisher: 'all', frequency: 'all', scheduleStatus: 'all' };
+  const [applied, setApplied] = useState(EMPTY_APPLIED);
+
+  const runSearch = () => {
+    setApplied({
+      search: searchTerm,
+      status: selectedStatus,
+      category: selectedCategory,
+      publisher: selectedPublisher,
+      frequency: selectedScheduleFrequency,
+      scheduleStatus: selectedScheduleStatus,
+    });
+    setCurrentPageNum(1);
+  };
+
   // Reset pagination on filter changes
   useEffect(() => {
     setCurrentPageNum(1);
-  }, [searchTerm, selectedStatus, selectedCategory, selectedPublisher, selectedScheduleFrequency, selectedScheduleStatus, activeTab]);
+  }, [applied, activeTab]);
 
   useEffect(() => {
     setCurrentPageNum(1);
@@ -855,17 +928,18 @@ export function OpenDataPublishedListPage() {
     setSearchTerm('');
     setSelectedScheduleFrequency('all');
     setSelectedScheduleStatus('all');
+    setApplied(EMPTY_APPLIED);
     setShowFilters(false);
   }, [activeTab]);
 
   // Filters
+  const appliedQuery = normalizeSearch(applied.search);
   const filteredRequests = dataList.filter(item => {
     if (!item) return false;
-    const nameToSearch = (item.fileName || '').toLowerCase();
-    const matchSearch = nameToSearch.includes(searchTerm.toLowerCase());
-    const matchStatus = selectedStatus === 'all' || item.status === selectedStatus;
-    const matchCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchPublisher = selectedPublisher === 'all' || item.publisher === selectedPublisher;
+    const matchSearch = normalizeSearch(item.fileName || '').includes(appliedQuery);
+    const matchStatus = applied.status === 'all' || item.status === applied.status;
+    const matchCategory = applied.category === 'all' || item.category === applied.category;
+    const matchPublisher = applied.publisher === 'all' || item.publisher === applied.publisher;
     return matchSearch && matchStatus && matchCategory && matchPublisher;
   });
 
@@ -875,11 +949,10 @@ export function OpenDataPublishedListPage() {
   const filteredApprovalRequests = dataList.filter(item => {
     if (!item) return false;
     if (item.status === 'draft') return false;
-    const nameToSearch = (item.fileName || '').toLowerCase();
-    const matchSearch = nameToSearch.includes(searchTerm.toLowerCase());
-    const matchStatus = selectedStatus === 'all' || item.status === selectedStatus;
-    const matchCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchPublisher = selectedPublisher === 'all' || item.publisher === selectedPublisher;
+    const matchSearch = normalizeSearch(item.fileName || '').includes(appliedQuery);
+    const matchStatus = applied.status === 'all' || item.status === applied.status;
+    const matchCategory = applied.category === 'all' || item.category === applied.category;
+    const matchPublisher = applied.publisher === 'all' || item.publisher === applied.publisher;
     return matchSearch && matchStatus && matchCategory && matchPublisher;
   });
 
@@ -897,11 +970,9 @@ export function OpenDataPublishedListPage() {
 
   const filteredSchedules = schedules.filter(sch => {
     if (!sch) return false;
-    const nameToSearch = (sch.datasetName || '').toLowerCase();
-    const dbToSearch = (sch.dataSource || '').toLowerCase();
-    const matchSearch = nameToSearch.includes(searchTerm.toLowerCase()) || dbToSearch.includes(searchTerm.toLowerCase());
-    const matchFrequency = selectedScheduleFrequency === 'all' || sch.frequency === selectedScheduleFrequency;
-    const matchStatus = selectedScheduleStatus === 'all' || sch.status === selectedScheduleStatus;
+    const matchSearch = normalizeSearch(sch.datasetName || '').includes(appliedQuery) || normalizeSearch(sch.dataSource || '').includes(appliedQuery);
+    const matchFrequency = applied.frequency === 'all' || sch.frequency === applied.frequency;
+    const matchStatus = applied.scheduleStatus === 'all' || sch.status === applied.scheduleStatus;
     return matchSearch && matchFrequency && matchStatus;
   });
 
@@ -909,23 +980,8 @@ export function OpenDataPublishedListPage() {
   const paginatedSchedules = filteredSchedules.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      approved: 'bg-green-50 text-green-600 border-green-200',
-      pending: 'bg-purple-50 text-purple-600 border-purple-200',
-      rejected: 'bg-red-50 text-red-600 border-red-200',
-      draft: 'bg-slate-50 text-slate-600 border-slate-200'
-    };
-    const labels = {
-      approved: 'Đã công bố',
-      pending: 'Chờ công bố',
-      rejected: 'Từ chối',
-      draft: 'Bản nháp'
-    };
-    return (
-      <span className={`inline-block px-2.5 py-1 text-xs border rounded-full font-medium text-center leading-tight whitespace-nowrap ${styles[status as keyof typeof styles] || styles.pending}`}>
-        {labels[status as keyof typeof labels] || 'Chờ công bố'}
-      </span>
-    );
+    const cfg = STATUS_BADGE[status] || STATUS_BADGE.pending;
+    return <Badge label={cfg.label} variant={cfg.variant} />;
   };
 
   const handleViewDetail = (item: PublishedData) => {
@@ -934,7 +990,7 @@ export function OpenDataPublishedListPage() {
   };
 
   const handleDownload = (fileName: string, format: string = 'Excel') => {
-    alert(`Tải xuống tệp dữ liệu: ${fileName}\nĐịnh dạng: ${format}`);
+    toast.info(`Tải xuống tệp dữ liệu: ${fileName}`, { description: `Định dạng: ${format}` });
   };
 
   const runValidation = (file: File, categoryCode: string, isForNewVersion: boolean = false) => {
@@ -1045,7 +1101,7 @@ export function OpenDataPublishedListPage() {
       category: currentCategoryObj ? currentCategoryObj.name : 'Danh mục dữ liệu mở',
       publisher: requestPublisher || 'Bộ Tư pháp',
       creator: 'Hệ thống (User)',
-      createdDate: new Date().toLocaleDateString('vi-VN'),
+      createdDate: formatDateVN(new Date()),
       status: status,
       approver: 'Chưa phê duyệt',
       description: requestDescription || 'Yêu cầu công bố dữ liệu mở từ kho dữ liệu',
@@ -1069,27 +1125,27 @@ export function OpenDataPublishedListPage() {
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!requestFileName) {
-      alert("Vui lòng nhập tên tập dữ liệu!");
+      toast.error("Vui lòng nhập tên tập dữ liệu!");
       setRequestModalTab('general');
       return;
     }
     if (!requestCategory) {
-      alert("Vui lòng chọn danh mục dữ liệu mở!");
+      toast.error("Vui lòng chọn danh mục dữ liệu mở!");
       setRequestModalTab('general');
       return;
     }
     if (!requestPublisher) {
-      alert("Vui lòng nhập đơn vị chủ trì cung cấp!");
+      toast.error("Vui lòng nhập đơn vị chủ trì cung cấp!");
       setRequestModalTab('general');
       return;
     }
     if (!requestTopic) {
-      alert("Vui lòng chọn chủ đề!");
+      toast.error("Vui lòng chọn chủ đề!");
       setRequestModalTab('general');
       return;
     }
     if (requestFormat.length === 0) {
-      alert("Vui lòng chọn ít nhất một định dạng chia sẻ!");
+      toast.error("Vui lòng chọn ít nhất một định dạng chia sẻ!");
       setRequestModalTab('general');
       return;
     }
@@ -1098,7 +1154,7 @@ export function OpenDataPublishedListPage() {
       return;
     }
     if (!mainTable) {
-      alert("Vui lòng chọn cấu hình nguồn dữ liệu và bảng dữ liệu chính trong tab Thiết lập dữ liệu!");
+      toast.error("Vui lòng chọn cấu hình nguồn dữ liệu và bảng dữ liệu chính trong tab Thiết lập dữ liệu!");
       setRequestModalTab('settings');
       return;
     }
@@ -1126,7 +1182,7 @@ export function OpenDataPublishedListPage() {
 
   const handleSaveDraft = () => {
     if (!requestFileName) {
-      alert("Vui lòng chọn tập dữ liệu trước khi lưu nháp!");
+      toast.error("Vui lòng chọn tập dữ liệu trước khi lưu nháp!");
       return;
     }
     if (editingItem) {
@@ -1318,111 +1374,89 @@ export function OpenDataPublishedListPage() {
     setTimeout(() => setShowSuccessPopup(false), 3000);
   };
 
+  // Phân trang chuẩn (compomennt.md 5.14) — giữ hành vi cũ: không hiển thị khi không có bản ghi
   const renderPagination = (total: number) => {
     if (total <= 0) return null;
-    const totalPages = Math.ceil(total / pageSize);
-    const startItem = (currentPageNum - 1) * pageSize + 1;
-    const endItem = Math.min(currentPageNum * pageSize, total);
-
     return (
-      <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white text-[13px] text-slate-600">
-        <div className="flex items-center gap-2">
-          <span>Hiển thị</span>
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPageNum(1);
-            }}
-            className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-[13px] cursor-pointer"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span>bản ghi/trang</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span>
-            {startItem} - {endItem} / {total}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
-              disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPageNum(page)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-[13px] transition-colors cursor-pointer ${
-                  currentPageNum === page
-                    ? 'bg-blue-600 text-white'
-                    : 'border border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
-              disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
+      <Pagination
+        className="border-t border-[#E2E8F0]"
+        currentPage={currentPageNum}
+        totalItems={total}
+        pageSize={pageSize}
+        onPageChange={setCurrentPageNum}
+        onPageSizeChange={(size) => { setPageSize(size); setCurrentPageNum(1); }}
+      />
     );
   };
 
+  const openEditSchedule = (schedule: ScheduleItem) => {
+    setSelectedSchedule(schedule);
+    setIsEditingSchedule(true);
+    setScheduleFormData({
+      datasetId: schedule.datasetCode,
+      frequency: schedule.frequency,
+      startTime: schedule.startTime,
+      dataSource: schedule.dataSource,
+      startDate: schedule.startDate || '',
+      endDate: schedule.endDate || '',
+      publishFormat: schedule.publishFormat || 'api',
+      targetAudience: schedule.targetAudience || '',
+      contactInfo: schedule.contactInfo || '',
+      weeklyDays: schedule.weeklyDays || [],
+      monthlyDay: schedule.monthlyDay || 1,
+      quarterlyDay: schedule.quarterlyDay || 1,
+      quarterlyMonth: schedule.quarterlyMonth || 1
+    });
+    setShowScheduleModal(true);
+  };
+
+  const openApprovalDetail = (item: PublishedData) => {
+    setSelectedApprovalItem(item);
+    setRejectReason('');
+    setShowRejectForm(false);
+    setShowApproveForm(false);
+    setShowApprovalModal(true);
+  };
+
+  const approvalStatCards = [
+    { label: 'Chờ công bố', value: approvalRequestStats.pending, icon: Clock, bg: 'bg-orange-50', fg: 'text-orange-600' },
+    { label: 'Đã công bố', value: approvalRequestStats.approved, icon: CheckCircle, bg: 'bg-green-50', fg: 'text-green-600' },
+    { label: 'Từ chối', value: approvalRequestStats.rejected, icon: XCircle, bg: 'bg-red-50', fg: 'text-red-600' },
+    { label: 'Tổng yêu cầu', value: approvalRequestStats.total, icon: Edit2, bg: 'bg-blue-50', fg: 'text-blue-600' },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Tabs Header - Styled matching the mockup */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="flex px-6 gap-6">
+      {/* Tabs Header (compomennt.md 5.9) */}
+      <div className="bg-white border-b border-[#E2E8F0]">
+        <div className="flex px-6 gap-2">
           <button
+            type="button"
             onClick={() => setActiveTab('requests')}
-            className={`flex items-center gap-2 px-6 py-4 text-[13px] transition-all border-b-2 font-medium cursor-pointer ${
-              activeTab === 'requests'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium'
-                : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
-            }`}
+            className={tabClass(activeTab === 'requests')}
           >
-            <FileText className={`w-4 h-4 ${activeTab === 'requests' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <FileText className="w-4 h-4" />
             Yêu cầu công bố
           </button>
           <button
+            type="button"
             onClick={() => {
               setActiveTab('approval');
               setShowRejectForm(false);
               setRejectReason('');
             }}
-            className={`flex items-center gap-2 px-6 py-4 text-[13px] transition-all border-b-2 font-medium cursor-pointer ${
-              activeTab === 'approval'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium'
-                : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
-            }`}
+            className={tabClass(activeTab === 'approval')}
           >
-            <CheckCircle className={`w-4 h-4 ${activeTab === 'approval' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <CheckCircle className="w-4 h-4" />
             Phê duyệt dữ liệu mở
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('schedule')}
-            className={`flex items-center gap-2 px-6 py-4 text-[13px] transition-all border-b-2 font-medium cursor-pointer ${
-              activeTab === 'schedule'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium'
-                : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
-            }`}
+            className={tabClass(activeTab === 'schedule')}
           >
-            <Calendar className={`w-4 h-4 ${activeTab === 'schedule' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <Calendar className="w-4 h-4" />
             Lịch công bố
           </button>
         </div>
@@ -1430,193 +1464,169 @@ export function OpenDataPublishedListPage() {
 
       {/* Main Content Area */}
       <div className="px-6 pb-6">
-        
+
         {/* RENDER TAB 1: YÊU CẦU CÔNG BỐ */}
         {activeTab === 'requests' && (
           <div className="space-y-4 animate-fade-in">
-                        {/* Filter and Search Row */}
-            <div className="flex flex-col md:flex-row items-center gap-3 w-full">
-              <div className="flex-1 flex items-center gap-2 w-full">
-                {/* Search Input */}
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm theo mã, tên tệp dữ liệu..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-                  />
+            {/* Filter and Search Row (compomennt.md 5.19) */}
+            <div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-1.5">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      aria-label="Tìm kiếm yêu cầu công bố"
+                      placeholder="Tìm kiếm theo mã, tên tệp dữ liệu..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                      className={SEARCH_INPUT_CLS}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    aria-label="Tìm kiếm"
+                    title="Tìm kiếm"
+                    onClick={runSearch}
+                    className={SEARCH_BTN_CLS}
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-label="Bộ lọc"
+                    aria-expanded={showFilters}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={filterBtnClass(showFilters)}
+                    title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                  >
+                    {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                  </button>
                 </div>
 
-                {/* Search Button */}
-                <button
-                  type="button"
-                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-                  title="Tìm kiếm"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
-
-                {/* Filter Toggle Button */}
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                    showFilters
-                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50'
-                  }`}
-                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                >
-                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetRequestForm();
+                      setShowRequestModal(true);
+                    }}
+                    className={`${BTN_PRIMARY} whitespace-nowrap`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Gửi yêu cầu công bố
+                  </button>
+                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetRequestForm();
-                    setShowRequestModal(true);
-                  }}
-                  className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  Gửi yêu cầu công bố
-                </button>
-              </div>
+              {/* Advanced Collapsible Filter Panel */}
+              {showFilters && (
+                <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+                  <div>
+                    <label className={FILTER_LABEL}>Trạng thái yêu cầu</label>
+                    <select
+                      aria-label="Trạng thái yêu cầu"
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="draft">Bản nháp</option>
+                      <option value="pending">Chờ công bố</option>
+                      <option value="approved">Đã công bố</option>
+                      <option value="rejected">Từ chối</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={FILTER_LABEL}>Danh mục mở</label>
+                    <select
+                      aria-label="Danh mục mở"
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả danh mục</option>
+                      <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
+                      <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
+                      <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={FILTER_LABEL}>Cơ quan công bố</label>
+                    <select
+                      aria-label="Cơ quan công bố"
+                      value={selectedPublisher}
+                      onChange={(e) => setSelectedPublisher(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả cơ quan</option>
+                      <option value="Bộ Tư pháp">Bộ Tư pháp</option>
+                      <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Advanced Collapsible Filter Panel */}
-            {showFilters && (
-              <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Trạng thái yêu cầu</label>
-                    <div className="relative">
-                      <select
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả trạng thái</option>
-                        <option value="draft">Bản nháp</option>
-                        <option value="pending">Chờ công bố</option>
-                        <option value="approved">Đã công bố</option>
-                        <option value="rejected">Từ chối</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Danh mục mở</label>
-                    <div className="relative">
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả danh mục</option>
-                        <option value="Danh sách tổ chức thực hiện trợ giúp pháp lý">Danh sách tổ chức thực hiện trợ giúp pháp lý</option>
-                        <option value="Danh sách người thực hiện trợ giúp pháp lý">Danh sách người thực hiện trợ giúp pháp lý</option>
-                        <option value="Danh sách Luật sư Việt Nam">Danh sách Luật sư Việt Nam</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Cơ quan công bố</label>
-                    <div className="relative">
-                      <select
-                        value={selectedPublisher}
-                        onChange={(e) => setSelectedPublisher(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả cơ quan</option>
-                        <option value="Bộ Tư pháp">Bộ Tư pháp</option>
-                        <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-
-{/* Grid Data Table */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            {/* Grid Data Table (compomennt.md 5.3) */}
+            <div className={TABLE_WRAP}>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[13px]">STT</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên tệp dữ liệu</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Danh mục</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Cơ quan công bố</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Người tạo</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Ngày tạo</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Người phê duyệt</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-32">Trạng thái</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-28">Thao tác</th>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className={THEAD_ROW}>
+                      <th className={`${TH} text-center w-16`}>STT</th>
+                      <th className={`${TH} text-left`}>Tên tệp dữ liệu</th>
+                      <th className={`${TH} text-left`}>Danh mục</th>
+                      <th className={`${TH} text-left`}>Cơ quan công bố</th>
+                      <th className={`${TH} text-left`}>Người tạo</th>
+                      <th className={`${TH} text-left`}>Ngày tạo</th>
+                      <th className={`${TH} text-left`}>Người phê duyệt</th>
+                      <th className={`${TH} text-left`}>Trạng thái</th>
+                      <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody>
                     {paginatedRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-[13px]">
+                        <td colSpan={9} className={EMPTY_TD}>
                           Không tìm thấy yêu cầu công bố nào.
                         </td>
                       </tr>
                     ) : (
                       paginatedRequests.map((item, index) => (
-                        <tr key={item.id} className="hover:bg-slate-50 transition-all border-b border-slate-100">
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                        <tr key={item.id} className={TR}>
+                          <td className={`${TD} text-center`}>
                             {(currentPageNum - 1) * pageSize + index + 1}
                           </td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <div
-                              className="text-black"
-                              onClick={() => handleViewDetail(item)}
-                            >
-                              {item.fileName || 'Không có tên tệp'}
+                          <td className={`${TD} text-left max-w-[360px]`}>
+                            <div onClick={() => handleViewDetail(item)}>
+                              <TruncatedText text={item.fileName || 'Không có tên tệp'} />
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-left text-slate-700 font-medium text-[13px]">{item.category}</td>
-                          <td className="px-4 py-3 text-left text-slate-650 text-[13px]">{item.publisher}</td>
-                          <td className="px-4 py-3 text-left text-slate-600 font-medium text-[13px]">{item.creator}</td>
-                          <td className="px-4 py-3 text-left text-slate-600 text-[13px]">{item.createdDate}</td>
-                          <td className="px-4 py-3 text-left text-slate-600 text-[13px]">{item.approver}</td>
-                          <td className="px-4 py-3 text-center text-[13px]">{getStatusBadge(item.status)}</td>
-                          <td className="px-4 py-3 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <button
-                                onClick={() => handleViewDetail(item)}
-                                className="p-1.5 text-slate-500 hover:text-black hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                                title="Xem chi tiết"
-                              >
+                          <td className={`${TD} text-left max-w-[280px]`}><TruncatedText text={item.category} /></td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.publisher}</td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.creator}</td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.createdDate}</td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.approver}</td>
+                          <td className={`${TD} text-left`}>{getStatusBadge(item.status)}</td>
+                          <td className={`${TD} text-center ${STICKY_TD}`}>
+                            {/* Cột thao tác (compomennt.md 5.3.2): 3 thao tác => hiện đủ icon */}
+                            <div className="inline-flex items-center justify-center gap-1">
+                              <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(item)}>
                                 <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleEditRequest(item)}
-                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                title="Chỉnh sửa"
-                              >
+                              </RowIconAction>
+                              <RowIconAction label="Chỉnh sửa" onClick={() => handleEditRequest(item)}>
                                 <SquarePen className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => item.status === 'draft' ? handleOpenSendApproval(item) : undefined}
-                                disabled={item.status !== 'draft'}
-                                className={`p-1.5 rounded-lg transition-colors ${
-                                  item.status === 'draft'
-                                    ? 'text-slate-500 hover:text-purple-600 hover:bg-purple-50 cursor-pointer'
-                                    : 'text-slate-300 cursor-not-allowed'
-                                }`}
-                                title="Gửi duyệt"
+                              </RowIconAction>
+                              <RowIconAction
+                                label="Gửi duyệt"
+                                disabledReason={item.status !== 'draft' ? 'Chỉ gửi duyệt yêu cầu ở trạng thái Bản nháp' : undefined}
+                                onClick={() => handleOpenSendApproval(item)}
                               >
                                 <Send className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                             </div>
                           </td>
                         </tr>
@@ -1633,73 +1643,41 @@ export function OpenDataPublishedListPage() {
         {/* RENDER TAB 2: PHÊ DUYỆT */}
         {activeTab === 'approval' && (
           <div className="space-y-4 animate-fade-in">
-            {/* Header Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-orange-700">Chờ công bố</p>
-                    <p className="text-2xl text-orange-900">{approvalRequestStats.pending}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-green-700">Đã công bố</p>
-                    <p className="text-2xl text-green-900">{approvalRequestStats.approved}</p>
+            {/* Header Stat Cards (compomennt.md 5.6.1) */}
+            <div className="grid grid-cols-4 gap-4">
+              {approvalStatCards.map(card => (
+                <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${card.bg}`}>
+                      <card.icon className={`w-5 h-5 ${card.fg}`} />
+                    </div>
+                    <div>
+                      <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                      <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{card.value}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                    <XCircle className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-red-700">Từ chối</p>
-                    <p className="text-2xl text-red-900">{approvalRequestStats.rejected}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <Edit2 className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-blue-700">Tổng yêu cầu</p>
-                    <p className="text-2xl text-blue-900">{approvalRequestStats.total}</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Bulk quick action bar */}
             {selectedApprovalIds.length > 0 && (
               <div className="flex items-center justify-end gap-3">
-                <span className="text-[13px] text-slate-600">
+                <span className="text-[13px] text-[#475569]">
                   Đã chọn: <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu
                 </span>
                 <button
+                  type="button"
                   onClick={handleBulkApprove}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-[13px]"
+                  className={BTN_PRIMARY}
                 >
                   <CheckCircle className="w-4 h-4" />
                   Phê duyệt nhanh
                 </button>
                 <button
+                  type="button"
                   onClick={openBulkRejectModal}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-[13px]"
+                  className={BTN_DESTRUCTIVE}
                 >
                   <XCircle className="w-4 h-4" />
                   Từ chối nhanh
@@ -1707,126 +1685,121 @@ export function OpenDataPublishedListPage() {
               </div>
             )}
 
-            {/* Search + Status Pills */}
-            <div className="bg-white border border-slate-200 rounded-lg p-4">
-              <div className="flex flex-col md:flex-row gap-4">
+            {/* Search + Status Pills (compomennt.md 5.19) — nút lọc nhanh áp dụng ngay */}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex-1 min-w-[280px] flex items-center gap-1.5">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
+                    aria-label="Tìm kiếm yêu cầu phê duyệt"
                     placeholder="Tìm kiếm theo tên tệp dữ liệu..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                    className={SEARCH_INPUT_CLS}
                   />
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {[
-                    { value: 'all', label: 'Tất cả', activeClass: 'bg-slate-700 text-white border-slate-700' },
-                    { value: 'pending', label: 'Chờ công bố', activeClass: 'bg-orange-500 text-white border-orange-500' },
-                    { value: 'approved', label: 'Đã công bố', activeClass: 'bg-green-600 text-white border-green-600' },
-                    { value: 'rejected', label: 'Từ chối', activeClass: 'bg-red-500 text-white border-red-500' },
-                  ].map(opt => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setSelectedStatus(opt.value)}
-                      className={`px-3 py-2 text-[13px] rounded-lg border transition-all font-medium cursor-pointer ${selectedStatus === opt.value
-                        ? opt.activeClass
-                        : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                        }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  aria-label="Tìm kiếm"
+                  title="Tìm kiếm"
+                  onClick={runSearch}
+                  className={SEARCH_BTN_CLS}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {[
+                  { value: 'all', label: 'Tất cả' },
+                  { value: 'pending', label: 'Chờ công bố' },
+                  { value: 'approved', label: 'Đã công bố' },
+                  { value: 'rejected', label: 'Từ chối' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    aria-pressed={selectedStatus === opt.value}
+                    onClick={() => {
+                      setSelectedStatus(opt.value);
+                      setApplied(prev => ({ ...prev, status: opt.value }));
+                    }}
+                    className={selectedStatus === opt.value ? CHIP_ACTIVE : BTN_OUTLINE}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Grid Data Table */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div className={TABLE_WRAP}>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-4 text-left w-10">
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className={THEAD_ROW}>
+                      <th className={`${TH} text-center w-10`}>
                         <input
                           type="checkbox"
                           title="Chọn tất cả"
+                          aria-label="Chọn tất cả"
                           checked={selectedApprovalIds.length > 0 && selectedApprovalIds.length === paginatedApprovalRequests.filter(item => item.status === 'pending').length}
                           onChange={toggleSelectAllApprovalIds}
-                          className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          className={CHECKBOX_CLS}
                         />
                       </th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[13px]">STT</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên tập dữ liệu</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Danh mục</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Cơ quan công bố</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Người tạo</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Ngày tạo</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-32">Trạng thái</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-28">Thao tác</th>
+                      <th className={`${TH} text-center w-16`}>STT</th>
+                      <th className={`${TH} text-left`}>Tên tập dữ liệu</th>
+                      <th className={`${TH} text-left`}>Danh mục</th>
+                      <th className={`${TH} text-left`}>Cơ quan công bố</th>
+                      <th className={`${TH} text-left`}>Người tạo</th>
+                      <th className={`${TH} text-left`}>Ngày tạo</th>
+                      <th className={`${TH} text-left`}>Trạng thái</th>
+                      <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody>
                     {paginatedApprovalRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-[13px]">
+                        <td colSpan={9} className={EMPTY_TD}>
                           Không có yêu cầu công bố nào được tìm thấy.
                         </td>
                       </tr>
                     ) : (
                       paginatedApprovalRequests.map((item, index) => (
-                        <tr key={item.id} className="hover:bg-slate-50 transition-all border-b border-slate-100">
-                          <td className="px-4 py-3">
+                        <tr key={item.id} className={TR}>
+                          <td className={`${TD} text-center`}>
                             {item.status === 'pending' && (
                               <input
                                 type="checkbox"
                                 title="Chọn bản ghi"
+                                aria-label="Chọn bản ghi"
                                 checked={selectedApprovalIds.includes(item.id)}
                                 onChange={() => toggleSelectApprovalId(item.id)}
-                                className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                className={CHECKBOX_CLS}
                               />
                             )}
                           </td>
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <span
-                              className="text-black cursor-pointer"
-                              onClick={() => {
-                                setSelectedApprovalItem(item);
-                                setRejectReason('');
-                                setShowRejectForm(false);
-                                setShowApproveForm(false);
-                                setShowApprovalModal(true);
-                              }}
-                            >
-                              {item.fileName}
-                            </span>
+                          <td className={`${TD} text-center`}>{(currentPageNum - 1) * pageSize + index + 1}</td>
+                          <td className={`${TD} text-left max-w-[360px]`}>
+                            <div className="cursor-pointer" onClick={() => openApprovalDetail(item)}>
+                              <TruncatedText text={item.fileName} />
+                            </div>
                           </td>
-                          <td className="px-4 py-3 text-slate-700 font-medium text-[13px]">{item.category}</td>
-                          <td className="px-4 py-3 text-slate-500 text-[13px]">{item.publisher}</td>
-                          <td className="px-4 py-3 text-slate-700 font-medium text-[13px]">{item.creator}</td>
-                          <td className="px-4 py-3 text-slate-550 text-[13px]">{item.createdDate}</td>
-                          <td className="px-4 py-3 text-center text-[13px]">{getStatusBadge(item.status)}</td>
-                          <td className="px-4 py-3 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedApprovalItem(item);
-                                  setRejectReason('');
-                                  setShowRejectForm(false);
-                                  setShowApproveForm(false);
-                                  setShowApprovalModal(true);
-                                }}
-                                className="p-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer transition-colors"
-                                title="Xem chi tiết"
-                              >
+                          <td className={`${TD} text-left max-w-[280px]`}><TruncatedText text={item.category} /></td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.publisher}</td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.creator}</td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{item.createdDate}</td>
+                          <td className={`${TD} text-left`}>{getStatusBadge(item.status)}</td>
+                          <td className={`${TD} text-center ${STICKY_TD}`}>
+                            {/* Cột thao tác (compomennt.md 5.3.2): 3 thao tác => hiện đủ icon */}
+                            <div className="inline-flex items-center justify-center gap-1">
+                              <RowIconAction label="Xem chi tiết" onClick={() => openApprovalDetail(item)}>
                                 <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
+                              </RowIconAction>
+                              <RowIconAction
+                                label="Phê duyệt"
+                                disabledReason={item.status !== 'pending' ? 'Đã xử lý' : undefined}
                                 onClick={() => {
                                   if (item.status !== 'pending') return;
                                   setSelectedApprovalItem(item);
@@ -1835,17 +1808,12 @@ export function OpenDataPublishedListPage() {
                                   setShowApproveForm(true);
                                   setShowApprovalModal(true);
                                 }}
-                                disabled={item.status !== 'pending'}
-                                className={`p-1 rounded transition-colors ${item.status === 'pending'
-                                  ? 'text-green-600 hover:bg-green-50 cursor-pointer'
-                                  : 'text-slate-300 cursor-not-allowed'
-                                  }`}
-                                title={item.status === 'pending' ? 'Phê duyệt' : 'Đã xử lý'}
                               >
                                 <CheckCircle className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
+                              </RowIconAction>
+                              <RowIconAction
+                                label="Từ chối"
+                                disabledReason={item.status !== 'pending' ? 'Đã xử lý' : undefined}
                                 onClick={() => {
                                   if (item.status !== 'pending') return;
                                   setSelectedApprovalItem(item);
@@ -1855,15 +1823,9 @@ export function OpenDataPublishedListPage() {
                                   setShowRejectForm(true);
                                   setShowApprovalModal(true);
                                 }}
-                                disabled={item.status !== 'pending'}
-                                className={`p-1 rounded transition-colors ${item.status === 'pending'
-                                  ? 'text-red-600 hover:bg-red-50 cursor-pointer'
-                                  : 'text-slate-300 cursor-not-allowed'
-                                  }`}
-                                title={item.status === 'pending' ? 'Từ chối' : 'Đã xử lý'}
                               >
                                 <XCircle className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                             </div>
                           </td>
                         </tr>
@@ -1877,268 +1839,201 @@ export function OpenDataPublishedListPage() {
           </div>
         )}
 
-
-
         {/* RENDER TAB 4: LỊCH CÔNG BỐ */}
         {activeTab === 'schedule' && (
           <div className="space-y-4 animate-fade-in">
-            {/* Filter and Search Row */}
-            <div className="flex flex-col md:flex-row items-center gap-3 w-full">
-              <div className="flex-1 flex items-center gap-2 w-full">
-                {/* Search Input */}
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm theo tên tập dữ liệu, nguồn dữ liệu..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
-                  />
+            {/* Filter and Search Row (compomennt.md 5.19) */}
+            <div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1 flex items-center gap-1.5">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      aria-label="Tìm kiếm lịch công bố"
+                      placeholder="Tìm kiếm theo tên tập dữ liệu, nguồn dữ liệu..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                      className={SEARCH_INPUT_CLS}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    aria-label="Tìm kiếm"
+                    title="Tìm kiếm"
+                    onClick={runSearch}
+                    className={SEARCH_BTN_CLS}
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-label="Bộ lọc"
+                    aria-expanded={showFilters}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={filterBtnClass(showFilters)}
+                    title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
+                  >
+                    {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+                  </button>
                 </div>
 
-                {/* Search Button */}
-                <button
-                  type="button"
-                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
-                  title="Tìm kiếm"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
-
-                {/* Filter Toggle Button */}
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                    showFilters
-                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-655 hover:bg-slate-50'
-                  }`}
-                  title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
-                >
-                  {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScheduleFormData({
+                        datasetId: '',
+                        frequency: 'daily',
+                        startTime: '08:00',
+                        startDate: '',
+                        endDate: '',
+                        publishFormat: 'api',
+                        targetAudience: '',
+                        contactInfo: '',
+                        dataSource: '',
+                        weeklyDays: [],
+                        monthlyDay: 1,
+                        quarterlyDay: 1,
+                        quarterlyMonth: 1
+                      });
+                      setIsEditingSchedule(false);
+                      setSelectedSchedule(null);
+                      setShowScheduleModal(true);
+                    }}
+                    className={`${BTN_PRIMARY} whitespace-nowrap`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Thêm lịch mới
+                  </button>
+                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setScheduleFormData({
-                      datasetId: '',
-                      frequency: 'daily',
-                      startTime: '08:00',
-                      startDate: '',
-                      endDate: '',
-                      publishFormat: 'api',
-                      targetAudience: '',
-                      contactInfo: '',
-                      dataSource: '',
-                      weeklyDays: [],
-                      monthlyDay: 1,
-                      quarterlyDay: 1,
-                      quarterlyMonth: 1
-                    });
-                    setIsEditingSchedule(false);
-                    setSelectedSchedule(null);
-                    setShowScheduleModal(true);
-                  }}
-                  className="flex-1 lg:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  Thêm lịch mới
-                </button>
-              </div>
+              {/* Advanced Collapsible Filter Panel */}
+              {showFilters && (
+                <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+                  <div>
+                    <label className={FILTER_LABEL}>Tần suất công bố</label>
+                    <select
+                      aria-label="Tần suất công bố"
+                      value={selectedScheduleFrequency}
+                      onChange={(e) => setSelectedScheduleFrequency(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả tần suất</option>
+                      <option value="daily">Hàng ngày</option>
+                      <option value="weekly">Hàng tuần</option>
+                      <option value="monthly">Hàng tháng</option>
+                      <option value="quarterly">Hàng quý</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={FILTER_LABEL}>Trạng thái lịch</label>
+                    <select
+                      aria-label="Trạng thái lịch"
+                      value={selectedScheduleStatus}
+                      onChange={(e) => setSelectedScheduleStatus(e.target.value)}
+                      className={INPUT_CLS}
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="active">Hoạt động</option>
+                      <option value="inactive">Tạm dừng</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Advanced Collapsible Filter Panel */}
-            {showFilters && (
-              <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Tần suất công bố</label>
-                    <div className="relative">
-                      <select
-                        value={selectedScheduleFrequency}
-                        onChange={(e) => setSelectedScheduleFrequency(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả tần suất</option>
-                        <option value="daily">Hàng ngày</option>
-                        <option value="weekly">Hàng tuần</option>
-                        <option value="monthly">Hàng tháng</option>
-                        <option value="quarterly">Hàng quý</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] text-black mb-2">Trạng thái lịch</label>
-                    <div className="relative">
-                      <select
-                        value={selectedScheduleStatus}
-                        onChange={(e) => setSelectedScheduleStatus(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                      >
-                        <option value="all">Tất cả trạng thái</option>
-                        <option value="active">Hoạt động</option>
-                        <option value="inactive">Tạm dừng</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Schedules Table */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div className={TABLE_WRAP}>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap w-16 text-[13px]">STT</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tên tập dữ liệu</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px] w-28">Mã</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Tần suất</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Giờ chạy</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Lần chạy cuối</th>
-                      <th className="px-6 py-4 text-left font-semibold text-slate-700 whitespace-nowrap text-[13px]">Lần chạy tiếp</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-32">Trạng thái</th>
-                      <th className="px-6 py-4 text-center font-semibold text-slate-700 whitespace-nowrap text-[13px] w-28">Thao tác</th>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className={THEAD_ROW}>
+                      <th className={`${TH} text-center w-16`}>STT</th>
+                      <th className={`${TH} text-left`}>Tên tập dữ liệu</th>
+                      <th className={`${TH} text-left w-28`}>Mã</th>
+                      <th className={`${TH} text-left`}>Tần suất</th>
+                      <th className={`${TH} text-left`}>Giờ chạy</th>
+                      <th className={`${TH} text-left`}>Lần chạy cuối</th>
+                      <th className={`${TH} text-left`}>Lần chạy tiếp</th>
+                      <th className={`${TH} text-left`}>Trạng thái</th>
+                      <th className={`${TH} text-center w-px ${STICKY_TH}`}>Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody>
                     {paginatedSchedules.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="px-6 py-8 text-center text-slate-500 text-[13px]">
+                        <td colSpan={9} className={EMPTY_TD}>
                           Không tìm thấy lịch công bố nào.
                         </td>
                       </tr>
                     ) : (
                       paginatedSchedules.map((schedule, index) => (
-                        <tr key={schedule.id} className="hover:bg-slate-50 transition-all border-b border-slate-100">
-                          <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                        <tr key={schedule.id} className={TR}>
+                          <td className={`${TD} text-center`}>
                             {(currentPageNum - 1) * pageSize + index + 1}
                           </td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <div>
-                              <span
-                                className="text-black"
-                                onClick={() => {
-                                  setSelectedSchedule(schedule);
-                                  setIsEditingSchedule(true);
-                                  setScheduleFormData({
-                                    datasetId: schedule.datasetCode,
-                                    frequency: schedule.frequency,
-                                    startTime: schedule.startTime,
-                                    dataSource: schedule.dataSource,
-                                    startDate: schedule.startDate || '',
-                                    endDate: schedule.endDate || '',
-                                    publishFormat: schedule.publishFormat || 'api',
-                                    targetAudience: schedule.targetAudience || '',
-                                    contactInfo: schedule.contactInfo || '',
-                                    weeklyDays: schedule.weeklyDays || [],
-                                    monthlyDay: schedule.monthlyDay || 1,
-                                    quarterlyDay: schedule.quarterlyDay || 1,
-                                    quarterlyMonth: schedule.quarterlyMonth || 1
-                                  });
-                                  setShowScheduleModal(true);
-                                }}
-                              >
-                                {schedule.datasetName}
-                              </span>
+                          <td className={`${TD} text-left max-w-[360px]`}>
+                            <div onClick={() => openEditSchedule(schedule)}>
+                              <TruncatedText text={schedule.datasetName} />
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-left text-[13px]">
-                            <code className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-xs font-mono font-medium text-slate-700">
-                              {schedule.datasetCode}
-                            </code>
+                          <td className={`${TD} text-left whitespace-nowrap`}>
+                            {schedule.datasetCode}
                           </td>
-                          <td className="px-4 py-3 text-[13px]">
-                            <div className="font-semibold text-slate-800">
+                          <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                            <div>
                               {schedule.frequency === 'daily' ? 'Hàng ngày' : schedule.frequency === 'weekly' ? 'Hàng tuần' : schedule.frequency === 'monthly' ? 'Hàng tháng' : 'Hàng quý'}
                             </div>
                             {schedule.frequency === 'weekly' && schedule.weeklyDays && schedule.weeklyDays.length > 0 && (
-                              <div className="text-[11px] text-slate-500 mt-0.5">
+                              <div className="text-[#64748B]">
                                 {schedule.weeklyDays.join(', ')}
                               </div>
                             )}
                             {schedule.frequency === 'monthly' && schedule.monthlyDay && (
-                              <div className="text-[11px] text-slate-500 mt-0.5">
+                              <div className="text-[#64748B]">
                                 Ngày {schedule.monthlyDay} hàng tháng
                               </div>
                             )}
                             {schedule.frequency === 'quarterly' && schedule.quarterlyMonth && schedule.quarterlyDay && (
-                              <div className="text-[11px] text-slate-500 mt-0.5">
+                              <div className="text-[#64748B]">
                                 Tháng thứ {schedule.quarterlyMonth}, ngày {schedule.quarterlyDay}
                               </div>
                             )}
                           </td>
-                          <td className="px-4 py-3.5 text-slate-700 font-medium">{schedule.startTime}</td>
-                          <td className="px-4 py-3.5 text-slate-500">{schedule.lastRun || 'Chưa chạy'}</td>
-                          <td className="px-4 py-3.5 text-slate-600 font-semibold">{schedule.nextRun}</td>
-                          <td className="px-4 py-3.5 text-center">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs border ${schedule.status === 'active' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                              {schedule.status === 'active' ? 'Hoạt động' : 'Tạm dừng'}
-                            </span>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{schedule.startTime}</td>
+                          <td className={`${TD} text-left whitespace-nowrap`}><DateTimeCell value={schedule.lastRun || 'Chưa chạy'} /></td>
+                          <td className={`${TD} text-left whitespace-nowrap`}><DateTimeCell value={schedule.nextRun} /></td>
+                          <td className={`${TD} text-left`}>
+                            <Badge label={schedule.status === 'active' ? 'Hoạt động' : 'Tạm dừng'} variant={schedule.status === 'active' ? 'green' : 'slate'} />
                           </td>
-                          <td className="px-4 py-3.5 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <button
-                                onClick={() => {
-                                  setSelectedSchedule(schedule);
-                                  setIsEditingSchedule(true);
-                                  setScheduleFormData({
-                                    datasetId: schedule.datasetCode,
-                                    frequency: schedule.frequency,
-                                    startTime: schedule.startTime,
-                                    dataSource: schedule.dataSource,
-                                    startDate: schedule.startDate || '',
-                                    endDate: schedule.endDate || '',
-                                    publishFormat: schedule.publishFormat || 'api',
-                                    targetAudience: schedule.targetAudience || '',
-                                    contactInfo: schedule.contactInfo || '',
-                                    weeklyDays: schedule.weeklyDays || [],
-                                    monthlyDay: schedule.monthlyDay || 1,
-                                    quarterlyDay: schedule.quarterlyDay || 1,
-                                    quarterlyMonth: schedule.quarterlyMonth || 1
-                                  });
-                                  setShowScheduleModal(true);
-                                }}
-                                className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
-                                title="Sửa lịch"
-                              >
+                          <td className={`${TD} text-center ${STICKY_TD}`}>
+                            {/* Cột thao tác (compomennt.md 5.3.2): 3 thao tác => hiện đủ icon */}
+                            <div className="inline-flex items-center justify-center gap-1">
+                              <RowIconAction label="Sửa lịch" onClick={() => openEditSchedule(schedule)}>
                                 <Edit2 className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                               {schedule.status === 'active' ? (
-                                <button
-                                  onClick={() => setScheduleStatusConfirm({ schedule, action: 'pause' })}
-                                  className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition-colors"
-                                  title="Tạm dừng"
-                                >
+                                <RowIconAction label="Tạm dừng" onClick={() => setScheduleStatusConfirm({ schedule, action: 'pause' })}>
                                   <PauseCircle className="w-4 h-4" />
-                                </button>
+                                </RowIconAction>
                               ) : (
-                                <button
-                                  onClick={() => setScheduleStatusConfirm({ schedule, action: 'resume' })}
-                                  className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors"
-                                  title="Tiếp tục"
-                                >
+                                <RowIconAction label="Tiếp tục" onClick={() => setScheduleStatusConfirm({ schedule, action: 'resume' })}>
                                   <PlayCircle className="w-4 h-4" />
-                                </button>
+                                </RowIconAction>
                               )}
-                              <button
+                              <RowIconAction
+                                label="Xóa lịch"
                                 onClick={() => {
                                   setSelectedSchedule(schedule);
                                   setShowDeleteScheduleModal(true);
                                 }}
-                                className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
-                                title="Xóa lịch"
                               >
                                 <Trash2 className="w-4 h-4" />
-                              </button>
+                              </RowIconAction>
                             </div>
                           </td>
                         </tr>
@@ -2153,148 +2048,150 @@ export function OpenDataPublishedListPage() {
         )}
       </div>
 
-      {/* DETAIL MODAL */}
+      {/* DETAIL MODAL (compomennt.md 5.4) */}
       {showDetailModal && selectedData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-5xl`}>
+            <div className={MODAL_HEADER}>
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-bold text-slate-900">Chi tiết Yêu cầu công bố dữ liệu mở</h3>
+                <h3 className={MODAL_TITLE}>Chi tiết Yêu cầu công bố dữ liệu mở</h3>
               </div>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowDetailModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
+                className={BTN_GHOST_ICON}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-5 flex-1 text-[13px]">
+            <div className={`${MODAL_BODY} space-y-5 text-[13px]`}>
 
               {/* ── Tên tập dữ liệu ── */}
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="col-span-1 md:col-span-2">
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Tên tập dữ liệu</div>
-                  <div className="text-[13px] text-black flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className={`${GROUP_CARD} grid grid-cols-2 gap-x-6 gap-y-4`}>
+                <div className="col-span-2">
+                  <div className={`${FIELD_LABEL} mb-1`}>Tên tập dữ liệu</div>
+                  <div className={`${FIELD_VALUE} flex items-center gap-1.5`}>
+                    <FileSpreadsheet className="w-4 h-4 text-[#16A34A] shrink-0" />
                     {selectedData.fileName || 'Không có tên tệp'}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Trạng thái</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Trạng thái</div>
                   <div>{getStatusBadge(selectedData.status)}</div>
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Người phê duyệt</div>
-                  <div className="text-[13px] text-black">{selectedData.approver}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Người phê duyệt</div>
+                  <div className={FIELD_VALUE}>{selectedData.approver || '-'}</div>
                 </div>
 
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Người tạo yêu cầu</div>
-                  <div className="text-[13px] text-black">{selectedData.creator}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Người tạo yêu cầu</div>
+                  <div className={FIELD_VALUE}>{selectedData.creator || '-'}</div>
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Ngày tạo yêu cầu</div>
-                  <div className="text-[13px] text-black">{selectedData.createdDate}</div>
-                </div>
-
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Danh mục dữ liệu mở</div>
-                  <div className="text-[13px] text-black">{selectedData.category}</div>
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Đơn vị chủ trì cung cấp</div>
-                  <div className="text-[13px] text-black">{selectedData.publisher}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Ngày tạo yêu cầu</div>
+                  <div className={FIELD_VALUE}>{selectedData.createdDate || '-'}</div>
                 </div>
 
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Giấy phép</div>
-                  <div className="text-[13px] text-black">{selectedData.license}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Danh mục dữ liệu mở</div>
+                  <div className={FIELD_VALUE}>{selectedData.category || '-'}</div>
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Từ khóa</div>
-                  <div className="text-[13px] text-black">{selectedData.keywords || 'N/A'}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Đơn vị chủ trì cung cấp</div>
+                  <div className={FIELD_VALUE}>{selectedData.publisher || '-'}</div>
                 </div>
 
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Định dạng chia sẻ</div>
-                  <div className="flex flex-wrap gap-1 mt-0.5">
+                  <div className={`${FIELD_LABEL} mb-1`}>Giấy phép</div>
+                  <div className={FIELD_VALUE}>{selectedData.license || '-'}</div>
+                </div>
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Từ khóa</div>
+                  <div className={FIELD_VALUE}>{selectedData.keywords || '-'}</div>
+                </div>
+
+                <div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Định dạng chia sẻ</div>
+                  <div className="flex flex-wrap gap-1">
                     {(selectedData.format || []).length > 0
                       ? selectedData.format.map((fmt, i) => (
-                          <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-black border border-blue-100 rounded text-[13px]">{fmt}</span>
+                          <Badge key={i} label={fmt} variant="blue" />
                         ))
-                      : <span className="text-[13px] text-black">—</span>
+                      : <span className={FIELD_VALUE}>-</span>
                     }
                   </div>
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Tần suất cập nhật</div>
-                  <div className="text-[13px] text-black">{getFrequencyLabel(selectedData.frequency || '') || '—'}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Tần suất cập nhật</div>
+                  <div className={FIELD_VALUE}>{getFrequencyLabel(selectedData.frequency || '') || '-'}</div>
                 </div>
 
                 <div>
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Chủ đề</div>
-                  <div className="text-[13px] text-black">{selectedData.topic || '—'}</div>
+                  <div className={`${FIELD_LABEL} mb-1`}>Chủ đề</div>
+                  <div className={FIELD_VALUE}>{selectedData.topic || '-'}</div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Thông tin mô tả</div>
-                  <div className="text-[13px] text-black whitespace-pre-wrap">{selectedData.description || '—'}</div>
+                <div className="col-span-2">
+                  <div className={`${FIELD_LABEL} mb-1`}>Thông tin mô tả</div>
+                  <div className={`${FIELD_VALUE} whitespace-pre-wrap`}>{selectedData.description || '-'}</div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
+                <div className="col-span-2 flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="detailPublishImmediately"
                     checked={selectedData.publishImmediately || false}
                     disabled
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-not-allowed"
+                    className="w-4 h-4 accent-blue-600 rounded cursor-not-allowed"
                   />
-                  <label htmlFor="detailPublishImmediately" className="text-slate-700 select-none cursor-not-allowed">
+                  <label htmlFor="detailPublishImmediately" className="text-[13px] text-[#020817] select-none cursor-not-allowed">
                     Công bố dữ liệu ngay sau khi được phê duyệt
                   </label>
                 </div>
               </div>
 
               {/* ── Nội dung trình duyệt ── */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
-                  <FileText className="w-4 h-4 text-slate-400" />
+              <div>
+                <div className={SECTION_TITLE.replace('mb-4', 'mb-2')}>
+                  <FileText className="w-4 h-4 text-[#64748B]" />
                   Nội dung trình duyệt
-                </label>
-                <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
+                </div>
+                <div className="px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] min-h-[46px] whitespace-pre-wrap">
                   {selectedData.submitNote || 'Chưa cập nhật'}
                 </div>
               </div>
 
               {/* ── Ý kiến phê duyệt ── */}
               {selectedData.status === 'approved' && (
-                <div className="rounded-xl border p-4 bg-green-50 border-green-200">
+                <div className={BANNER_SUCCESS}>
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-                    <span className="text-[13px] font-semibold uppercase tracking-wider text-green-700">
+                    <CheckCircle className="w-4 h-4 text-[#16A34A] shrink-0" />
+                    <span className="text-[13px] font-medium text-[#15803D]">
                       Ý kiến phê duyệt
                     </span>
                   </div>
-                  <p className="text-[13px] leading-relaxed text-green-900">
-                    {selectedData.approvalNote || '—'}
+                  <p className="text-[13px] leading-relaxed text-[#020817]">
+                    {selectedData.approvalNote || '-'}
                   </p>
                 </div>
               )}
 
               {/* ── Lý do từ chối ── */}
               {selectedData.status === 'rejected' && (
-                <div className="rounded-xl border p-4 bg-red-50 border-red-200">
+                <div className={BANNER_DANGER}>
                   <div className="flex items-center gap-2 mb-2">
-                    <XCircle className="w-4 h-4 text-red-500 shrink-0" />
-                    <span className="text-[13px] font-semibold uppercase tracking-wider text-red-600">
+                    <XCircle className="w-4 h-4 text-[#DC2626] shrink-0" />
+                    <span className="text-[13px] font-medium text-[#B91C1C]">
                       Lý do từ chối
                     </span>
                   </div>
-                  <p className="text-[13px] leading-relaxed text-red-900">
-                    {selectedData.approvalNote || '—'}
+                  <p className="text-[13px] leading-relaxed text-[#020817]">
+                    {selectedData.approvalNote || '-'}
                   </p>
                 </div>
               )}
@@ -2304,34 +2201,34 @@ export function OpenDataPublishedListPage() {
                 const meta = getRecordMetadataConfig(selectedData);
                 const dbName = WAREHOUSE_DATABASES.find(db => db.id === meta.dbId)?.name || meta.dbId;
                 return (
-                  <section className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
-                    <div className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center gap-2">
-                      <Database className="w-4 h-4 text-white" />
-                      <h4 className="text-[13px] text-white">Cấu hình nguồn dữ liệu</h4>
-                    </div>
-                    <div className="p-4 space-y-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="p-3 bg-white rounded-lg border border-slate-200">
-                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Kho dữ liệu</div>
-                          <div className="text-[13px] text-black flex items-center gap-1.5">
-                            <Database className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            {dbName || '—'}
+                  <section className={GROUP_CARD}>
+                    <h4 className={SECTION_TITLE}>
+                      <Database className="w-4 h-4 text-blue-600" />
+                      Cấu hình nguồn dữ liệu
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                          <div className={`${FIELD_LABEL} mb-1`}>Kho dữ liệu</div>
+                          <div className={`${FIELD_VALUE} flex items-center gap-1.5`}>
+                            <Database className="w-4 h-4 text-blue-600 shrink-0" />
+                            {dbName || '-'}
                           </div>
                         </div>
-                        <div className="p-3 bg-white rounded-lg border border-slate-200">
-                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-1">Bảng dữ liệu chính</div>
-                          <div className="text-[13px] text-black font-mono">{meta.mainTable || '—'}</div>
+                        <div>
+                          <div className={`${FIELD_LABEL} mb-1`}>Bảng dữ liệu chính</div>
+                          <div className={FIELD_VALUE}>{meta.mainTable || '-'}</div>
                         </div>
                       </div>
 
                       {meta.joinTables.length > 0 && (
                         <div>
-                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-2">Bảng liên kết (Join)</div>
+                          <div className={`${FIELD_LABEL} mb-2`}>Bảng liên kết (Join)</div>
                           <div className="space-y-1.5">
                             {meta.joinTables.map((jt, idx) => (
-                              <div key={idx} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between text-[13px] text-black">
-                                <span className="font-mono">{jt.tableId} <span className="text-slate-400">({jt.alias})</span></span>
-                                <span className="text-black">{jt.joinType} ON {jt.joinColA} = {jt.joinColB}</span>
+                              <div key={idx} className="bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 flex items-center justify-between gap-4 text-[13px] text-[#020817]">
+                                <span>{jt.tableId} <span className="text-[#64748B]">({jt.alias})</span></span>
+                                <span>{jt.joinType} ON {jt.joinColA} = {jt.joinColB}</span>
                               </div>
                             ))}
                           </div>
@@ -2340,37 +2237,29 @@ export function OpenDataPublishedListPage() {
 
                       {meta.dataFields.length > 0 && (
                         <div>
-                          <div className="text-[13px] font-semibold text-black uppercase tracking-wider mb-2">Trường dữ liệu chia sẻ ({meta.dataFields.filter((f: any) => f.shared).length}/{meta.dataFields.length})</div>
-                          <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-                            <table className="w-full text-left text-[13px] border-collapse">
-                              <thead>
-                                <tr className="bg-slate-50 text-black border-b border-slate-200">
-                                  <th className="px-3 py-2 text-[13px] uppercase">Trường gốc</th>
-                                  <th className="px-3 py-2 text-[13px] uppercase">Bảng nguồn</th>
-                                  <th className="px-3 py-2 text-[13px] uppercase">Tên trường (API)</th>
-                                  <th className="px-3 py-2 text-[13px] uppercase">Kiểu dữ liệu</th>
-                                  <th className="px-3 py-2 text-[13px] uppercase text-center">Che dấu</th>
+                          <div className={`${FIELD_LABEL} mb-2`}>Trường dữ liệu chia sẻ ({meta.dataFields.filter((f: any) => f.shared).length}/{meta.dataFields.length})</div>
+                          <div className={SUB_TABLE_WRAP}>
+                            <table className={TABLE_CLS}>
+                              <thead className="bg-[#F8FAFC]">
+                                <tr className="h-[42px] border-b border-[#E0E0E0]">
+                                  <th className={SUB_TH}>Trường gốc</th>
+                                  <th className={SUB_TH}>Bảng nguồn</th>
+                                  <th className={SUB_TH}>Tên trường (API)</th>
+                                  <th className={SUB_TH}>Kiểu dữ liệu</th>
+                                  <th className={SUB_TH}>Che dấu</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100 text-black">
+                              <tbody>
                                 {meta.dataFields.filter((f: any) => f.shared).map((df: any, idx: number) => (
-                                  <tr key={idx} className="hover:bg-slate-50">
-                                    <td className="px-3 py-2 font-mono text-[13px]">{df.column}</td>
-                                    <td className="px-3 py-2 text-[13px]">
-                                      <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[13px] font-mono text-slate-600">{df.tableId}</span>
+                                  <tr key={idx} className={SUB_TR}>
+                                    <td className={`${SUB_TD} max-w-[220px]`}><TruncatedText text={df.column || '-'} /></td>
+                                    <td className={`${SUB_TD} max-w-[220px]`}><TruncatedText text={df.tableId || '-'} /></td>
+                                    <td className={`${SUB_TD} max-w-[220px]`}><TruncatedText text={df.apiField || '-'} /></td>
+                                    <td className={SUB_TD}>
+                                      <Badge label={df.dataType} variant={df.dataType === 'date' ? 'purple' : df.dataType === 'number' ? 'blue' : 'slate'} />
                                     </td>
-                                    <td className="px-3 py-2 font-mono text-[13px]">{df.apiField}</td>
-                                    <td className="px-3 py-2 text-[13px]">
-                                      <span className={`px-1.5 py-0.5 rounded border text-[13px] ${
-                                        df.dataType === 'date' ? 'bg-purple-50 text-purple-600 border-purple-200' :
-                                        df.dataType === 'number' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                        'bg-slate-50 text-slate-600 border-slate-200'
-                                      }`}>{df.dataType}</span>
-                                    </td>
-                                    <td className="px-3 py-2 text-center text-[13px]">
-                                      <span className={`px-1.5 py-0.5 rounded border text-[13px] ${df.masked ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
-                                        {df.masked ? 'Có' : 'Không'}
-                                      </span>
+                                    <td className={SUB_TD}>
+                                      <Badge label={df.masked ? 'Có' : 'Không'} variant={df.masked ? 'red' : 'green'} />
                                     </td>
                                   </tr>
                                 ))}
@@ -2385,10 +2274,11 @@ export function OpenDataPublishedListPage() {
               })()}
             </div>
 
-            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-[13px]"
+                className={BTN_OUTLINE}
               >
                 Đóng
               </button>
@@ -2397,75 +2287,71 @@ export function OpenDataPublishedListPage() {
         </div>
       )}
 
-      {/* REQUEST MODAL */}
+      {/* REQUEST MODAL (compomennt.md 5.4) */}
       {showRequestModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-5xl`}>
+            <div className={MODAL_HEADER}>
               <div className="flex items-center gap-2">
                 {editingItem ? <Edit2 className="w-5 h-5 text-blue-600" /> : <Send className="w-5 h-5 text-blue-600" />}
-                <h3 className="text-lg font-bold text-slate-900">{editingItem ? 'Chỉnh sửa yêu cầu công bố' : 'Gửi yêu cầu công bố dữ liệu'}</h3>
+                <h3 className={MODAL_TITLE}>{editingItem ? 'Chỉnh sửa yêu cầu công bố' : 'Gửi yêu cầu công bố dữ liệu'}</h3>
               </div>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowRequestModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors p-1 hover:bg-slate-100 rounded-lg"
+                className={BTN_GHOST_ICON}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            {/* TAB SELECTOR */}
-            <div className="px-6 border-b border-slate-200 bg-white flex gap-6 z-10 shrink-0">
+
+            {/* TAB SELECTOR (compomennt.md 5.9) */}
+            <div className="px-6 border-b border-[#E2E8F0] bg-white flex gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setRequestModalTab('general')}
-                className={`px-4 py-3 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${
-                  requestModalTab === 'general'
-                    ? 'border-blue-600 text-blue-700 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
+                className={tabClass(requestModalTab === 'general')}
               >
                 Thông tin chung
               </button>
               <button
                 type="button"
                 onClick={() => setRequestModalTab('settings')}
-                className={`px-4 py-3 text-[13px] font-medium transition-all border-b-2 cursor-pointer ${
-                  requestModalTab === 'settings'
-                    ? 'border-blue-600 text-blue-700 font-semibold'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
+                className={tabClass(requestModalTab === 'settings')}
               >
                 Thiết lập dữ liệu
               </button>
             </div>
-            
-            <form onSubmit={handleRequestSubmit} className="p-6 space-y-6 flex-1 text-[13px]">
+
+            <form onSubmit={handleRequestSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className={`${MODAL_BODY} space-y-6 text-[13px]`}>
               {requestModalTab === 'general' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-200">
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-slate-700 mb-1">
-                    Tên tập dữ liệu <span className="text-red-500">*</span>
+                <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-200">
+                <div className="col-span-2">
+                  <label className={LABEL_CLS}>
+                    Tên tập dữ liệu <span className={REQUIRED_MARK}>*</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Nhập tên tập dữ liệu công bố..."
                     value={requestFileName}
                     onChange={(e) => setRequestFileName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-slate-700 mb-1">
-                    Danh mục dữ liệu mở <span className="text-red-500">*</span>
+                <div className="col-span-2">
+                  <label className={LABEL_CLS}>
+                    Danh mục dữ liệu mở <span className={REQUIRED_MARK}>*</span>
                   </label>
                   <select
+                    aria-label="Danh mục dữ liệu mở"
                     value={requestCategory}
                     onChange={(e) => {
                       const newCat = e.target.value;
                       setRequestCategory(newCat);
-                      
+
                       // Reset selected metadata if it doesn't match the new category
                       const fileConfig = CONFIGURED_METADATA_FILES.find(f => f.fileName === requestMetaFile);
                       if (fileConfig && fileConfig.categoryCode !== newCat) {
@@ -2493,7 +2379,7 @@ export function OpenDataPublishedListPage() {
                         }
                       }
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className={INPUT_CLS}
                   >
                     <option value="">-- Chọn danh mục dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(cat => (
@@ -2502,9 +2388,10 @@ export function OpenDataPublishedListPage() {
                   </select>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-slate-700 mb-1">Chọn metadata</label>
+                <div className="col-span-2">
+                  <label className={LABEL_CLS}>Chọn metadata</label>
                   <select
+                    aria-label="Chọn metadata"
                     value={requestMetaFile}
                     disabled={!requestCategory}
                     onChange={(e) => {
@@ -2552,9 +2439,7 @@ export function OpenDataPublishedListPage() {
                         setDataFields([]);
                       }
                     }}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${
-                      !requestCategory ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'border-slate-300'
-                    }`}
+                    className={INPUT_CLS}
                   >
                     <option value="">
                       {!requestCategory ? '-- Vui lòng chọn danh mục dữ liệu mở trước --' : '-- Chọn cấu hình metadata --'}
@@ -2573,43 +2458,43 @@ export function OpenDataPublishedListPage() {
                   const freqLabel: Record<string, string> = { daily: 'Theo ngày', weekly: 'Theo tuần', monthly: 'Theo tháng', quarterly: 'Theo quý', yearly: 'Theo năm' };
                   const shareFormatLabel: Record<string, string> = { excel: 'File Excel', api: 'API' };
                   return (
-                    <div className="col-span-1 md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className={`col-span-2 ${BANNER_INFO}`}>
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px]">M</span>
-                        <span className="text-blue-800 text-[13px]">Thông tin metadata đã cấu hình</span>
+                        <Info className="w-4 h-4 text-[#155DFC] shrink-0" />
+                        <span className="text-[13px] font-medium text-[#020817]">Thông tin metadata đã cấu hình</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[12px]">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px]">
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Danh mục:</span>
-                          <span className="text-slate-800">{metaCfg.categoryName}</span>
+                          <span className="text-[#64748B] shrink-0">Danh mục:</span>
+                          <span className="text-[#020817]">{metaCfg.categoryName}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Đơn vị chủ trì cung cấp:</span>
-                          <span className="text-slate-800">{metaCfg.publisher}</span>
+                          <span className="text-[#64748B] shrink-0">Đơn vị chủ trì cung cấp:</span>
+                          <span className="text-[#020817]">{metaCfg.publisher}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Giấy phép:</span>
-                          <span className="text-slate-800">{metaCfg.license}</span>
+                          <span className="text-[#64748B] shrink-0">Giấy phép:</span>
+                          <span className="text-[#020817]">{metaCfg.license}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Tần suất cập nhật:</span>
-                          <span className="text-slate-800">{metaCfg.frequency ? (freqLabel[metaCfg.frequency] || metaCfg.frequency) : '—'}</span>
+                          <span className="text-[#64748B] shrink-0">Tần suất cập nhật:</span>
+                          <span className="text-[#020817]">{metaCfg.frequency ? (freqLabel[metaCfg.frequency] || metaCfg.frequency) : '—'}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Bảng chính:</span>
-                          <span className="text-slate-800 font-mono">{metaCfg.mainTable || '—'}</span>
+                          <span className="text-[#64748B] shrink-0">Bảng chính:</span>
+                          <span className="text-[#020817]">{metaCfg.mainTable || '—'}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Bảng join:</span>
-                          <span className="text-slate-800 font-mono">{metaCfg.joinTableNames && metaCfg.joinTableNames.length > 0 ? metaCfg.joinTableNames.join(', ') : '—'}</span>
+                          <span className="text-[#64748B] shrink-0">Bảng join:</span>
+                          <span className="text-[#020817]">{metaCfg.joinTableNames && metaCfg.joinTableNames.length > 0 ? metaCfg.joinTableNames.join(', ') : '—'}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Định dạng chia sẻ:</span>
-                          <span className="text-blue-700">{metaCfg.shareFormat ? (shareFormatLabel[metaCfg.shareFormat] || metaCfg.shareFormat) : '—'}</span>
+                          <span className="text-[#64748B] shrink-0">Định dạng chia sẻ:</span>
+                          <span className="text-[#155DFC]">{metaCfg.shareFormat ? (shareFormatLabel[metaCfg.shareFormat] || metaCfg.shareFormat) : '—'}</span>
                         </div>
                         <div className="flex gap-1">
-                          <span className="text-slate-500 shrink-0">Từ khóa:</span>
-                          <span className="text-slate-800">{metaCfg.keywords}</span>
+                          <span className="text-[#64748B] shrink-0">Từ khóa:</span>
+                          <span className="text-[#020817]">{metaCfg.keywords}</span>
                         </div>
                       </div>
                     </div>
@@ -2617,13 +2502,14 @@ export function OpenDataPublishedListPage() {
                 })()}
 
                 <div>
-                  <label className="block text-slate-700 mb-1">
-                    Giấy phép <span className="text-red-500">*</span>
+                  <label className={LABEL_CLS}>
+                    Giấy phép <span className={REQUIRED_MARK}>*</span>
                   </label>
                   <select
+                    aria-label="Giấy phép"
                     value={requestLicense}
                     onChange={(e) => setRequestLicense(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className={INPUT_CLS}
                   >
                     <option value="Giấy phép dữ liệu mở công cộng">Giấy phép dữ liệu mở công cộng</option>
                     <option value="Giấy phép ODC-BY">Giấy phép ODC-BY</option>
@@ -2631,37 +2517,38 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-1">Từ khóa</label>
+                  <label className={LABEL_CLS}>Từ khóa</label>
                   <input
                     type="text"
                     placeholder="Ngăn cách bằng dấu phẩy, vd: luat, tgpl, tro giup"
                     value={requestKeywords}
                     onChange={(e) => setRequestKeywords(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-1">
-                    Đơn vị chủ trì cung cấp <span className="text-red-500">*</span>
+                  <label className={LABEL_CLS}>
+                    Đơn vị chủ trì cung cấp <span className={REQUIRED_MARK}>*</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Nhập tên đơn vị chủ trì cung cấp"
                     value={requestPublisher}
                     onChange={(e) => setRequestPublisher(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-1">
-                    Chủ đề <span className="text-red-500">*</span>
+                  <label className={LABEL_CLS}>
+                    Chủ đề <span className={REQUIRED_MARK}>*</span>
                   </label>
                   <select
+                    aria-label="Chủ đề"
                     value={requestTopic}
                     onChange={(e) => setRequestTopic(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className={INPUT_CLS}
                   >
                     <option value="">-- Chọn chủ đề --</option>
                     <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
@@ -2679,11 +2566,12 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-1">Tần suất cập nhật</label>
+                  <label className={LABEL_CLS}>Tần suất cập nhật</label>
                   <select
+                    aria-label="Tần suất cập nhật"
                     value={requestFrequency}
                     onChange={(e) => setRequestFrequency(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className={INPUT_CLS}
                   >
                     <option value="">-- Chọn tần suất --</option>
                     <option value="daily">Theo ngày</option>
@@ -2695,12 +2583,12 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 mb-2">
-                    Định dạng chia sẻ <span className="text-red-500">*</span>
+                  <label className={LABEL_CLS}>
+                    Định dạng chia sẻ <span className={REQUIRED_MARK}>*</span>
                   </label>
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 h-10 items-center">
                     {[{ value: 'excel', label: 'File Excel' }, { value: 'api', label: 'API' }].map(opt => (
-                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer select-none">
+                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer select-none text-[13px] text-[#020817]">
                         <input
                           type="checkbox"
                           checked={requestFormat.includes(opt.value)}
@@ -2711,34 +2599,34 @@ export function OpenDataPublishedListPage() {
                               setRequestFormat(requestFormat.filter(v => v !== opt.value));
                             }
                           }}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          className={CHECKBOX_CLS}
                         />
-                        <span className="text-slate-700">{opt.label}</span>
+                        <span>{opt.label}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-slate-700 mb-1">Thông tin mô tả</label>
+                <div className="col-span-2">
+                  <label className={LABEL_CLS}>Thông tin mô tả</label>
                   <textarea
                     rows={2}
                     placeholder="Mô tả nội dung tập dữ liệu công bố..."
                     value={requestDescription}
                     onChange={(e) => setRequestDescription(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={TEXTAREA_CLS}
                   />
                 </div>
 
-                <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
+                <div className="col-span-2 flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="requestPublishImmediately"
                     checked={requestPublishImmediately}
                     onChange={(e) => setRequestPublishImmediately(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className={CHECKBOX_CLS}
                   />
-                  <label htmlFor="requestPublishImmediately" className="text-slate-700 select-none cursor-pointer">
+                  <label htmlFor="requestPublishImmediately" className="text-[13px] text-[#020817] select-none cursor-pointer">
                     Công bố dữ liệu ngay sau khi được phê duyệt
                   </label>
                 </div>
@@ -2746,47 +2634,47 @@ export function OpenDataPublishedListPage() {
             )}
 
             {requestModalTab === 'settings' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-200">
+              <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-200">
                 {/* SOURCE CONFIG SECTION */}
-                <div className="col-span-1 md:col-span-2">
-                  <section className="bg-slate-50 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-gradient-to-r from-blue-600 to-blue-700">
-                      <h4 className="text-white flex items-center gap-2 text-[13px]">
-                        <Database className="w-4 h-4" />
+                <div className="col-span-2">
+                  <section className={GROUP_CARD}>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                      <h4 className={SECTION_TITLE.replace('mb-4', 'mb-0')}>
+                        <Database className="w-4 h-4 text-blue-600" />
                         Cấu hình nguồn dữ liệu
                       </h4>
-                      <div
-                        className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 cursor-pointer"
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={hasJoin}
+                        className="flex items-center gap-2 cursor-pointer text-[13px] text-[#020817]"
                         onClick={() => setHasJoin(!hasJoin)}
                       >
-                        <span className="text-[13px] text-white uppercase tracking-tight">Sử dụng liên kết bảng (Join)</span>
-                        <div className={`w-9 h-5 rounded-full p-0.5 transition-all duration-300 ${hasJoin ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.3)]' : 'bg-white/30'}`}>
-                          <div className={`w-4 h-4 rounded-full transition-all duration-300 shadow-sm ${hasJoin ? 'bg-blue-600 translate-x-4' : 'bg-white translate-x-0'}`}></div>
-                        </div>
-                      </div>
+                        <span>Sử dụng liên kết bảng (Join)</span>
+                        <span className={`w-9 h-5 rounded-full p-0.5 transition-colors ${hasJoin ? 'bg-blue-600' : 'bg-[#CBD5E1]'}`}>
+                          <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${hasJoin ? 'translate-x-4' : 'translate-x-0'}`}></span>
+                        </span>
+                      </button>
                     </div>
 
-                    <div className="p-4 space-y-4">
+                    <div className="space-y-4">
                       {sourceDbId && (
-                        <div className="flex items-center gap-2 text-[13px] bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
-                          <Database className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          <span className="text-black">Kho dữ liệu:</span>
-                          <span className="text-black">{WAREHOUSE_DATABASES.find(db => db.id === sourceDbId)?.name || sourceDbId}</span>
+                        <div className={`${BANNER_INFO} flex items-center gap-2 !py-2`}>
+                          <Database className="w-4 h-4 text-[#155DFC] shrink-0" />
+                          <span className="text-[#64748B]">Kho dữ liệu:</span>
+                          <span>{WAREHOUSE_DATABASES.find(db => db.id === sourceDbId)?.name || sourceDbId}</span>
                         </div>
                       )}
 
                       {/* Primary Table */}
-                      <div className="p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-300 transition-all">
-                        <label className="block text-[13px] text-black uppercase mb-2 flex items-center justify-between">
+                      <div>
+                        <label className={`${LABEL_CLS} flex items-center justify-between`}>
                           <span>Bảng dữ liệu chính</span>
-                          <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded italic">Primary Table</span>
+                          <span className="text-[12px] font-normal text-[#64748B]">Primary Table</span>
                         </label>
                         <select
-                          className={`w-full border rounded-lg px-3 py-1.5 text-[13px] text-black outline-none ${
-                            !requestMetaFile
-                              ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                              : 'bg-slate-50 border-slate-200 cursor-pointer focus:border-blue-500'
-                          }`}
+                          aria-label="Bảng dữ liệu chính"
+                          className={INPUT_CLS}
                           disabled={!requestMetaFile}
                           value={mainTable}
                           onChange={(e) => {
@@ -2802,8 +2690,8 @@ export function OpenDataPublishedListPage() {
                           ))}
                         </select>
                         {!requestMetaFile && (
-                          <div className="mt-2 text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-[12px] flex items-center gap-1.5 animate-in fade-in duration-200">
-                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          <div className={`mt-2 ${BANNER_WARN} !py-2 flex items-center gap-2 animate-in fade-in duration-200`}>
+                            <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0" />
                             <span>Vui lòng chọn cấu hình metadata tại Thông tin chung</span>
                           </div>
                         )}
@@ -2812,9 +2700,9 @@ export function OpenDataPublishedListPage() {
                       {/* Join Tables */}
                       {hasJoin && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                          <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                            <h5 className="text-[13px] text-black uppercase tracking-wider flex items-center gap-1.5">
-                              <Database className="w-3.5 h-3.5 text-blue-600" />
+                          <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-4">
+                            <h5 className="text-[13px] font-medium text-[#020817] flex items-center gap-1.5">
+                              <Database className="w-4 h-4 text-blue-600" />
                               Bảng liên kết bổ sung ({joinTables.length})
                             </h5>
                             <button
@@ -2824,41 +2712,40 @@ export function OpenDataPublishedListPage() {
                                 const newJt = { id: `join_new_${idx}_${Date.now()}`, tableId: '', alias: `t${idx + 2}`, joinType: 'LEFT JOIN', joinColA: '', joinColB: '' };
                                 setJoinTables([...joinTables, newJt]);
                               }}
-                              className="text-[13px] bg-blue-50 hover:bg-blue-100 text-black px-3 py-1.5 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer"
+                              className={BTN_OUTLINE}
                             >
-                              <Plus className="w-3.5 h-3.5 mr-1" /> Thêm bảng liên kết
+                              <Plus className="w-4 h-4" /> Thêm bảng liên kết
                             </button>
                           </div>
 
                           {joinTables.map((jt, idx) => (
-                            <div key={jt.id} className="p-4 bg-white border border-slate-200 rounded-xl relative space-y-4 hover:border-blue-300 transition-all">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newJts = joinTables.filter(j => j.id !== jt.id);
-                                  setJoinTables(newJts);
-                                  if (sourceDbId && mainTable) {
-                                    setDataFields(buildAllDataFields(sourceDbId, mainTable, newJts.map(j => j.tableId).filter(Boolean)));
-                                  }
-                                }}
-                                className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                                title="Xóa bảng liên kết"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-
-                              <div className="flex items-center gap-3">
-                                <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded">
-                                  BẢNG LIÊN KẾT #{idx + 1}
-                                </span>
-                                <span className="text-[13px] font-mono text-black">Alias: {jt.alias}</span>
+                            <div key={jt.id} className={`${GROUP_CARD} relative space-y-4`}>
+                              <div className="absolute top-3 right-3">
+                                <RowIconAction
+                                  label="Xóa bảng liên kết"
+                                  onClick={() => {
+                                    const newJts = joinTables.filter(j => j.id !== jt.id);
+                                    setJoinTables(newJts);
+                                    if (sourceDbId && mainTable) {
+                                      setDataFields(buildAllDataFields(sourceDbId, mainTable, newJts.map(j => j.tableId).filter(Boolean)));
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </RowIconAction>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="flex items-center gap-3">
+                                <Badge label={`BẢNG LIÊN KẾT #${idx + 1}`} variant="blue" />
+                                <span className="text-[13px] text-[#020817]">Alias: {jt.alias}</span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <label className="block text-[13px] text-black uppercase mb-1">Kiểu liên kết</label>
+                                  <label className={LABEL_CLS}>Kiểu liên kết</label>
                                   <select
-                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-black focus:outline-none focus:border-blue-500 cursor-pointer"
+                                    aria-label="Kiểu liên kết"
+                                    className={INPUT_CLS}
                                     value={jt.joinType}
                                     onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinType: e.target.value } : j))}
                                   >
@@ -2868,9 +2755,10 @@ export function OpenDataPublishedListPage() {
                                   </select>
                                 </div>
                                 <div>
-                                  <label className="block text-[13px] text-black uppercase mb-1">Bảng dữ liệu bổ sung</label>
+                                  <label className={LABEL_CLS}>Bảng dữ liệu bổ sung</label>
                                   <select
-                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-black focus:outline-none focus:border-blue-500 cursor-pointer"
+                                    aria-label="Bảng dữ liệu bổ sung"
+                                    className={INPUT_CLS}
                                     value={jt.tableId}
                                     onChange={(e) => {
                                       const newJts = joinTables.map(j => j.id === jt.id ? { ...j, tableId: e.target.value, joinColA: '', joinColB: '' } : j);
@@ -2892,12 +2780,13 @@ export function OpenDataPublishedListPage() {
                               </div>
 
                               {jt.tableId && (
-                                <div className="p-3 bg-blue-50/20 rounded-lg border border-blue-100 border-dashed space-y-2 animate-in fade-in zoom-in-95 duration-200">
-                                  <div className="text-[13px] text-black uppercase tracking-tight">Điều kiện liên kết (Join Condition):</div>
+                                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-dashed border-[#CBD5E1] space-y-2 animate-in fade-in zoom-in-95 duration-200">
+                                  <div className={FIELD_LABEL}>Điều kiện liên kết (Join Condition):</div>
                                   <div className="flex flex-col md:flex-row items-center gap-2">
                                     <div className="flex-1 w-full">
                                       <select
-                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[13px] font-mono text-black outline-none focus:border-blue-500 cursor-pointer"
+                                        aria-label={`Cột của ${jt.tableId}`}
+                                        className={INPUT_CLS}
                                         value={jt.joinColA}
                                         onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinColA: e.target.value } : j))}
                                       >
@@ -2907,10 +2796,11 @@ export function OpenDataPublishedListPage() {
                                         ))}
                                       </select>
                                     </div>
-                                    <div className="text-blue-600 text-xs px-2.5 py-1 bg-blue-50 rounded border border-blue-100 shadow-sm">=</div>
+                                    <div className="text-[13px] font-medium text-[#155DFC] px-2.5 py-1 bg-[#EAF3FF] rounded-lg border border-[#BFDBFE]">=</div>
                                     <div className="flex-1 w-full">
                                       <select
-                                        className="w-full bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[13px] font-mono text-black outline-none focus:border-blue-500 cursor-pointer"
+                                        aria-label="Nối với cột"
+                                        className={INPUT_CLS}
                                         value={jt.joinColB}
                                         onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinColB: e.target.value } : j))}
                                       >
@@ -2942,73 +2832,72 @@ export function OpenDataPublishedListPage() {
 
                 {/* DATA FIELDS TABLE */}
                 {dataFields.length > 0 && (
-                  <div className="col-span-1 md:col-span-2">
-                    <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                      <div className="flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50/50">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600">
-                            <FileText className="w-4 h-4" />
-                          </div>
-                          <h4 className="text-black text-[13px] font-bold">Chọn trường dữ liệu chia sẻ (Field Selection)</h4>
-                        </div>
+                  <div className="col-span-2">
+                    <section className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+                      <div className="flex justify-between items-center gap-4 px-4 py-3 border-b border-[#E2E8F0]">
+                        <h4 className={SECTION_TITLE.replace('mb-4', 'mb-0')}>
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          Chọn trường dữ liệu chia sẻ (Field Selection)
+                        </h4>
                         <div className="flex items-center gap-3">
-                          <span className="text-[13px] text-slate-500 font-medium">{dataFields.filter(f => f.shared).length}/{dataFields.length} trường được chọn</span>
+                          <span className="text-[13px] text-[#64748B]">{dataFields.filter(f => f.shared).length}/{dataFields.length} trường được chọn</span>
                           <button
                             type="button"
                             onClick={handleAddDataField}
-                            className="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg border border-blue-200 transition-all flex items-center shadow-sm cursor-pointer"
+                            className={BTN_OUTLINE}
                             title="Thêm trường dữ liệu"
                           >
-                            <Plus className="w-3.5 h-3.5 mr-1" /> Thêm trường dữ liệu
+                            <Plus className="w-4 h-4" /> Thêm trường dữ liệu
                           </button>
                         </div>
                       </div>
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm border-collapse" style={{ tableLayout: 'fixed' }}>
+                        <table className={`${TABLE_CLS} table-fixed`}>
                           <colgroup>
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '5%' }} />
-                            <col style={{ width: '20%' }} />
-                            <col style={{ width: '20%' }} />
-                            <col style={{ width: '20%' }} />
-                            <col style={{ width: '20%' }} />
-                            <col style={{ width: '6%' }} />
-                            <col style={{ width: '4%' }} />
+                            <col className="w-[7%]" />
+                            <col className="w-[5%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[15%]" />
+                            <col className="w-[7%]" />
+                            <col className="w-[6%]" />
                           </colgroup>
-                          <thead>
-                            <tr className="bg-slate-50 text-slate-500 border-b border-slate-200">
-                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center">Chia sẻ</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center">PK</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Nguồn dữ liệu (Table)</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Trường gốc (Column)</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Tên trường (API Field)</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px]">Kiểu dữ liệu</th>
-                              <th className="px-3 py-3 font-bold uppercase text-[10px] text-center">Che dấu</th>
-                              <th className="px-3 py-3 text-right">Xóa</th>
+                          <thead className="bg-[#F8FAFC]">
+                            <tr className={THEAD_ROW}>
+                              <th className={`${TH} text-center`}>Chia sẻ</th>
+                              <th className={`${TH} text-center`}>PK</th>
+                              <th className={`${TH} text-left`}>Nguồn dữ liệu (Table)</th>
+                              <th className={`${TH} text-left`}>Trường gốc (Column)</th>
+                              <th className={`${TH} text-left`}>Tên trường (API Field)</th>
+                              <th className={`${TH} text-left`}>Kiểu dữ liệu</th>
+                              <th className={`${TH} text-center`}>Che dấu</th>
+                              <th className={`${TH} text-center`}>Xóa</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                          <tbody>
                             {dataFields.map((df) => (
-                              <tr key={df.id} className={`hover:bg-slate-50/50 group transition-colors ${!df.shared ? 'opacity-50' : ''}`}>
-                                <td className="px-3 py-3 text-center">
+                              <tr key={df.id} className={`${TR} ${!df.shared ? 'opacity-50' : ''}`}>
+                                <td className={`${TD} text-center`}>
                                   <input
                                     type="checkbox"
                                     title="Chọn trường"
+                                    aria-label="Chọn trường"
                                     checked={df.shared}
                                     onChange={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, shared: !f.shared } : f))}
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer"
+                                    className={CHECKBOX_CLS}
                                   />
                                 </td>
-                                <td className="px-3 py-3 text-center">
+                                <td className={`${TD} text-center`}>
                                   <Key
-                                    className={`w-4 h-4 mx-auto cursor-pointer transition-colors ${df.isPk ? 'text-blue-600' : 'text-slate-400 hover:text-blue-500'}`}
+                                    className={`w-4 h-4 mx-auto cursor-pointer transition-colors ${df.isPk ? 'text-blue-600' : 'text-[#94A3B8] hover:text-blue-600'}`}
                                     onClick={() => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, isPk: !f.isPk } : f))}
                                   />
                                 </td>
-                                <td className="px-3 py-3 overflow-hidden">
+                                <td className={`${TD} overflow-hidden`}>
                                   <select
                                     title="Chọn bảng"
-                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-bold text-slate-700 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                    className={`${INPUT_CLS} min-w-0`}
                                     value={df.tableId || mainTable}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, tableId: e.target.value } : f))}
                                   >
@@ -3018,10 +2907,10 @@ export function OpenDataPublishedListPage() {
                                     ))}
                                   </select>
                                 </td>
-                                <td className="px-3 py-3 overflow-hidden">
+                                <td className={`${TD} overflow-hidden`}>
                                   <select
                                     title="Chọn cột nguồn"
-                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-600 outline-none cursor-pointer focus:border-blue-500 shadow-sm"
+                                    className={`${INPUT_CLS} min-w-0`}
                                     value={df.column || ''}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, column: e.target.value, apiField: e.target.value } : f))}
                                   >
@@ -3034,21 +2923,21 @@ export function OpenDataPublishedListPage() {
                                     )}
                                   </select>
                                 </td>
-                                <td className="px-3 py-3 overflow-hidden">
+                                <td className={`${TD} overflow-hidden`}>
                                   <input
                                     title="Tên trường API"
                                     aria-label="Tên trường API"
                                     type="text"
-                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 focus:border-blue-500 px-2 py-1 rounded outline-none text-xs text-slate-800 font-mono font-bold shadow-sm"
+                                    className={`${INPUT_CLS} min-w-0`}
                                     value={df.apiField}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, apiField: e.target.value } : f))}
                                     placeholder="Ví dụ: ho_ten"
                                   />
                                 </td>
-                                <td className="px-3 py-3 overflow-hidden">
+                                <td className={`${TD} overflow-hidden`}>
                                   <select
                                     title="Kiểu"
-                                    className="w-full min-w-0 bg-slate-50 border border-slate-200 px-2 py-1 rounded text-[10px] font-bold text-slate-500 outline-none uppercase cursor-pointer focus:border-blue-500 shadow-sm"
+                                    className={`${INPUT_CLS} min-w-0`}
                                     value={df.dataType}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, dataType: e.target.value } : f))}
                                   >
@@ -3058,24 +2947,20 @@ export function OpenDataPublishedListPage() {
                                     <option value="datetime">datetime</option>
                                   </select>
                                 </td>
-                                <td className="px-3 py-3 text-center">
+                                <td className={`${TD} text-center`}>
                                   <input
                                     type="checkbox"
                                     title="Masking"
-                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white w-4 h-4 cursor-pointer"
+                                    aria-label="Masking"
+                                    className={CHECKBOX_CLS}
                                     checked={df.masked || false}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, masked: e.target.checked } : f))}
                                   />
                                 </td>
-                                <td className="px-3 py-3 text-right">
-                                  <button
-                                    type="button"
-                                    onClick={() => setDataFields(dataFields.filter(f => f.id !== df.id))}
-                                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                                    title="Xóa trường"
-                                  >
+                                <td className={`${TD} text-center`}>
+                                  <RowIconAction label="Xóa trường" onClick={() => setDataFields(dataFields.filter(f => f.id !== df.id))}>
                                     <Trash2 className="w-4 h-4" />
-                                  </button>
+                                  </RowIconAction>
                                 </td>
                               </tr>
                             ))}
@@ -3089,130 +2974,125 @@ export function OpenDataPublishedListPage() {
             )}
 
             {formValidationError && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2 mb-4 animate-fade-in">
-                  <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-amber-600" />
+                <div className={`${BANNER_WARN} flex items-start gap-2 animate-fade-in`}>
+                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-[#D97706]" />
                   <div>
                     <span>Thông tin chỉnh sửa không hợp lệ so với metadata cho phép:</span>
-                    <p className="mt-1 text-xs text-amber-700">{formValidationError}</p>
+                    <p className="mt-1 text-[13px] text-[#475569]">{formValidationError}</p>
                   </div>
                 </div>
               )}
+              </div>
 
-              <div className="border-t border-slate-200 pt-4 flex items-center justify-between gap-3 bg-white">
+              <div className={MODAL_FOOTER}>
                 <button
                   type="button"
                   onClick={() => setShowRequestModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm transition-colors"
+                  className={BTN_OUTLINE}
                 >
                   Hủy
                 </button>
-                <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  disabled={!!formValidationError}
+                  className={BTN_OUTLINE}
+                >
+                  <Save className="w-4 h-4" />
+                  Lưu nháp
+                </button>
+                {requestModalTab === 'general' ? (
                   <button
                     type="button"
-                    onClick={handleSaveDraft}
-                    disabled={!!formValidationError}
-                    className={`px-4 py-2 border rounded-lg text-sm flex items-center gap-1.5 transition-colors ${
-                      formValidationError
-                        ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
-                        : 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
-                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!requestFileName) {
+                        toast.error("Vui lòng nhập tên tập dữ liệu!");
+                        return;
+                      }
+                      if (!requestCategory) {
+                        toast.error("Vui lòng chọn danh mục dữ liệu mở!");
+                        return;
+                      }
+                      if (!requestPublisher) {
+                        toast.error("Vui lòng nhập đơn vị chủ trì cung cấp!");
+                        return;
+                      }
+                      if (!requestTopic) {
+                        toast.error("Vui lòng chọn chủ đề!");
+                        return;
+                      }
+                      if (requestFormat.length === 0) {
+                        toast.error("Vui lòng chọn ít nhất một định dạng chia sẻ!");
+                        return;
+                      }
+                      setRequestModalTab('settings');
+                    }}
+                    className={BTN_PRIMARY}
                   >
-                    <Save className="w-4 h-4" />
-                    Lưu nháp
+                    Tiếp tục
+                    <ArrowRight className="w-4 h-4" />
                   </button>
-                  {requestModalTab === 'general' ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (!requestFileName) {
-                          alert("Vui lòng nhập tên tập dữ liệu!");
-                          return;
-                        }
-                        if (!requestCategory) {
-                          alert("Vui lòng chọn danh mục dữ liệu mở!");
-                          return;
-                        }
-                        if (!requestPublisher) {
-                          alert("Vui lòng nhập đơn vị chủ trì cung cấp!");
-                          return;
-                        }
-                        if (!requestTopic) {
-                          alert("Vui lòng chọn chủ đề!");
-                          return;
-                        }
-                        if (requestFormat.length === 0) {
-                          alert("Vui lòng chọn ít nhất một định dạng chia sẻ!");
-                          return;
-                        }
-                        setRequestModalTab('settings');
-                      }}
-                      className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-                    >
-                      Tiếp tục
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={!!formValidationError || (!editingItem && !mainTable && uploadType === 'file' && !validationSuccess)}
-                      className={`px-4 py-2 text-white rounded-lg text-sm flex items-center gap-2 shadow-sm transition-all ${
-                        !formValidationError && (editingItem || mainTable || uploadType === 'api' || validationSuccess)
-                          ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                          : 'bg-slate-300 cursor-not-allowed text-slate-500'
-                      }`}
-                    >
-                      <Send className="w-4 h-4" />
-                      Gửi yêu cầu
-                    </button>
-                  )}
-                </div>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!!formValidationError || (!editingItem && !mainTable && uploadType === 'file' && !validationSuccess)}
+                    className={BTN_PRIMARY}
+                  >
+                    <Send className="w-4 h-4" />
+                    Gửi yêu cầu
+                  </button>
+                )}
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* BULK REJECT MODAL */}
+      {/* BULK REJECT MODAL (compomennt.md 5.4) */}
       {showBulkRejectModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
-            <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">Từ chối nhanh</h3>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-md`}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Từ chối nhanh</h3>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowBulkRejectModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
+                className={BTN_GHOST_ICON}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-3">
-              <p className="text-[13px] text-slate-600">
+            <div className={`${MODAL_BODY} space-y-3`}>
+              <p className="text-[13px] text-[#020817]">
                 Từ chối <span className="font-medium text-blue-600">{selectedApprovalIds.length}</span> yêu cầu công bố đã chọn.
               </p>
               <div>
-                <label className="block text-[13px] text-slate-700 mb-2">Lý do từ chối <span className="text-red-500">*</span></label>
+                <label className={LABEL_CLS}>Lý do từ chối <span className={REQUIRED_MARK}>*</span></label>
                 <textarea
                   value={bulkRejectReason}
                   onChange={(e) => setBulkRejectReason(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-red-500 outline-none"
+                  className={TEXTAREA_CLS}
                   placeholder="Nhập lý do từ chối..."
                 />
               </div>
             </div>
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setShowBulkRejectModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-[13px]"
+                className={BTN_OUTLINE}
               >
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={confirmBulkReject}
                 disabled={!bulkRejectReason.trim()}
-                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-[13px] flex items-center gap-2"
+                className={BTN_DESTRUCTIVE}
               >
                 <XCircle className="w-4 h-4" />
                 Từ chối
@@ -3222,13 +3102,15 @@ export function OpenDataPublishedListPage() {
         </div>
       )}
 
-      {/* APPROVAL MODAL */}
+      {/* APPROVAL MODAL (compomennt.md 5.4) */}
       {showApprovalModal && selectedApprovalItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-lg font-bold text-slate-900">Phê duyệt yêu cầu công bố</h3>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-2xl`}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>Phê duyệt yêu cầu công bố</h3>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => {
                   setShowApprovalModal(false);
                   setShowRejectForm(false);
@@ -3236,74 +3118,75 @@ export function OpenDataPublishedListPage() {
                   setApproveOpinion('');
                   setRejectReason('');
                 }}
-                className="text-slate-400 hover:text-slate-650 p-1 hover:bg-slate-100 rounded-lg"
+                className={BTN_GHOST_ICON}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="p-6 space-y-4 flex-1 text-[13px]">
+
+            <div className={`${MODAL_BODY} space-y-4 text-[13px]`}>
               {!showApproveForm && !showRejectForm && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px]">
-                  <div className="col-span-1 md:col-span-2">
-                    <div className="text-[13px] font-semibold text-black uppercase">Tên tệp đề xuất</div>
-                    <div className="text-[13px] font-bold text-black mt-1 flex items-center gap-1.5">
-                      <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                      {selectedApprovalItem.fileName}
+                <div className={`${GROUP_CARD} grid grid-cols-2 gap-x-6 gap-y-4`}>
+                  <div className="col-span-2">
+                    <div className={`${FIELD_LABEL} mb-1`}>Tên tệp đề xuất</div>
+                    <div className={`${FIELD_VALUE} flex items-center gap-1.5`}>
+                      <FileSpreadsheet className="w-4 h-4 text-[#16A34A] shrink-0" />
+                      {selectedApprovalItem.fileName || '-'}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Danh mục mở</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.category}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Danh mục mở</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalItem.category || '-'}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Người đề xuất</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.creator}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Người đề xuất</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalItem.creator || '-'}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Đơn vị chủ trì cung cấp</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.publisher}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Đơn vị chủ trì cung cấp</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalItem.publisher || '-'}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Giấy phép</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.license}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Giấy phép</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalItem.license || '-'}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Từ khóa</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.keywords || 'N/A'}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Từ khóa</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalItem.keywords || '-'}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Tần suất cập nhật</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{getFrequencyLabel(selectedApprovalItem.frequency || 'monthly')}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Tần suất cập nhật</div>
+                    <div className={FIELD_VALUE}>{getFrequencyLabel(selectedApprovalItem.frequency || 'monthly')}</div>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-black uppercase">Chủ đề</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5">{selectedApprovalItem.topic || '—'}</div>
+                    <div className={`${FIELD_LABEL} mb-1`}>Chủ đề</div>
+                    <div className={FIELD_VALUE}>{selectedApprovalItem.topic || '-'}</div>
                   </div>
-                  <div className="col-span-1 md:col-span-2">
-                    <div className="text-[13px] font-semibold text-black uppercase">Định dạng chia sẻ</div>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedApprovalItem.format?.map((fmt, i) => (
-                        <span key={i} className="px-1.5 py-0.5 bg-blue-50 text-black border border-blue-100 rounded text-[13px] font-medium">
-                          {fmt}
-                        </span>
-                      ))}
+                  <div className="col-span-2">
+                    <div className={`${FIELD_LABEL} mb-1`}>Định dạng chia sẻ</div>
+                    <div className="flex flex-wrap gap-1">
+                      {(selectedApprovalItem.format || []).length > 0
+                        ? (selectedApprovalItem.format || []).map((fmt, i) => (
+                            <Badge key={i} label={fmt} variant="blue" />
+                          ))
+                        : <span className={FIELD_VALUE}>-</span>
+                      }
                     </div>
                   </div>
-                  <div className="col-span-1 md:col-span-2">
-                    <div className="text-[13px] font-semibold text-black uppercase">Thông tin mô tả</div>
-                    <div className="text-[13px] text-black font-medium mt-0.5 whitespace-pre-wrap">{selectedApprovalItem.description || 'Không có mô tả'}</div>
+                  <div className="col-span-2">
+                    <div className={`${FIELD_LABEL} mb-1`}>Thông tin mô tả</div>
+                    <div className={`${FIELD_VALUE} whitespace-pre-wrap`}>{selectedApprovalItem.description || 'Không có mô tả'}</div>
                   </div>
 
-                  <div className="col-span-1 md:col-span-2 flex items-center gap-2 mt-1">
+                  <div className="col-span-2 flex items-center gap-2">
                     <input
                       type="checkbox"
                       id="approvalPublishImmediately"
                       checked={selectedApprovalItem.publishImmediately || false}
                       disabled
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-not-allowed"
+                      className="w-4 h-4 accent-blue-600 rounded cursor-not-allowed"
                     />
-                    <label htmlFor="approvalPublishImmediately" className="text-slate-700 select-none cursor-not-allowed">
+                    <label htmlFor="approvalPublishImmediately" className="text-[13px] text-[#020817] select-none cursor-not-allowed">
                       Công bố dữ liệu ngay sau khi được phê duyệt
                     </label>
                   </div>
@@ -3312,12 +3195,12 @@ export function OpenDataPublishedListPage() {
 
               {/* ── Nội dung trình duyệt ── */}
               {!showApproveForm && !showRejectForm && (
-                <div className="space-y-2">
-                  <label className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700">
-                    <FileText className="w-4 h-4 text-slate-400" />
+                <div>
+                  <div className={SECTION_TITLE.replace('mb-4', 'mb-2')}>
+                    <FileText className="w-4 h-4 text-[#64748B]" />
                     Nội dung trình duyệt
-                  </label>
-                  <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] text-slate-700 min-h-[46px] whitespace-pre-wrap">
+                  </div>
+                  <div className="px-4 py-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] min-h-[46px] whitespace-pre-wrap">
                     {selectedApprovalItem.submitNote || 'Chưa cập nhật'}
                   </div>
                 </div>
@@ -3325,27 +3208,27 @@ export function OpenDataPublishedListPage() {
 
               {/* ── Ý kiến phê duyệt / Lý do từ chối ── */}
               {!showApproveForm && !showRejectForm && (selectedApprovalItem.status === 'approved' || selectedApprovalItem.status === 'rejected') && (
-                <div className={`rounded-xl border p-4 ${selectedApprovalItem.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className={selectedApprovalItem.status === 'approved' ? BANNER_SUCCESS : BANNER_DANGER}>
                   <div className="flex items-center gap-2 mb-2">
                     {selectedApprovalItem.status === 'approved'
-                      ? <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-                      : <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                      ? <CheckCircle className="w-4 h-4 text-[#16A34A] shrink-0" />
+                      : <XCircle className="w-4 h-4 text-[#DC2626] shrink-0" />
                     }
-                    <span className={`text-[11px] font-semibold uppercase tracking-wider ${selectedApprovalItem.status === 'approved' ? 'text-green-700' : 'text-red-600'}`}>
+                    <span className={`text-[13px] font-medium ${selectedApprovalItem.status === 'approved' ? 'text-[#15803D]' : 'text-[#B91C1C]'}`}>
                       {selectedApprovalItem.status === 'approved' ? 'Ý kiến phê duyệt' : 'Lý do từ chối'}
                     </span>
                   </div>
-                  <p className={`text-[13px] leading-relaxed ${selectedApprovalItem.status === 'approved' ? 'text-green-900' : 'text-red-900'}`}>
-                    {selectedApprovalItem.approvalNote || '—'}
+                  <p className="text-[13px] leading-relaxed text-[#020817]">
+                    {selectedApprovalItem.approvalNote || '-'}
                   </p>
                 </div>
               )}
 
               {showRejectForm ? (
-                <div className="space-y-4 pt-2 animate-fade-in text-[13px] text-black">
+                <div className="space-y-4 animate-fade-in text-[13px] text-[#020817]">
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                      Lý do từ chối phê duyệt <span className="text-red-500">*</span>
+                    <label className={LABEL_CLS}>
+                      Lý do từ chối phê duyệt <span className={REQUIRED_MARK}>*</span>
                     </label>
                     <textarea
                       rows={4}
@@ -3353,103 +3236,104 @@ export function OpenDataPublishedListPage() {
                       placeholder="Nhập lý do từ chối cụ thể để cán bộ chỉnh sửa..."
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 font-normal resize-none"
+                      className={`${TEXTAREA_CLS} resize-none`}
                     />
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    <div className="text-[13px] font-semibold text-slate-700 mb-2">Sau khi từ chối phê duyệt:</div>
+                  <div className={GROUP_CARD}>
+                    <div className={`${FIELD_LABEL} mb-2`}>Sau khi từ chối phê duyệt:</div>
                     <ul className="space-y-1.5">
-                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
-                        <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+                      <li className="flex items-start gap-2 text-[13px] text-[#020817]">
+                        <XCircle className="w-4 h-4 text-[#DC2626] mt-px shrink-0" />
                         Yêu cầu công bố sẽ chuyển sang trạng thái "Từ chối"
                       </li>
-                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
-                        <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+                      <li className="flex items-start gap-2 text-[13px] text-[#020817]">
+                        <XCircle className="w-4 h-4 text-[#DC2626] mt-px shrink-0" />
                         Lý do từ chối sẽ được gửi phản hồi lại cho đơn vị đề xuất
                       </li>
-                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
-                        <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+                      <li className="flex items-start gap-2 text-[13px] text-[#020817]">
+                        <XCircle className="w-4 h-4 text-[#DC2626] mt-px shrink-0" />
                         Đơn vị đề xuất có thể chỉnh sửa thông tin và gửi lại yêu cầu mới
                       </li>
                     </ul>
                   </div>
                 </div>
               ) : showApproveForm ? (
-                <div className="space-y-4 pt-2 animate-fade-in text-[13px] text-black">
+                <div className="space-y-4 animate-fade-in text-[13px] text-[#020817]">
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Ý kiến phê duyệt</label>
+                    <label className={LABEL_CLS}>Ý kiến phê duyệt</label>
                     <textarea
                       value={approveOpinion}
                       onChange={(e) => setApproveOpinion(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none font-normal"
+                      className={`${TEXTAREA_CLS} resize-none`}
                       rows={4}
                       placeholder="Nhập ý kiến phê duyệt (nếu có)... Ví dụ: Đồng ý phê duyệt và công bố dữ liệu mở theo đề xuất của đơn vị."
                     />
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    <div className="text-[13px] font-semibold text-slate-700 mb-2">Sau khi phê duyệt:</div>
+                  <div className={GROUP_CARD}>
+                    <div className={`${FIELD_LABEL} mb-2`}>Sau khi phê duyệt:</div>
                     <ul className="space-y-1.5">
-                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                      <li className="flex items-start gap-2 text-[13px] text-[#020817]">
+                        <CheckCircle className="w-4 h-4 text-[#155DFC] mt-px shrink-0" />
                         Dữ liệu sẽ được công bố trên Cổng dữ liệu mở quốc gia
                       </li>
-                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                      <li className="flex items-start gap-2 text-[13px] text-[#020817]">
+                        <CheckCircle className="w-4 h-4 text-[#155DFC] mt-px shrink-0" />
                         Dữ liệu sẽ được đồng bộ và cập nhật định kỳ theo lịch đã thiết lập
                       </li>
-                      <li className="flex items-start gap-2 text-[13px] text-slate-655 font-normal">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                      <li className="flex items-start gap-2 text-[13px] text-[#020817]">
+                        <CheckCircle className="w-4 h-4 text-[#155DFC] mt-px shrink-0" />
                         Các cơ quan, tổ chức và công dân có thể truy cập và tải xuống dữ liệu
                       </li>
                     </ul>
                   </div>
                 </div>
               ) : (
-                <div className="pt-2 space-y-3">
-                  <div className="flex border-b border-slate-200">
+                <div className="space-y-3">
+                  {/* Tab con (compomennt.md 5.9) */}
+                  <div className="flex gap-2 border-b border-[#E2E8F0]">
                     <button
                       type="button"
                       onClick={() => setApprovalPreviewTab('metadata')}
-                      className={`px-4 py-2 text-[13px] font-semibold uppercase tracking-wider border-b-2 transition-all ${approvalPreviewTab === 'metadata' ? 'border-blue-600 text-black border-blue-600' : 'border-transparent text-black hover:text-black'}`}
+                      className={tabClass(approvalPreviewTab === 'metadata')}
                     >
                       Xem metadata
                     </button>
                     <button
                       type="button"
                       onClick={() => setApprovalPreviewTab('preview')}
-                      className={`px-4 py-2 text-[13px] font-semibold uppercase tracking-wider border-b-2 transition-all ${approvalPreviewTab === 'preview' ? 'border-blue-600 text-black border-blue-600' : 'border-transparent text-black hover:text-black'}`}
+                      className={tabClass(approvalPreviewTab === 'preview')}
                     >
                       Xem trước dữ liệu dòng đầu
                     </button>
                   </div>
 
                   {approvalPreviewTab === 'metadata' ? (
-                    <div className="space-y-4 p-4 bg-slate-50 border border-slate-200 rounded-xl max-h-60 overflow-y-auto text-[13px] text-black">
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className={`${GROUP_CARD} space-y-4 max-h-60 overflow-y-auto custom-scrollbar text-[13px] text-[#020817]`}>
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                         <div>
-                          <span className="block text-[13px] font-semibold text-black uppercase">Cơ sở dữ liệu đích</span>
-                          <span className="text-[13px] font-normal text-black">
-                            {WAREHOUSE_DATABASES.find(db => db.id === getRecordMetadataConfig(selectedApprovalItem).dbId)?.name || getRecordMetadataConfig(selectedApprovalItem).dbId}
-                          </span>
+                          <div className={`${FIELD_LABEL} mb-1`}>Cơ sở dữ liệu đích</div>
+                          <div className={FIELD_VALUE}>
+                            {WAREHOUSE_DATABASES.find(db => db.id === getRecordMetadataConfig(selectedApprovalItem).dbId)?.name || getRecordMetadataConfig(selectedApprovalItem).dbId || '-'}
+                          </div>
                         </div>
                         <div>
-                          <span className="block text-[13px] font-semibold text-black uppercase">Bảng chính</span>
-                          <span className="text-[13px] font-normal text-black">
-                            {getRecordMetadataConfig(selectedApprovalItem).mainTable}
-                          </span>
+                          <div className={`${FIELD_LABEL} mb-1`}>Bảng chính</div>
+                          <div className={FIELD_VALUE}>
+                            {getRecordMetadataConfig(selectedApprovalItem).mainTable || '-'}
+                          </div>
                         </div>
                       </div>
 
                       {getRecordMetadataConfig(selectedApprovalItem).joinTables.length > 0 && (
                         <div>
-                          <span className="block text-[13px] font-semibold text-black uppercase mb-1">Bảng liên kết (Join)</span>
+                          <div className={`${FIELD_LABEL} mb-1`}>Bảng liên kết (Join)</div>
                           <div className="space-y-1.5">
                             {getRecordMetadataConfig(selectedApprovalItem).joinTables.map((jt, idx) => (
-                              <div key={idx} className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between text-[13px] text-black font-normal">
-                                <span className="font-normal text-black">{jt.tableId} ({jt.alias})</span>
-                                <span className="text-[13px] text-black font-normal">{jt.joinType} ON {jt.joinColA} = {jt.joinColB}</span>
+                              <div key={idx} className="bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 flex items-center justify-between gap-4 text-[13px] text-[#020817]">
+                                <span>{jt.tableId} ({jt.alias})</span>
+                                <span>{jt.joinType} ON {jt.joinColA} = {jt.joinColB}</span>
                               </div>
                             ))}
                           </div>
@@ -3457,29 +3341,27 @@ export function OpenDataPublishedListPage() {
                       )}
 
                       <div>
-                        <span className="block text-[13px] font-semibold text-black uppercase mb-2">Các trường thông tin đã chọn</span>
-                        <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-                          <table className="w-full text-left text-[13px] border-collapse">
-                            <thead className="bg-slate-50 text-slate-500 uppercase tracking-tight">
-                              <tr>
-                                <th className="px-3 py-2 font-semibold border-b border-slate-200 text-[13px]">Tên cột</th>
-                                <th className="px-3 py-2 font-semibold border-b border-slate-200 text-[13px]">Bảng nguồn</th>
-                                <th className="px-3 py-2 font-semibold border-b border-slate-200 text-[13px]">Kiểu dữ liệu</th>
-                                <th className="px-3 py-2 font-semibold border-b border-slate-200 text-[13px]">API Field</th>
-                                <th className="px-3 py-2 text-center font-semibold border-b border-slate-200 text-[13px]">Bảo mật (Mask)</th>
+                        <div className={`${FIELD_LABEL} mb-2`}>Các trường thông tin đã chọn</div>
+                        <div className={SUB_TABLE_WRAP}>
+                          <table className={TABLE_CLS}>
+                            <thead className="bg-[#F8FAFC]">
+                              <tr className="h-[42px] border-b border-[#E0E0E0]">
+                                <th className={SUB_TH}>Tên cột</th>
+                                <th className={SUB_TH}>Bảng nguồn</th>
+                                <th className={SUB_TH}>Kiểu dữ liệu</th>
+                                <th className={SUB_TH}>API Field</th>
+                                <th className={SUB_TH}>Bảo mật (Mask)</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 text-black">
+                            <tbody>
                               {getRecordMetadataConfig(selectedApprovalItem).dataFields.map((df, idx) => (
-                                <tr key={idx} className="hover:bg-slate-50">
-                                  <td className="px-3 py-2 font-normal text-[13px]">{df.column}</td>
-                                  <td className="px-3 py-2 text-[13px] font-normal">{df.tableId}</td>
-                                  <td className="px-3 py-2 text-[13px] font-normal">{df.dataType}</td>
-                                  <td className="px-3 py-2 font-mono text-[13px] font-normal">{df.apiField}</td>
-                                  <td className="px-3 py-2 text-center text-[13px]">
-                                    <span className={`px-2 py-0.5 rounded text-[13px] ${df.masked ? 'bg-red-50 text-black border border-red-100 font-normal' : 'bg-green-50 text-black border border-green-100 font-normal'}`}>
-                                      {df.masked ? 'Bảo mật' : 'Không'}
-                                    </span>
+                                <tr key={idx} className={SUB_TR}>
+                                  <td className={`${SUB_TD} max-w-[200px]`}><TruncatedText text={df.column || '-'} /></td>
+                                  <td className={`${SUB_TD} max-w-[200px]`}><TruncatedText text={df.tableId || '-'} /></td>
+                                  <td className={`${SUB_TD} whitespace-nowrap`}>{df.dataType || '-'}</td>
+                                  <td className={`${SUB_TD} max-w-[200px]`}><TruncatedText text={df.apiField || '-'} /></td>
+                                  <td className={SUB_TD}>
+                                    <Badge label={df.masked ? 'Bảo mật' : 'Không'} variant={df.masked ? 'red' : 'green'} />
                                   </td>
                                 </tr>
                               ))}
@@ -3497,20 +3379,20 @@ export function OpenDataPublishedListPage() {
                       ? selectedApprovalItem.previewRows
                       : fallback.rows;
                     return (
-                      <div className="border border-slate-200 rounded-lg overflow-x-auto max-h-60 text-[13px] text-black">
-                        <table className="w-full border-collapse">
-                          <thead className="bg-slate-50 text-slate-500 uppercase tracking-tight">
-                            <tr>
+                      <div className={`${SUB_TABLE_WRAP} max-h-60 overflow-y-auto custom-scrollbar`}>
+                        <table className={TABLE_CLS}>
+                          <thead className="bg-[#F8FAFC] sticky top-0">
+                            <tr className="h-[42px] border-b border-[#E0E0E0]">
                               {pHeaders.map((h, i) => (
-                                <th key={i} className="px-3 py-2 text-left font-semibold border-b border-slate-200 whitespace-nowrap text-[13px]">{h}</th>
+                                <th key={i} className={SUB_TH}>{h}</th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 text-black font-normal">
+                          <tbody>
                             {pRows.map((row, ri) => (
-                              <tr key={ri} className="hover:bg-slate-50">
+                              <tr key={ri} className={SUB_TR}>
                                 {row.map((cell, ci) => (
-                                  <td key={ci} className="px-3 py-2 whitespace-nowrap text-[13px] font-normal">{cell}</td>
+                                  <td key={ci} className={`${SUB_TD} whitespace-nowrap`}>{cell}</td>
                                 ))}
                               </tr>
                             ))}
@@ -3523,18 +3405,20 @@ export function OpenDataPublishedListPage() {
               )}
             </div>
 
-            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-4">
+            <div className={MODAL_FOOTER}>
               {!showRejectForm && !showApproveForm ? (
                 <>
                   <button
+                    type="button"
                     onClick={() => setShowRejectForm(true)}
-                    className="px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-normal text-[13px] transition-colors cursor-pointer"
+                    className={BTN_DESTRUCTIVE}
                   >
                     Từ chối duyệt
                   </button>
                   <button
+                    type="button"
                     onClick={() => { setApproveOpinion(''); setShowApproveForm(true); }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-normal text-[13px] transition-colors cursor-pointer"
+                    className={BTN_PRIMARY}
                   >
                     Phê duyệt & Công bố
                   </button>
@@ -3542,15 +3426,17 @@ export function OpenDataPublishedListPage() {
               ) : showRejectForm ? (
                 <>
                   <button
+                    type="button"
                     onClick={() => setShowRejectForm(false)}
-                    className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-normal text-[13px] transition-colors"
+                    className={BTN_OUTLINE}
                   >
                     Quay lại
                   </button>
                   <button
+                    type="button"
                     onClick={handleReject}
                     disabled={!rejectReason.trim()}
-                    className={`px-4 py-2 text-white rounded-lg font-normal text-[13px] transition-all ${rejectReason.trim() ? 'bg-red-600 hover:bg-red-700 cursor-pointer' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}
+                    className={BTN_DESTRUCTIVE}
                   >
                     Xác nhận Từ chối
                   </button>
@@ -3558,14 +3444,16 @@ export function OpenDataPublishedListPage() {
               ) : (
                 <>
                   <button
+                    type="button"
                     onClick={() => setShowApproveForm(false)}
-                    className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-normal text-[13px] transition-colors"
+                    className={BTN_OUTLINE}
                   >
                     Quay lại
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleApprove(selectedApprovalItem, approveOpinion)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-normal text-[13px] transition-colors cursor-pointer"
+                    className={BTN_PRIMARY}
                   >
                     Xác nhận Phê duyệt
                   </button>
@@ -3577,27 +3465,29 @@ export function OpenDataPublishedListPage() {
       )}
 
 
-      {/* SCHEDULE SETUP MODAL */}
+      {/* SCHEDULE SETUP MODAL (compomennt.md 5.4) */}
       {showScheduleModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
-              <h3 className="text-lg font-bold text-slate-900">{isEditingSchedule ? 'Sửa lịch công bố tự động' : 'Thêm lịch công bố tự động'}</h3>
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-2xl`}>
+            <div className={MODAL_HEADER}>
+              <h3 className={MODAL_TITLE}>{isEditingSchedule ? 'Sửa lịch công bố tự động' : 'Thêm lịch công bố tự động'}</h3>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowScheduleModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg"
+                className={BTN_GHOST_ICON}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 const matchedDataset = APPROVED_CATEGORIES.find(c => c.code === scheduleFormData.datasetId);
-                
+
                 if (scheduleFormData.frequency === 'weekly' && (!scheduleFormData.weeklyDays || scheduleFormData.weeklyDays.length === 0)) {
-                  alert('Vui lòng chọn ít nhất một thứ trong tuần!');
+                  toast.error('Vui lòng chọn ít nhất một thứ trong tuần!');
                   return;
                 }
 
@@ -3618,10 +3508,10 @@ export function OpenDataPublishedListPage() {
                     quarterlyMonth: scheduleFormData.quarterlyMonth,
                     nextRun: `06/06/2026 ${scheduleFormData.startTime}`
                   } : s));
-                  alert('Đã cập nhật lịch công bố tự động thành công!');
+                  toast.success('Đã cập nhật lịch công bố tự động thành công!');
                 } else {
                   if (!matchedDataset) {
-                    alert('Vui lòng chọn tập dữ liệu mở!');
+                    toast.error('Vui lòng chọn tập dữ liệu mở!');
                     return;
                   }
                   const newSchedule: ScheduleItem = {
@@ -3639,23 +3529,25 @@ export function OpenDataPublishedListPage() {
                     status: 'active',
                     nextRun: `06/06/2026 ${scheduleFormData.startTime}`,
                     createdBy: 'User',
-                    createdDate: new Date().toLocaleDateString('vi-VN'),
+                    createdDate: formatDateVN(new Date()),
                     weeklyDays: scheduleFormData.weeklyDays,
                     monthlyDay: scheduleFormData.monthlyDay,
                     quarterlyDay: scheduleFormData.quarterlyDay,
                     quarterlyMonth: scheduleFormData.quarterlyMonth
                   };
                   setSchedules([newSchedule, ...schedules]);
-                  alert('Đã thêm lịch công bố tự động thành công!');
+                  toast.success('Đã thêm lịch công bố tự động thành công!');
                 }
                 setShowScheduleModal(false);
               }}
-              className="p-6 space-y-4 flex-1 text-[13px]"
+              className="flex flex-col flex-1 min-h-0"
             >
+              <div className={`${MODAL_BODY} text-[13px]`}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-[13px] text-black mb-1">Tập dữ liệu áp dụng <span className="text-red-500">*</span></label>
+                  <label className={LABEL_CLS}>Tập dữ liệu áp dụng <span className={REQUIRED_MARK}>*</span></label>
                   <select
+                    aria-label="Tập dữ liệu áp dụng"
                     disabled={isEditingSchedule}
                     value={scheduleFormData.datasetId}
                     onChange={(e) => {
@@ -3664,7 +3556,7 @@ export function OpenDataPublishedListPage() {
                       const dbInfo = WAREHOUSE_DATABASES.find(db => db.id === dbId);
                       setScheduleFormData({ ...scheduleFormData, datasetId: code, dataSource: dbInfo?.name || '' });
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                    className={INPUT_CLS}
                   >
                     <option value="">-- Chọn tập dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(c => (
@@ -3674,11 +3566,12 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[13px] text-black mb-1">Tần suất <span className="text-red-500">*</span></label>
+                  <label className={LABEL_CLS}>Tần suất <span className={REQUIRED_MARK}>*</span></label>
                   <select
+                    aria-label="Tần suất"
                     value={scheduleFormData.frequency}
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, frequency: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className={INPUT_CLS}
                   >
                     <option value="daily">Hàng ngày</option>
                     <option value="weekly">Hàng tuần</option>
@@ -3688,19 +3581,20 @@ export function OpenDataPublishedListPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[13px] text-black mb-1">Giờ chạy tự động <span className="text-red-500">*</span></label>
+                  <label className={LABEL_CLS}>Giờ chạy tự động <span className={REQUIRED_MARK}>*</span></label>
                   <input
                     type="time"
                     required
+                    aria-label="Giờ chạy tự động"
                     value={scheduleFormData.startTime}
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, startTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
 
                 {scheduleFormData.frequency === 'weekly' && (
-                  <div className="col-span-2 space-y-1.5">
-                    <label className="block text-[13px] text-black">Các thứ trong tuần <span className="text-red-500">*</span></label>
+                  <div className="col-span-2">
+                    <label className={LABEL_CLS}>Các thứ trong tuần <span className={REQUIRED_MARK}>*</span></label>
                     <div className="flex flex-wrap gap-2">
                       {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'].map((day) => {
                         const isSelected = scheduleFormData.weeklyDays?.includes(day);
@@ -3708,6 +3602,7 @@ export function OpenDataPublishedListPage() {
                           <button
                             key={day}
                             type="button"
+                            aria-pressed={!!isSelected}
                             onClick={() => {
                               const currentDays = scheduleFormData.weeklyDays || [];
                               const newWeeklyDays = isSelected
@@ -3715,11 +3610,7 @@ export function OpenDataPublishedListPage() {
                                 : [...currentDays, day];
                               setScheduleFormData({ ...scheduleFormData, weeklyDays: newWeeklyDays });
                             }}
-                            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                              isSelected
-                                ? 'bg-blue-600 border-blue-600 text-white shadow-sm font-medium'
-                                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400'
-                            }`}
+                            className={isSelected ? CHIP_ACTIVE : BTN_OUTLINE}
                           >
                             {day}
                           </button>
@@ -3731,11 +3622,12 @@ export function OpenDataPublishedListPage() {
 
                 {scheduleFormData.frequency === 'monthly' && (
                   <div className="col-span-2">
-                    <label className="block text-[13px] text-black mb-1">Ngày trong tháng <span className="text-red-500">*</span></label>
+                    <label className={LABEL_CLS}>Ngày trong tháng <span className={REQUIRED_MARK}>*</span></label>
                     <select
+                      aria-label="Ngày trong tháng"
                       value={scheduleFormData.monthlyDay || 1}
                       onChange={(e) => setScheduleFormData({ ...scheduleFormData, monthlyDay: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className={INPUT_CLS}
                     >
                       {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                         <option key={day} value={day}>
@@ -3749,11 +3641,12 @@ export function OpenDataPublishedListPage() {
                 {scheduleFormData.frequency === 'quarterly' && (
                   <>
                     <div>
-                      <label className="block text-[13px] text-black mb-1">Tháng thứ mấy trong quý <span className="text-red-500">*</span></label>
+                      <label className={LABEL_CLS}>Tháng thứ mấy trong quý <span className={REQUIRED_MARK}>*</span></label>
                       <select
+                        aria-label="Tháng thứ mấy trong quý"
                         value={scheduleFormData.quarterlyMonth || 1}
                         onChange={(e) => setScheduleFormData({ ...scheduleFormData, quarterlyMonth: parseInt(e.target.value) })}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        className={INPUT_CLS}
                       >
                         <option value={1}>Tháng thứ nhất</option>
                         <option value={2}>Tháng thứ hai</option>
@@ -3761,11 +3654,12 @@ export function OpenDataPublishedListPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[13px] text-black mb-1">Ngày trong quý (1-30) <span className="text-red-500">*</span></label>
+                      <label className={LABEL_CLS}>Ngày trong quý (1-30) <span className={REQUIRED_MARK}>*</span></label>
                       <select
+                        aria-label="Ngày trong quý"
                         value={scheduleFormData.quarterlyDay || 1}
                         onChange={(e) => setScheduleFormData({ ...scheduleFormData, quarterlyDay: parseInt(e.target.value) })}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        className={INPUT_CLS}
                       >
                         {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
                           <option key={day} value={day}>
@@ -3778,17 +3672,18 @@ export function OpenDataPublishedListPage() {
                 )}
 
                 <div>
-                  <label className="block text-[13px] text-black mb-1">Ngày bắt đầu</label>
+                  <label className={LABEL_CLS}>Ngày bắt đầu</label>
                   <input
                     type="date"
+                    aria-label="Ngày bắt đầu"
                     value={scheduleFormData.startDate}
                     onChange={(e) => setScheduleFormData({ ...scheduleFormData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
 
-<div className="col-span-2">
-                  <label className="block text-[13px] text-black mb-1">Nguồn cơ sở dữ liệu hệ thống <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <label className={LABEL_CLS}>Nguồn cơ sở dữ liệu hệ thống <span className={REQUIRED_MARK}>*</span></label>
                   {scheduleFormData.datasetId ? (() => {
                     const dbId = CATEGORY_TO_DB[scheduleFormData.datasetId] || '';
                     const dbInfo = WAREHOUSE_DATABASES.find(db => db.id === dbId);
@@ -3796,41 +3691,42 @@ export function OpenDataPublishedListPage() {
                     const allTableNames = [metaFile?.mainTable, ...(metaFile?.joinTableNames || [])].filter(Boolean) as string[];
                     const allFields = buildAllDataFields(dbId, metaFile?.mainTable || '', metaFile?.joinTableNames || []);
                     return (
-                      <div className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-[13px] space-y-1.5">
+                      <div className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] text-[13px] space-y-1.5">
                         <div className="flex gap-2">
-                          <span className="text-slate-500 shrink-0 w-28">Cơ sở dữ liệu:</span>
-                          <span className="text-slate-800">{dbInfo?.name || '—'}</span>
+                          <span className="text-[#64748B] shrink-0 w-28">Cơ sở dữ liệu:</span>
+                          <span className="text-[#020817]">{dbInfo?.name || '—'}</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-slate-500 shrink-0 w-28">Bảng dữ liệu:</span>
-                          <span className="text-slate-800">{allTableNames.join(', ') || '—'}</span>
+                          <span className="text-[#64748B] shrink-0 w-28">Bảng dữ liệu:</span>
+                          <span className="text-[#020817]">{allTableNames.join(', ') || '—'}</span>
                         </div>
                         <div className="flex gap-2">
-                          <span className="text-slate-500 shrink-0 w-28">Các trường:</span>
-                          <span className="text-slate-800 break-all">{allFields.map(f => f.column).join(', ') || '—'}</span>
+                          <span className="text-[#64748B] shrink-0 w-28">Các trường:</span>
+                          <span className="text-[#020817] break-all">{allFields.map(f => f.column).join(', ') || '—'}</span>
                         </div>
                       </div>
                     );
                   })() : (
-                    <div className="w-full px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-[13px] text-slate-400 italic">
+                    <div className="w-full px-3 py-2.5 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] text-[13px] text-[#94A3B8]">
                       Chọn tập dữ liệu để xem thông tin nguồn
                     </div>
                   )}
                 </div>
 
               </div>
+              </div>
 
-              <div className="border-t border-slate-200 pt-4 flex justify-end gap-2 bg-white">
+              <div className={MODAL_FOOTER}>
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-[13px]"
+                  className={BTN_OUTLINE}
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-white rounded-lg text-[13px] transition-all bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                  className={BTN_PRIMARY}
                 >
                   Xác nhận
                 </button>
@@ -3840,28 +3736,47 @@ export function OpenDataPublishedListPage() {
         </div>
       )}
 
-      {/* DELETE SCHEDULE MODAL */}
+      {/* DELETE SCHEDULE MODAL (compomennt.md 5.4) */}
       {showDeleteScheduleModal && selectedSchedule && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Xác nhận xóa lịch</h3>
-            <p className="text-sm text-slate-600">
-              Bạn có chắc chắn muốn xóa lịch công bố tự động của tập dữ liệu <strong>{selectedSchedule.datasetName}</strong>?
-            </p>
-            <div className="flex justify-end gap-2">
+        <div className={MODAL_OVERLAY}>
+          <div className={`${MODAL_BOX} max-w-md`}>
+            <div className={MODAL_HEADER}>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[#FEF2F2] shrink-0">
+                  <Trash2 className="w-5 h-5 text-[#DC2626]" />
+                </div>
+                <h3 className={MODAL_TITLE}>Xác nhận xóa lịch</h3>
+              </div>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowDeleteScheduleModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-semibold"
+                className={BTN_GHOST_ICON}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className={MODAL_BODY}>
+              <p className="text-[13px] text-[#020817]">
+                Bạn có chắc chắn muốn xóa lịch công bố tự động của tập dữ liệu <strong className="font-medium">{selectedSchedule.datasetName}</strong>?
+              </p>
+            </div>
+            <div className={MODAL_FOOTER}>
+              <button
+                type="button"
+                onClick={() => setShowDeleteScheduleModal(false)}
+                className={BTN_OUTLINE}
               >
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setSchedules(schedules.filter(s => s.id !== selectedSchedule.id));
                   setShowDeleteScheduleModal(false);
-                  alert('Đã xóa lịch công bố tự động thành công!');
+                  toast.success('Đã xóa lịch công bố tự động thành công!');
                 }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold cursor-pointer"
+                className={BTN_DESTRUCTIVE}
               >
                 Xóa
               </button>
@@ -3870,45 +3785,47 @@ export function OpenDataPublishedListPage() {
         </div>
       )}
 
-      {/* SEND APPROVAL MODAL */}
+      {/* SEND APPROVAL MODAL — giữ cơ chế Portal + z-index, khung theo compomennt.md 5.4 */}
       {showSendApprovalModal && sendApprovalItem && createPortal(
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
-          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div className={MODAL_OVERLAY_PORTAL} style={{ zIndex: 2147483647 }}>
+          <div className={`${MODAL_BOX} max-w-lg`}>
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+            <div className={MODAL_HEADER}>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                  <Send className="w-4 h-4 text-blue-600" />
+                <div className="p-2 rounded-lg bg-[#EAF3FF] shrink-0">
+                  <Send className="w-5 h-5 text-[#155DFC]" />
                 </div>
-                <h3 className="text-[18px] font-semibold text-slate-900">Gửi duyệt yêu cầu công bố</h3>
+                <h3 className={MODAL_TITLE}>Gửi duyệt yêu cầu công bố</h3>
               </div>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowSendApprovalModal(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                className={BTN_GHOST_ICON}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Body */}
-            <div className="p-6 space-y-4">
+            <div className={`${MODAL_BODY} space-y-4`}>
               {/* Thông tin yêu cầu */}
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-1">
-                <div className="text-[12px] text-slate-500 uppercase tracking-wide font-medium">Yêu cầu công bố</div>
-                <div className="text-[13px] font-semibold text-slate-900">{sendApprovalItem.fileName}</div>
-                <div className="text-[13px] text-slate-500">{sendApprovalItem.category}</div>
-                <div className="text-[12px] text-slate-400">Người tạo: {sendApprovalItem.creator} · {sendApprovalItem.createdDate}</div>
+              <div className={`${GROUP_CARD} space-y-1`}>
+                <div className="text-[12px] text-[#64748B] font-medium">Yêu cầu công bố</div>
+                <div className="text-[13px] font-medium text-[#020817]">{sendApprovalItem.fileName}</div>
+                <div className="text-[13px] text-[#64748B]">{sendApprovalItem.category}</div>
+                <div className="text-[12px] text-[#64748B]">Người tạo: {sendApprovalItem.creator} · {sendApprovalItem.createdDate}</div>
               </div>
 
               {/* Người phê duyệt */}
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
-                  Người phê duyệt <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Người phê duyệt <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   value={sendApprovalApprover}
                   onChange={(e) => setSendApprovalApprover(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-colors bg-white"
+                  className={INPUT_CLS}
                   title="Chọn người phê duyệt"
                 >
                   <option value="">-- Chọn người phê duyệt --</option>
@@ -3922,11 +3839,11 @@ export function OpenDataPublishedListPage() {
 
               {/* Nội dung trình duyệt */}
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">Nội dung trình duyệt</label>
+                <label className={LABEL_CLS}>Nội dung trình duyệt</label>
                 <textarea
                   value={sendApprovalNote}
                   onChange={(e) => setSendApprovalNote(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-colors resize-none"
+                  className={`${TEXTAREA_CLS} resize-none`}
                   rows={4}
                   placeholder={`Nhập nội dung trình duyệt...\nVí dụ: Đề nghị Lãnh đạo xem xét phê duyệt yêu cầu công bố dữ liệu mở theo Nghị định 47/2020/NĐ-CP`}
                 />
@@ -3934,17 +3851,19 @@ export function OpenDataPublishedListPage() {
             </div>
 
             {/* Footer */}
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setShowSendApprovalModal(false)}
-                className="px-4 py-2 text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 text-[13px] font-medium transition-colors cursor-pointer"
+                className={BTN_OUTLINE}
               >
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={handleConfirmSendApproval}
                 disabled={!sendApprovalApprover}
-                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-[13px] font-medium transition-colors cursor-pointer"
+                className={BTN_PRIMARY}
               >
                 <Send className="w-4 h-4" />
                 Gửi phê duyệt
@@ -3955,29 +3874,34 @@ export function OpenDataPublishedListPage() {
         document.body
       )}
 
-      {/* SUCCESS POPUP */}
+      {/* SUCCESS POPUP — giữ cơ chế Portal + z-index, khung theo compomennt.md 5.4 */}
       {showSuccessPopup && createPortal(
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
-          <div className="bg-white rounded-xl w-full max-w-xs shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <h3 className="text-[14px] font-semibold text-slate-900">Thành công</h3>
+        <div className={MODAL_OVERLAY_PORTAL} style={{ zIndex: 2147483647 }}>
+          <div className={`${MODAL_BOX} max-w-sm`}>
+            <div className={MODAL_HEADER}>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[#F0FDF4] shrink-0">
+                  <CheckCircle className="w-5 h-5 text-[#16A34A]" />
+                </div>
+                <h3 className={MODAL_TITLE}>Thành công</h3>
               </div>
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setShowSuccessPopup(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+                className={BTN_GHOST_ICON}
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="px-5 py-4">
-              <p className="text-[13px] text-slate-600 leading-relaxed">{successPopupMessage}</p>
+            <div className={MODAL_BODY}>
+              <p className="text-[13px] text-[#020817] leading-relaxed">{successPopupMessage}</p>
             </div>
-            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setShowSuccessPopup(false)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
+                className={BTN_PRIMARY}
               >
                 Đồng ý
               </button>
@@ -3988,41 +3912,45 @@ export function OpenDataPublishedListPage() {
       )}
 
       {scheduleStatusConfirm && createPortal(
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
-          <div className="bg-white rounded-xl w-[380px] max-w-[90vw] shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-blue-600" />
-                <h3 className="text-[14px] font-semibold text-slate-900">
+        <div className={MODAL_OVERLAY_PORTAL} style={{ zIndex: 2147483647 }}>
+          <div className={`${MODAL_BOX} max-w-md`}>
+            <div className={MODAL_HEADER}>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[#EAF3FF] shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-[#155DFC]" />
+                </div>
+                <h3 className={MODAL_TITLE}>
                   {scheduleStatusConfirm.action === 'pause' ? 'Tạm dừng công bố' : 'Tiếp tục công bố'}
                 </h3>
               </div>
-              <button onClick={() => setScheduleStatusConfirm(null)} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer">
-                <X className="w-4 h-4" />
+              <button type="button" aria-label="Đóng" onClick={() => setScheduleStatusConfirm(null)} className={BTN_GHOST_ICON}>
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="px-5 py-4">
-              <p className="text-[13px] text-slate-600 leading-relaxed">
+            <div className={MODAL_BODY}>
+              <p className="text-[13px] text-[#020817] leading-relaxed">
                 {scheduleStatusConfirm.action === 'pause'
-                  ? <>Bạn có chắc chắn muốn <span className="font-medium text-blue-600">tạm dừng</span> lịch công bố tự động cho tập dữ liệu <span className="font-medium text-slate-800">"{scheduleStatusConfirm.schedule.datasetName}"</span> không?</>
-                  : <>Bạn có chắc chắn muốn <span className="font-medium text-blue-600">tiếp tục</span> lịch công bố tự động cho tập dữ liệu <span className="font-medium text-slate-800">"{scheduleStatusConfirm.schedule.datasetName}"</span> không?</>
+                  ? <>Bạn có chắc chắn muốn <span className="font-medium text-blue-600">tạm dừng</span> lịch công bố tự động cho tập dữ liệu <span className="font-medium">"{scheduleStatusConfirm.schedule.datasetName}"</span> không?</>
+                  : <>Bạn có chắc chắn muốn <span className="font-medium text-blue-600">tiếp tục</span> lịch công bố tự động cho tập dữ liệu <span className="font-medium">"{scheduleStatusConfirm.schedule.datasetName}"</span> không?</>
                 }
               </p>
             </div>
-            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+            <div className={MODAL_FOOTER}>
               <button
+                type="button"
                 onClick={() => setScheduleStatusConfirm(null)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 text-[13px] transition-colors cursor-pointer"
+                className={BTN_OUTLINE}
               >
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={() => {
                   const newStatus = scheduleStatusConfirm.action === 'pause' ? 'inactive' : 'active';
                   setSchedules(schedules.map(s => s.id === scheduleStatusConfirm.schedule.id ? { ...s, status: newStatus } : s));
                   setScheduleStatusConfirm(null);
                 }}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] transition-colors cursor-pointer"
+                className={BTN_PRIMARY}
               >
                 {scheduleStatusConfirm.action === 'pause' ? 'Tạm dừng' : 'Tiếp tục'}
               </button>

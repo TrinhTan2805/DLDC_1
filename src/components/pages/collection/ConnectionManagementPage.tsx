@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Server, Monitor, Network } from 'lucide-react';
 import { SourceSystemManagementPage } from './SourceSystemManagementPage';
 import { AgentManagementPage } from './AgentManagementPage';
 import { UnitManagementPage } from './UnitManagementPage';
+import { tabClass } from './collectionUi';
 
 export interface Unit {
   id: string;
@@ -51,41 +52,19 @@ export function ConnectionManagementPage({ activeTab: propActiveTab, onTabChange
   const [units, setUnits] = useState<Unit[]>(initialUnits);
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <div className="flex flex-col h-full bg-[#f8f9fa] min-h-screen">
-      {/* Tab Navigation */}
-      <div className="bg-white border-b border-slate-200 px-6">
-        <div className="flex items-center gap-8">
-          <button
-            onClick={() => setActiveTab('units')}
-            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-[13px] ${
-              activeTab === 'units'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
+    <div className="flex flex-col h-full bg-[#F8FAFC] min-h-screen">
+      {/* Tab Navigation (compomennt.md 5.9) */}
+      <div className="bg-white border-b border-[#E2E8F0] px-6">
+        <div className="flex items-center">
+          <button type="button" onClick={() => setActiveTab('units')} className={tabClass(activeTab === 'units')}>
             <Network className="w-4 h-4" />
             Quản lý đơn vị
           </button>
-          <button
-            onClick={() => setActiveTab('source-systems')}
-            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-[13px] ${
-              activeTab === 'source-systems'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
+          <button type="button" onClick={() => setActiveTab('source-systems')} className={tabClass(activeTab === 'source-systems')}>
             <Server className="w-4 h-4" />
             Hệ thống nguồn
           </button>
-          <button
-            onClick={() => setActiveTab('agents')}
-            className={`py-4 px-2 border-b-2 transition-all flex items-center gap-2 font-medium text-[13px] ${
-              activeTab === 'agents'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
+          <button type="button" onClick={() => setActiveTab('agents')} className={tabClass(activeTab === 'agents')}>
             <Monitor className="w-4 h-4" />
             Trạm kết nối
           </button>
@@ -102,7 +81,6 @@ export function ConnectionManagementPage({ activeTab: propActiveTab, onTabChange
           <AgentManagementPage />
         )}
       </div>
-    </div>
     </div>
   );
 }

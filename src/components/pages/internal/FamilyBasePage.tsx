@@ -77,8 +77,9 @@ export function FamilyBasePage({ mode = 'thu thập', context = 'thu thập', on
       innerSidebarItems={sidebarItems}
       activeId={selectedId}
       onSelectDataType={(id) => setSelectedId(id)}
+      stretchHeight
     >
-      <div className="mt-4">
+      <div className="mt-4 flex-1 flex flex-col min-h-0">
         <FamilyBaseModal
           isOpen={true}
           onClose={() => {}}

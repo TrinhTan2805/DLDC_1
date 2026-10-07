@@ -1,6 +1,9 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { Save, Database } from 'lucide-react';
 import { BaseModal } from '../../../../common/BaseModal';
+import { BTN_PRIMARY, BTN_OUTLINE, INPUT_CLS, LABEL_CLS, REQUIRED_MARK } from '../../../collection/collectionUi';
+
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
 
 interface RecordFormModalProps {
   isOpen: boolean;
@@ -51,15 +54,12 @@ export function RecordFormModal({ isOpen, onClose, onSave, initialData, title, e
       maxWidth="max-w-2xl"
       footer={
         <>
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 text-[13px] text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
-          >
+          <button onClick={onClose} className={BTN_OUTLINE}>
             Hủy
           </button>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-[13px] rounded-xl hover:bg-blue-700 transition-all shadow-sm cursor-pointer"
+            className={BTN_PRIMARY}
           >
             <Save className="w-4 h-4" />
             Lưu lại
@@ -67,20 +67,20 @@ export function RecordFormModal({ isOpen, onClose, onSave, initialData, title, e
         </>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         {entityName && (
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-xl text-[13px]">
-            <Database className="w-4 h-4 text-blue-500 shrink-0" />
-            <span className="text-slate-600">Danh mục:</span>
-            <span className="font-semibold text-slate-800">{entityName}</span>
-            {entityCode && <span className="text-slate-400 font-mono text-[12px]">({entityCode})</span>}
+          <div className="flex items-center gap-2 p-3 bg-[#EAF3FF] border border-[#BFDBFE] rounded-lg text-[13px] text-[#020817]">
+            <Database className="w-4 h-4 text-[#155DFC] shrink-0" />
+            <span className="text-[#475569]">Danh mục:</span>
+            <span className="font-medium">{entityName}</span>
+            {entityCode && <span className="text-[#64748B]">({entityCode})</span>}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-5">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-semibold text-slate-700">
-              Mã bản ghi <span className="text-red-500">*</span>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <label className={LABEL_CLS}>
+              Mã bản ghi <span className={REQUIRED_MARK}>*</span>
             </label>
             <input
               type="text"
@@ -88,14 +88,14 @@ export function RecordFormModal({ isOpen, onClose, onSave, initialData, title, e
               value={formData.code}
               onChange={handleChange}
               placeholder="VD: MALE, FEMALE..."
-              className={`w-full px-3 py-2.5 border rounded-xl text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white ${errorObj.code ? 'border-red-300' : 'border-slate-200'}`}
+              className={`${INPUT_CLS} ${errorObj.code ? '!border-[#DC2626]' : ''}`}
             />
-            {errorObj.code && <p className="text-[12px] text-red-600">{errorObj.code}</p>}
+            {errorObj.code && <p className="mt-1 text-[12px] text-[#DC2626]">{errorObj.code}</p>}
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-semibold text-slate-700">
-              Tên giá trị <span className="text-red-500">*</span>
+          <div>
+            <label className={LABEL_CLS}>
+              Tên giá trị <span className={REQUIRED_MARK}>*</span>
             </label>
             <input
               type="text"
@@ -103,20 +103,20 @@ export function RecordFormModal({ isOpen, onClose, onSave, initialData, title, e
               value={formData.name}
               onChange={handleChange}
               placeholder="VD: Nam, Nữ, Khác..."
-              className={`w-full px-3 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white ${errorObj.name ? 'border-red-300' : 'border-slate-200'}`}
+              className={`${INPUT_CLS} ${errorObj.name ? '!border-[#DC2626]' : ''}`}
             />
-            {errorObj.name && <p className="text-[12px] text-red-600">{errorObj.name}</p>}
+            {errorObj.name && <p className="mt-1 text-[12px] text-[#DC2626]">{errorObj.name}</p>}
           </div>
 
-          <div className="col-span-2 space-y-1.5">
-            <label className="block text-[13px] font-semibold text-slate-700">Mô tả</label>
+          <div className="col-span-2">
+            <label className={LABEL_CLS}>Mô tả</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows={3}
               placeholder="Mô tả chi tiết về giá trị bản ghi này..."
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white resize-none"
+              className={TEXTAREA_CLS}
             />
           </div>
         </div>

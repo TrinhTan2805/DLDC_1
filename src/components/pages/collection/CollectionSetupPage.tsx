@@ -12,6 +12,7 @@ import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
+import { TOOLTIP_CLS, Badge, TruncatedText, BTN_FOCUS, BTN_DISABLED, BTN_PRIMARY, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, RowIconAction, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, DateInput, formatDateVN, toLocalIsoDate, normalizeSearch, Pagination, SearchableSelect } from './collectionUi';
 
 // Định dạng dung lượng dữ liệu suy ra từ số bản ghi (dùng khi dịch vụ chưa có sẵn dataSize)
 const formatDataSize = (records: number) => {
@@ -21,98 +22,6 @@ const formatDataSize = (records: number) => {
   if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(0)} KB`;
   return `${bytes} B`;
 };
-
-// --- Thành phần theo tailieu/docs/compomennt.md ---
-
-// Tooltip chuẩn (mục 5.3.1): nền xám đậm, chữ trắng 12px/500, tối đa 480px
-const TOOLTIP_CLS = 'z-[300] max-w-[480px] bg-[#475569]/95 text-white text-[12px] font-medium px-3 py-2 rounded-lg text-left [&_svg]:!fill-[#475569] [&_svg]:!bg-[#475569]';
-
-// Badge (mục 5.8): 13px/400, padding 2×8, viền 1px, bo 16px, cao 26px
-const BADGE_TONES: Record<string, string> = {
-  // Loại nguồn
-  'Trong ngành': 'text-[#8200DB] bg-[#FAF5FF] border-[#E7E1EC]',
-  'Ngoài ngành': 'text-[#2563EB] bg-[#EFF6FF] border-[#BFDBFE]',
-  // Phương thức kết nối
-  'Cơ Sở Dữ Liệu': 'text-[#4338CA] bg-[#EEF2FF] border-[#E0E7FF]',
-  'File': 'text-[#475569] bg-[#F8FAFC] border-[#E2E8F0]',
-  'API': 'text-[#047857] bg-[#ECFDF5] border-[#D1FAE5]',
-  'API nhận (JSON)': 'text-[#C2410C] bg-[#FFF7ED] border-[#FED7AA]',
-  'API nhận (XML)': 'text-[#C2410C] bg-[#FFF7ED] border-[#FED7AA]',
-  // Trạng thái dịch vụ
-  'Hoạt động': 'text-[#15803D] bg-[#F0FDF4] border-[#DCFCE7]',
-  'Bản nháp': 'text-[#64748B] bg-[#F8FAFC] border-[#E2E8F0]',
-  'Ngưng hoạt động': 'text-[#64748B] bg-[#F8FAFC] border-[#E2E8F0]',
-  // Trạng thái dữ liệu
-  'Rỗng': 'text-[#64748B] bg-[#F8FAFC] border-[#E2E8F0]',
-  'Lỗi cập nhật': 'text-[#B91C1C] bg-[#FEF2F2] border-[#FEE2E2]',
-  'Cập nhật thành công': 'text-[#047857] bg-[#ECFDF5] border-[#D1FAE5]',
-  'Đang xử lý': 'text-[#D97706] bg-white border-[#F6B657]',
-};
-
-const Badge = ({ label }: { label: string }) => (
-  <span className={`inline-flex items-center h-[26px] px-2 py-0.5 rounded-2xl border text-[13px] font-normal whitespace-nowrap ${BADGE_TONES[label] || BADGE_TONES['Rỗng']}`}>
-    {label}
-  </span>
-);
-
-// Chữ dài: cắt 1 dòng, hover hiện tooltip đầy đủ — chỉ hiện khi chữ thực sự bị cắt (mục 5.3.1)
-const TruncatedText = ({ text, className = '', extra }: { text: string; className?: string; extra?: ReactNode }) => {
-  const ref = useRef<HTMLSpanElement | null>(null);
-  const [open, setOpen] = useState(false);
-  return (
-    <Tooltip
-      open={open}
-      onOpenChange={(next: boolean) => {
-        const el = ref.current;
-        setOpen(next && !!el && (el.scrollWidth > el.clientWidth || !!extra));
-      }}
-    >
-      <TooltipTrigger asChild>
-        <span ref={ref} className={`block truncate ${className}`}>{text}</span>
-      </TooltipTrigger>
-      <TooltipContent side="top" align="start" sideOffset={4} className={TOOLTIP_CLS}>
-        <div>{text}</div>
-        {extra && <div className="mt-1 font-normal opacity-90">{extra}</div>}
-      </TooltipContent>
-    </Tooltip>
-  );
-};
-
-// Trạng thái nút (mục 5.1): vô hiệu = nền #F1F5F9 + chữ #94A3B8, không dùng opacity
-const BTN_FOCUS = 'cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1';
-const BTN_DISABLED = 'disabled:bg-[#F1F5F9] disabled:bg-none disabled:border-[#E2E8F0] disabled:text-[#94A3B8] disabled:shadow-none disabled:cursor-not-allowed';
-const BTN_PRIMARY = `h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 text-white text-[13px] font-medium hover:bg-blue-700 transition-colors ${BTN_FOCUS} ${BTN_DISABLED}`;
-const BTN_OUTLINE = `h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg border border-[#CBD5E1] bg-white text-[#334155] text-[13px] font-medium hover:bg-[#F8FAFC] hover:border-[#94A3B8] hover:text-[#020817] transition-colors ${BTN_FOCUS} ${BTN_DISABLED}`;
-const BTN_PAGE = `h-8 min-w-8 px-3 inline-flex items-center justify-center rounded-lg border text-[13px] font-medium transition-colors ${BTN_FOCUS} ${BTN_DISABLED}`;
-const BTN_PAGE_IDLE = 'border-[#CBD5E1] bg-white text-[#334155] hover:bg-[#F8FAFC] hover:border-[#94A3B8] hover:text-[#020817]';
-const BTN_GHOST_ICON = `p-1.5 rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-[#020817] transition-colors ${BTN_FOCUS}`;
-
-// Nút icon trong cột thao tác (mục 5.3.2): 32×32, icon 16px #475569, tooltip bắt buộc
-const ROW_ICON_BTN = `w-8 h-8 inline-flex items-center justify-center rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-blue-600 data-[state=open]:bg-[#EAF3FF] data-[state=open]:text-blue-600 transition-colors ${BTN_FOCUS} disabled:text-[#CBD5E1] disabled:bg-transparent disabled:cursor-not-allowed`;
-const MENU_ITEM = 'min-h-8 px-3 py-1.5 gap-2 text-[13px] cursor-pointer focus:bg-[#F1F5F9] data-[disabled]:opacity-100 data-[disabled]:text-[#94A3B8] data-[disabled]:cursor-not-allowed';
-
-// Nút bị vô hiệu giữ nguyên vị trí, tooltip ghi lý do (bọc span vì nút disabled không nhận sự kiện hover)
-const RowIconAction = ({ label, onClick, children, disabledReason }: { label: string; onClick: () => void; children: ReactNode; disabledReason?: string }) => (
-  <Tooltip>
-    <TooltipTrigger asChild>
-      {disabledReason ? (
-        <span tabIndex={0} className="inline-flex rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
-          <button type="button" aria-label={label} className={`${ROW_ICON_BTN} pointer-events-none`} disabled>
-            {children}
-          </button>
-        </span>
-      ) : (
-        <button type="button" aria-label={label} className={ROW_ICON_BTN} onClick={onClick}>
-          {children}
-        </button>
-      )}
-    </TooltipTrigger>
-    <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>
-      <div>{label}</div>
-      {disabledReason && <div className="mt-0.5 font-normal opacity-90">{disabledReason}</div>}
-    </TooltipContent>
-  </Tooltip>
-);
 
 // --- Logic thao tác theo trạng thái dịch vụ / dữ liệu ---
 type ServiceStatus = 'active' | 'inactive' | 'draft';
@@ -221,8 +130,9 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
 
   useEffect(() => {
     if (urlId) {
+      // Dùng dữ liệu đã chuẩn hóa để trạng thái ở Xem chi tiết / Chỉnh sửa khớp với danh sách
       const service = mockCollectionServices.find(s => s.id === Number(urlId));
-      if (service) setSelectedService(service);
+      if (service) setSelectedService(normalizeService(service));
     }
   }, [urlId]);
 
@@ -253,14 +163,18 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     return {
-      start: firstDay.toISOString().split('T')[0],
-      end: lastDay.toISOString().split('T')[0]
+      start: toLocalIsoDate(firstDay),
+      end: toLocalIsoDate(lastDay)
     };
   };
 
   const defaultRange = getCurrentMonthRange();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm nút Tìm kiếm hoặc Enter (mục 5.19)
+  const EMPTY_FILTERS = { searchText: '', statusFilter: 'all', typeFilter: 'all', sourceFilter: 'all', departmentFilter: 'all', startDate: '', endDate: '' };
+  const [applied, setApplied] = useState(EMPTY_FILTERS);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -277,6 +191,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
     setTypeFilter('all');
     setStartDate('');
     setEndDate('');
+    setApplied(EMPTY_FILTERS);
     setCurrentPage(1);
   };
 
@@ -292,6 +207,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
   const filterServices = (services: any[]) => {
     return services.filter(service => {
       // Date filtering based on updatedAt
+      const { searchText, statusFilter, typeFilter, sourceFilter, departmentFilter, startDate, endDate } = applied;
       let matchesDate = true;
       if (startDate || endDate) {
         const updateDate = parseDate(service.updatedAt);
@@ -316,12 +232,15 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         (typeFilter === 'all' || service.connectionMethod === typeFilter) &&
         (sourceFilter === 'all' || service.source === sourceFilter) &&
         (departmentFilter === 'all' || service.department === departmentFilter) &&
-        (searchText === '' ||
-          service.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          service.code.toLowerCase().includes(searchText.toLowerCase()) ||
-          service.managingUnit.toLowerCase().includes(searchText.toLowerCase())
+        (normalizeSearch(searchText) === '' ||
+          [service.name, service.code, service.managingUnit].some(v => normalizeSearch(v).includes(normalizeSearch(searchText)))
         );
     });
+  };
+
+  const runSearch = () => {
+    setApplied({ searchText, statusFilter, typeFilter, sourceFilter, departmentFilter, startDate, endDate });
+    setCurrentPage(1);
   };
 
   const filteredServices = filterServices(mockServices);
@@ -338,13 +257,13 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
     console.log(`Gửi thông báo cho hệ thống ${service.name}:`, {
       code: service.code,
       status: service.statusText,
-      time: new Date().toLocaleString('vi-VN'),
+      time: formatDateVN(new Date(), true),
       message: service.status === 'success'
         ? `Kiểm tra cấu trúc thành công. Đã nhận ${service.recordsReceived} bản ghi.`
         : `Kiểm tra cấu trúc thất bại: ${service.errorDetails?.errorMessage || 'Lỗi không xác định'}`
     });
 
-    alert(`✅ Đã gửi thông báo tự động cho ${service.managingUnit}\n\nTrạng thái: ${service.statusText}\nThời gian: ${new Date().toLocaleString('vi-VN')}`);
+    alert(`✅ Đã gửi thông báo tự động cho ${service.managingUnit}\n\nTrạng thái: ${service.statusText}\nThời gian: ${formatDateVN(new Date(), true)}`);
   };
 
   // Export function for service list
@@ -382,7 +301,8 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto py-6">
+      {/* -mx-0.5 px-0.5: nới vùng cuộn 2px mỗi bên để viền focus của ô/nút sát mép không bị cắt, nội dung vẫn thẳng hàng */}
+      <div className="flex-1 overflow-auto py-6 -mx-0.5 px-0.5">
         {/* Tab: Thiết lập dịch vụ */}
         {activeTab === 'service-setup' && (
           <div className="space-y-4">
@@ -438,24 +358,26 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
             </div>
 
             {/* Filters and Actions */}
-            <div className="mb-6">
+            <div>
               {/* Row 1: Search and Buttons */}
               <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-1.5">
                   <div className="relative flex-1">
                     <input aria-label="Tìm kiếm dịch vụ"
                       type="text"
-                      placeholder="Tìm kiếm theo tên dịch vụ, hệ thống nguồn"
-                      className="w-full h-[35px] px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      placeholder="Tìm kiếm theo tên dịch vụ, mã dịch vụ, hệ thống nguồn"
+                      className={SEARCH_INPUT_CLS}
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
                     />
                   </div>
                   <button
                     type="button"
                     aria-label="Tìm kiếm"
                     title="Tìm kiếm"
-                    className={`w-10 h-10 bg-[#10B981] text-white rounded-lg hover:bg-[#059669] transition-colors flex items-center justify-center ${BTN_FOCUS} ${BTN_DISABLED}`}
+                    onClick={runSearch}
+                    className={SEARCH_BTN_CLS}
                   >
                     <Search className="w-5 h-5" />
                   </button>
@@ -463,14 +385,15 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                     type="button"
                     aria-label="Bộ lọc"
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`w-10 h-10 rounded-lg transition-colors flex items-center justify-center border ${BTN_FOCUS} ${BTN_DISABLED} ${showFilters ? 'bg-[#EAF3FF] border-[#BFDBFE] text-blue-600' : 'bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC] hover:text-[#020817]'}`}
+                    aria-expanded={showFilters}
+                    className={filterBtnClass(showFilters)}
                     title="Bộ lọc"
                   >
                     {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => navigate('/collection-setup/add')}
                     className={BTN_PRIMARY}
@@ -490,13 +413,12 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
 
               {/* Row 2: Filters (Collapsible) */}
               {showFilters && (
-                <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-6 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-                  <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+                <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
 
-                  <div className="space-y-1.5 relative z-10">
-                    <label className="text-[13px] font-medium text-[#020817]">Loại kết nối</label>
+                  <div>
+                    <label className={FILTER_LABEL}>Loại kết nối</label>
                     <select aria-label="Select box"
-                      className="w-full h-[35px] px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className={INPUT_CLS}
                       value={typeFilter}
                       onChange={(e) => setTypeFilter(e.target.value)}
                     >
@@ -509,10 +431,10 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                     </select>
                   </div>
 
-                  <div className="space-y-1.5 relative z-10">
-                    <label className="text-[13px] font-medium text-[#020817]">Nguồn dữ liệu</label>
+                  <div>
+                    <label className={FILTER_LABEL}>Nguồn dữ liệu</label>
                     <select aria-label="Select box"
-                      className="w-full h-[35px] px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className={INPUT_CLS}
                       value={sourceFilter}
                       onChange={(e) => setSourceFilter(e.target.value)}
                     >
@@ -522,29 +444,31 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                     </select>
                   </div>
 
-                  <div className="space-y-1.5 relative z-10">
-                    <label className="text-[13px] font-medium text-[#020817]">Hệ thống nguồn</label>
-                    <select aria-label="Select box"
-                      className="w-full h-[35px] px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  <div>
+                    <label className={FILTER_LABEL}>Hệ thống nguồn</label>
+                    <SearchableSelect
+                      ariaLabel="Hệ thống nguồn"
+                      searchPlaceholder="Tìm hệ thống nguồn..."
                       value={departmentFilter}
-                      onChange={(e) => setDepartmentFilter(e.target.value)}
-                    >
-                      <option value="all">Tất cả hệ thống nguồn</option>
-                      <option value="Bộ ngành ngoài">Bộ ngành ngoài</option>
-                      <option value="Cục Hành chính tư pháp">Cục Hành chính tư pháp</option>
-                      <option value="Cục Quản lý thi hành án dân sự">Cục Quản lý thi hành án dân sự</option>
-                      <option value="Cục Đăng ký giao dịch bảo đảm">Cục Đăng ký giao dịch bảo đảm</option>
-                      <option value="Cục Kiểm tra văn bản">Cục Kiểm tra văn bản</option>
-                      <option value="Cục Bổ trợ tư pháp">Cục Bổ trợ tư pháp</option>
-                      <option value="Vụ Hợp tác quốc tế">Vụ Hợp tác quốc tế</option>
-                      <option value="Cục Kế hoạch - Tài chính">Cục Kế hoạch - Tài chính</option>
-                    </select>
+                      onChange={setDepartmentFilter}
+                      options={[
+                        { value: 'all', label: 'Tất cả hệ thống nguồn' },
+                        { value: 'Bộ ngành ngoài', label: 'Bộ ngành ngoài' },
+                        { value: 'Cục Hành chính tư pháp', label: 'Cục Hành chính tư pháp' },
+                        { value: 'Cục Quản lý thi hành án dân sự', label: 'Cục Quản lý thi hành án dân sự' },
+                        { value: 'Cục Đăng ký giao dịch bảo đảm', label: 'Cục Đăng ký giao dịch bảo đảm' },
+                        { value: 'Cục Kiểm tra văn bản', label: 'Cục Kiểm tra văn bản' },
+                        { value: 'Cục Bổ trợ tư pháp', label: 'Cục Bổ trợ tư pháp' },
+                        { value: 'Vụ Hợp tác quốc tế', label: 'Vụ Hợp tác quốc tế' },
+                        { value: 'Cục Kế hoạch - Tài chính', label: 'Cục Kế hoạch - Tài chính' },
+                      ]}
+                    />
                   </div>
 
-                  <div className="space-y-1.5 relative z-10">
-                    <label className="text-[13px] font-medium text-[#020817]">Trạng thái</label>
+                  <div>
+                    <label className={FILTER_LABEL}>Trạng thái</label>
                     <select aria-label="Select box"
-                      className="w-full h-[35px] px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className={INPUT_CLS}
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -555,30 +479,14 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                     </select>
                   </div>
 
-                  <div className="space-y-1.5 relative z-10">
-                    <label className="text-[13px] font-medium text-[#020817]">Thời gian từ</label>
-                    <div className="flex items-center gap-2 bg-white h-[35px] px-3 rounded-lg border border-[#E2E8F0] focus-within:ring-2 focus-within:ring-blue-600">
-                      <input aria-label="Input field"
-                        type="date"
-                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                      />
-                      <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                    </div>
+                  <div>
+                    <label className={FILTER_LABEL}>Thời gian từ</label>
+                    <DateInput ariaLabel="Thời gian từ" value={startDate} onChange={setStartDate} max={endDate || undefined} />
                   </div>
 
-                  <div className="space-y-1.5 relative z-10">
-                    <label className="text-[13px] font-medium text-[#020817]">Thời gian đến</label>
-                    <div className="flex items-center gap-2 bg-white h-[35px] px-3 rounded-lg border border-[#E2E8F0] focus-within:ring-2 focus-within:ring-blue-600">
-                      <input aria-label="Input field"
-                        type="date"
-                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                      />
-                      <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                    </div>
+                  <div>
+                    <label className={FILTER_LABEL}>Thời gian đến</label>
+                    <DateInput ariaLabel="Thời gian đến" value={endDate} onChange={setEndDate} min={startDate || undefined} />
                   </div>
                 </div>
               )}
@@ -712,65 +620,14 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                 </table>
               </div>
               {/* Pagination */}
-              <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-600">Hiển thị</span>
-                  <select aria-label="Số bản ghi trên trang"
-                    className="h-8 px-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white text-[13px]"
-                    title="Số bản ghi trên trang"
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                  <span className="text-slate-600">bản ghi/trang</span>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <span className="text-slate-600">
-                    {filteredServices.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredServices.length)} / {filteredServices.length}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                      disabled={currentPage === 1}
-                      className={`${BTN_PAGE} ${BTN_PAGE_IDLE}`}
-                    >
-                      Trước
-                    </button>
-                    
-                    {Array.from({ length: Math.ceil(filteredServices.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        aria-current={currentPage === page ? 'page' : undefined}
-                        className={`${BTN_PAGE} ${currentPage === page ? 'bg-blue-600 border-blue-600 text-white' : BTN_PAGE_IDLE}`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={() => {
-                        const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
-                        if (currentPage < totalPages) {
-                          setCurrentPage(currentPage + 1);
-                        }
-                      }}
-                      disabled={currentPage >= Math.ceil(filteredServices.length / itemsPerPage)}
-                      className={`${BTN_PAGE} ${BTN_PAGE_IDLE}`}
-                    >
-                      Sau
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <Pagination
+                className="border-t border-[#E2E8F0]"
+                currentPage={currentPage}
+                totalItems={filteredServices.length}
+                pageSize={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setItemsPerPage}
+              />
             </div>
           </div>
         )}

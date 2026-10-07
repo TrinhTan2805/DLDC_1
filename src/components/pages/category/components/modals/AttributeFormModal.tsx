@@ -5,6 +5,7 @@ import { MasterDataAttribute, FieldDataType, MasterDataEntity } from '../../cate
 import { BaseModal } from '../../../../common/BaseModal';
 import { approvers } from '../../categoryConstants';
 import { ApprovalRequestModal } from './ApprovalRequestModal';
+import { BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL } from '../../../collection/collectionUi';
 
 interface AttributeFormModalProps {
   isOpen: boolean;
@@ -46,14 +47,14 @@ export function AttributeFormModal({
       <button
         type="button"
         onClick={onClose}
-        className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition-colors text-[13px] font-medium cursor-pointer"
+        className={BTN_OUTLINE}
       >
         Hủy
       </button>
       <button
         type="button"
         onClick={() => setShowApproval(true)}
-        className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 transition-colors text-[13px] font-medium shadow-sm cursor-pointer"
+        className={BTN_PRIMARY}
       >
         <Send className="w-4 h-4"/>
         Gửi duyệt cấu trúc
@@ -73,45 +74,45 @@ export function AttributeFormModal({
     >
       <div className="space-y-4 text-left">
         {/* Tên trường */}
-        <div className="space-y-1.5">
-          <label className="block text-[13px] font-medium text-slate-600">
-            Tên trường <span className="text-red-500">*</span>
+        <div>
+          <label className={LABEL_CLS}>
+            Tên trường <span className={REQUIRED_MARK}>*</span>
           </label>
           <input
             type="text"
             value={formData.fieldName || ''}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, fieldName: e.target.value })}
             placeholder="VD: citizen_id"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+            className={INPUT_CLS}
           />
-          <p className="text-[13px] text-slate-400 italic">Tên định danh trong cơ sở dữ liệu (không dấu, chữ thường)</p>
+          <p className="mt-1 text-[12px] text-[#64748B]">Tên định danh trong cơ sở dữ liệu (không dấu, chữ thường)</p>
         </div>
 
         {/* Tên hiển thị */}
-        <div className="space-y-1.5">
-          <label className="block text-[13px] font-medium text-slate-600">
-            Tên hiển thị <span className="text-red-500">*</span>
+        <div>
+          <label className={LABEL_CLS}>
+            Tên hiển thị <span className={REQUIRED_MARK}>*</span>
           </label>
           <input
             type="text"
             value={formData.displayName || ''}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, displayName: e.target.value })}
             placeholder="VD: Số CCCD"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+            className={INPUT_CLS}
           />
         </div>
 
         {/* Kiểu dữ liệu & Độ dài tối đa */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-slate-600">
-              Kiểu dữ liệu <span className="text-red-500">*</span>
+          <div>
+            <label className={LABEL_CLS}>
+              Kiểu dữ liệu <span className={REQUIRED_MARK}>*</span>
             </label>
             <select
               title="Kiểu dữ liệu"
               value={formData.dataType || 'string'}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, dataType: e.target.value as FieldDataType })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-800"
+              className={INPUT_CLS}
             >
               <option value="string">Chuỗi (String)</option>
               <option value="number">Số (Number)</option>
@@ -125,34 +126,34 @@ export function AttributeFormModal({
             </select>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-slate-600">Độ dài tối đa</label>
+          <div>
+            <label className={LABEL_CLS}>Độ dài tối đa</label>
             <input
               type="number"
               value={formData.length || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, length: e.target.value ? parseInt(e.target.value) : undefined })}
               placeholder="VD: 255"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+              className={INPUT_CLS}
             />
           </div>
         </div>
 
         {/* Là trường bắt buộc checkbox */}
-        <div className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <label className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+        <div className="flex items-center p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+          <label className="flex items-center gap-2 cursor-pointer text-[13px] text-[#020817]">
             <input 
               type="checkbox" 
               checked={formData.required || false} 
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, required: e.target.checked })} 
-              className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer" 
+              className="w-4 h-4 rounded accent-blue-600 cursor-pointer" 
             />
-            <span className="font-medium text-slate-800">Là trường bắt buộc</span>
+            <span className={FIELD_LABEL}>Là trường bắt buộc</span>
           </label>
         </div>
 
         {/* Cấu hình khóa (Khóa chính / Khóa ngoại) */}
-        <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
-          <label className="text-[13px] font-medium text-slate-600 shrink-0">Cấu hình khóa:</label>
+        <div className="flex items-center gap-6 p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+          <label className={`${FIELD_LABEL} shrink-0`}>Cấu hình khóa:</label>
           <div className="flex items-center gap-6">
             {[
               { value: 'primary', label: 'Khóa chính (PK)' },
@@ -160,7 +161,7 @@ export function AttributeFormModal({
             ].map((option) => {
               const isSelected = formData.keyType === option.value;
               return (
-                <label key={option.value} className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer text-[13px] text-[#020817]">
                   <input
                     type="radio"
                     name="modalKeyType"
@@ -184,7 +185,7 @@ export function AttributeFormModal({
                         });
                       }
                     }}
-                    className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 accent-blue-600 cursor-pointer"
                   />
                   <span>{option.label}</span>
                 </label>
@@ -194,14 +195,14 @@ export function AttributeFormModal({
         </div>
 
         {/* Giá trị mặc định */}
-        <div className="space-y-1.5">
-          <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
+        <div>
+          <label className={LABEL_CLS}>Giá trị mặc định</label>
           <input
             type="text"
             value={formData.defaultValue || ''}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, defaultValue: e.target.value })}
             placeholder="Để trống nếu không có"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white text-slate-800"
+            className={INPUT_CLS}
           />
         </div>
       </div>

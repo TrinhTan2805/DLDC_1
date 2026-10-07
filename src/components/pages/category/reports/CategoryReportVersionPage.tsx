@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, Eye } from 'lucide-react';
 import { MasterDataEntity } from '../categoryTypes';
 import { EntityVersionHistoryModal } from '../components/modals/EntityVersionHistoryModal';
+import { Badge, TruncatedText, RowIconAction, Pagination, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, normalizeSearch } from '../../collection/collectionUi';
 
 const reportEntities: MasterDataEntity[] = [
   {
@@ -120,160 +121,109 @@ const reportEntities: MasterDataEntity[] = [
   }
 ];
 
+// Bảng (compomennt.md 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+
 export function CategoryReportVersionPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  // Từ khóa chỉ áp dụng khi bấm Tìm kiếm hoặc Enter (compomennt.md 5.19)
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedEntity, setSelectedEntity] = useState<MasterDataEntity | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
+  const runSearch = () => {
+    setAppliedSearch(searchTerm);
+    setCurrentPageNum(1);
+  };
+
+  const keyword = normalizeSearch(appliedSearch);
   const filteredEntities = reportEntities.filter(e =>
-    e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.code.toLowerCase().includes(searchTerm.toLowerCase())
+    normalizeSearch(e.name).includes(keyword) ||
+    normalizeSearch(e.code).includes(keyword)
   );
 
   const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
-  const renderPagination = (totalItemsCount: number) => {
-    if (totalItemsCount <= 0) return null;
-    const totalPages = Math.ceil(totalItemsCount / pageSize);
-    const startItem = (currentPageNum - 1) * pageSize + 1;
-    const endItem = Math.min(currentPageNum * pageSize, totalItemsCount);
-
-    return (
-      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 font-normal">Hiển thị</span>
-          <select
-            aria-label="Select record count"
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPageNum(1);
-            }}
-            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
-          <span className="text-slate-600 font-normal">bản ghi/trang</span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600 font-normal">
-            {startItem} - {endItem} / {totalItemsCount}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
-              disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPageNum(page)}
-                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
-              disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Search Bar - form chung */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-[220px]">
-            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Từ khóa</label>
-            <input
-              type="text"
-              placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPageNum(1); }}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400 transition-all"
-            />
-          </div>
-          <button
-            type="button"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
-            title="Tìm kiếm"
-          >
-            <Search className="w-4 h-4" />
-            Tìm kiếm
-          </button>
+    <div className="space-y-4">
+      {/* Search Bar (compomennt.md 5.19) */}
+      <div className="flex items-center gap-1.5">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            aria-label="Tìm kiếm danh mục"
+            placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+            className={SEARCH_INPUT_CLS}
+          />
         </div>
+        <button
+          type="button"
+          aria-label="Tìm kiếm"
+          title="Tìm kiếm"
+          onClick={runSearch}
+          className={SEARCH_BTN_CLS}
+        >
+          <Search className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Grid Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      {/* Grid Table (compomennt.md 5.3) */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-16">STT</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên danh mục</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Phiên bản</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày thay đổi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Ngày hiệu lực</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Người thay đổi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700">Nội dung thay đổi</th>
-                <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-28">Thao tác</th>
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-[#F8FAFC]">
+              <tr className="h-[42px]">
+                <th className={`${TH} text-center w-12`}>STT</th>
+                <th className={`${TH} text-left min-w-[220px]`}>Tên danh mục</th>
+                <th className={`${TH} text-left w-px`}>Phiên bản</th>
+                <th className={`${TH} text-left w-px`}>Ngày thay đổi</th>
+                <th className={`${TH} text-left w-px`}>Ngày hiệu lực</th>
+                <th className={`${TH} text-left w-px`}>Người thay đổi</th>
+                <th className={`${TH} text-left`}>Nội dung thay đổi</th>
+                <th className={`${TH} text-center w-px`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody>
               {paginatedEntities.length > 0 ? (
                 paginatedEntities.map((entity, index) => (
-                  <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                    <td className="px-6 py-4 text-slate-500 text-[13px] font-normal text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                    <td className="px-6 py-4 text-slate-900 text-[13px] font-medium hover:text-blue-600 transition-colors">
-                      {entity.name}
+                  <tr key={entity.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <td className={`${TD} text-center whitespace-nowrap`}>{(currentPageNum - 1) * pageSize + index + 1}</td>
+                    <td className={`${TD} text-left max-w-[360px]`}>
+                      <TruncatedText text={entity.name} />
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="px-2.5 py-0.5 bg-green-50 text-green-700 border border-green-100 rounded-full text-[12px] font-semibold">
-                        v{entity.version}.0
-                      </span>
+                    <td className={`${TD} text-left`}>
+                      <Badge label={`v${entity.version}.0`} variant="green" />
                     </td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.updatedDate}</td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.effectiveDate || '--'}</td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.updatedBy || 'Nguyễn Văn A'}</td>
-                    <td className="px-6 py-4 text-slate-700 text-[13px] font-normal">{entity.changeDescription || '--'}</td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => {
-                          setSelectedEntity(entity);
-                          setShowHistoryModal(true);
-                        }}
-                        className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                        title="Xem chi tiết"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{entity.updatedDate}</td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{entity.effectiveDate || '--'}</td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>{entity.updatedBy || 'Nguyễn Văn A'}</td>
+                    <td className={`${TD} text-left max-w-[360px]`}>
+                      <TruncatedText text={entity.changeDescription || '--'} />
+                    </td>
+                    <td className={`${TD} text-center`}>
+                      <div className="flex items-center justify-center">
+                        <RowIconAction
+                          label="Xem chi tiết"
+                          onClick={() => {
+                            setSelectedEntity(entity);
+                            setShowHistoryModal(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </RowIconAction>
+                      </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={8} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>
@@ -281,7 +231,17 @@ export function CategoryReportVersionPage() {
             </tbody>
           </table>
         </div>
-        {renderPagination(filteredEntities.length)}
+        {filteredEntities.length > 0 && (
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPageNum}
+            totalItems={filteredEntities.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPageNum}
+            onPageSizeChange={setPageSize}
+            pageSizeOptions={[10, 20, 50]}
+          />
+        )}
       </div>
 
       {/* Entity Version History Modal */}

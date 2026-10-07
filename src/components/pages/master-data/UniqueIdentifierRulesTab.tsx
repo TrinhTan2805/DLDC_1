@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, Hash, ChevronDown, Check, AlertCircle, Send, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Hash, ChevronDown, Check, AlertCircle, Send } from 'lucide-react';
+import { toast } from 'sonner';
 import { BaseModal } from '../../common/BaseModal';
+import {
+  Badge, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, INPUT_CLS, LABEL_CLS, REQUIRED_MARK,
+  FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS,
+} from '../collection/collectionUi';
 
 // Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
 const SHOW_EDIT_DELETE_ACTIONS = false;
@@ -101,6 +106,13 @@ export const buildCode = (cfg: PreviewInput, number: number) => {
   return [cfg.prefix, padded, cfg.suffix].filter(Boolean).join(sep);
 };
 
+// Thẻ nhóm (mục 5.6) và tiêu đề nhóm 14px/500
+const GROUP_CARD = 'rounded-2xl border border-[#E2E8F0] bg-white p-4 space-y-4';
+const GROUP_TITLE = 'text-[14px] font-medium text-[#020817]';
+// Ô xem trước mã: chữ thường 13px #020817 trên nền #F8FAFC (không font-mono)
+const CODE_BOX = 'inline-flex items-center px-2 py-0.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-[13px] text-[#020817]';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
+
 export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [rules, setRules] = useState<IdentifierRule[]>(mockIdentifierRules);
 
@@ -149,6 +161,9 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
   const [selectedApprover, setSelectedApprover] = useState('');
   const [approvalNote, setApprovalNote] = useState('');
 
+  // Xác nhận xóa (thay confirm() của trình duyệt)
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const handleOpenAdd = () => {
     setEditingRule(null);
     setFormData({ prefix: '', suffix: '', separator: '-', digits: 6, startFrom: 1, increment: 1, checkDuplicate: true });
@@ -176,7 +191,7 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
 
   const handleSubmit = () => {
     if (!formData.prefix.trim()) {
-      alert('Vui lòng nhập tiền tố (prefix)');
+      toast.error('Vui lòng nhập tiền tố (prefix)');
       return;
     }
 
@@ -217,20 +232,24 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
 
   const handleConfirmApprove = () => {
     if (!approvalRule || !selectedApprover) return;
-    alert('Đã gửi phê duyệt quy tắc định danh thành công!');
+    toast.success('Đã gửi phê duyệt quy tắc định danh thành công!');
     handleCloseApprovalModal();
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa quy tắc định danh này? Điều này có thể ảnh hưởng đến dữ liệu đã tạo.')) {
-      setRules(rules.filter(rule => rule.id !== id));
-    }
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteId) return;
+    setRules(rules.filter(rule => rule.id !== deleteId));
+    setDeleteId(null);
   };
 
   const getStatusBadge = (status: RuleStatus) => {
     return status === 'active'
-      ? { label: 'Hoạt động', className: 'bg-green-100 text-green-700' }
-      : { label: 'Không hoạt động', className: 'bg-slate-100 text-slate-700' };
+      ? { label: 'Hoạt động', variant: 'green' }
+      : { label: 'Không hoạt động', variant: 'slate' };
   };
 
   const formSep = formData.separator === 'none' ? '' : formData.separator;
@@ -240,52 +259,48 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-[18px] font-bold text-slate-900">Thiết lập quy tắc định danh duy nhất</h2>
+        <h2 className="text-[16px] font-semibold text-[#020817] leading-6">Thiết lập quy tắc định danh duy nhất</h2>
       </div>
 
       {/* Entity Filter */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <label className="block text-[13px] text-slate-700 mb-2">
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4">
+        <label className={LABEL_CLS}>
           Xem theo thực thể dữ liệu chủ
         </label>
         <div ref={comboboxRef} className="relative">
           <button
             type="button"
-            className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left text-[13px]"
+            className={`${INPUT_CLS} text-left flex items-center justify-between gap-2 cursor-pointer`}
             onClick={() => setComboboxOpen(!comboboxOpen)}
+            aria-expanded={comboboxOpen}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                {selectedFilterEntityData ? (
-                  <div>
-                    <span className="text-[13px] text-slate-900">{selectedFilterEntityData.code}</span>
-                    <span className="text-[13px] text-slate-600"> - {selectedFilterEntityData.name}</span>
-                  </div>
-                ) : (
-                  <span className="text-[13px] text-slate-500">Chọn thực thể dữ liệu chủ...</span>
-                )}
-              </div>
-              <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${comboboxOpen ? 'rotate-180' : ''}`} />
-            </div>
+            <span className="truncate">
+              {selectedFilterEntityData ? (
+                <>
+                  <span className="text-[#020817]">{selectedFilterEntityData.code}</span>
+                  <span className="text-[#64748B]"> - {selectedFilterEntityData.name}</span>
+                </>
+              ) : (
+                <span className="text-[#94A3B8]">Chọn thực thể dữ liệu chủ...</span>
+              )}
+            </span>
+            <ChevronDown className={`w-4 h-4 text-[#64748B] shrink-0 transition-transform ${comboboxOpen ? 'rotate-180' : ''}`} />
           </button>
           {comboboxOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg max-h-64 overflow-hidden flex flex-col">
-              <div className="p-2 border-b border-slate-200">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={comboboxSearch}
-                    onChange={(e) => setComboboxSearch(e.target.value)}
-                    placeholder="Tìm kiếm theo mã hoặc tên..."
-                    className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    autoFocus
-                  />
-                </div>
+            <div className="absolute z-10 mt-1 w-full bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-64 overflow-hidden flex flex-col">
+              <div className="p-2 border-b border-[#E2E8F0]">
+                <input
+                  type="text"
+                  value={comboboxSearch}
+                  onChange={(e) => setComboboxSearch(e.target.value)}
+                  placeholder="Tìm kiếm theo mã hoặc tên..."
+                  className={SEARCH_INPUT_CLS}
+                  autoFocus
+                />
               </div>
-              <ul className="overflow-y-auto max-h-52">
+              <ul className="overflow-y-auto max-h-52 custom-scrollbar">
                 {filteredEntities.length === 0 ? (
-                  <li className="px-4 py-8 text-center text-[13px] text-slate-500">
+                  <li className="px-4 py-8 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy thực thể phù hợp
                   </li>
                 ) : (
@@ -293,20 +308,20 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
                     <li key={entity.id}>
                       <button
                         type="button"
-                        className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 transition-colors ${selectedEntityFilter === entity.id ? 'bg-blue-50' : ''}`}
+                        className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-[#F8FAFC] transition-colors cursor-pointer ${selectedEntityFilter === entity.id ? 'bg-[#EAF3FF]' : ''}`}
                         onClick={() => {
                           setSelectedEntityFilter(entity.id);
                           setComboboxOpen(false);
                           setComboboxSearch('');
                         }}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-[13px] text-slate-900">{entity.code}</span>
-                            <span className="text-[13px] text-slate-600"> - {entity.name}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 truncate">
+                            <span className="text-[#020817]">{entity.code}</span>
+                            <span className="text-[#64748B]"> - {entity.name}</span>
                           </div>
                           {selectedEntityFilter === entity.id && (
-                            <Check className="w-4 h-4 text-blue-600" />
+                            <Check className="w-4 h-4 text-blue-600 shrink-0" />
                           )}
                         </div>
                       </button>
@@ -321,23 +336,20 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
 
       {/* Nội dung theo thực thể đã chọn */}
       {!selectedEntityFilter ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center">
-          <Hash className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-[13px] text-slate-500">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl py-16 px-4 text-center">
+          <Hash className="w-12 h-12 text-[#CBD5E1] mx-auto mb-3" />
+          <p className="text-[13px] text-[#64748B]">
             Vui lòng chọn thực thể dữ liệu chủ để xem quy tắc định danh duy nhất
           </p>
         </div>
       ) : !currentRule ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center">
-          <Hash className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-[13px] text-slate-500 mb-4">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl py-16 px-4 text-center">
+          <Hash className="w-12 h-12 text-[#CBD5E1] mx-auto mb-3" />
+          <p className="text-[13px] text-[#64748B] mb-4">
             Chưa cấu hình quy tắc định danh duy nhất nào
           </p>
           {!readOnly && (
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
-            >
+            <button onClick={handleOpenAdd} className={BTN_PRIMARY}>
               <Plus className="w-4 h-4" />
               Thêm quy tắc định danh
             </button>
@@ -346,31 +358,23 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
       ) : (
         <div className="space-y-4">
           {/* Thanh tóm tắt quy tắc + thao tác */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-[13px] font-semibold text-slate-900">Quy tắc định danh: {currentRule.entityName}</p>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] ${getStatusBadge(currentRule.status).className}`}>
-                  {getStatusBadge(currentRule.status).label}
-                </span>
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-[14px] font-medium text-[#020817]">Quy tắc định danh: {currentRule.entityName}</p>
+                <Badge label={getStatusBadge(currentRule.status).label} variant={getStatusBadge(currentRule.status).variant} />
               </div>
-              <p className="text-[12px] text-slate-500 mt-1">
-                Đã tạo {currentRule.totalGenerated.toLocaleString()} mã định danh
+              <p className="text-[13px] text-[#64748B] mt-1">
+                Đã tạo <span className="tabular-nums">{currentRule.totalGenerated.toLocaleString()}</span> mã định danh
               </p>
             </div>
             {!readOnly && SHOW_EDIT_DELETE_ACTIONS && (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => handleOpenEdit(currentRule)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-lg text-[13px] font-medium transition-colors"
-              >
+              <button onClick={() => handleOpenEdit(currentRule)} className={BTN_OUTLINE}>
                 <Edit className="w-4 h-4" />
                 Chỉnh sửa
               </button>
-              <button
-                onClick={() => handleDelete(currentRule.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg text-[13px] font-medium transition-colors"
-              >
+              <button onClick={() => handleDelete(currentRule.id)} className={`${BTN_OUTLINE} !text-[#DC2626] !border-[#FEE2E2] hover:!bg-[#FEF2F2]`}>
                 <Trash2 className="w-4 h-4" />
                 Xóa
               </button>
@@ -382,74 +386,74 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
           <div className="grid grid-cols-2 gap-6">
             {/* Left */}
             <div className="space-y-4">
-              <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
-                <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
-                <div className="grid grid-cols-2 gap-4 text-[13px]">
+              <div className={GROUP_CARD}>
+                <h4 className={GROUP_TITLE}>Cấu trúc mã định danh</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                   <div>
-                    <span className="block text-slate-500 mb-1">Tiền tố (Prefix)</span>
-                    <span className="font-medium text-slate-800">{currentRule.prefix || '(không có)'}</span>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Tiền tố (Prefix)</span>
+                    <span className={FIELD_VALUE}>{currentRule.prefix || '(không có)'}</span>
                   </div>
                   <div>
-                    <span className="block text-slate-500 mb-1">Hậu tố (Suffix)</span>
-                    <span className="font-medium text-slate-800">{currentRule.suffix || '(không có)'}</span>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Hậu tố (Suffix)</span>
+                    <span className={FIELD_VALUE}>{currentRule.suffix || '(không có)'}</span>
                   </div>
                   <div>
-                    <span className="block text-slate-500 mb-1">Ký tự phân cách</span>
-                    <span className="font-medium text-slate-800">{currentRule.separator === 'none' ? 'Không dùng' : `"${currentRule.separator}"`}</span>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Ký tự phân cách</span>
+                    <span className={FIELD_VALUE}>{currentRule.separator === 'none' ? 'Không dùng' : `"${currentRule.separator}"`}</span>
                   </div>
                   <div>
-                    <span className="block text-slate-500 mb-1">Độ dài số thứ tự</span>
-                    <span className="font-medium text-slate-800">{currentRule.digits} chữ số</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
-                <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
-                <div className="grid grid-cols-2 gap-4 text-[13px]">
-                  <div>
-                    <span className="block text-slate-500 mb-1">Bắt đầu từ</span>
-                    <span className="font-medium text-slate-800">{currentRule.startFrom}</span>
-                  </div>
-                  <div>
-                    <span className="block text-slate-500 mb-1">Bước tăng</span>
-                    <span className="font-medium text-slate-800">{currentRule.increment}</span>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Độ dài số thứ tự</span>
+                    <span className={FIELD_VALUE}>{currentRule.digits} chữ số</span>
                   </div>
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-xl p-5 bg-white flex items-start gap-3">
-                <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${currentRule.checkDuplicate ? 'bg-blue-600' : 'bg-slate-200'}`}>
+              <div className={GROUP_CARD}>
+                <h4 className={GROUP_TITLE}>Số tự tăng</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Bắt đầu từ</span>
+                    <span className={`${FIELD_VALUE} tabular-nums`}>{currentRule.startFrom}</span>
+                  </div>
+                  <div>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Bước tăng</span>
+                    <span className={`${FIELD_VALUE} tabular-nums`}>{currentRule.increment}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 flex items-start gap-3">
+                <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${currentRule.checkDuplicate ? 'bg-blue-600' : 'bg-[#E2E8F0]'}`}>
                   {currentRule.checkDuplicate && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <div>
-                  <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
-                  <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                  <p className="text-[13px] font-medium text-[#020817]">Kiểm tra trùng lặp khi tạo mới</p>
+                  <p className="text-[13px] text-[#64748B] mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
                 </div>
               </div>
             </div>
 
             {/* Right — preview */}
             <div className="space-y-4">
-              <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-4">
-                <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
-                <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
-                  <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
+              <div className={GROUP_CARD}>
+                <h4 className={GROUP_TITLE}>Mẫu mã định danh</h4>
+                <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-6 py-7 text-center">
+                  <span className="text-[13px] text-[#020817]">
                     {buildCode(currentRule, currentRule.startFrom)}
-                  </code>
+                  </span>
                 </div>
-                <div className="space-y-3 text-[13px]">
-                  <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                    <span className="text-slate-600">Mã thứ 1:</span>
-                    <code className="font-mono font-semibold text-slate-800">{buildCode(currentRule, currentRule.startFrom)}</code>
+                <div className="text-[13px]">
+                  <div className="flex justify-between items-center py-2 border-b border-[#E2E8F0]">
+                    <span className="text-[#64748B]">Mã thứ 1:</span>
+                    <span className={CODE_BOX}>{buildCode(currentRule, currentRule.startFrom)}</span>
                   </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                    <span className="text-slate-600">Mã thứ 2:</span>
-                    <code className="font-mono font-semibold text-slate-800">{buildCode(currentRule, currentRule.startFrom + currentRule.increment)}</code>
+                  <div className="flex justify-between items-center py-2 border-b border-[#E2E8F0]">
+                    <span className="text-[#64748B]">Mã thứ 2:</span>
+                    <span className={CODE_BOX}>{buildCode(currentRule, currentRule.startFrom + currentRule.increment)}</span>
                   </div>
-                  <div className="flex justify-between items-center py-1.5">
-                    <span className="text-slate-600">Mã thứ 3:</span>
-                    <code className="font-mono font-semibold text-slate-800">{buildCode(currentRule, currentRule.startFrom + currentRule.increment * 2)}</code>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-[#64748B]">Mã thứ 3:</span>
+                    <span className={CODE_BOX}>{buildCode(currentRule, currentRule.startFrom + currentRule.increment * 2)}</span>
                   </div>
                 </div>
               </div>
@@ -468,16 +472,10 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
         customHeaderIcon={<Hash className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
         footer={
           <>
-            <button
-              onClick={handleCloseForm}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-            >
+            <button onClick={handleCloseForm} className={BTN_OUTLINE}>
               Hủy
             </button>
-            <button
-              onClick={handleSubmit}
-              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <button onClick={handleSubmit} className={BTN_PRIMARY}>
               <Save className="w-4 h-4" />
               {editingRule ? 'Cập nhật' : 'Lưu quy tắc'}
             </button>
@@ -487,38 +485,38 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
         <div className="grid grid-cols-2 gap-6">
           {/* Left — form */}
           <div className="space-y-4">
-            <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
-              <h4 className="text-[13px] font-bold text-slate-800">Cấu trúc mã định danh</h4>
+            <div className={GROUP_CARD}>
+              <h4 className={GROUP_TITLE}>Cấu trúc mã định danh</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-2">Tiền tố (Prefix)</label>
+                  <label className={LABEL_CLS}>Tiền tố (Prefix)</label>
                   <input
                     type="text"
                     value={formData.prefix}
                     onChange={(e) => setFormData({ ...formData, prefix: e.target.value.toUpperCase() })}
                     placeholder="VD: NDAN, ORG"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
+                    className={INPUT_CLS}
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-2">Hậu tố (Suffix)</label>
+                  <label className={LABEL_CLS}>Hậu tố (Suffix)</label>
                   <input
                     type="text"
                     value={formData.suffix}
                     onChange={(e) => setFormData({ ...formData, suffix: e.target.value.toUpperCase() })}
                     placeholder="Để trống nếu không dùng"
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 uppercase"
+                    className={INPUT_CLS}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-2">Ký tự phân cách</label>
+                  <label className={LABEL_CLS}>Ký tự phân cách</label>
                   <select
                     value={formData.separator}
                     onChange={(e) => setFormData({ ...formData, separator: e.target.value as SeparatorType })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                    className={`${INPUT_CLS} cursor-pointer`}
                   >
                     <option value="none">Không dùng</option>
                     <option value="-">Gạch ngang ( - )</option>
@@ -527,113 +525,113 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-2">Độ dài số thứ tự</label>
+                  <label className={LABEL_CLS}>Độ dài số thứ tự</label>
                   <input
                     type="number" min={1} max={12}
                     value={formData.digits}
                     onChange={(e) => setFormData({ ...formData, digits: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    className={INPUT_CLS}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
-              <h4 className="text-[13px] font-bold text-slate-800">Số tự tăng</h4>
+            <div className={GROUP_CARD}>
+              <h4 className={GROUP_TITLE}>Số tự tăng</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-2">Bắt đầu từ</label>
+                  <label className={LABEL_CLS}>Bắt đầu từ</label>
                   <input
                     type="number" min={0}
                     value={formData.startFrom}
                     onChange={(e) => setFormData({ ...formData, startFrom: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    className={INPUT_CLS}
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-2">Bước tăng</label>
+                  <label className={LABEL_CLS}>Bước tăng</label>
                   <input
                     type="number" min={1}
                     value={formData.increment}
                     onChange={(e) => setFormData({ ...formData, increment: Number(e.target.value) })}
-                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    className={INPUT_CLS}
                   />
                 </div>
               </div>
             </div>
 
-            <label className="flex items-start gap-3 cursor-pointer select-none border border-slate-200 rounded-xl p-5 bg-white">
+            <label className="flex items-start gap-3 cursor-pointer select-none rounded-2xl border border-[#E2E8F0] p-4 bg-white">
               <input
                 type="checkbox"
                 checked={formData.checkDuplicate}
                 onChange={() => setFormData({ ...formData, checkDuplicate: !formData.checkDuplicate })}
-                className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20 cursor-pointer w-4 h-4 flex-shrink-0"
+                className="mt-0.5 rounded border-[#CBD5E1] accent-blue-600 cursor-pointer w-4 h-4 flex-shrink-0"
               />
               <div>
-                <p className="text-[13px] font-medium text-slate-700">Kiểm tra trùng lặp khi tạo mới</p>
-                <p className="text-[13px] text-slate-500 mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
+                <p className="text-[13px] font-medium text-[#020817]">Kiểm tra trùng lặp khi tạo mới</p>
+                <p className="text-[13px] text-[#64748B] mt-1">Hệ thống từ chối tạo bản ghi nếu mã định danh đã tồn tại</p>
               </div>
             </label>
           </div>
 
           {/* Right — preview */}
           <div className="space-y-4">
-            <div className="border border-blue-200 rounded-xl p-5 bg-blue-50 space-y-4">
-              <h4 className="text-[13px] font-bold text-blue-900">Mẫu mã định danh</h4>
-              <div className="bg-white border border-blue-200 rounded-lg px-6 py-7 text-center">
+            <div className={GROUP_CARD}>
+              <h4 className={GROUP_TITLE}>Mẫu mã định danh</h4>
+              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-6 py-7 text-center">
                 {previewCode ? (
-                  <code className="text-2xl font-mono font-bold text-blue-700 tracking-widest">
+                  <span className="text-[13px] text-[#020817]">
                     {previewCode}
-                  </code>
+                  </span>
                 ) : (
-                  <span className="text-[13px] text-slate-400">Nhập tiền tố để xem mẫu mã</span>
+                  <span className="text-[13px] text-[#64748B]">Nhập tiền tố để xem mẫu mã</span>
                 )}
               </div>
 
-              <div className="space-y-3 text-[13px]">
-                <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                  <span className="text-slate-600">Mã thứ 1:</span>
-                  <code className="font-mono font-semibold text-slate-800">
+              <div className="text-[13px]">
+                <div className="flex justify-between items-center py-2 border-b border-[#E2E8F0]">
+                  <span className="text-[#64748B]">Mã thứ 1:</span>
+                  <span className={CODE_BOX}>
                     {[formData.prefix, String(formData.startFrom).padStart(formData.digits, '0'), formData.suffix].filter(Boolean).join(formSep) || '—'}
-                  </code>
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-1.5 border-b border-blue-100">
-                  <span className="text-slate-600">Mã thứ 2:</span>
-                  <code className="font-mono font-semibold text-slate-800">
+                <div className="flex justify-between items-center py-2 border-b border-[#E2E8F0]">
+                  <span className="text-[#64748B]">Mã thứ 2:</span>
+                  <span className={CODE_BOX}>
                     {[formData.prefix, String(formData.startFrom + formData.increment).padStart(formData.digits, '0'), formData.suffix].filter(Boolean).join(formSep) || '—'}
-                  </code>
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-1.5">
-                  <span className="text-slate-600">Mã thứ 3:</span>
-                  <code className="font-mono font-semibold text-slate-800">
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-[#64748B]">Mã thứ 3:</span>
+                  <span className={CODE_BOX}>
                     {[formData.prefix, String(formData.startFrom + formData.increment * 2).padStart(formData.digits, '0'), formData.suffix].filter(Boolean).join(formSep) || '—'}
-                  </code>
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="border border-slate-200 rounded-xl p-5 bg-white space-y-3">
-              <h4 className="text-[13px] font-bold text-slate-800">Tóm tắt cấu hình</h4>
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 space-y-3">
+              <h4 className={GROUP_TITLE}>Tóm tắt cấu hình</h4>
               <div className="space-y-2.5 text-[13px]">
-                <div className="flex justify-between items-center"><span className="text-slate-500">Tiền tố:</span><span className="font-medium text-slate-800">{formData.prefix || '(không có)'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Ký tự phân cách:</span><span className="font-medium text-slate-800">{formData.separator === 'none' ? 'Không dùng' : `"${formData.separator}"`}</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Độ dài số:</span><span className="font-medium text-slate-800">{formData.digits} chữ số</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Bắt đầu từ:</span><span className="font-medium text-slate-800">{formData.startFrom}</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Bước tăng:</span><span className="font-medium text-slate-800">{formData.increment}</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Kiểm tra trùng:</span><span className={`font-medium ${formData.checkDuplicate ? 'text-green-700' : 'text-slate-500'}`}>{formData.checkDuplicate ? 'Bật' : 'Tắt'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-[#64748B]">Tiền tố:</span><span className="text-[#020817]">{formData.prefix || '(không có)'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-[#64748B]">Ký tự phân cách:</span><span className="text-[#020817]">{formData.separator === 'none' ? 'Không dùng' : `"${formData.separator}"`}</span></div>
+                <div className="flex justify-between items-center"><span className="text-[#64748B]">Độ dài số:</span><span className="text-[#020817]">{formData.digits} chữ số</span></div>
+                <div className="flex justify-between items-center"><span className="text-[#64748B]">Bắt đầu từ:</span><span className="text-[#020817] tabular-nums">{formData.startFrom}</span></div>
+                <div className="flex justify-between items-center"><span className="text-[#64748B]">Bước tăng:</span><span className="text-[#020817] tabular-nums">{formData.increment}</span></div>
+                <div className="flex justify-between items-center"><span className="text-[#64748B]">Kiểm tra trùng:</span><Badge label={formData.checkDuplicate ? 'Bật' : 'Tắt'} variant={formData.checkDuplicate ? 'green' : 'slate'} /></div>
               </div>
             </div>
           </div>
         </div>
 
         {selectedFilterEntityData && (
-          <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg mt-5">
-            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-[13px] text-amber-800">
+          <div className="flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg mt-5">
+            <AlertCircle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
+            <div className="text-[13px] text-[#020817]">
               <p className="mb-1">
                 {editingRule ? 'Khi chỉnh sửa quy tắc định danh, ' : 'Khi thêm mới quy tắc định danh, '}
-                phiên bản thực thể dữ liệu chủ <strong>{selectedFilterEntityData.name}</strong> sẽ tự động tăng từ{' '}
-                <strong>v{selectedFilterEntityData.version}</strong> lên <strong>v{selectedFilterEntityData.version + 1}</strong>.
+                phiên bản thực thể dữ liệu chủ <strong className="font-medium">{selectedFilterEntityData.name}</strong> sẽ tự động tăng từ{' '}
+                <strong className="font-medium">v{selectedFilterEntityData.version}</strong> lên <strong className="font-medium">v{selectedFilterEntityData.version + 1}</strong>.
               </p>
               <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
             </div>
@@ -648,23 +646,13 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
         title="Gửi phê duyệt"
         subtitle={approvalRule ? `Quy tắc định danh: ${approvalRule.entityName}` : undefined}
         maxWidth="max-w-2xl"
-        customHeaderIcon={<Send className="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0" />}
+        customHeaderIcon={<Send className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
         footer={
           <>
-            <button
-              onClick={handleCloseApprovalModal}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-            >
+            <button onClick={handleCloseApprovalModal} className={BTN_OUTLINE}>
               Hủy
             </button>
-            <button
-              onClick={handleConfirmApprove}
-              disabled={!selectedApprover}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${selectedApprover
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
-            >
+            <button onClick={handleConfirmApprove} disabled={!selectedApprover} className={BTN_PRIMARY}>
               <Send className="w-4 h-4" />
               Gửi trình duyệt
             </button>
@@ -674,13 +662,13 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
         {approvalRule && (
           <div className="space-y-4">
             <div>
-              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                Chọn người duyệt <span className="text-red-500">*</span>
+              <label className={LABEL_CLS}>
+                Chọn người duyệt <span className={REQUIRED_MARK}>*</span>
               </label>
               <select
                 value={selectedApprover}
                 onChange={e => setSelectedApprover(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+                className={`${INPUT_CLS} cursor-pointer`}
               >
                 <option value="">-- Chọn người duyệt --</option>
                 {MOCK_APPROVERS.map(u => (
@@ -692,7 +680,7 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
             </div>
 
             <div>
-              <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+              <label className={LABEL_CLS}>
                 Nội dung yêu cầu
               </label>
               <textarea
@@ -700,26 +688,26 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
                 onChange={e => setApprovalNote(e.target.value)}
                 rows={4}
                 placeholder="Nhập nội dung gửi kèm (nếu có)..."
-                className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                className={TEXTAREA_CLS}
               />
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-              <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin quy tắc định danh</h4>
-              <div className="space-y-2 text-[13px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Thuộc thực thể:</span>
-                  <span className="text-slate-800 font-medium">{approvalRule.entityName}</span>
+            <div className="rounded-2xl border border-[#E2E8F0] p-4">
+              <h4 className={`${GROUP_TITLE} mb-3`}>Thông tin quy tắc định danh</h4>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <span className={`block ${FIELD_LABEL} mb-1`}>Thuộc thực thể:</span>
+                  <span className={FIELD_VALUE}>{approvalRule.entityName}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Mẫu mã định danh:</span>
-                  <code className="px-2 py-0.5 bg-white border border-slate-200 text-indigo-700 rounded text-[12px]">
+                <div>
+                  <span className={`block ${FIELD_LABEL} mb-1`}>Mẫu mã định danh:</span>
+                  <span className={CODE_BOX}>
                     {buildCode(approvalRule, approvalRule.startFrom)}
-                  </code>
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Phiên bản thực thể mới:</span>
-                  <span className="text-slate-800">
+                <div>
+                  <span className={`block ${FIELD_LABEL} mb-1`}>Phiên bản thực thể mới:</span>
+                  <span className={FIELD_VALUE}>
                     v{(mockEntities.find(e => e.id === approvalRule.entityId)?.version ?? 1) + 1}
                   </span>
                 </div>
@@ -727,6 +715,29 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
             </div>
           </div>
         )}
+      </BaseModal>
+
+      {/* Xác nhận xóa quy tắc định danh (thay confirm() của trình duyệt) */}
+      <BaseModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        title="Xóa quy tắc định danh"
+        maxWidth="max-w-lg"
+        customHeaderIcon={<Trash2 className="w-5 h-5 text-[#DC2626] mr-3 flex-shrink-0" />}
+        footer={
+          <>
+            <button onClick={() => setDeleteId(null)} className={BTN_OUTLINE}>
+              Hủy
+            </button>
+            <button onClick={handleConfirmDelete} className={BTN_DESTRUCTIVE}>
+              Xóa
+            </button>
+          </>
+        }
+      >
+        <p className="text-[13px] text-[#020817]">
+          Bạn có chắc chắn muốn xóa quy tắc định danh này? Điều này có thể ảnh hưởng đến dữ liệu đã tạo.
+        </p>
       </BaseModal>
     </div>
   );

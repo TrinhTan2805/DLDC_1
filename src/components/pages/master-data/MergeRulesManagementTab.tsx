@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Edit, Trash2, AlertCircle, AlertTriangle, Save, GitMerge, ChevronDown, ChevronUp, X, Send, Search, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertCircle, AlertTriangle, Save, GitMerge, ChevronDown, ChevronUp, X, Send, Check, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { BaseModal } from '../../common/BaseModal';
+import {
+  Badge, RowIconAction, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS,
+  REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS,
+} from '../collection/collectionUi';
 import { defaultAttributes } from './AttributesManagementTab';
 
 // Tạm ẩn nút Chỉnh sửa/Xóa theo yêu cầu — chỉ ẩn giao diện, không xóa code/luồng xử lý
@@ -230,6 +235,27 @@ export const onEmptyLabels: Record<OnEmpty, string> = {
   allow: 'Cho phép trống'
 };
 
+// --- Quy chuẩn giao diện (compomennt.md 5.3 bảng, 5.6 thẻ nhóm, 5.8 badge) ---
+const TABLE_WRAP = 'bg-white rounded-lg border border-[#E2E8F0] overflow-hidden';
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px] text-left';
+const TH_RIGHT = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px] text-right';
+const TH_CENTER = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px] text-center';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TD_EMPTY = 'px-4 py-6 text-center text-[13px] text-[#64748B]';
+const LAYER_CARD = 'rounded-2xl border border-[#E2E8F0] bg-white overflow-hidden';
+const LAYER_HEAD = 'px-4 py-3 flex items-center gap-3 border-b border-[#E2E8F0]';
+const STEP_DOT = 'w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-medium flex items-center justify-center flex-shrink-0';
+const LAYER_TITLE = 'text-[14px] font-medium text-[#020817]';
+const LAYER_SUB = 'text-[13px] text-[#64748B]';
+const CHIP_BLUE = 'inline-flex items-center gap-1 h-[26px] px-2 rounded-2xl border text-[13px] text-[#2563EB] bg-[#EFF6FF] border-[#BFDBFE]';
+// Mã bản ghi: chữ thường 13px #020817 trên nền #F8FAFC (không font-mono)
+const CODE_BOX = 'inline-flex items-center px-2 py-0.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-[13px] text-[#020817]';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
+const STAT_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4 flex items-center gap-3';
+const DASH = <span className="text-[#94A3B8]">—</span>;
+
 export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [rules, setRules] = useState<MergeRule[]>(mockMergeRules);
 
@@ -317,17 +343,17 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
 
   const handleSubmit = () => {
     if (!ruleName.trim()) {
-      alert('Vui lòng nhập tên quy tắc');
+      toast.error('Vui lòng nhập tên quy tắc');
       return;
     }
 
     if (matchingRules.length === 0) {
-      alert('Cần ít nhất 1 quy tắc so khớp');
+      toast.error('Cần ít nhất 1 quy tắc so khớp');
       return;
     }
 
     if (totalWeight !== 100) {
-      alert('Tổng trọng số các quy tắc so khớp phải bằng 100%');
+      toast.error('Tổng trọng số các quy tắc so khớp phải bằng 100%');
       return;
     }
 
@@ -384,7 +410,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
 
   const handleConfirmApprove = () => {
     if (!approvalRule || !selectedApprover) return;
-    alert('Đã gửi trình duyệt quy tắc hợp nhất thành công!');
+    toast.success('Đã gửi trình duyệt quy tắc hợp nhất thành công!');
     handleCloseApprovalModal();
   };
 
@@ -463,63 +489,64 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
 
   const getStatusBadge = (status: RuleStatus) => {
     const badges = {
-      active: { label: 'Hoạt động', className: 'bg-green-100 text-green-700' },
-      inactive: { label: 'Không hoạt động', className: 'bg-slate-100 text-slate-700' },
-      testing: { label: 'Đang thử nghiệm', className: 'bg-amber-100 text-amber-700' }
+      active: { label: 'Hoạt động', variant: 'green' },
+      inactive: { label: 'Không hoạt động', variant: 'slate' },
+      testing: { label: 'Đang thử nghiệm', variant: 'amber' }
     };
     return badges[status];
   };
+
+  // Badge cho kiểu so khớp / chiến lược / khi hết vẫn trống (giữ nhãn gốc)
+  const matchMethodVariant: Record<MatchMethod, string> = { exact: 'blue', fuzzy: 'purple' };
+  const conflictStrategyVariant: Record<ConflictStrategy, string> = { source: 'blue', priority: 'purple' };
+  const onEmptyVariant: Record<OnEmpty, string> = { required: 'red', warn: 'amber', allow: 'slate' };
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-[18px] font-bold text-slate-900">Thiết lập quy tắc hợp nhất dữ liệu chủ</h2>
+        <h2 className="text-[16px] font-semibold text-[#020817] leading-6">Thiết lập quy tắc hợp nhất dữ liệu chủ</h2>
       </div>
 
       {/* Entity Filter */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <label className="block text-[13px] text-slate-700 mb-2">
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4">
+        <label className={LABEL_CLS}>
           Xem theo thực thể dữ liệu chủ
         </label>
         <div ref={comboboxRef} className="relative">
           <button
             type="button"
-            className="w-full px-4 py-2 border border-slate-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-left text-[13px]"
+            className={`${INPUT_CLS} text-left flex items-center justify-between gap-2 cursor-pointer`}
             onClick={() => setComboboxOpen(!comboboxOpen)}
+            aria-expanded={comboboxOpen}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                {selectedFilterEntityData ? (
-                  <div>
-                    <span className="text-[13px] text-slate-900">{selectedFilterEntityData.code}</span>
-                    <span className="text-[13px] text-slate-600"> - {selectedFilterEntityData.name}</span>
-                  </div>
-                ) : (
-                  <span className="text-[13px] text-slate-500">Chọn thực thể dữ liệu chủ...</span>
-                )}
-              </div>
-              <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${comboboxOpen ? 'rotate-180' : ''}`} />
-            </div>
+            <span className="truncate">
+              {selectedFilterEntityData ? (
+                <>
+                  <span className="text-[#020817]">{selectedFilterEntityData.code}</span>
+                  <span className="text-[#64748B]"> - {selectedFilterEntityData.name}</span>
+                </>
+              ) : (
+                <span className="text-[#94A3B8]">Chọn thực thể dữ liệu chủ...</span>
+              )}
+            </span>
+            <ChevronDown className={`w-4 h-4 text-[#64748B] shrink-0 transition-transform ${comboboxOpen ? 'rotate-180' : ''}`} />
           </button>
           {comboboxOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg max-h-64 overflow-hidden flex flex-col">
-              <div className="p-2 border-b border-slate-200">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={comboboxSearch}
-                    onChange={(e) => setComboboxSearch(e.target.value)}
-                    placeholder="Tìm kiếm theo mã hoặc tên..."
-                    className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    autoFocus
-                  />
-                </div>
+            <div className="absolute z-10 mt-1 w-full bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-64 overflow-hidden flex flex-col">
+              <div className="p-2 border-b border-[#E2E8F0]">
+                <input
+                  type="text"
+                  value={comboboxSearch}
+                  onChange={(e) => setComboboxSearch(e.target.value)}
+                  placeholder="Tìm kiếm theo mã hoặc tên..."
+                  className={SEARCH_INPUT_CLS}
+                  autoFocus
+                />
               </div>
-              <ul className="overflow-y-auto max-h-52">
+              <ul className="overflow-y-auto max-h-52 custom-scrollbar">
                 {filteredEntities.length === 0 ? (
-                  <li className="px-4 py-8 text-center text-[13px] text-slate-500">
+                  <li className="px-4 py-8 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy thực thể phù hợp
                   </li>
                 ) : (
@@ -527,20 +554,20 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                     <li key={entity.id}>
                       <button
                         type="button"
-                        className={`w-full px-4 py-2.5 text-left hover:bg-blue-50 transition-colors ${selectedEntityFilter === entity.id ? 'bg-blue-50' : ''}`}
+                        className={`w-full px-4 py-2.5 text-left text-[13px] hover:bg-[#F8FAFC] transition-colors cursor-pointer ${selectedEntityFilter === entity.id ? 'bg-[#EAF3FF]' : ''}`}
                         onClick={() => {
                           setSelectedEntityFilter(entity.id);
                           setComboboxOpen(false);
                           setComboboxSearch('');
                         }}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-[13px] text-slate-900">{entity.code}</span>
-                            <span className="text-[13px] text-slate-600"> - {entity.name}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 truncate">
+                            <span className="text-[#020817]">{entity.code}</span>
+                            <span className="text-[#64748B]"> - {entity.name}</span>
                           </div>
                           {selectedEntityFilter === entity.id && (
-                            <Check className="w-4 h-4 text-blue-600" />
+                            <Check className="w-4 h-4 text-blue-600 shrink-0" />
                           )}
                         </div>
                       </button>
@@ -555,23 +582,20 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
 
       {/* Nội dung theo thực thể đã chọn */}
       {!selectedEntityFilter ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center">
-          <GitMerge className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-[13px] text-slate-500">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl py-16 px-4 text-center">
+          <GitMerge className="w-12 h-12 text-[#CBD5E1] mx-auto mb-3" />
+          <p className="text-[13px] text-[#64748B]">
             Vui lòng chọn thực thể dữ liệu chủ để xem quy tắc hợp nhất
           </p>
         </div>
       ) : !currentRule ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center">
-          <GitMerge className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-[13px] text-slate-500 mb-4">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl py-16 px-4 text-center">
+          <GitMerge className="w-12 h-12 text-[#CBD5E1] mx-auto mb-3" />
+          <p className="text-[13px] text-[#64748B] mb-4">
             Chưa cấu hình quy tắc hợp nhất dữ liệu nào
           </p>
           {!readOnly && (
-            <button
-              onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
-            >
+            <button onClick={handleOpenAdd} className={BTN_PRIMARY}>
               <Plus className="w-4 h-4" />
               Thêm quy tắc hợp nhất
             </button>
@@ -580,32 +604,24 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
       ) : (
         <div className="space-y-4">
           {/* Thanh tóm tắt quy tắc + thao tác */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-[13px] font-semibold text-slate-900">{currentRule.name}</p>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] ${getStatusBadge(currentRule.status).className}`}>
-                  {getStatusBadge(currentRule.status).label}
-                </span>
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-[14px] font-medium text-[#020817]">{currentRule.name}</p>
+                <Badge label={getStatusBadge(currentRule.status).label} variant={getStatusBadge(currentRule.status).variant} />
               </div>
-              <p className="text-[12px] text-slate-500 mt-1">
-                Áp dụng cho thực thể <span className="font-medium text-slate-700">{currentRule.entityName}</span>
+              <p className="text-[13px] text-[#64748B] mt-1">
+                Áp dụng cho thực thể <span className="text-[#020817]">{currentRule.entityName}</span>
                 {currentRule.lastApplied && <> · Lần áp dụng cuối: {currentRule.lastApplied}</>}
               </p>
             </div>
             {!readOnly && SHOW_EDIT_DELETE_ACTIONS && (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => handleRequestEdit(currentRule)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-lg text-[13px] font-medium transition-colors"
-              >
+              <button onClick={() => handleRequestEdit(currentRule)} className={BTN_OUTLINE}>
                 <Edit className="w-4 h-4" />
                 Chỉnh sửa
               </button>
-              <button
-                onClick={() => handleRequestDelete(currentRule)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg text-[13px] font-medium transition-colors"
-              >
+              <button onClick={() => handleRequestDelete(currentRule)} className={`${BTN_OUTLINE} !text-[#DC2626] !border-[#FEE2E2] hover:!bg-[#FEF2F2]`}>
                 <Trash2 className="w-4 h-4" />
                 Xóa
               </button>
@@ -614,54 +630,52 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
           </div>
 
           {/* Lớp 1: Matching Rules */}
-          <div className="border border-blue-200 rounded-xl overflow-hidden">
-            <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-              <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+          <div className={LAYER_CARD}>
+            <div className={LAYER_HEAD}>
+              <span className={STEP_DOT}>1</span>
               <div>
-                <p className="text-[13px] font-semibold text-blue-800">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
-                <p className="text-[13px] text-blue-500">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
+                <p className={LAYER_TITLE}>Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
+                <p className={LAYER_SUB}>Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
               </div>
             </div>
-            <div className="p-4 space-y-3 bg-white">
-              <div>
-                <p className="text-[13px] text-slate-600">
-                  Ngưỡng tự động gộp (≥):{' '}
-                  <span className="font-semibold text-slate-900">{currentRule.autoThreshold ?? '-'}%</span>
-                </p>
-              </div>
-              <div className="border border-slate-100 rounded-lg overflow-hidden">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
+            <div className="p-4 space-y-3">
+              <p className="text-[13px] text-[#64748B]">
+                Ngưỡng tự động gộp (≥):{' '}
+                <span className="text-[#020817] tabular-nums">{currentRule.autoThreshold ?? '-'}%</span>
+              </p>
+              <div className={TABLE_WRAP}>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className="h-[42px]">
+                      <th className={TH}>Trường đối chiếu</th>
+                      <th className={TH}>Kiểu so khớp</th>
+                      <th className={TH}>Thuật toán</th>
+                      <th className={`${TH_RIGHT} w-28`}>Ngưỡng (%)</th>
+                      <th className={`${TH_RIGHT} w-28`}>Trọng số (%)</th>
+                      <th className={`${TH} w-28`}>Điều kiện</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 bg-white">
+                  <tbody>
                     {!currentRule.matchingRulesDetail || currentRule.matchingRulesDetail.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                        <td colSpan={6} className={TD_EMPTY}>
                           Chưa cấu hình quy tắc so khớp
                         </td>
                       </tr>
                     ) : (
                       currentRule.matchingRulesDetail.map(rule => (
-                        <tr key={rule.id}>
-                          <td className="px-3 py-2 text-slate-700">{(defaultAttributes[currentRule.entityId] ?? []).find(af => af.fieldName === rule.fieldName)?.displayName || rule.fieldName}</td>
-                          <td className="px-3 py-2 text-slate-700">{matchMethodLabels[rule.method]}</td>
-                          <td className="px-3 py-2 text-slate-700">
-                            {rule.method === 'fuzzy' ? fuzzyAlgorithmLabels[rule.algorithm] : <span className="text-slate-400">—</span>}
+                        <tr key={rule.id} className={TR}>
+                          <td className={TD}>{(defaultAttributes[currentRule.entityId] ?? []).find(af => af.fieldName === rule.fieldName)?.displayName || rule.fieldName}</td>
+                          <td className={TD}><Badge label={matchMethodLabels[rule.method]} variant={matchMethodVariant[rule.method]} /></td>
+                          <td className={TD}>
+                            {rule.method === 'fuzzy' ? fuzzyAlgorithmLabels[rule.algorithm] : DASH}
                           </td>
-                          <td className="px-3 py-2 text-center text-slate-700">
-                            {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : <span className="text-slate-400">—</span>}
+                          <td className={`${TD} text-right tabular-nums`}>
+                            {rule.method === 'fuzzy' ? `${rule.fuzzyThreshold ?? '-'}%` : DASH}
                           </td>
-                          <td className="px-3 py-2 text-center text-slate-700">{rule.weight}</td>
-                          <td className="px-3 py-2 text-center text-slate-700">
-                            {rule.operator ?? <span className="text-slate-400">—</span>}
+                          <td className={`${TD} text-right tabular-nums`}>{rule.weight}</td>
+                          <td className={TD}>
+                            {rule.operator ? <Badge label={rule.operator} variant="indigo" /> : DASH}
                           </td>
                         </tr>
                       ))
@@ -673,58 +687,56 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
           </div>
 
           {/* Trường hard-block */}
-          <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 space-y-3">
             <div>
-              <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
-              <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+              <p className={LAYER_TITLE}>Trường hard-block</p>
+              <p className={LAYER_SUB}>Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {!currentRule.hardBlockFields || currentRule.hardBlockFields.length === 0 ? (
-                <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
+                <span className="text-[13px] text-[#64748B]">Chưa có trường hard-block nào</span>
               ) : (
                 currentRule.hardBlockFields.map(f => (
-                  <span key={f} className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
-                    {(defaultAttributes[currentRule.entityId] ?? []).find(af => af.fieldName === f)?.displayName || f}
-                  </span>
+                  <Badge key={f} variant="blue" label={(defaultAttributes[currentRule.entityId] ?? []).find(af => af.fieldName === f)?.displayName || f} />
                 ))
               )}
             </div>
           </div>
 
           {/* Lớp 2: Hợp nhất giá trị (Survivorship) */}
-          <div className="border border-blue-200 rounded-xl overflow-hidden">
-            <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-              <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+          <div className={LAYER_CARD}>
+            <div className={LAYER_HEAD}>
+              <span className={STEP_DOT}>2</span>
               <div>
-                <p className="text-[13px] font-semibold text-blue-800">Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
-                <p className="text-[13px] text-blue-500">Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
+                <p className={LAYER_TITLE}>Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
+                <p className={LAYER_SUB}>Với mỗi trường, giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
               </div>
             </div>
-            <div className="p-4 bg-white">
+            <div className="p-4">
               {!currentRule.extractionRulesDetail || currentRule.extractionRulesDetail.length === 0 ? (
-                <p className="text-[13px] text-slate-400 text-center py-6">Chưa cấu hình quy tắc hợp nhất giá trị</p>
+                <p className="text-[13px] text-[#64748B] text-center py-6">Chưa cấu hình quy tắc hợp nhất giá trị</p>
               ) : (
-                <div className="border border-slate-100 rounded-lg overflow-hidden">
-                  <table className="w-full text-[13px]">
-                    <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
-                        <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
-                        <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
-                        <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý null</th>
-                        <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
+                <div className={TABLE_WRAP}>
+                  <table className={TABLE_CLS}>
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={TH}>Trường</th>
+                        <th className={TH}>Chiến lược</th>
+                        <th className={TH}>Nguồn dữ liệu</th>
+                        <th className={TH}>Xử lý null</th>
+                        <th className={TH}>Khi hết vẫn trống</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-50 bg-white">
+                    <tbody>
                       {currentRule.extractionRulesDetail.map(rule => (
-                        <tr key={rule.id}>
-                          <td className="px-3 py-2 text-slate-700">{(defaultAttributes[currentRule.entityId] ?? []).find(af => af.fieldName === rule.fieldName)?.displayName || rule.fieldName}</td>
-                          <td className="px-3 py-2 text-slate-700">{conflictStrategyLabels[rule.conflictStrategy]}</td>
-                          <td className="px-3 py-2 text-slate-700">
+                        <tr key={rule.id} className={TR}>
+                          <td className={TD}>{(defaultAttributes[currentRule.entityId] ?? []).find(af => af.fieldName === rule.fieldName)?.displayName || rule.fieldName}</td>
+                          <td className={TD}><Badge label={conflictStrategyLabels[rule.conflictStrategy]} variant={conflictStrategyVariant[rule.conflictStrategy]} /></td>
+                          <td className={TD}>
                             {rule.conflictStrategy === 'source' ? rule.primarySource : rule.priorityOrder.join(' → ')}
                           </td>
-                          <td className="px-3 py-2 text-slate-700">{nullHandlingLabels[rule.nullHandling]}</td>
-                          <td className="px-3 py-2 text-slate-700">{onEmptyLabels[rule.onEmpty]}</td>
+                          <td className={TD}>{nullHandlingLabels[rule.nullHandling]}</td>
+                          <td className={TD}><Badge label={onEmptyLabels[rule.onEmpty]} variant={onEmptyVariant[rule.onEmpty]} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -746,16 +758,10 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
         customHeaderIcon={<GitMerge className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0" />}
         footer={
           <>
-            <button
-              onClick={handleCloseForm}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-            >
+            <button onClick={handleCloseForm} className={BTN_OUTLINE}>
               Hủy
             </button>
-            <button
-              onClick={handleSubmit}
-              className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <button onClick={handleSubmit} className={BTN_PRIMARY}>
               <Save className="w-4 h-4" />
               {editingRule ? 'Cập nhật' : 'Lưu quy tắc'}
             </button>
@@ -765,58 +771,58 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
         <div className="space-y-4">
 
           {/* Lớp 1: Matching Rules */}
-          <div className="border border-blue-200 rounded-xl overflow-hidden">
-            <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-              <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+          <div className={LAYER_CARD}>
+            <div className={LAYER_HEAD}>
+              <span className={STEP_DOT}>1</span>
               <div>
-                <p className="text-[13px] font-semibold text-blue-800">Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
-                <p className="text-[13px] text-blue-500">Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
+                <p className={LAYER_TITLE}>Lớp 1 — Quy tắc so khớp (Matching Rules)</p>
+                <p className={LAYER_SUB}>Xác định khi nào hai bản ghi từ hai nguồn khác nhau được coi là cùng một thực thể</p>
               </div>
             </div>
-            <div className="p-4 space-y-4 bg-white">
+            <div className="p-4 space-y-4">
               <div>
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Ngưỡng tự động gộp (≥)</label>
-                  <div className="flex items-center gap-2">
+                <label className={LABEL_CLS}>Ngưỡng tự động gộp (≥)</label>
+                <div className="flex items-center gap-2">
+                  <div className="w-24">
                     <input
                       type="number" min={0} max={100}
                       value={autoThreshold}
                       onChange={(e) => setAutoThreshold(Number(e.target.value))}
-                      className="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                      className={`${INPUT_CLS} text-right tabular-nums`}
                     />
-                    <span className="text-[13px] text-slate-500">%</span>
                   </div>
+                  <span className="text-[13px] text-[#64748B]">%</span>
                 </div>
               </div>
 
-              <div className="border border-slate-100 rounded-lg overflow-hidden">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường đối chiếu</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Kiểu so khớp</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Thuật toán</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Ngưỡng (%)</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Trọng số (%)</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-28">Điều kiện</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
+              <div className={TABLE_WRAP}>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className="h-[42px]">
+                      <th className={TH}>Trường đối chiếu</th>
+                      <th className={TH}>Kiểu so khớp</th>
+                      <th className={TH}>Thuật toán</th>
+                      <th className={`${TH_RIGHT} w-28`}>Ngưỡng (%)</th>
+                      <th className={`${TH_RIGHT} w-28`}>Trọng số (%)</th>
+                      <th className={`${TH} w-28`}>Điều kiện</th>
+                      <th className={`${TH_CENTER} w-14`}></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 bg-white">
+                  <tbody>
                     {matchingRules.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                        <td colSpan={7} className={TD_EMPTY}>
                           Chưa có quy tắc — nhấn "+ Thêm quy tắc so khớp" để bắt đầu
                         </td>
                       </tr>
                     ) : (
                       matchingRules.map((rule, idx) => (
-                        <tr key={rule.id}>
-                          <td className="px-2 py-1.5">
+                        <tr key={rule.id} className={TR}>
+                          <td className={TD}>
                             <select
                               value={rule.fieldName}
                               onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              className={`${INPUT_CLS} cursor-pointer`}
                             >
                               <option value="">-- Chọn trường --</option>
                               {formFields.map(f => (
@@ -824,82 +830,82 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                               ))}
                             </select>
                           </td>
-                          <td className="px-2 py-1.5">
+                          <td className={TD}>
                             <select
                               value={rule.method}
                               onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, method: e.target.value as MatchMethod } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              className={`${INPUT_CLS} cursor-pointer`}
                             >
                               <option value="exact">{matchMethodLabels.exact}</option>
                               <option value="fuzzy">{matchMethodLabels.fuzzy}</option>
                             </select>
                           </td>
-                          <td className="px-2 py-1.5">
+                          <td className={TD}>
                             {rule.method === 'fuzzy' ? (
                               <select
                                 value={rule.algorithm}
                                 onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, algorithm: e.target.value as FuzzyAlgorithm } : r))}
-                                className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                className={`${INPUT_CLS} cursor-pointer`}
                               >
                                 {(Object.entries(fuzzyAlgorithmLabels) as [FuzzyAlgorithm, string][]).map(([val, label]) => (
                                   <option key={val} value={val}>{label}</option>
                                 ))}
                               </select>
                             ) : (
-                              <span className="text-slate-400">—</span>
+                              DASH
                             )}
                           </td>
-                          <td className="px-2 py-1.5 text-center">
+                          <td className={`${TD} text-right`}>
                             {rule.method === 'fuzzy' ? (
                               <input
                                 type="number" min={0} max={100}
                                 value={rule.fuzzyThreshold}
                                 onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fuzzyThreshold: Number(e.target.value) } : r))}
-                                className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                className={`${INPUT_CLS} text-right tabular-nums`}
                               />
                             ) : (
-                              <span className="text-slate-400">—</span>
+                              DASH
                             )}
                           </td>
-                          <td className="px-2 py-1.5 text-center">
+                          <td className={`${TD} text-right`}>
                             <input
                               type="number" min={0} max={100}
                               value={rule.weight}
                               onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, weight: Number(e.target.value) } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                              className={`${INPUT_CLS} text-right tabular-nums`}
                             />
                           </td>
-                          <td className="px-2 py-1.5 text-center">
+                          <td className={TD}>
                             {idx < matchingRules.length - 1 ? (
                               <select
                                 value={rule.operator}
                                 onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, operator: e.target.value as ConditionOperator } : r))}
-                                className="w-full border border-slate-200 rounded-lg px-1 py-1 text-[13px] font-bold text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                className={`${INPUT_CLS} cursor-pointer`}
                               >
                                 <option value="AND">AND</option>
                                 <option value="OR">OR</option>
                               </select>
                             ) : (
-                              <span className="text-slate-400">—</span>
+                              DASH
                             )}
                           </td>
-                          <td className="px-2 py-1.5 text-center">
-                            <button type="button" onClick={() => handleDeleteMatchingRule(rule.id)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                          <td className={`${TD} text-center`}>
+                            <RowIconAction label="Xóa" onClick={() => handleDeleteMatchingRule(rule.id)}>
+                              <Trash2 className="w-4 h-4" />
+                            </RowIconAction>
                           </td>
                         </tr>
                       ))
                     )}
                   </tbody>
                   {matchingRules.length > 0 && (
-                    <tfoot className="border-t border-slate-200 bg-slate-50">
-                      <tr>
-                        <td colSpan={4} className="px-3 py-2 text-right text-[13px] font-medium text-slate-600">Tổng trọng số:</td>
-                        <td className="px-2 py-2 text-center">
-                          <span className={`text-[13px] font-bold ${totalWeight === 100 ? 'text-green-700' : 'text-red-600'}`}>{totalWeight}%</span>
+                    <tfoot className="bg-[#F8FAFC]">
+                      <tr className="h-12">
+                        <td colSpan={4} className="px-3 py-1 text-right text-[13px] font-medium text-[#020817]">Tổng trọng số:</td>
+                        <td className="px-3 py-1 text-right">
+                          <span className={`text-[13px] font-medium tabular-nums ${totalWeight === 100 ? 'text-[#15803D]' : 'text-[#DC2626]'}`}>{totalWeight}%</span>
                         </td>
-                        <td colSpan={3} className="px-3 py-2 text-[13px] text-slate-400">
+                        <td colSpan={3} className="px-3 py-1 text-[13px] text-[#64748B]">
                           {totalWeight === 100 ? 'Hợp lệ' : 'Tổng trọng số phải bằng 100%'}
                         </td>
                       </tr>
@@ -907,100 +913,107 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   )}
                 </table>
               </div>
-              <button
-                type="button"
-                onClick={handleAddMatchingRule}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
+              <button type="button" onClick={handleAddMatchingRule} className={BTN_OUTLINE}>
+                <Plus className="w-4 h-4" />
                 Thêm quy tắc so khớp
               </button>
             </div>
           </div>
 
           {/* Trường hard-block */}
-          <div className="border border-slate-200 rounded-xl bg-white p-4 space-y-3">
+          <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 space-y-3">
             <div>
-              <p className="text-[13px] font-semibold text-slate-700">Trường hard-block</p>
-              <p className="text-[13px] text-slate-500">Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
+              <p className={LAYER_TITLE}>Trường hard-block</p>
+              <p className={LAYER_SUB}>Nếu các trường này khác nhau, hai bản ghi chắc chắn KHÔNG phải cùng thực thể (loại khỏi so khớp)</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {hardBlockFields.map(f => (
-                <span key={f} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[13px] font-medium">
+                <span key={f} className={CHIP_BLUE}>
                   {formFields.find(af => af.fieldName === f)?.displayName || f}
-                  <button type="button" onClick={() => handleRemoveHardBlockField(f)} className="text-blue-400 hover:text-red-500 transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveHardBlockField(f)}
+                    aria-label="Bỏ trường"
+                    title="Bỏ trường"
+                    className="rounded text-[#2563EB] hover:text-[#DC2626] transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </span>
               ))}
               {hardBlockFields.length === 0 && (
-                <span className="text-[13px] text-slate-400">Chưa có trường hard-block nào</span>
+                <span className="text-[13px] text-[#64748B]">Chưa có trường hard-block nào</span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <select
-                value={hardBlockInput}
-                onChange={(e) => setHardBlockInput(e.target.value)}
-                className="flex-1 max-w-xs border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-              >
-                <option value="">-- Chọn trường để thêm --</option>
-                {formFields
-                  .filter(f => !hardBlockFields.includes(f.fieldName))
-                  .map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>)}
-              </select>
+              <div className="flex-1 max-w-xs">
+                <select
+                  value={hardBlockInput}
+                  onChange={(e) => setHardBlockInput(e.target.value)}
+                  className={`${INPUT_CLS} cursor-pointer`}
+                >
+                  <option value="">-- Chọn trường để thêm --</option>
+                  {formFields
+                    .filter(f => !hardBlockFields.includes(f.fieldName))
+                    .map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>)}
+                </select>
+              </div>
               <button
                 type="button"
                 onClick={() => { handleAddHardBlockField(hardBlockInput); setHardBlockInput(''); }}
                 disabled={!hardBlockInput}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className={BTN_OUTLINE}
               >
-                <Plus className="w-3.5 h-3.5" /> Thêm
+                <Plus className="w-4 h-4" /> Thêm
               </button>
             </div>
           </div>
 
           {/* Lớp 2: Hợp nhất giá trị (Survivorship) */}
-          <div className="border border-blue-200 rounded-xl overflow-hidden">
-            <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-              <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+          <div className={LAYER_CARD}>
+            <div className={LAYER_HEAD}>
+              <span className={STEP_DOT}>2</span>
               <div>
-                <p className="text-[13px] font-semibold text-blue-800">Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
-                <p className="text-[13px] text-blue-500">Với mỗi trường, chọn giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
+                <p className={LAYER_TITLE}>Lớp 2 — Hợp nhất giá trị (Survivorship)</p>
+                <p className={LAYER_SUB}>Với mỗi trường, chọn giá trị nào sẽ tồn tại trong bản ghi chủ cuối cùng</p>
               </div>
             </div>
-            <div className="p-4 space-y-3 bg-white">
+            <div className="p-4 space-y-3">
               {formSources.length === 0 && (
-                <p className="text-[13px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                  Thực thể này chưa có nguồn dữ liệu đã đăng ký — chỉ có thể khai báo tên trường, chưa chọn được nguồn ưu tiên.
-                </p>
+                <div className="flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
+                  <p className="text-[13px] text-[#020817]">
+                    Thực thể này chưa có nguồn dữ liệu đã đăng ký — chỉ có thể khai báo tên trường, chưa chọn được nguồn ưu tiên.
+                  </p>
+                </div>
               )}
-              <div className="border border-slate-100 rounded-lg overflow-hidden">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Trường</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Chiến lược</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Nguồn dữ liệu</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Xử lý null</th>
-                      <th className="px-3 py-2.5 text-left text-[13px] font-semibold text-slate-500">Khi hết vẫn trống</th>
-                      <th className="px-3 py-2.5 text-center text-[13px] font-semibold text-slate-500 w-10"></th>
+              <div className={TABLE_WRAP}>
+                <table className={TABLE_CLS}>
+                  <thead className="bg-[#F8FAFC]">
+                    <tr className="h-[42px]">
+                      <th className={TH}>Trường</th>
+                      <th className={TH}>Chiến lược</th>
+                      <th className={TH}>Nguồn dữ liệu</th>
+                      <th className={TH}>Xử lý null</th>
+                      <th className={TH}>Khi hết vẫn trống</th>
+                      <th className={`${TH_CENTER} w-14`}></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 bg-white">
+                  <tbody>
                     {extractionRules.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-6 text-center text-[13px] text-slate-400">
+                        <td colSpan={6} className={TD_EMPTY}>
                           Chưa có quy tắc — nhấn "+ Thêm quy tắc hợp nhất giá trị" để bắt đầu
                         </td>
                       </tr>
                     ) : (
                       extractionRules.map(rule => (
-                        <tr key={rule.id}>
-                          <td className="px-2 py-1.5 align-top">
+                        <tr key={rule.id} className={TR}>
+                          <td className={`${TD} align-top`}>
                             <select
                               value={rule.fieldName}
                               onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              className={`${INPUT_CLS} cursor-pointer`}
                             >
                               <option value="">-- Chọn trường --</option>
                               {formFields.map(f => (
@@ -1008,67 +1021,69 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                               ))}
                             </select>
                           </td>
-                          <td className="px-2 py-1.5 align-top">
+                          <td className={`${TD} align-top`}>
                             <select
                               value={rule.conflictStrategy}
                               onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, conflictStrategy: e.target.value as ConflictStrategy } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              className={`${INPUT_CLS} cursor-pointer`}
                             >
                               <option value="source">{conflictStrategyLabels.source}</option>
                               <option value="priority">{conflictStrategyLabels.priority}</option>
                             </select>
                           </td>
-                          <td className="px-2 py-1.5 align-top">
+                          <td className={`${TD} align-top`}>
                             {rule.conflictStrategy === 'source' ? (
                               <select
                                 value={rule.primarySource}
                                 onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, primarySource: e.target.value } : r))}
-                                className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                                className={`${INPUT_CLS} cursor-pointer`}
                               >
                                 <option value="">-- Chọn nguồn --</option>
                                 {formSources.map(s => <option key={s.sourceName} value={s.sourceName}>{s.sourceName}</option>)}
                               </select>
                             ) : rule.priorityOrder.length === 0 ? (
-                              <span className="text-[13px] text-slate-400">Chưa có nguồn</span>
+                              <span className="inline-flex items-center h-10 text-[13px] text-[#64748B]">Chưa có nguồn</span>
                             ) : (
                               <div className="space-y-1 min-w-[190px]">
                                 {rule.priorityOrder.map((sourceName, idx) => (
-                                  <div key={sourceName} className="flex items-center gap-1.5 border border-slate-200 rounded-lg px-2 py-1 bg-slate-50">
-                                    <span className="w-4 text-[11px] font-semibold text-slate-400">{idx + 1}</span>
-                                    <span className="flex-1 text-[13px] text-slate-700 truncate">{sourceName}</span>
-                                    <button type="button" disabled={idx === 0} onClick={() => handleMoveExtractionPriority(rule.id, idx, -1)} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Lên"><ChevronUp className="w-3.5 h-3.5" /></button>
-                                    <button type="button" disabled={idx === rule.priorityOrder.length - 1} onClick={() => handleMoveExtractionPriority(rule.id, idx, 1)} className="p-0.5 text-slate-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Xuống"><ChevronDown className="w-3.5 h-3.5" /></button>
+                                  <div key={sourceName} className="flex items-center gap-1.5 border border-[#E2E8F0] rounded-lg px-2 py-1 bg-[#F8FAFC]">
+                                    <span className="w-4 text-[12px] text-[#64748B] tabular-nums">{idx + 1}</span>
+                                    <span className="flex-1 text-[13px] text-[#020817] truncate">{sourceName}</span>
+                                    <button type="button" disabled={idx === 0} onClick={() => handleMoveExtractionPriority(rule.id, idx, -1)} className="p-0.5 rounded text-[#475569] hover:text-blue-600 disabled:text-[#CBD5E1] disabled:cursor-not-allowed cursor-pointer" aria-label="Lên" title="Lên"><ChevronUp className="w-4 h-4" /></button>
+                                    <button type="button" disabled={idx === rule.priorityOrder.length - 1} onClick={() => handleMoveExtractionPriority(rule.id, idx, 1)} className="p-0.5 rounded text-[#475569] hover:text-blue-600 disabled:text-[#CBD5E1] disabled:cursor-not-allowed cursor-pointer" aria-label="Xuống" title="Xuống"><ChevronDown className="w-4 h-4" /></button>
                                   </div>
                                 ))}
-                                <p className="text-[11px] text-slate-400">Thiếu ở nguồn đầu → lấy nguồn kế</p>
+                                <p className="text-[12px] text-[#64748B]">Thiếu ở nguồn đầu → lấy nguồn kế</p>
                               </div>
                             )}
                           </td>
-                          <td className="px-2 py-1.5 align-top">
+                          <td className={`${TD} align-top`}>
                             <select
                               value={rule.nullHandling}
                               onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, nullHandling: e.target.value as NullHandling } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              className={`${INPUT_CLS} cursor-pointer`}
                             >
                               <option value="next">{nullHandlingLabels.next}</option>
                               <option value="skip">{nullHandlingLabels.skip}</option>
                             </select>
                           </td>
-                          <td className="px-2 py-1.5 align-top">
+                          <td className={`${TD} align-top`}>
                             <select
                               value={rule.onEmpty}
                               onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, onEmpty: e.target.value as OnEmpty } : r))}
-                              className="w-full border border-slate-200 rounded-lg px-2 py-1 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                              className={`${INPUT_CLS} cursor-pointer`}
                             >
                               <option value="required">{onEmptyLabels.required}</option>
                               <option value="warn">{onEmptyLabels.warn}</option>
                               <option value="allow">{onEmptyLabels.allow}</option>
                             </select>
                           </td>
-                          <td className="px-2 py-1.5 text-center align-top">
-                            <button type="button" onClick={() => handleDeleteExtractionRule(rule.id)} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                          <td className={`${TD} text-center align-top`}>
+                            <div className="h-10 flex items-center justify-center">
+                              <RowIconAction label="Xóa" onClick={() => handleDeleteExtractionRule(rule.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </RowIconAction>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -1076,34 +1091,30 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   </tbody>
                 </table>
               </div>
-              <button
-                type="button"
-                onClick={handleAddExtractionRule}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
+              <button type="button" onClick={handleAddExtractionRule} className={BTN_OUTLINE}>
+                <Plus className="w-4 h-4" />
                 Thêm quy tắc hợp nhất giá trị
               </button>
             </div>
           </div>
 
           {/* Kiểm thử */}
-          <div className="border border-blue-200 rounded-xl overflow-hidden">
-            <div className="bg-blue-50 px-4 py-3 flex items-center gap-3 border-b border-blue-200">
-              <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[13px] font-bold flex items-center justify-center flex-shrink-0">3</span>
+          <div className={LAYER_CARD}>
+            <div className={LAYER_HEAD}>
+              <span className={STEP_DOT}>3</span>
               <div>
-                <p className="text-[13px] font-semibold text-blue-800">Kiểm thử</p>
-                <p className="text-[13px] text-blue-500">Chạy mô phỏng để xem trước kết quả áp dụng quy tắc so khớp và hợp nhất giá trị hiện tại</p>
+                <p className={LAYER_TITLE}>Kiểm thử</p>
+                <p className={LAYER_SUB}>Chạy mô phỏng để xem trước kết quả áp dụng quy tắc so khớp và hợp nhất giá trị hiện tại</p>
               </div>
             </div>
-            <div className="p-4 space-y-4 bg-white">
-              <div className="border border-slate-200 rounded-xl bg-white p-4 flex flex-wrap items-end gap-3">
-                <div>
-                  <label className="block text-[13px] font-medium text-slate-700 mb-1.5">Chọn số lượng bản ghi chạy kiểm thử</label>
+            <div className="p-4 space-y-4">
+              <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 flex flex-wrap items-end gap-3">
+                <div className="w-80">
+                  <label className={LABEL_CLS}>Chọn số lượng bản ghi chạy kiểm thử</label>
                   <select
                     value={testSample}
                     onChange={(e) => { setTestSample(e.target.value); setTestRun(false); }}
-                    className="w-80 border border-slate-200 rounded-lg px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    className={`${INPUT_CLS} cursor-pointer`}
                   >
                     <option value="">-- Chọn số lượng bản ghi --</option>
                     {TEST_SAMPLE_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
@@ -1113,65 +1124,73 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   type="button"
                   onClick={() => setTestRun(true)}
                   disabled={!testSample}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-[13px] font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={BTN_PRIMARY}
                 >
                   Chạy mô phỏng
                 </button>
               </div>
 
               {!testRun ? (
-                <div className="border border-dashed border-slate-200 rounded-xl bg-slate-50 p-8 text-center text-[13px] text-slate-400">
+                <div className="border border-dashed border-[#E2E8F0] rounded-2xl bg-[#F8FAFC] p-8 text-center text-[13px] text-[#64748B]">
                   Chọn dữ liệu mẫu và nhấn "Chạy mô phỏng" để xem kết quả kiểm thử
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-4 gap-3">
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                      <div className="text-[13px] text-emerald-700 mb-1">Golden hình thành</div>
-                      <div className="text-2xl font-bold text-emerald-800">312</div>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className={STAT_CARD}>
+                      <div className="p-2 rounded-lg bg-green-50"><CheckCircle2 className="w-5 h-5 text-green-600" /></div>
+                      <div>
+                        <div className="text-[16px] text-[#64748B]">Golden hình thành</div>
+                        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">312</div>
+                      </div>
                     </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <div className="text-[13px] text-blue-700 mb-1">Auto-merge</div>
-                      <div className="text-2xl font-bold text-blue-800">268</div>
+                    <div className={STAT_CARD}>
+                      <div className="p-2 rounded-lg bg-blue-50"><GitMerge className="w-5 h-5 text-blue-600" /></div>
+                      <div>
+                        <div className="text-[16px] text-[#64748B]">Auto-merge</div>
+                        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">268</div>
+                      </div>
                     </div>
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                      <div className="text-[13px] text-amber-700 mb-1">Chờ rà soát</div>
-                      <div className="text-2xl font-bold text-amber-800">37</div>
+                    <div className={STAT_CARD}>
+                      <div className="p-2 rounded-lg bg-amber-50"><Clock className="w-5 h-5 text-amber-600" /></div>
+                      <div>
+                        <div className="text-[16px] text-[#64748B]">Chờ rà soát</div>
+                        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">37</div>
+                      </div>
                     </div>
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                      <div className="text-[13px] text-slate-600 mb-1">Không khớp</div>
-                      <div className="text-2xl font-bold text-slate-800">183</div>
+                    <div className={STAT_CARD}>
+                      <div className="p-2 rounded-lg bg-gray-50"><XCircle className="w-5 h-5 text-gray-600" /></div>
+                      <div>
+                        <div className="text-[16px] text-[#64748B]">Không khớp</div>
+                        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">183</div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                      <p className="text-[13px] font-semibold text-slate-800">Các bản ghi chờ rà soát</p>
-                      <span className="text-[12px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
-                        {MOCK_TEST_REVIEW_ITEMS.length} bản ghi
-                      </span>
+                  <div className={TABLE_WRAP}>
+                    <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center gap-2">
+                      <p className={LAYER_TITLE}>Các bản ghi chờ rà soát</p>
+                      <Badge label={`${MOCK_TEST_REVIEW_ITEMS.length} bản ghi`} variant="amber" />
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-[13px]">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                          <tr>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Cặp bản ghi</th>
-                            <th className="px-3 py-2.5 text-center font-semibold text-slate-600 w-28">Điểm khớp</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-600">Lý do</th>
+                      <table className={TABLE_CLS}>
+                        <thead className="bg-[#F8FAFC]">
+                          <tr className="h-[42px]">
+                            <th className={TH}>Cặp bản ghi</th>
+                            <th className={`${TH_RIGHT} w-28`}>Điểm khớp</th>
+                            <th className={TH}>Lý do</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
+                        <tbody>
                           {MOCK_TEST_REVIEW_ITEMS.map(item => (
-                            <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-3 py-2.5 font-medium text-slate-700">
-                                <code className="px-1.5 py-0.5 rounded font-mono bg-slate-100 text-slate-700">{item.pair.split(' ↔ ')[0]}</code>
-                                <span className="mx-1.5 text-slate-400">↔</span>
-                                <code className="px-1.5 py-0.5 rounded font-mono bg-slate-100 text-slate-700">{item.pair.split(' ↔ ')[1]}</code>
+                            <tr key={item.id} className={TR}>
+                              <td className={`${TD} whitespace-nowrap`}>
+                                <span className={CODE_BOX}>{item.pair.split(' ↔ ')[0]}</span>
+                                <span className="mx-1.5 text-[#64748B]">↔</span>
+                                <span className={CODE_BOX}>{item.pair.split(' ↔ ')[1]}</span>
                               </td>
-                              <td className="px-3 py-2.5 text-center">
-                                <span className="px-2 py-0.5 rounded font-semibold text-[12px] bg-amber-100 text-amber-800">{item.score}%</span>
-                              </td>
-                              <td className="px-3 py-2.5 text-slate-600">{item.reason}</td>
+                              <td className={`${TD} text-right tabular-nums`}>{item.score}%</td>
+                              <td className={TD}>{item.reason}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1184,18 +1203,18 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
           </div>
 
           {editingRule ? (
-            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="text-[13px] text-amber-800">
-                <p className="mb-1">Khi chỉnh sửa quy tắc hợp nhất, phiên bản thực thể dữ liệu chủ sẽ tự động tăng từ <strong>v{selectedFilterEntityData?.version ?? 1}</strong> lên <strong>v{(selectedFilterEntityData?.version ?? 1) + 1}</strong>.</p>
+            <div className="flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg">
+              <AlertCircle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
+              <div className="text-[13px] text-[#020817]">
+                <p className="mb-1">Khi chỉnh sửa quy tắc hợp nhất, phiên bản thực thể dữ liệu chủ sẽ tự động tăng từ <strong className="font-medium">v{selectedFilterEntityData?.version ?? 1}</strong> lên <strong className="font-medium">v{(selectedFilterEntityData?.version ?? 1) + 1}</strong>.</p>
                 <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="text-[13px] text-amber-800">
-                <p className="mb-1">Khi thêm mới quy tắc hợp nhất, phiên bản thực thể dữ liệu chủ sẽ tự động tăng từ <strong>v{selectedFilterEntityData?.version ?? 1}</strong> lên <strong>v{(selectedFilterEntityData?.version ?? 1) + 1}</strong>.</p>
+            <div className="flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg">
+              <AlertCircle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
+              <div className="text-[13px] text-[#020817]">
+                <p className="mb-1">Khi thêm mới quy tắc hợp nhất, phiên bản thực thể dữ liệu chủ sẽ tự động tăng từ <strong className="font-medium">v{selectedFilterEntityData?.version ?? 1}</strong> lên <strong className="font-medium">v{(selectedFilterEntityData?.version ?? 1) + 1}</strong>.</p>
                 <p>Thay đổi này sẽ được ghi nhận trong lịch sử phiên bản.</p>
               </div>
             </div>
@@ -1205,32 +1224,35 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
 
       {/* Gửi trình duyệt Modal — shown after add/edit quy tắc hợp nhất */}
       {approvalRule && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h3 className="text-[16px] font-bold text-slate-900">Gửi trình duyệt</h3>
-                <p className="text-[12px] text-slate-500 mt-0.5">
-                  Quy tắc hợp nhất: <span className="text-indigo-700 font-medium">{approvalRule.name}</span>
+        <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="text-[16px] font-medium text-[#020817] leading-6">Gửi trình duyệt</h3>
+                <p className="text-[13px] text-[#64748B] mt-0.5">
+                  Quy tắc hợp nhất: <span className="text-[#020817]">{approvalRule.name}</span>
                 </p>
               </div>
               <button
+                type="button"
                 onClick={handleCloseApprovalModal}
-                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                className={BTN_GHOST_ICON}
+                aria-label="Đóng"
+                title="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="px-6 py-4 space-y-4 overflow-y-auto custom-scrollbar">
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                  Chọn người duyệt <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Chọn người duyệt <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   value={selectedApprover}
                   onChange={e => setSelectedApprover(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+                  className={`${INPUT_CLS} cursor-pointer`}
                 >
                   <option value="">-- Chọn người duyệt --</option>
                   {MOCK_APPROVERS.map(u => (
@@ -1242,7 +1264,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+                <label className={LABEL_CLS}>
                   Nội dung yêu cầu
                 </label>
                 <textarea
@@ -1250,48 +1272,38 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   onChange={e => setApprovalNote(e.target.value)}
                   rows={4}
                   placeholder="Nhập nội dung gửi kèm (nếu có)..."
-                  className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                  className={TEXTAREA_CLS}
                 />
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <h4 className="text-[13px] font-semibold text-slate-700 mb-3">Thông tin quy tắc hợp nhất</h4>
-                <div className="space-y-2 text-[13px]">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Thuộc thực thể:</span>
-                    <span className="text-slate-800 font-medium">{approvalRule.entityName}</span>
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className={`${LAYER_TITLE} mb-3`}>Thông tin quy tắc hợp nhất</h4>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Thuộc thực thể:</span>
+                    <span className={FIELD_VALUE}>{approvalRule.entityName}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Số quy tắc so khớp:</span>
-                    <span className="text-slate-800 font-medium">{approvalRule.matchingRulesDetail?.length ?? 0}</span>
+                  <div>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Số quy tắc so khớp:</span>
+                    <span className={`${FIELD_VALUE} tabular-nums`}>{approvalRule.matchingRulesDetail?.length ?? 0}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Số quy tắc trích rút:</span>
-                    <span className="text-slate-800 font-medium">{approvalRule.extractionRulesDetail?.length ?? 0}</span>
+                  <div>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Số quy tắc trích rút:</span>
+                    <span className={`${FIELD_VALUE} tabular-nums`}>{approvalRule.extractionRulesDetail?.length ?? 0}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Phiên bản thực thể mới:</span>
-                    <span className="text-slate-800">v{((mockEntities.find(e => e.id === approvalRule.entityId)?.version) ?? 1) + 1}</span>
+                  <div>
+                    <span className={`block ${FIELD_LABEL} mb-1`}>Phiên bản thực thể mới:</span>
+                    <span className={FIELD_VALUE}>v{((mockEntities.find(e => e.id === approvalRule.entityId)?.version) ?? 1) + 1}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
-              <button
-                onClick={handleCloseApprovalModal}
-                className="bg-white text-[#020817] border border-[#e2e8f0] hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors cursor-pointer shadow-sm"
-              >
+            <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
+              <button onClick={handleCloseApprovalModal} className={BTN_OUTLINE}>
                 Hủy
               </button>
-              <button
-                onClick={handleConfirmApprove}
-                disabled={!selectedApprover}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-[13px] transition-colors shadow-sm ${selectedApprover
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-              >
+              <button onClick={handleConfirmApprove} disabled={!selectedApprover} className={BTN_PRIMARY}>
                 <Send className="w-4 h-4" />
                 Gửi trình duyệt
               </button>
@@ -1306,29 +1318,24 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
         onClose={handleCancelPendingAction}
         title={pendingAction?.type === 'delete' ? 'Xóa quy tắc hợp nhất' : 'Chỉnh sửa quy tắc hợp nhất'}
         maxWidth="max-w-lg"
-        customHeaderIcon={<AlertTriangle className="w-5 h-5 text-amber-600 mr-3 flex-shrink-0" />}
+        customHeaderIcon={<AlertTriangle className="w-5 h-5 text-[#D97706] mr-3 flex-shrink-0" />}
         footer={
           <>
-            <button
-              onClick={handleCancelPendingAction}
-              className="px-4 py-2 text-[13px] text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-            >
+            <button onClick={handleCancelPendingAction} className={BTN_OUTLINE}>
               Hủy
             </button>
             <button
               onClick={handleConfirmPendingAction}
-              className={`px-4 py-2 text-[13px] font-medium text-white rounded-lg transition-colors ${
-                pendingAction?.type === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
-              }`}
+              className={pendingAction?.type === 'delete' ? BTN_DESTRUCTIVE : BTN_PRIMARY}
             >
               {pendingAction?.type === 'delete' ? 'Xác nhận xóa' : 'Tiếp tục chỉnh sửa'}
             </button>
           </>
         }
       >
-        <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-[13px] text-amber-800">
+        <div className="flex items-start gap-2 p-3 bg-[#FFF7ED] border border-[#FED7AA] rounded-lg">
+          <AlertTriangle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
+          <p className="text-[13px] text-[#020817]">
             Đã có bản ghi dữ liệu chủ hình thành từ quy tắc hợp nhất thiết lập, xóa quy tắc sẽ đồng thời xóa toàn bộ bản ghi dữ liệu chủ đã hình thành.
           </p>
         </div>

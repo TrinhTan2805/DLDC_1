@@ -18,9 +18,9 @@ Hệ thống sử dụng bộ font **Inter** cho **mọi phần tử**. Cỡ ch�
 
 | Thành phần | Cỡ chữ (Size) | Trọng số (Weight) | Màu sắc | Ghi chú |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tiêu đề chính (H1)** | 16px | Medium (500) | `#020817` | Tiêu đề trang / modal |
-| **Tiêu đề phụ (H2)** | 14px | Medium (500) | `#020817` | Tiêu đề khối/section |
-| **Tiêu đề nhỏ (H3)** | 13px | Medium (500) | `#020817` | Tiêu đề nhóm |
+| **Tiêu đề trang (H1)** | **20px**, cao dòng 32px | **Bold (700)** | **`#2A0F0F`** | Tiêu đề trang / tiêu đề khối nội dung chính (PM chốt 06/10/2026) |
+| **Tiêu đề modal** | 16px | Medium (500) | `#020817` | Tiêu đề header của modal / dialog — giữ 16px |
+| **Tiêu đề phụ (H2)** | 14px | Medium (500) | `#020817` | Tiêu đề khối/section **và tiêu đề nhóm** trong khối (PM chốt 07/10/2026: bỏ H3 13px). Tiêu đề khối có vạch xanh `#155DFC` bên trái (`SECTION_TITLE`); tiêu đề nhóm không có vạch (`GROUP_TITLE`) |
 | **Văn bản nội dung (P)** | 13px | Regular (400) | `#020817` | Cỡ chữ mặc định |
 | **Tên hệ thống (logo)** | 13px | Semibold (600) | `#020817` | Sidebar |
 | **Dòng phụ dưới logo** | 12px | Regular (400) | `#64748B` | Sidebar |
@@ -33,8 +33,9 @@ Hệ thống sử dụng bộ font **Inter** cho **mọi phần tử**. Cỡ ch�
 | **Tiêu đề cột bảng (`th`)** | 13px | **Bold (700)** | `#000000` | Mục 5.3 |
 | **Ô bảng (`td`)** | 13px | Regular (400) | `#000000` | Mục 5.3 |
 | **Badge** | 13px | Regular (400) | Theo loại badge | Mục 5.8 |
-| **Nhãn (Label) form** | 13px | Medium (500) | `#020817` | Mục 5.2 |
-| **Ô nhập liệu** | 13px | Regular (400) | `#020817` | Mục 5.2 |
+| **Nhãn trường** (form Thêm mới/Chỉnh sửa **và** tên trường ở Xem chi tiết) | 13px | Medium (500) | `#020817` | Một kiểu chung — mục 5.2, 5.17 |
+| **Ô nhập liệu / Giá trị trường** | 13px | Regular (400) | `#020817` | Mục 5.2, 5.17 |
+| **Nhãn trong vùng bộ lọc** | 13px | Semibold (600) | `#0E0D0D` | Theo trang chuẩn BTP — mục 5.19 |
 | **Chú thích (Small)** | 12px | Regular (400) | `#64748B` | Mô tả nhỏ |
 | **Liên kết (Link)** | 13px | Medium (500) | `#155DFC` | Hyperlink |
 
@@ -54,6 +55,7 @@ Màn hình mới **chỉ dùng các màu trong bảng dưới**, không dùng m�
 | :--- | :--- | :---: | :--- | :--- |
 | **Primary (xanh chính)** | `#155DFC` | <img src="https://placehold.co/24x24/155dfc/155dfc.png" alt="Primary" style="border-radius:4px" /> | `blue-600` | Nút chính, menu đang chọn, tab đang chọn, liên kết, focus |
 | **Nền menu đang chọn** | `#EAF3FF` | <img src="https://placehold.co/24x24/eaf3ff/eaf3ff.png" alt="Active bg" style="border-radius:4px; border: 1px solid #e2e8f0" /> | `[#EAF3FF]` | Hàng menu đang chọn |
+| **Tiêu đề trang** | `#2A0F0F` | <img src="https://placehold.co/24x24/2a0f0f/2a0f0f.png" alt="Page title" style="border-radius:4px" /> | `[#2A0F0F]` | Tiêu đề trang H1 (mục 1) |
 | **Chữ chính (Foreground)** | `#020817` | <img src="https://placehold.co/24x24/020817/020817.png" alt="Foreground" style="border-radius:4px" /> | `[#020817]` | Menu, breadcrumb, input, nội dung |
 | **Chữ đậm** | `#0F172A` | <img src="https://placehold.co/24x24/0f172a/0f172a.png" alt="Strong" style="border-radius:4px" /> | `[#0F172A]` | Số thống kê, tiêu đề |
 | **Chữ nút viền** | `#334155` | <img src="https://placehold.co/24x24/334155/334155.png" alt="Outline text" style="border-radius:4px" /> | `[#334155]` | Nút outline |
@@ -65,6 +67,8 @@ Màn hình mới **chỉ dùng các màu trong bảng dưới**, không dùng m�
 | **Viền** | `#E2E8F0` | <img src="https://placehold.co/24x24/e2e8f0/e2e8f0.png" alt="Border" style="border-radius:4px" /> | `[#E2E8F0]` | Header, thẻ, nút icon, ô nhập |
 | **Viền đậm** | `#CBD5E1` | <img src="https://placehold.co/24x24/cbd5e1/cbd5e1.png" alt="Border strong" style="border-radius:4px" /> | `[#CBD5E1]` | Nút outline |
 | **Đường kẻ hàng bảng** | `#E0E0E0` | <img src="https://placehold.co/24x24/e0e0e0/e0e0e0.png" alt="Row border" style="border-radius:4px" /> | `[#E0E0E0]` | Viền dưới mỗi hàng bảng |
+| **Nhãn bộ lọc** | `#0E0D0D` | <img src="https://placehold.co/24x24/0e0d0d/0e0d0d.png" alt="Filter label" style="border-radius:4px" /> | `[#0E0D0D]` | Nhãn trên ô lọc (mục 5.19) |
+| **Phân trang** | `#555555` · `#F0F0F0` · `#E6F4FF` · `#0091FF` | <img src="https://placehold.co/24x24/e6f4ff/0091ff.png" alt="Pagination" style="border-radius:4px; border: 1px solid #e2e8f0" /> | `[#…]` | Chữ khối phân trang · nền nút trang / ô chọn số dòng · nền + chữ trang hiện tại (mục 5.14) |
 | **Nút icon nhấn mạnh** | `#10B981` | <img src="https://placehold.co/24x24/10b981/10b981.png" alt="Emerald" style="border-radius:4px" /> | `[#10B981]` | Nút icon nền xanh lá |
 
 ### 2.2. Màu trạng thái
@@ -179,11 +183,11 @@ Mọi nút: chữ **13px / Medium (500)**, bo góc **8px**, kế thừa font Int
 | Loại | Áp dụng | Bình thường | Hover | Đang chọn / đang mở | **Bị vô hiệu** |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Primary** | Thêm mới, Lưu / Xác nhận | Nền `#155DFC`, chữ trắng | Nền `#1447E6` | — | Nền `#F1F5F9`, chữ `#94A3B8` |
-| **Outline** | Kết xuất, Tham số API, Giám sát, Hủy, Trước / Sau, số trang | Nền trắng, viền `#CBD5E1`, chữ `#334155` | Nền `#F8FAFC`, viền `#94A3B8`, chữ `#020817` | Trang hiện tại: nền + viền `#155DFC`, chữ trắng | Nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8` |
+| **Outline** | Kết xuất, Tham số API, Giám sát, Hủy | Nền trắng, viền `#CBD5E1`, chữ `#334155` | Nền `#F8FAFC`, viền `#94A3B8`, chữ `#020817` | — (phân trang xem mục 5.14) | Nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8` |
 | **Ghost** | Bỏ qua, thao tác phụ | Trong suốt, chữ `#020817` | Nền `#F1F5F9` | — | Chữ `#94A3B8` |
 | **Destructive** | Xóa (modal xác nhận) | Nền `#DC2626`, chữ trắng | Nền `#B91C1C` | — | Nền `#F1F5F9`, chữ `#94A3B8` |
 | **Icon nhấn mạnh** | Tìm kiếm | Nền `#10B981`, icon trắng | Nền `#059669` | — | Nền `#F1F5F9`, icon `#94A3B8` |
-| **Icon outline** | Bộ lọc | Nền trắng, viền `#CBD5E1` ¹, icon `#475569` | Nền `#F8FAFC`, icon `#020817` | Nền `#EAF3FF`, viền `#BFDBFE`, icon `#155DFC` | Nền `#F1F5F9`, viền `#E2E8F0`, icon `#94A3B8` |
+| **Icon outline** | Bộ lọc nâng cao, nút icon nền trắng khác | Nền trắng, viền `#CBD5E1` ¹, icon `#475569` | Nền `#F8FAFC`, icon `#020817` | Nền `#EAF3FF`, viền `#BFDBFE`, icon `#155DFC` | Nền `#F1F5F9`, viền `#E2E8F0`, icon `#94A3B8` |
 | **Icon trong bảng** (không viền, 32×32) | Xem chi tiết, Mapping, `⋯` | Trong suốt, icon `#475569` | Nền `#F1F5F9`, icon `#155DFC` | Menu `⋯` đang mở: nền `#EAF3FF`, icon `#155DFC` | Icon `#CBD5E1`, không hover, tooltip ghi lý do |
 | **Chuông thông báo** | Header | Trong suốt, tròn, icon `#475569` | Nền `#F1F5F9` | — | — |
 
@@ -216,28 +220,30 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 </div>
 
 ### 5.2. Ô nhập liệu (Input & Textarea)
-- Chiều cao: **35px** (theo trang chuẩn). Padding **8×12**.
+- Chiều cao: **40px** — thống nhất cho **mọi ô nhập** (form Thêm mới/Chỉnh sửa, ô tìm kiếm, ô lọc, ô tìm menu), bằng chiều cao nút. Padding ngang **12px** (ô tìm kiếm trong trang 16px — mục 5.19).
 - Chữ: 13px / Regular (400) / `#020817`.
 - Bo góc: **8px** — *đề xuất, chưa xác nhận từ trang chuẩn*.
 - Viền: 1px `#E2E8F0` — *đề xuất, chưa xác nhận từ trang chuẩn*.
 - Trạng thái Focus: ring 2px màu primary `#155DFC`.
-- **Disabled (Vô hiệu hóa):** Nền xám nhạt (`bg-slate-100`), chữ mờ (`opacity-50`), con trỏ `not-allowed`.
-- **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ (`*`). Khi có lỗi (validation), border chuyển sang màu `destructive` (#dc2626) và hiển thị thông báo lỗi cỡ 12px bên dưới.
+- **Nhãn trường:** 13px / Medium (500) / `#020817` (đen), cách ô nhập 4px — **dùng chung một kiểu với tên trường ở màn Xem chi tiết** (mục 5.17).
+- **Disabled (Vô hiệu hóa):** Nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`** (cùng quy tắc với nút, mục 5.1).
+- **Ô bị khóa ở màn Xem chi tiết** *(PM chốt 07/10/2026 — áp dụng module Cung cấp dữ liệu; chỉ cho ô `disabled` ở màn xem chi tiết, không áp cho ô nhập bình thường)*: **giá trị đã có hiển thị chữ đen `#000000`**; ô trống hiển thị **placeholder xám `#94A3B8`**, 13px / 400; nền `#F0F0F0` (như trang BTP hiển thị); viền `rgba(0,0,0,0.26)`. Code: ghép `VIEW_FIELD_CLS` (trong `collectionUi.tsx`) sau `INPUT_CLS` — `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Màn xem chi tiết mà ô không bị khóa sẵn → bọc form bằng `<fieldset disabled={isViewMode}>` để mọi ô nhận kiểu này. Ô giả lập bằng `div` (VD ô tệp đính kèm) theo cùng quy tắc: có giá trị → chữ đen, trống → chữ xám.
+- **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ `*` màu `#DC2626`. Khi có lỗi (validation), viền chuyển `#DC2626` và hiển thị thông báo lỗi 12px `#DC2626` bên dưới.
 - **Cỡ chữ:** Nhãn và nội dung ô nhập đều 13px (theo bảng Typography mục 1).
 - Placeholder, trạng thái lỗi/disabled **chưa đo** ở trang chuẩn — dùng quy định trên cho tới khi đo đủ.
 
 **Class Tailwind chuẩn:**
 ```tsx
 <label className="block text-[13px] font-medium text-[#020817] mb-1">
-  Tên dịch vụ <span className="text-red-600">*</span>
+  Tên dịch vụ <span className="text-[#DC2626]">*</span>
 </label>
-<input className="w-full h-[35px] px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white
+<input className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white
   focus:outline-none focus:ring-2 focus:ring-blue-600
-  disabled:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed" />
-{/* Khi lỗi: thay border-[#E2E8F0] bằng border-red-600 và hiển thị: */}
-<p className="mt-1 text-[12px] text-red-600">Tên dịch vụ không được để trống</p>
+  disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] disabled:cursor-not-allowed" />
+{/* Khi lỗi: thay border-[#E2E8F0] bằng border-[#DC2626] và hiển thị: */}
+<p className="mt-1 text-[12px] text-[#DC2626]">Tên dịch vụ không được để trống</p>
 ```
-- Textarea dùng cùng class nhưng thay `h-[35px]` bằng `py-2` và đặt `rows`.
+- Textarea dùng cùng class nhưng thay `h-10` bằng `py-2` và đặt `rows`.
 - Select dùng cùng class với input.
 
 **Ví dụ hiển thị:**
@@ -557,6 +563,28 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 </div>
 ```
 
+**Ngoại lệ – Thẻ header màn Tổng quan (Dashboard)** *(PM chốt 06/10/2026)*: ở các màn **Tổng quan** (có biểu đồ bên dưới), hàng thẻ header **giữ kích thước lớn** để cân bằng với các biểu đồ. Màu, viền và bo góc vẫn theo chuẩn.
+
+| Thuộc tính | Giá trị (màn Tổng quan) |
+| :--- | :--- |
+| Padding / bo góc | **24px** (`p-6`) / 16px (`rounded-2xl`), viền 1px `#E2E8F0`, không bóng |
+| Ô icon | Trên trái, **48×48** (`w-12 h-12 rounded-lg`), nền `{màu}-50`, icon **24px** `{màu}-600` |
+| Dòng xu hướng (nếu có) | Trên phải, dạng viên: 13px / 500, `#16A34A` trên `#F0FDF4` (giảm: `#DC2626` trên `#FEF2F2`) |
+| Số liệu | **30px / Bold (700) / `#0F172A`**, cao dòng 36px |
+| Nhãn | Dưới số, **14px / Medium (500) / `#64748B`** |
+| Bố cục hàng thẻ | `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6` |
+
+```tsx
+<div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] flex flex-col">
+  <div className="flex items-center justify-between mb-4">
+    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center"><FolderTree className="w-6 h-6" /></div>
+    <span className="flex items-center gap-1 text-[13px] font-medium text-[#16A34A] bg-[#F0FDF4] px-2 py-1 rounded-full"><TrendingUp className="w-4 h-4" /> +12%</span>
+  </div>
+  <h3 className="text-[30px] leading-9 font-bold text-[#0F172A]">124</h3>
+  <p className="text-[14px] font-medium text-[#64748B] mt-1">Tổng số danh mục</p>
+</div>
+```
+
 ### 5.7. Chọn giá trị (Select / Dropdown)
 - Dùng cho các bộ lọc tìm kiếm hoặc form nhập liệu có danh sách cố định.
 - Hiển thị icon chevron ở góc phải để nhận diện dễ dàng.
@@ -692,29 +720,42 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 </div>
 
 ### 5.14. Phân trang (Pagination)
-- Nằm ở dưới cùng của Bảng dữ liệu.
-- Cung cấp tính năng chọn trang, xem tổng số bản ghi và điều chỉnh số dòng hiển thị trên mỗi trang (10 / 20 / 50 / 100; đổi số dòng thì quay về trang 1).
-- Nút Trước / Sau / số trang dùng kiểu **Outline**; trang hiện tại kiểu đang chọn; Trước (trang đầu) và Sau (trang cuối) dùng trạng thái **bị vô hiệu** — theo bảng mục 5.1.
+Quy định chung — theo mẫu PM cung cấp 06/10/2026 (MUI `Pagination`: variant outlined, size medium, shape rounded). Component dùng chung: `Pagination` trong `pages/collection/collectionUi.tsx`.
+
+| Thành phần | Quy chuẩn |
+| :--- | :--- |
+| Khối bọc | Nằm dưới bảng, viền trên `#E2E8F0`; padding **13px**; chữ **14px / 400 / `#555555`**; trái – phải dàn hai đầu |
+| Ô chọn số dòng (bên trái) | 70×36px, nền `#F0F0F0`, không viền, bo 8px, mũi tên ▾; lựa chọn 10 / 20 / 50 / 100; đổi số dòng → về trang 1 |
+| Chữ đếm | "Hiển thị **1-10/1622**" — phần số **in đậm**; cách ô chọn ~10px |
+| Nút trang | **32×32px** (rộng thêm theo số, VD "163" ≈ 34px), padding 0 6px, margin 0 3px (cách nhau 6px), bo **8px**, chữ **13px / 700** |
+| Trang thường | Nền `#F0F0F0`, chữ `#000000`, không viền |
+| **Trang hiện tại** | Nền **`#E6F4FF`**, chữ **`#0091FF`**, viền 1px `rgba(37,99,235,0.5)` |
+| Mũi tên Trước / Sau | Chỉ icon `‹` `›`, nền trong suốt, màu `#020817`; ở trang đầu / cuối thì **vô hiệu** (mờ, không bấm được) |
+| Dấu "…" | Khối 32×19px, bo 16px, màu `#020817` (không phải nút) |
+| Rút gọn số trang | Luôn hiện trang đầu và trang cuối; ≤ 7 trang hiện hết; nhiều hơn thì dạng `1 2 3 4 5 … 163`, `1 … 9 10 11 … 163`, `1 … 159 160 161 162 163` |
+
+```tsx
+<Pagination
+  className="border-t border-[#E2E8F0]"
+  currentPage={page} totalItems={total} pageSize={size}
+  onPageChange={setPage} onPageSizeChange={setSize}
+/>
+```
 
 **Ví dụ hiển thị:**
-<div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; max-width: 600px; flex-wrap: wrap; gap: 12px;">
-  <div style="display: flex; align-items: center; gap: 8px;">
-    <span style="color: #64748b;">Hiển thị</span>
-    <div style="padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 4px; background: white; display: flex; align-items: center; gap: 4px; cursor: pointer;">
-      <span>10</span>
-      <span style="font-size: 10px; color: #64748b;">▼</span>
-    </div>
-    <span style="color: #64748b;">bản ghi / trang</span>
+<div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; padding: 13px; font-size: 14px; color: #555555; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 720px; background: white;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div style="width: 70px; height: 36px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-sizing: border-box; color: #020817;"><span>10</span><span style="font-size: 10px; color: #64748b;">▼</span></div>
+    <span>Hiển thị <b>1-10/1622</b></span>
   </div>
-  
-  <div style="display: flex; align-items: center; gap: 12px;">
-    <span style="color: #64748b;">1 - 10 / 50</span>
-    <div style="display: flex; gap: 4px;">
-      <div style="padding: 4px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f1f5f9; color: #94a3b8; cursor: not-allowed;">Trước</div>
-      <div style="padding: 4px 12px; border: 1px solid #155dfc; background: #155dfc; color: white; border-radius: 8px; cursor: pointer;">1</div>
-      <div style="padding: 4px 12px; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; cursor: pointer;">2</div>
-      <div style="padding: 4px 12px; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; cursor: pointer;">Sau</div>
-    </div>
+  <div style="display: flex; align-items: center;">
+    <span style="width: 32px; text-align: center; margin: 0 3px; color: #020817; opacity: .4;">‹</span>
+    <span style="min-width: 32px; height: 32px; margin: 0 3px; border-radius: 8px; background: #e6f4ff; border: 1px solid rgba(37,99,235,.5); color: #0091ff; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">1</span>
+    <span style="min-width: 32px; height: 32px; margin: 0 3px; border-radius: 8px; background: #f0f0f0; color: #000; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;">2</span>
+    <span style="min-width: 32px; height: 32px; margin: 0 3px; border-radius: 8px; background: #f0f0f0; color: #000; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;">3</span>
+    <span style="width: 32px; text-align: center; margin: 0 3px; color: #020817;">…</span>
+    <span style="min-width: 34px; height: 32px; margin: 0 3px; border-radius: 8px; background: #f0f0f0; color: #000; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;">163</span>
+    <span style="width: 32px; text-align: center; margin: 0 3px; color: #020817;">›</span>
   </div>
 </div>
 
@@ -761,38 +802,38 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 
 ### 5.17. Trường thông tin chỉ đọc (Label – Value)
 - Dùng cho màn hình **Xem chi tiết** (modal/trang read-only) hiển thị cặp Nhãn – Giá trị.
-- **Nhãn:** 13px, Medium (500), màu `muted` (`#64748b` — `text-slate-500`). Viết hoa chữ đầu như form, **không dùng** `uppercase`.
-- **Giá trị:** 13px, Regular (400), màu `foreground` (`text-slate-900`). **Không dùng** in nghiêng (`italic`) hay in đậm.
+- **Tên trường:** 13px / Medium (500) / `#020817` (đen) — **cùng một kiểu với nhãn ở form Thêm mới/Chỉnh sửa** (mục 5.2). Viết hoa chữ đầu, **không dùng** `uppercase`.
+- **Giá trị:** 13px / Regular (400) / `#020817`. **Không dùng** in nghiêng (`italic`) hay in đậm.
 - **Giá trị trống:** Hiển thị dấu `-`.
 - Khoảng cách nhãn – giá trị: 4px (`space-y-1`). Bố cục lưới 2 cột: `grid grid-cols-2 gap-x-6 gap-y-4`; trường dài (Mô tả, Ghi chú) chiếm 2 cột (`col-span-2`).
 - Giá trị dạng trạng thái dùng Badge (mục 5.8); giá trị dạng liên kết dùng màu `primary`.
-- Nhãn ở màn Xem chi tiết dùng **cùng cỡ chữ và độ đậm** với nhãn ở form Thêm mới/Chỉnh sửa (mục 5.2), chỉ khác màu (muted thay cho foreground) để người dùng phân biệt chế độ chỉ đọc.
+- Tên trường và giá trị cùng màu đen, phân biệt bằng độ đậm (500 so với 400). Chế độ chỉ đọc phân biệt với form nhờ **giá trị không có khung ô nhập**.
 
 **Class Tailwind chuẩn:**
 ```tsx
 <div className="grid grid-cols-2 gap-x-6 gap-y-4">
   <div className="space-y-1">
-    <div className="text-[13px] font-medium text-slate-500">Tên dịch vụ</div>
-    <div className="text-[13px] text-slate-900 break-words">{value || '-'}</div>
+    <div className="text-[13px] font-medium text-[#020817]">Tên dịch vụ</div>
+    <div className="text-[13px] text-[#020817] break-words">{value || '-'}</div>
   </div>
   <div className="space-y-1 col-span-2">
-    <div className="text-[13px] font-medium text-slate-500">Mô tả</div>
-    <div className="text-[13px] text-slate-900 whitespace-pre-line">{description || '-'}</div>
+    <div className="text-[13px] font-medium text-[#020817]">Mô tả</div>
+    <div className="text-[13px] text-[#020817] whitespace-pre-line">{description || '-'}</div>
   </div>
 </div>
 ```
 
 **Ví dụ hiển thị:**
 <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; max-width: 500px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: white;">
-  <div><div style="font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 4px;">Tên dịch vụ</div><div style="font-size: 13px; color: #020817;">API Hộ tịch</div></div>
-  <div><div style="font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 4px;">Mức độ bảo mật</div><div style="font-size: 13px; color: #020817;">-</div></div>
-  <div style="grid-column: span 2;"><div style="font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 4px;">Mô tả</div><div style="font-size: 13px; color: #020817;">Thu thập dữ liệu hộ tịch từ hệ thống nguồn.</div></div>
+  <div><div style="font-size: 13px; font-weight: 500; color: #020817; margin-bottom: 4px;">Tên dịch vụ</div><div style="font-size: 13px; color: #020817;">API Hộ tịch</div></div>
+  <div><div style="font-size: 13px; font-weight: 500; color: #020817; margin-bottom: 4px;">Mức độ bảo mật</div><div style="font-size: 13px; color: #020817;">-</div></div>
+  <div style="grid-column: span 2;"><div style="font-size: 13px; font-weight: 500; color: #020817; margin-bottom: 4px;">Mô tả</div><div style="font-size: 13px; color: #020817;">Thu thập dữ liệu hộ tịch từ hệ thống nguồn.</div></div>
 </div>
 
 ### 5.18. Sidebar, Menu và Header
 | Thành phần | Quy chuẩn |
 | :--- | :--- |
-| **Sidebar** | Rộng **250px**, nền `#FFFFFF`, cố định bên trái. Đường kẻ phải: *chưa xác nhận* |
+| **Sidebar** | Rộng **250px** (thu gọn 80px), nền `#FFFFFF`, cố định bên trái, đường kẻ phải 1px `#E2E8F0`. Nút thu gọn/mở rộng tròn 24px nằm đè mép phải |
 | **Logo** | Tên hệ thống "Kho Dữ liệu dùng chung" 13px/600 `#020817`; dòng "Thuộc quản lý của Bộ Tư pháp" 12px/400 `#64748B`; chữ cách mép trái 54px |
 | **Menu cấp 1** | Chữ 12px/400 `#020817` (hàng cha có thể dùng `#475569`), cao **35px**, bo 10px, cách mép trái 6px |
 | **Menu cấp 2** | Chữ 12px/400, cao **30px**, bo 10px, thụt vào 16px so với cấp 1 |
@@ -811,7 +852,80 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 
 **Tên menu chuẩn (theo trang Bộ Tư pháp):** Tổng quan; Quản lý thu thập (Dashboard, Thiết lập thu thập, Xem dữ liệu thu thập, Đối soát dữ liệu, Xử lý dữ liệu)²; Danh mục dùng chung; Quản lý dữ liệu chủ; Dữ liệu mở; Cung cấp dữ liệu; Quản trị & vận hành.
 
-² Phân cấp con của "Quản lý thu thập" suy ra từ thứ tự hiển thị — *chưa xác nhận*. Bản localhost đang đặt tên khác: "Tổng quan thu thập" (nên là **Dashboard**), "Dữ liệu chủ" (nên là **Quản lý dữ liệu chủ**).
+² Phân cấp con của "Quản lý thu thập" suy ra từ thứ tự hiển thị — *chưa xác nhận*. Đã đổi tên trong `Sidebar.tsx` (05/10/2026): "Tổng quan thu thập" → **Dashboard**, "Dữ liệu chủ" → **Quản lý dữ liệu chủ**. "Xử lý dữ liệu" giữ là menu cấp 1 (PM chốt).
+
+### 5.19. Tìm kiếm và Bộ lọc
+Theo số đo trang chuẩn Bộ Tư pháp (cửa sổ 1534px), PM chốt 05/10/2026.
+
+**Thanh tìm kiếm**
+| Thuộc tính | Quy chuẩn |
+| :--- | :--- |
+| Bố cục | Nhóm trái: ô tìm kiếm (giãn hết) → nút Tìm kiếm → nút Bộ lọc; nhóm phải: Thêm mới → nút viền → Kết xuất; hai nhóm dàn hai đầu (`justify-between`) |
+| Khoảng cách | **6px** giữa ô tìm kiếm và nút, giữa các nút trong cả hai nhóm (`gap-1.5`) |
+| Ô tìm kiếm | Cao **40px**, bo 8px, viền 1px `#E2E8F0`, nền trắng, đệm ngang **16px**, chữ 13px/400 `#020817`. **Không** đặt icon trong ô, **không** có nút X xóa nhanh |
+| Placeholder | "Tìm kiếm theo " + các trường được tìm. VD: *Tìm kiếm theo tên dịch vụ, mã dịch vụ, hệ thống nguồn* |
+| Nút Tìm kiếm | 40×40, bo 8px, nền `#10B981`, icon trắng (mục 5.1) |
+| Nút Bộ lọc | 40×40, bo 8px, **nền trắng**, viền `#CBD5E1`, icon `#475569` (kiểu Icon outline mục 5.1 — PM chốt, không dùng nền xanh của BTP); vùng lọc đang mở: nền `#EAF3FF`, viền `#BFDBFE`, icon `#155DFC` và đổi thành `X` |
+
+**Cách tìm**
+- **Chỉ ra kết quả khi bấm nút Tìm kiếm hoặc nhấn Enter** trong ô tìm kiếm — gõ chữ không tự lọc.
+- Giá trị trong vùng bộ lọc **cũng chỉ áp dụng khi bấm Tìm kiếm / Enter** (cùng lúc với từ khóa).
+- Mỗi lần tìm quay về trang 1. So khớp **không phân biệt hoa/thường và dấu tiếng Việt**.
+- Không có kết quả → trạng thái rỗng (mục 5.16).
+- Vùng cuộn chứa thanh tìm kiếm phải chừa chỗ cho viền focus 2px (VD `-mx-0.5 px-0.5`), không để ô/nút sát mép bị cắt viền.
+
+**Vùng bộ lọc** (hiện khi bấm nút Bộ lọc, nằm ngay dưới thanh tìm kiếm, **có khung xám bao quanh** — PM chốt)
+| Thuộc tính | Quy chuẩn |
+| :--- | :--- |
+| Khung | Nền `#F8FAFC`, viền 1px `#E2E8F0`, bo 8px, đệm 16px; cách thanh tìm kiếm **15px** |
+| Ô lọc | Rộng tối thiểu **193px**, **tự giãn đều lấp đủ chiều ngang khung** (`auto-fit`), tự xuống hàng khi không đủ chỗ; cao **40px**, bo 8px, nền trắng; khoảng cách giữa ô **8px** |
+| Nhãn trên ô | **13px / Semibold (600) / `#0E0D0D`**, cao 20px, cách ô **2px** |
+
+```tsx
+<div className="flex items-center justify-between gap-4">
+  <div className="flex-1 flex items-center gap-1.5">
+    <input className="w-full h-10 px-4 border border-[#E2E8F0] rounded-lg text-[13px]" placeholder="Tìm kiếm theo ..."
+      onKeyDown={(e) => e.key === 'Enter' && runSearch()} />
+    <button onClick={runSearch} className="w-10 h-10 rounded-lg bg-[#10B981] text-white"><Search /></button>
+    <button className="w-10 h-10 rounded-lg border bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC]"><Filter /></button>
+  </div>
+  <div className="flex items-center gap-1.5">{/* Thêm mới, ..., Kết xuất */}</div>
+</div>
+<div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg grid grid-cols-[repeat(auto-fit,minmax(193px,1fr))] gap-2">
+  <div>
+    <label className="block text-[13px] font-semibold text-[#0E0D0D] leading-5 mb-0.5">Trạng thái</label>
+    <select className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px]">…</select>
+  </div>
+</div>
+```
+
+---
+
+### 5.20. Tùy chọn cột (ẩn/hiện và sắp xếp thứ tự trường ở danh sách)
+*(PM duyệt phương án A ngày 07/10/2026 — thí điểm màn Xem dữ liệu thu thập › CSDL Hộ tịch)*
+
+Cho phép người dùng chọn các trường muốn xem **và sắp xếp thứ tự cột** trên bảng danh sách (sắp xếp bổ sung ngày 07/10/2026).
+
+| Thuộc tính | Quy chuẩn |
+| :--- | :--- |
+| Nút | Icon outline 40×40 (`Columns3`), đặt **trước** nút Bộ lọc, tooltip "Tùy chọn cột". Đang mở: nền `#EAF3FF`. Đang ẩn/hiện khác mặc định: chấm xanh `#155DFC` góc phải trên |
+| Khung (Popover) | Rộng 288px, căn phải, viền `#E2E8F0`, bo 8px. Đầu khung: "Hiển thị & sắp xếp cột" + bộ đếm `đang hiện/tổng` (12px `#64748B`), dòng hướng dẫn 12px "Kéo ⋮⋮ hoặc dùng ↑ ↓ để đổi thứ tự". Mỗi dòng cao 36px: tay cầm `GripVertical` `#94A3B8` → ô tích xanh `#155DFC` + tên 13px → nút ↑ ↓ 24×24 (hiện khi rê chuột/focus, khóa ở dòng đầu/cuối). Danh sách dài cuộn trong khung (cao tối đa 320px) |
+| Thứ tự mặc định | **Theo thứ tự trường khi Nạp cấu trúc** — khai báo `ColumnDef` theo đúng thứ tự này |
+| Sắp xếp | Kéo tay cầm ⋮⋮ (khi kéo: dòng đang kéo mờ 50%, vạch xanh `#155DFC` 2px báo vị trí thả) hoặc bấm ↑ ↓. Kéo được cả cột đang ẩn và cột "luôn hiện". STT luôn đầu, Thao tác luôn cuối |
+| Danh sách trường | Gồm các cột mặc định **và** các trường khác của bản ghi (kể cả trường trong popup chi tiết) |
+| Cột cố định | STT và Thao tác luôn hiện (không có trong danh sách). Cột định danh chính khóa ô tích, ghi "(luôn hiện)" |
+| Thao tác | Tích/bỏ tích và đổi thứ tự áp dụng **ngay** (không cần nút Áp dụng), khung vẫn mở. "Chọn tất cả" bật toàn bộ; bấm lần nữa chỉ giữ cột khóa. "Khôi phục mặc định" (chữ `#155DFC`, khóa khi đang ở mặc định) trả về **cả ẩn/hiện lẫn thứ tự** |
+| Ghi nhớ | Lưu `{ order, visible }` theo **từng bộ dữ liệu** trên trình duyệt (`localStorage`, khóa `dldc.columns.<màn>.<bộ dữ liệu>`); đọc được dữ liệu lưu dạng cũ (mảng cột đang hiện). Chấm xanh trên nút khi ẩn/hiện **hoặc** thứ tự khác mặc định. Không ảnh hưởng dữ liệu và bộ lọc |
+| Nhiều cột | Bảng cuộn ngang, cột Thao tác ghim phải (mục 5.3.2), văn bản dài cắt `…` + tooltip (mục 5.3.1) |
+
+**Code dùng chung** (`collectionUi.tsx`): `ColumnDef<T>` (`key`, `label`, `render`, `locked`, `defaultVisible`, `wide`), hook `useVisibleColumns(storageKey, columns)` (trả `order`, `visible`, `visibleColumns` theo thứ tự, `toggle`, `setAll`, `move`, `reset`, `isDefault`) và component `<ColumnPicker />` (Popover, kéo-thả HTML5 sẵn có — không thêm thư viện). Bảng nhận `columns={cols.visibleColumns}` và tự vẽ cột.
+
+```tsx
+const cols = useVisibleColumns(`dldc.columns.civil-registry.${datasetId}`, columnDefs);
+<ColumnPicker columns={columnDefs} order={cols.order} visible={cols.visible} onToggle={cols.toggle}
+  onToggleAll={cols.setAll} onMove={cols.move} onReset={cols.reset} isDefault={cols.isDefault} />
+<Table columns={cols.visibleColumns} ... />
+```
 
 ---
 
@@ -870,6 +984,7 @@ button, input, select, textarea { font-family: inherit; }
 - [ ] Chỉ dùng màu trong mục 2; màu xanh chính duy nhất `#155DFC`.
 - [ ] Thẻ bo 16px, nút bo 8px, hàng menu bo 10px.
 - [ ] Bảng: tiêu đề cao 42px chữ 700 đen, hàng cao 48px, chữ dài cắt `…` + tooltip khi hover, không xuống dòng ngoài ý muốn.
+- [ ] Mọi ô nhập cao 40px; tìm kiếm chỉ chạy khi bấm nút Tìm kiếm / Enter (mục 5.19).
 - [ ] Badge đúng khung (13px/400, padding 2×8, viền 1px, bo 16px) và đúng bộ ba màu.
 - [ ] Tên menu và thứ tự nút trùng trang chuẩn.
 

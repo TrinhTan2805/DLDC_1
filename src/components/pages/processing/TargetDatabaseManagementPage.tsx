@@ -1,16 +1,31 @@
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, Database, Server, RefreshCw, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, Database, Filter, X } from 'lucide-react';
 import { TargetDatabaseModal } from './TargetDatabaseModal';
 import { initialTargetDatabases, TargetDatabase } from './mockTargetDatabases';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, BTN_PRIMARY, BTN_OUTLINE, BTN_FOCUS, INPUT_CLS,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch,
+} from '../collection/collectionUi';
+
+const TH = 'px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-left text-[13px] text-black';
 
 export function TargetDatabaseManagementPage() {
   const [data, setData] = useState<TargetDatabase[]>(initialTargetDatabases);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Filter states
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm nút Tìm kiếm hoặc Enter (compomennt.md 5.19)
+  const EMPTY_FILTERS = { searchTerm: '', filterType: 'all', filterStatus: 'all' };
+  const [applied, setApplied] = useState(EMPTY_FILTERS);
+
+  // Phân trang (compomennt.md 5.14)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,14 +33,21 @@ export function TargetDatabaseManagementPage() {
 
   // Filtered data based on search term and filters
   const filteredData = data.filter(item => {
-    const matchSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        item.host.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        item.type.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchType = filterType === 'all' || item.type === filterType;
-    const matchStatus = filterStatus === 'all' || item.status === filterStatus;
-    
+    const q = normalizeSearch(applied.searchTerm);
+    const matchSearch = normalizeSearch(item.name).includes(q) ||
+                        normalizeSearch(item.host).includes(q) ||
+                        normalizeSearch(item.type).includes(q);
+    const matchType = applied.filterType === 'all' || item.type === applied.filterType;
+    const matchStatus = applied.filterStatus === 'all' || item.status === applied.filterStatus;
+
     return matchSearch && matchType && matchStatus;
   });
+  const pagedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const runSearch = () => {
+    setApplied({ searchTerm, filterType, filterStatus });
+    setCurrentPage(1);
+  };
 
   const handleAdd = () => {
     setEditingItem(null);
@@ -53,7 +75,7 @@ export function TargetDatabaseManagementPage() {
   const handleSave = (savedData: Omit<TargetDatabase, 'id' | 'lastUpdated'>) => {
     const now = new Date();
     const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
+
     if (editingItem) {
       // Edit mode
       setData(data.map(item => item.id === editingItem.id ? { ...savedData, id: editingItem.id, lastUpdated: formattedDate } : item));
@@ -82,46 +104,44 @@ export function TargetDatabaseManagementPage() {
   const uniqueTypes = Array.from(new Set(data.map(item => item.type)));
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <div className="h-full flex flex-col bg-slate-50 p-6 space-y-6 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm">
-          <Database className="w-6 h-6 text-blue-600" />
-        </div>
-        <div>
-          <h1 className="text-[20px] font-bold text-slate-800 uppercase tracking-tight" style={{ fontSize: '20px' }}>Quản lý CSDL đích</h1>
-          <p className="text-[13px] text-slate-500 mt-1">Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích</p>
-        </div>
+    <div>
+      <div className="h-full flex flex-col bg-[#F8FAFC] p-6 space-y-4 min-h-screen">
+      {/* Header (H1 — compomennt.md mục 1) */}
+      <div>
+        <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Quản lý CSDL đích</h1>
+        <p className="text-[13px] text-[#64748B]">Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích</p>
       </div>
 
-      {/* Toolbar - Separated from Table Card */}
-      <div className="flex flex-col gap-4">
+      {/* Thanh tìm kiếm & bộ lọc (compomennt.md 5.19) */}
+      <div>
         <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-1.5">
             <input
               type="text"
+              aria-label="Tìm kiếm CSDL đích"
               placeholder="Tìm kiếm theo tên CSDL, Host hoặc Kiểu kết nối..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+              className={SEARCH_INPUT_CLS}
             />
-            <button className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-all flex items-center justify-center shrink-0 active:scale-95">
+            <button type="button" aria-label="Tìm kiếm" title="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
               <Search className="w-5 h-5" />
             </button>
-            <button 
+            <button
+              type="button"
+              aria-label="Bộ lọc"
+              title="Bộ lọc"
+              aria-expanded={showFilters}
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2.5 border rounded-lg shadow-sm transition-all flex items-center justify-center shrink-0 active:scale-95 ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              className={filterBtnClass(showFilters)}
             >
-              <Filter className="w-5 h-5" />
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleAdd}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-            >
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={handleAdd} className={BTN_PRIMARY}>
               <Plus className="w-4 h-4" />
               Thêm mới
             </button>
@@ -130,13 +150,14 @@ export function TargetDatabaseManagementPage() {
 
         {/* Expanded Filters */}
         {showFilters && (
-          <div className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-lg shadow-sm animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3">
-              <span className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Kiểu CSDL:</span>
+          <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+            <div>
+              <label className={FILTER_LABEL}>Kiểu CSDL</label>
               <select
+                aria-label="Kiểu CSDL"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={INPUT_CLS}
               >
                 <option value="all">Tất cả</option>
                 {uniqueTypes.map(type => (
@@ -144,123 +165,115 @@ export function TargetDatabaseManagementPage() {
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Trạng thái:</span>
+            <div>
+              <label className={FILTER_LABEL}>Trạng thái</label>
               <select
+                aria-label="Trạng thái"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={INPUT_CLS}
               >
                 <option value="all">Tất cả</option>
                 <option value="active">Hoạt động</option>
                 <option value="inactive">Tạm dừng</option>
               </select>
             </div>
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setFilterType('all');
-                setFilterStatus('all');
-              }}
-              className="text-[13px] text-blue-600 hover:underline font-medium ml-auto"
-            >
-              Xóa bộ lọc
-            </button>
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterType('all');
+                  setFilterStatus('all');
+                  setApplied(EMPTY_FILTERS);
+                  setCurrentPage(1);
+                }}
+                className={BTN_OUTLINE}
+              >
+                Xóa bộ lọc
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Table Card */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+      {/* Table Card (compomennt.md 5.3) */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-              <tr>
-                <th className="py-3 px-6 w-16 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">STT</th>
-                <th className="py-3 px-6 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cơ sở dữ liệu</th>
-                <th className="py-3 px-6 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu</th>
-                <th className="py-3 px-6 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cập nhật lần cuối</th>
-                <th className="py-3 px-6 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trạng thái</th>
-                <th className="py-3 px-6 text-center text-[13px] font-semibold text-slate-500 whitespace-nowrap w-32">Thao tác</th>
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-[#F8FAFC] sticky top-0 z-[1]">
+              <tr className="h-[42px]">
+                <th className={`${TH.replace('text-left', 'text-center')} w-12`}>STT</th>
+                <th className={`${TH} min-w-[220px]`}>Cơ sở dữ liệu</th>
+                <th className={TH}>Kiểu</th>
+                <th className={TH}>Cập nhật lần cuối</th>
+                <th className={TH}>Trạng thái</th>
+                <th className={`${TH.replace('text-left', 'text-center')} w-px sticky right-0 z-[1] bg-[#F8FAFC] shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                    <td className="py-4 px-6 text-[13px] text-slate-500 text-center font-medium">{(index + 1).toString().padStart(2, '0')}</td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-white transition-colors">
-                          <Server className="w-5 h-5 text-slate-600" />
-                        </div>
-                        <div>
-                          <p className="text-[13px] font-bold text-slate-900 leading-tight">{item.name}</p>
-                          <p className="text-[13px] text-slate-400 mt-1">Schema: {item.schema}</p>
-                        </div>
-                      </div>
+            <tbody>
+              {pagedData.length > 0 ? (
+                pagedData.map((item, index) => {
+                  const [datePart, timePart] = (item.lastUpdated || '').split(' ');
+                  return (
+                  <tr key={item.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <td className={`${TD.replace('text-left', 'text-center')} whitespace-nowrap`}>{((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}</td>
+                    <td className={`${TD} max-w-[360px] leading-[18px]`}>
+                      <TruncatedText text={item.name} />
+                      <TruncatedText text={`Schema: ${item.schema}`} className="text-[#64748B]" />
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      <span className="inline-flex items-center px-3 py-1 rounded-md text-[13px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
-                        {item.type}
-                      </span>
+                    <td className={TD}>
+                      <Badge label={item.type} variant="slate" />
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="text-[13px] text-slate-600 font-medium">{item.lastUpdated || 'N/A'}</div>
+                    <td className={`${TD} whitespace-nowrap leading-[18px]`}>
+                      {item.lastUpdated ? (
+                        <>
+                          <div>{datePart}</div>
+                          {timePart && <div className="text-[#64748B]">{timePart}</div>}
+                        </>
+                      ) : 'N/A'}
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex flex-col items-center gap-1.5">
-                        <button 
+                    <td className={`${TD} whitespace-nowrap`}>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={item.status === 'active'}
+                          aria-label={item.status === 'active' ? 'Kích hoạt' : 'Tạm dừng'}
                           onClick={() => toggleStatus(item.id)}
-                          className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 ${
-                            item.status === 'active' ? 'bg-blue-600' : 'bg-slate-300'
-                          }`}
+                          className={`relative w-9 h-5 shrink-0 rounded-full transition-colors ${BTN_FOCUS} ${item.status === 'active' ? 'bg-blue-600' : 'bg-[#CBD5E1]'}`}
                         >
-                          <span className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform ${
-                            item.status === 'active' ? 'translate-x-5' : 'translate-x-1'
-                          }`} />
+                          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${item.status === 'active' ? 'left-[18px]' : 'left-0.5'}`} />
                         </button>
-                        <span className="text-[13px] font-bold text-slate-500 uppercase tracking-tighter">
+                        <span className="text-[13px] text-[#020817]">
                           {item.status === 'active' ? 'Kích hoạt' : 'Tạm dừng'}
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleView(item)}
-                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Xem chi tiết & Cấu trúc"
-                        >
+                    <td className="px-3 py-1 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]">
+                      {/* Cột thao tác (compomennt.md 5.3.2): 3 thao tác → hiện đủ nút icon */}
+                      <div className="inline-flex items-center justify-center gap-1">
+                        <RowIconAction label="Xem chi tiết & Cấu trúc" onClick={() => handleView(item)}>
                           <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                          title="Chỉnh sửa kết nối"
-                        >
+                        </RowIconAction>
+                        <RowIconAction label="Chỉnh sửa kết nối" onClick={() => handleEdit(item)}>
                           <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Xóa kết nối"
-                        >
+                        </RowIconAction>
+                        <RowIconAction label="Xóa kết nối" onClick={() => handleDelete(item.id)}>
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </RowIconAction>
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-20 text-center text-slate-400">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center">
-                      <div className="p-4 bg-slate-50 rounded-full mb-4">
-                        <Database className="w-10 h-10 opacity-20" />
-                      </div>
-                      <p className="text-[13px] font-medium text-slate-600">Không tìm thấy CSDL đích nào.</p>
-                      <p className="text-[13px] text-slate-400 mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc khác.</p>
+                      <Database className="w-10 h-10 text-[#CBD5E1] mb-3" />
+                      <p className="text-[13px] text-[#64748B]">Không tìm thấy CSDL đích nào.</p>
+                      <p className="text-[13px] text-[#64748B] mt-1">Vui lòng thử lại với từ khóa hoặc bộ lọc khác.</p>
                     </div>
                   </td>
                 </tr>
@@ -269,35 +282,15 @@ export function TargetDatabaseManagementPage() {
           </table>
         </div>
 
-        {/* Pagination Style matched to Source Management */}
-        <div className="px-6 py-3 border-t border-slate-200 bg-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] text-slate-600">Hiển thị</span>
-            <select className="px-2 py-1 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>10</option>
-              <option>20</option>
-              <option>50</option>
-            </select>
-            <span className="text-[13px] text-slate-600">bản ghi/trang</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="text-[13px] text-slate-600">
-              Hiển thị 1-{filteredData.length} / {filteredData.length} bản ghi
-            </span>
-            <div className="flex items-center gap-1">
-              <button className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 opacity-50 cursor-not-allowed text-[13px] font-medium">
-                Trước
-              </button>
-              <button className="px-3 py-1.5 border border-blue-600 bg-blue-600 text-white rounded-lg text-[13px] font-medium">
-                1
-              </button>
-              <button className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 opacity-50 cursor-not-allowed text-[13px] font-medium">
-                Sau
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Phân trang (compomennt.md 5.14) */}
+        <Pagination
+          className="border-t border-[#E2E8F0]"
+          currentPage={currentPage}
+          totalItems={filteredData.length}
+          pageSize={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setItemsPerPage}
+        />
       </div>
     </div>
 

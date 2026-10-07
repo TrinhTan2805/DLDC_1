@@ -1,6 +1,21 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Clock, Shield, CheckCircle, Calendar, User, Plug, Activity, Database, Lock, AlertTriangle, Layers, Info, List, Server, FileText } from 'lucide-react';
+import { X, Clock, Shield, CheckCircle, Calendar, User, Plug, Activity, Database, Lock, AlertTriangle, Layers, Info, FileText } from 'lucide-react';
+import { Badge, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE } from '../../collection/collectionUi';
+
+const TH_CLS = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px] text-left';
+const TD_CLS = 'px-3 py-1 text-[13px] text-black text-left';
+const TR_CLS = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const DETAIL_ROW_CLS = 'grid grid-cols-1 md:grid-cols-4 px-4 py-3 gap-2 items-start bg-white';
+const DETAIL_LABEL_CLS = `${FIELD_LABEL} flex items-center gap-2`;
+
+const API_FIELDS = [
+  { field: 'id', source: 'ho_tich_ca_nhan.id', type: 'string', masked: false, desc: 'Mã định danh hệ thống' },
+  { field: 'ho_ten', source: 'ho_tich_ca_nhan.ho_ten', type: 'string', masked: false, desc: 'Họ và tên công dân' },
+  { field: 'ngay_sinh', source: 'ho_tich_ca_nhan.ngay_sinh', type: 'datetime', masked: false, desc: 'Ngày tháng năm sinh' },
+  { field: 'gioi_tinh', source: 'ho_tich_ca_nhan.gioi_tinh', type: 'string', masked: false, desc: 'Giới tính' },
+  { field: 'so_dinh_danh', source: 'ho_tich_ca_nhan.so_dinh_danh', type: 'string', masked: true, desc: 'Số định danh cá nhân (CCCD)' },
+];
 
 interface ProvisionApiDetailModalProps {
   isOpen: boolean;
@@ -38,47 +53,30 @@ export function ProvisionApiDetailModal({ isOpen, onClose, service, onApprove, o
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100 flex-shrink-0 bg-white">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 shadow-sm shrink-0">
-              <Server className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-xl font-extrabold text-slate-800 tracking-tight leading-tight">
-                {service.name.startsWith('API') ? service.name : `API cung cấp dữ liệu ${service.name.replace('DV_', '')}`}
-              </h2>
-              <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-400">
-                <span className="font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold">{service.code}</span>
-                <span className="text-slate-300">•</span>
-                <span className="font-semibold text-slate-500">{service.type}</span>
-              </div>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh]">
+        {/* Header (mục 5.4) */}
+        <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0] shrink-0">
+          <div className="min-w-0">
+            <h2 className="text-[16px] font-medium text-[#020817]">
+              {service.name.startsWith('API') ? service.name : `API cung cấp dữ liệu ${service.name.replace('DV_', '')}`}
+            </h2>
+            <div className="flex items-center gap-2 text-[13px] text-[#64748B]">
+              <span>{service.code}</span>
+              <span>•</span>
+              <span>{service.type}</span>
             </div>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all duration-200 cursor-pointer"
-            title="Đóng"
-          >
+          <button type="button" onClick={onClose} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Tab row */}
-        <div className="border-b border-slate-200 bg-slate-50/50 px-6 flex-shrink-0">
-          <nav className="flex space-x-8" aria-label="Tabs">
+        {/* Tab row (mục 5.9) */}
+        <div className="border-b border-[#E2E8F0] px-6 shrink-0">
+          <nav className="flex overflow-x-auto" aria-label="Tabs">
             {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap py-3.5 px-1 border-b-2 font-bold text-xs uppercase tracking-wider flex items-center gap-2.5 transition-all cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300'
-                }`}
-              >
+              <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`${tabClass(activeTab === tab.id)} whitespace-nowrap`}>
                 {tab.icon}
                 {tab.label}
               </button>
@@ -87,91 +85,73 @@ export function ProvisionApiDetailModal({ isOpen, onClose, service, onApprove, o
         </div>
 
         {/* Content area */}
-        <div className="p-6 overflow-y-auto flex-1 bg-white space-y-6">
+        <div className="px-6 py-4 overflow-y-auto custom-scrollbar flex-1 bg-white">
           {activeTab === 'overview' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-4">
               {/* Status & Banner Info */}
-              <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  {/* Badge Chờ phê duyệt */}
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-100 shadow-sm">
-                    <Clock className="w-3.5 h-3.5 text-amber-600" />
-                    Chờ phê duyệt
-                  </span>
-                  {/* Badge Bảo mật */}
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-800 rounded-full text-xs font-bold border border-yellow-200 shadow-sm">
-                    <Shield className="w-3.5 h-3.5 text-yellow-600" />
-                    Bảo mật
-                  </span>
-                  {/* Badge Đã thẩm định KT */}
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 rounded-full text-xs font-bold border border-emerald-100 shadow-sm">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                    Đã thẩm định KT
-                  </span>
+              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge label="Chờ phê duyệt" variant="amber" icon={<Clock className="w-4 h-4" />} />
+                  <Badge label="Bảo mật" variant="orange" icon={<Shield className="w-4 h-4" />} />
+                  <Badge label="Đã thẩm định KT" variant="emerald" icon={<CheckCircle className="w-4 h-4" />} />
                 </div>
-                <div className="text-xs font-bold text-slate-400">
+                <div className="text-[13px] text-[#64748B]">
                   Cập nhật: {formatDateTime(service.date)}
                 </div>
               </div>
 
               {/* Detail list items */}
-              <div className="border border-slate-100 rounded-xl divide-y divide-slate-100">
-                <div className="grid grid-cols-1 md:grid-cols-4 p-4 gap-2 items-start bg-white">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-slate-400" />
+              <div className="border border-[#E2E8F0] rounded-2xl overflow-hidden divide-y divide-[#E2E8F0]">
+                <div className={DETAIL_ROW_CLS}>
+                  <div className={DETAIL_LABEL_CLS}>
+                    <FileText className="w-4 h-4 text-[#64748B]" />
                     Mô tả:
                   </div>
-                  <div className="md:col-span-3 text-sm text-slate-700 leading-relaxed font-semibold">
+                  <div className={`md:col-span-3 ${FIELD_VALUE} leading-relaxed`}>
                     Cung cấp thông tin hộ tịch điện tử cho các đơn vị xử lý nghiệp vụ trong ngành tư pháp và liên ngành.
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 p-4 gap-2 items-center bg-white">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <User className="w-4 h-4 text-slate-400" />
+                <div className={DETAIL_ROW_CLS}>
+                  <div className={DETAIL_LABEL_CLS}>
+                    <User className="w-4 h-4 text-[#64748B]" />
                     Người thiết lập:
                   </div>
-                  <div className="md:col-span-3 text-sm text-slate-800 font-bold">
-                    Nguyễn Văn An
-                  </div>
+                  <div className={`md:col-span-3 ${FIELD_VALUE}`}>Nguyễn Văn An</div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 p-4 gap-2 items-center bg-white">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-slate-400" />
+                <div className={DETAIL_ROW_CLS}>
+                  <div className={DETAIL_LABEL_CLS}>
+                    <Calendar className="w-4 h-4 text-[#64748B]" />
                     Ngày tạo:
                   </div>
-                  <div className="md:col-span-3 text-sm text-slate-700 font-mono font-bold">
-                    28/05/2026 08:30:00
-                  </div>
+                  <div className={`md:col-span-3 ${FIELD_VALUE}`}>28/05/2026 08:30:00</div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 p-4 gap-2 items-center bg-white">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <Plug className="w-4 h-4 text-slate-400" />
+                <div className={DETAIL_ROW_CLS}>
+                  <div className={DETAIL_LABEL_CLS}>
+                    <Plug className="w-4 h-4 text-[#64748B]" />
                     Giao thức:
                   </div>
-                  <div className="md:col-span-3 text-sm font-mono text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded w-max">
-                    {service.protocol || 'REST API'}
+                  <div className="md:col-span-3">
+                    <Badge label={service.protocol || 'REST API'} variant="blue" />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 p-4 gap-2 items-center bg-white">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-slate-400" />
+                <div className={DETAIL_ROW_CLS}>
+                  <div className={DETAIL_LABEL_CLS}>
+                    <Activity className="w-4 h-4 text-[#64748B]" />
                     Tần suất:
                   </div>
-                  <div className="md:col-span-3 text-sm text-slate-700 font-bold">
-                    Thời gian thực (Realtime)
-                  </div>
+                  <div className={`md:col-span-3 ${FIELD_VALUE}`}>Thời gian thực (Realtime)</div>
                 </div>
               </div>
 
               {/* Warning/Regulation box */}
-              <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-4 flex gap-3.5">
-                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div className="text-xs text-amber-800 leading-relaxed font-semibold">
-                  <p className="font-bold text-amber-900 mb-1 uppercase tracking-wide">Quy tắc chia sẻ thông tin cá nhân</p>
+              <div className="bg-[#FFF7ED] border border-[#FED7AA] rounded-lg p-3 flex gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
+                <div className="text-[13px] text-[#020817] leading-relaxed">
+                  <p className="font-medium mb-1">Quy tắc chia sẻ thông tin cá nhân</p>
                   Dịch vụ đang cấu hình mở các trường thông tin nhạy cảm. Yêu cầu bắt buộc áp dụng cấu hình mặt nạ (masking) đối với các trường thông tin nhận dạng như Số định danh cá nhân (CCCD/CMND) theo Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.
                 </div>
               </div>
@@ -179,176 +159,135 @@ export function ProvisionApiDetailModal({ isOpen, onClose, service, onApprove, o
           )}
 
           {activeTab === 'data' && (
-            <div className="space-y-4 animate-in fade-in duration-200">
-              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                    <Database className="w-4 h-4 text-blue-600" />
-                    Gói tin phản hồi mẫu (API Fields)
-                  </span>
-                  <span className="text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded uppercase">
-                    Bảng chính: ho_tich_ca_nhan
-                  </span>
+            <div className="space-y-3">
+              <div className="flex flex-wrap justify-between items-center gap-2">
+                <span className="text-[14px] font-medium text-[#020817] flex items-center gap-2">
+                  <Database className="w-4 h-4 text-blue-600" />
+                  Gói tin phản hồi mẫu (API Fields)
+                </span>
+                <Badge label="Bảng chính: ho_tich_ca_nhan" variant="blue" />
+              </div>
+              <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse collection-table text-[13px]">
+                    <thead className="bg-[#F8FAFC]">
+                      <tr className="h-[42px]">
+                        <th className={TH_CLS}>Tên Trường (API field)</th>
+                        <th className={TH_CLS}>Bảng & Cột Nguồn</th>
+                        <th className={TH_CLS}>Kiểu Dữ Liệu</th>
+                        <th className={TH_CLS}>Bảo mật / Che dấu</th>
+                        <th className={TH_CLS}>Mô tả</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {API_FIELDS.map(f => (
+                        <tr key={f.field} className={TR_CLS}>
+                          <td className={TD_CLS}>{f.field}</td>
+                          <td className={TD_CLS}>{f.source}</td>
+                          <td className={TD_CLS}>{f.type}</td>
+                          <td className={TD_CLS}>
+                            {f.masked ? <Badge label="Masked (hide_middle)" variant="amber" /> : '—'}
+                          </td>
+                          <td className={TD_CLS}>{f.desc}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
-                      <th className="py-2.5 px-4">Tên Trường (API field)</th>
-                      <th className="py-2.5 px-4 font-mono">Bảng & Cột Nguồn</th>
-                      <th className="py-2.5 px-4">Kiểu Dữ Liệu</th>
-                      <th className="py-2.5 px-4 text-center">Bảo mật / Che dấu</th>
-                      <th className="py-2.5 px-4">Mô tả</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="py-2.5 px-4 font-bold text-slate-800">id</td>
-                      <td className="py-2.5 px-4 font-mono text-slate-500">ho_tich_ca_nhan.id</td>
-                      <td className="py-2.5 px-4 uppercase text-slate-500">string</td>
-                      <td className="py-2.5 px-4 text-center">—</td>
-                      <td className="py-2.5 px-4 text-slate-500">Mã định danh hệ thống</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="py-2.5 px-4 font-bold text-slate-800">ho_ten</td>
-                      <td className="py-2.5 px-4 font-mono text-slate-500">ho_tich_ca_nhan.ho_ten</td>
-                      <td className="py-2.5 px-4 uppercase text-slate-500">string</td>
-                      <td className="py-2.5 px-4 text-center">—</td>
-                      <td className="py-2.5 px-4 text-slate-500">Họ và tên công dân</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="py-2.5 px-4 font-bold text-slate-800">ngay_sinh</td>
-                      <td className="py-2.5 px-4 font-mono text-slate-500">ho_tich_ca_nhan.ngay_sinh</td>
-                      <td className="py-2.5 px-4 uppercase text-slate-500">datetime</td>
-                      <td className="py-2.5 px-4 text-center">—</td>
-                      <td className="py-2.5 px-4 text-slate-500">Ngày tháng năm sinh</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="py-2.5 px-4 font-bold text-slate-800">gioi_tinh</td>
-                      <td className="py-2.5 px-4 font-mono text-slate-500">ho_tich_ca_nhan.gioi_tinh</td>
-                      <td className="py-2.5 px-4 uppercase text-slate-500">string</td>
-                      <td className="py-2.5 px-4 text-center">—</td>
-                      <td className="py-2.5 px-4 text-slate-500">Giới tính</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50">
-                      <td className="py-2.5 px-4 font-bold text-slate-800">so_dinh_danh</td>
-                      <td className="py-2.5 px-4 font-mono text-slate-500">ho_tich_ca_nhan.so_dinh_danh</td>
-                      <td className="py-2.5 px-4 uppercase text-slate-500">string</td>
-                      <td className="py-2.5 px-4 text-center">
-                        <span className="px-2 py-0.5 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded font-bold text-[10px]">
-                          Masked (hide_middle)
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-4 text-slate-500">Số định danh cá nhân (CCCD)</td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
             </div>
           )}
 
           {activeTab === 'legal' && (
-            <div className="space-y-4 animate-in fade-in duration-200 text-sm">
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Căn cứ pháp lý chia sẻ</h4>
-                <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-600 font-medium leading-relaxed">
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className={SECTION_TITLE}>Căn cứ pháp lý chia sẻ</h4>
+                <ul className="list-disc list-inside space-y-1.5 text-[13px] text-[#020817] leading-relaxed">
                   <li>Nghị định 47/2020/NĐ-CP về quản lý, kết nối và chia sẻ dữ liệu số của cơ quan nhà nước.</li>
                   <li>Quyết định số 2026/QĐ-BTP của Bộ trưởng Bộ Tư pháp về việc Ban hành Danh mục chia sẻ dữ liệu dùng chung.</li>
                 </ul>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Đối tượng được cấp quyền truy cập khai thác</h4>
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className={SECTION_TITLE}>Đối tượng được cấp quyền truy cập khai thác</h4>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
-                    Cục Hộ tịch, quốc tịch, chứng thực
-                  </span>
-                  <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
-                    Sở Tư pháp các tỉnh thành
-                  </span>
-                  <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
-                    Văn phòng Bộ Tư pháp
-                  </span>
+                  <Badge label="Cục Hộ tịch, quốc tịch, chứng thực" variant="blue" />
+                  <Badge label="Sở Tư pháp các tỉnh thành" variant="blue" />
+                  <Badge label="Văn phòng Bộ Tư pháp" variant="blue" />
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === 'security' && (
-            <div className="space-y-4 animate-in fade-in duration-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 border border-slate-200 rounded-xl space-y-2">
-                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Giới hạn Tần suất (Rate Limiting)</h4>
-                  <div className="text-xl font-black text-slate-800">
-                    1,200 <span className="text-xs font-bold text-slate-400">Yêu cầu / Phút</span>
-                  </div>
-                  <p className="text-xs text-slate-500">Giới hạn tối đa trên mỗi Token / API key khi truy cập hệ thống.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border border-[#E2E8F0] rounded-2xl">
+                <h4 className={SECTION_TITLE}>Giới hạn Tần suất (Rate Limiting)</h4>
+                <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">
+                  1,200 <span className="text-[13px] font-normal text-[#64748B]">Yêu cầu / Phút</span>
                 </div>
+                <p className="text-[13px] text-[#64748B] mt-1">Giới hạn tối đa trên mỗi Token / API key khi truy cập hệ thống.</p>
+              </div>
 
-                <div className="p-4 border border-slate-200 rounded-xl space-y-2">
-                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Chính sách bảo mật (Security Policy)</h4>
-                  <ul className="text-xs space-y-1 text-slate-600 font-medium">
-                    <li>• Yêu cầu xác thực OAuth2 / Bearer Token.</li>
-                    <li>• Chỉ chấp nhận kết nối từ dải IP đã cấu hình.</li>
-                    <li>• Mã hóa dữ liệu truyền tải SSL/TLS 1.3.</li>
-                  </ul>
-                </div>
+              <div className="p-4 border border-[#E2E8F0] rounded-2xl">
+                <h4 className={SECTION_TITLE}>Chính sách bảo mật (Security Policy)</h4>
+                <ul className="text-[13px] space-y-1 text-[#020817]">
+                  <li>• Yêu cầu xác thực OAuth2 / Bearer Token.</li>
+                  <li>• Chỉ chấp nhận kết nối từ dải IP đã cấu hình.</li>
+                  <li>• Mã hóa dữ liệu truyền tải SSL/TLS 1.3.</li>
+                </ul>
               </div>
             </div>
           )}
 
           {activeTab === 'history' && (
-            <div className="space-y-4 animate-in fade-in duration-200">
-              <div className="relative border-l-2 border-slate-200 pl-4 ml-2 space-y-6 py-2 text-xs">
-                <div className="relative">
-                  <span className="absolute -left-[21px] top-0 w-2 h-2 rounded-full bg-blue-600 ring-4 ring-blue-100"></span>
-                  <p className="font-bold text-slate-800">29/05/2026 10:15 - Nguyễn Văn An</p>
-                  <p className="text-slate-500 mt-1">Cập nhật: Bổ sung cấu hình che giấu thông tin trường số_dinh_danh.</p>
-                </div>
-                <div className="relative">
-                  <span className="absolute -left-[21px] top-0 w-2 h-2 rounded-full bg-slate-300 ring-4 ring-slate-100"></span>
-                  <p className="font-bold text-slate-800">28/05/2026 08:30 - Nguyễn Văn An</p>
-                  <p className="text-slate-500 mt-1">Tạo mới: Thiết lập các thông số cơ bản cho API và chọn bảng dữ liệu gốc.</p>
-                </div>
+            <div className="relative border-l-2 border-[#E2E8F0] pl-4 ml-2 space-y-6 py-2 text-[13px]">
+              <div className="relative">
+                <span className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-blue-600 ring-4 ring-[#EAF3FF]"></span>
+                <p className="font-medium text-[#020817]">29/05/2026 10:15 - Nguyễn Văn An</p>
+                <p className="text-[#64748B] mt-1">Cập nhật: Bổ sung cấu hình che giấu thông tin trường số_dinh_danh.</p>
+              </div>
+              <div className="relative">
+                <span className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-[#CBD5E1] ring-4 ring-[#F1F5F9]"></span>
+                <p className="font-medium text-[#020817]">28/05/2026 08:30 - Nguyễn Văn An</p>
+                <p className="text-[#64748B] mt-1">Tạo mới: Thiết lập các thông số cơ bản cho API và chọn bảng dữ liệu gốc.</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
-          <div className="flex gap-2">
-            {/* Show approve / reject buttons only if the status is pending */}
-            {service.status === 'pending' && (
-              <>
-                <button
-                  onClick={() => {
-                    if (onReject) onReject(service);
-                    onClose();
-                  }}
-                  className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  <X className="w-4 h-4" />
-                  Từ chối
-                </button>
-                <button
-                  onClick={() => {
-                    if (onApprove) onApprove(service);
-                    onClose();
-                  }}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md shadow-emerald-100 transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Phê duyệt
-                </button>
-              </>
-            )}
-          </div>
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-xs uppercase tracking-widest rounded-lg shadow-md transition-all cursor-pointer"
-          >
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end items-center gap-3 shrink-0">
+          <button type="button" onClick={onClose} className={BTN_OUTLINE}>
             Đóng
           </button>
+          {/* Show approve / reject buttons only if the status is pending */}
+          {service.status === 'pending' && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onReject) onReject(service);
+                  onClose();
+                }}
+                className={BTN_DESTRUCTIVE}
+              >
+                <X className="w-4 h-4" />
+                Từ chối
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onApprove) onApprove(service);
+                  onClose();
+                }}
+                className={BTN_PRIMARY}
+              >
+                <CheckCircle className="w-4 h-4" />
+                Phê duyệt
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

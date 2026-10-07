@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Search, FileText, ChevronDown, Check, X, BarChart2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { BTN_OUTLINE, BTN_FOCUS, INPUT_CLS, FILTER_LABEL, TruncatedText } from '../../collection/collectionUi';
 import {
   BarChart, Bar as BarR, XAxis as XAxisR, YAxis as YAxisR,
   CartesianGrid, Tooltip as TooltipR,
@@ -12,6 +14,22 @@ const Bar = BarR as any;
 const XAxis = XAxisR as any;
 const YAxis = YAxisR as any;
 const Tooltip = TooltipR as any;
+
+// Ô chọn nhiều (multi-select) — đồng bộ ô nhập 40px (compomennt.md 5.2, 5.19)
+const MS_TRIGGER = 'w-full h-10 px-3 border rounded-lg text-[13px] bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600';
+const MS_TRIGGER_OPEN = 'border-[#155DFC] ring-2 ring-blue-600/20';
+const MS_TRIGGER_IDLE = 'border-[#E2E8F0] hover:border-[#CBD5E1]';
+const MS_CLEAR = 'w-4 h-4 rounded-full bg-[#E2E8F0] hover:bg-[#CBD5E1] flex items-center justify-center cursor-pointer transition-colors';
+const MS_PANEL = 'absolute left-0 top-full mt-1 w-full bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-40 overflow-hidden';
+const MS_SEARCH = 'w-full h-9 pl-8 pr-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white outline-none focus:ring-2 focus:ring-blue-600 placeholder:text-[#94A3B8]';
+const MS_OPTION = 'w-full flex items-center gap-3 px-3 py-2 hover:bg-[#F1F5F9] transition-colors text-[13px] text-[#020817] text-left cursor-pointer';
+// Nút "Truy xuất" giữ tông xanh lá của nút Tìm kiếm (SEARCH_BTN_CLS) nhưng có chữ
+const RUN_BTN_CLS = `h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[#10B981] text-white text-[13px] font-medium hover:bg-[#059669] transition-colors ${BTN_FOCUS}`;
+// Bảng (compomennt.md 5.3)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TOTAL_TR = 'h-12 bg-[#F8FAFC] font-semibold border-b border-[#E0E0E0]';
 
 const AGENCY_OPTIONS = [
   { value: 'Cục Hành chính tư pháp', label: 'Cục Hành chính tư pháp' },
@@ -48,7 +66,8 @@ const mockDataList: { agency: string; total: number; recent: number; updated: nu
   { agency: 'Trung tâm dữ liệu Quốc gia (TTDLQG)', total: 45, recent: 10, updated: 7, categoryType: 'shared_ttdlqg' },
 ];
 
-const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#6366f1', '#14b8a6', '#f97316'];
+// Bảng màu biểu đồ của dự án (lặp lại theo vòng khi nhiều đơn vị)
+const COLORS = ['#155DFC', '#10B981', '#D97706', '#DC2626', '#8200DB', '#64748B'];
 
 export function CategoryReportListPage() {
   // Filter state (chưa áp dụng)
@@ -144,7 +163,7 @@ export function CategoryReportListPage() {
 
   const handleExportFile = (format: string) => {
     setShowExportMenu(false);
-    alert(`Đang xuất dữ liệu sang định dạng ${format}...`);
+    toast.info(`Đang xuất dữ liệu sang định dạng ${format}...`);
   };
 
   return (
@@ -158,42 +177,42 @@ export function CategoryReportListPage() {
       )}
 
       {/* Control Panel - form chung */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-30">
+      <div className="bg-white p-4 rounded-2xl border border-[#E2E8F0] relative z-30">
         <div className="flex flex-wrap items-end gap-3">
 
           {/* Multi-select Đơn vị quản lý */}
           <div className="flex-1 min-w-[220px]">
-            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Đơn vị quản lý</label>
+            <label className={FILTER_LABEL}>Đơn vị quản lý</label>
             <div className="relative" ref={agencyRef}>
               <button
                 type="button"
                 onClick={() => setShowAgencyDropdown(prev => !prev)}
-                className={`w-full px-3 py-2 border rounded-lg text-[13px] bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  showAgencyDropdown ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
+                className={`${MS_TRIGGER} ${
+                  showAgencyDropdown ? MS_TRIGGER_OPEN : MS_TRIGGER_IDLE
                 }`}
               >
-                <span className={`truncate ${selectedAgencies.length === 0 ? 'text-slate-500' : 'text-slate-800 font-medium'}`}>
+                <span className={`truncate ${selectedAgencies.length === 0 ? 'text-[#64748B]' : 'text-[#020817]'}`}>
                   {agencyDisplayText()}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
                   {selectedAgencies.length > 0 && (
                     <span
                       onClick={(e) => { e.stopPropagation(); setSelectedAgencies([]); }}
-                      className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                      className={MS_CLEAR}
                     >
-                      <X className="w-2.5 h-2.5 text-slate-600" />
+                      <X className="w-3 h-3 text-[#475569]" />
                     </span>
                   )}
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showAgencyDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-[#94A3B8] transition-transform duration-200 ${showAgencyDropdown ? 'rotate-180' : ''}`} />
                 </div>
               </button>
 
               {showAgencyDropdown && (
-                <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
+                <div className={MS_PANEL}>
                   {/* Ô tìm kiếm (search combobox) */}
-                  <div className="p-2 border-b border-slate-100">
+                  <div className="p-2 border-b border-[#E2E8F0]">
                     <div className="relative">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
                       <input
                         type="text"
                         autoFocus
@@ -201,7 +220,7 @@ export function CategoryReportListPage() {
                         onChange={(e: ChangeEvent<HTMLInputElement>) => setAgencySearchTerm(e.target.value)}
                         onClick={(e) => e.stopPropagation()}
                         placeholder="Tìm đơn vị..."
-                        className="w-full pl-8 pr-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
+                        className={MS_SEARCH}
                       />
                     </div>
                   </div>
@@ -210,14 +229,14 @@ export function CategoryReportListPage() {
                     <button
                       type="button"
                       onClick={toggleAll}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-[13px] font-medium text-slate-700"
+                      className={`${MS_OPTION} border-b border-[#E2E8F0] font-medium`}
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                         selectedAgencies.length === AGENCY_OPTIONS.length
                           ? 'bg-blue-600 border-blue-600'
                           : selectedAgencies.length > 0
-                          ? 'bg-blue-100 border-blue-400'
-                          : 'border-slate-300'
+                          ? 'bg-[#EAF3FF] border-[#155DFC]'
+                          : 'border-[#CBD5E1]'
                       }`}>
                         {selectedAgencies.length === AGENCY_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
                         {selectedAgencies.length > 0 && selectedAgencies.length < AGENCY_OPTIONS.length && (
@@ -230,19 +249,19 @@ export function CategoryReportListPage() {
 
                   <div className="max-h-[180px] overflow-y-auto custom-scrollbar">
                     {filteredAgencyOptions.length === 0 ? (
-                      <p className="px-4 py-3 text-[13px] text-slate-400 text-center">Không tìm thấy đơn vị phù hợp</p>
+                      <p className="px-3 py-3 text-[13px] text-[#64748B] text-center">Không tìm thấy đơn vị phù hợp</p>
                     ) : (
                       filteredAgencyOptions.map(opt => (
                         <button
                           key={opt.value}
                           type="button"
                           onClick={() => toggleAgency(opt.value)}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-[13px] text-slate-700 text-left"
+                          className={MS_OPTION}
                         >
                           <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                             selectedAgencies.includes(opt.value)
                               ? 'bg-blue-600 border-blue-600'
-                              : 'border-slate-300'
+                              : 'border-[#CBD5E1]'
                           }`}>
                             {selectedAgencies.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
                           </span>
@@ -258,44 +277,44 @@ export function CategoryReportListPage() {
 
           {/* Multi-select Loại danh mục */}
           <div className="flex-1 min-w-[220px]">
-            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Loại danh mục</label>
+            <label className={FILTER_LABEL}>Loại danh mục</label>
             <div className="relative" ref={categoryTypeRef}>
               <button
                 type="button"
                 onClick={() => setShowCategoryTypeDropdown(prev => !prev)}
-                className={`w-full px-3 py-2 border rounded-lg text-[13px] bg-white text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  showCategoryTypeDropdown ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
+                className={`${MS_TRIGGER} ${
+                  showCategoryTypeDropdown ? MS_TRIGGER_OPEN : MS_TRIGGER_IDLE
                 }`}
               >
-                <span className={`truncate ${selectedCategoryTypes.length === 0 ? 'text-slate-500' : 'text-slate-800 font-medium'}`}>
+                <span className={`truncate ${selectedCategoryTypes.length === 0 ? 'text-[#64748B]' : 'text-[#020817]'}`}>
                   {categoryTypeDisplayText()}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
                   {selectedCategoryTypes.length > 0 && (
                     <span
                       onClick={(e) => { e.stopPropagation(); setSelectedCategoryTypes([]); }}
-                      className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                      className={MS_CLEAR}
                     >
-                      <X className="w-2.5 h-2.5 text-slate-600" />
+                      <X className="w-3 h-3 text-[#475569]" />
                     </span>
                   )}
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCategoryTypeDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-[#94A3B8] transition-transform duration-200 ${showCategoryTypeDropdown ? 'rotate-180' : ''}`} />
                 </div>
               </button>
 
               {showCategoryTypeDropdown && (
-                <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-slate-200 rounded-xl shadow-2xl z-40 overflow-hidden">
+                <div className={MS_PANEL}>
                   <button
                     type="button"
                     onClick={toggleAllCategoryTypes}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 text-[13px] font-medium text-slate-700"
+                    className={`${MS_OPTION} border-b border-[#E2E8F0] font-medium`}
                   >
                     <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                       selectedCategoryTypes.length === CATEGORY_TYPE_OPTIONS.length
                         ? 'bg-blue-600 border-blue-600'
                         : selectedCategoryTypes.length > 0
-                        ? 'bg-blue-100 border-blue-400'
-                        : 'border-slate-300'
+                        ? 'bg-[#EAF3FF] border-[#155DFC]'
+                        : 'border-[#CBD5E1]'
                     }`}>
                       {selectedCategoryTypes.length === CATEGORY_TYPE_OPTIONS.length && <Check className="w-3 h-3 text-white" />}
                       {selectedCategoryTypes.length > 0 && selectedCategoryTypes.length < CATEGORY_TYPE_OPTIONS.length && (
@@ -310,12 +329,12 @@ export function CategoryReportListPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => toggleCategoryType(opt.value)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-[13px] text-slate-700 text-left"
+                      className={MS_OPTION}
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                         selectedCategoryTypes.includes(opt.value)
                           ? 'bg-blue-600 border-blue-600'
-                          : 'border-slate-300'
+                          : 'border-[#CBD5E1]'
                       }`}>
                         {selectedCategoryTypes.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
                       </span>
@@ -329,12 +348,12 @@ export function CategoryReportListPage() {
 
           {/* Thời gian */}
           <div className="min-w-[170px]">
-            <label className="block text-[12px] text-slate-500 mb-1 font-medium">Thời gian tạo (Năm)</label>
+            <label className={FILTER_LABEL}>Thời gian tạo (Năm)</label>
             <select
               title="Thời gian tạo"
               value={dateRange}
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setDateRange(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className={INPUT_CLS}
             >
               <option value="all">Toàn thời gian</option>
               <option value="2026">Năm 2026</option>
@@ -345,7 +364,7 @@ export function CategoryReportListPage() {
           <button
             type="button"
             onClick={handleSearch}
-            className="bg-[#10B981] hover:brightness-110 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm shrink-0 active:scale-95"
+            className={`${RUN_BTN_CLS} shrink-0`}
           >
             <Search className="w-4 h-4" />
             Truy xuất dữ liệu
@@ -355,20 +374,20 @@ export function CategoryReportListPage() {
             <button
               type="button"
               onClick={() => setShowExportMenu(prev => !prev)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium text-[13px] shadow-sm"
+              className={BTN_OUTLINE}
             >
               <FileText className="w-4 h-4" />
               Xuất File
               <ChevronDown className="w-4 h-4" />
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1 z-50">
                 {['Excel', 'PDF', 'CSV'].map(fmt => (
                   <button
                     key={fmt}
                     type="button"
                     onClick={() => handleExportFile(fmt)}
-                    className="w-full text-left px-4 py-2.5 hover:bg-slate-50 text-sm text-slate-700 transition-colors"
+                    className="w-full text-left min-h-8 px-3 py-1.5 rounded-md hover:bg-[#F1F5F9] text-[13px] text-[#020817] transition-colors cursor-pointer"
                   >
                     {fmt}
                   </button>
@@ -381,29 +400,29 @@ export function CategoryReportListPage() {
 
       {/* Chưa truy xuất — empty state */}
       {!hasSearched && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col items-center justify-center py-20 gap-4 text-slate-400">
-          <BarChart2 className="w-12 h-12 opacity-30" />
-          <p className="text-[13px] font-medium">Chọn điều kiện lọc và bấm <span className="text-slate-600 font-semibold">Truy xuất dữ liệu</span> để xem kết quả</p>
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl flex flex-col items-center justify-center py-20 gap-4">
+          <BarChart2 className="w-12 h-12 text-[#CBD5E1]" />
+          <p className="text-[13px] text-[#64748B]">Chọn điều kiện lọc và bấm <span className="text-[#334155] font-medium">Truy xuất dữ liệu</span> để xem kết quả</p>
         </div>
       )}
 
       {/* Chart */}
       {hasSearched && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-          <p className="text-[18px] font-bold text-slate-700 mb-3">Báo cáo thống kê danh sách danh mục</p>
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+          <p className="text-[14px] font-medium text-[#020817] mb-3">Báo cáo thống kê danh sách danh mục</p>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={appliedData} margin={{ top: 10, right: 30, left: 0, bottom: 90 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis
                   dataKey="agency"
-                  tick={{ fontSize: 11, fill: '#374151' }}
+                  tick={{ fontSize: 12, fill: '#64748B' }}
                   interval={0}
                   angle={-30}
                   textAnchor="end"
                   height={110}
                 />
-                <YAxis tick={{ fontSize: 12, fill: '#374151' }} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748B' }} />
                 <Tooltip cursor={{ fill: 'transparent' }} />
                 <Bar dataKey="total" name="Tổng số bộ danh mục" radius={[4, 4, 0, 0]} maxBarSize={50}>
                   {appliedData.map((_entry, index) => (
@@ -416,35 +435,35 @@ export function CategoryReportListPage() {
         </div>
       )}
 
-      {/* Data Table */}
+      {/* Data Table (compomennt.md 5.3) */}
       {hasSearched && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
           <div className="overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar">
-            <table className="w-full text-left border-collapse table-auto">
-              <thead className="sticky top-0 z-10">
-                <tr className="bg-slate-50 border-b border-slate-200 text-[13px] font-semibold text-slate-500 uppercase tracking-tight">
-                  <th className="py-3 px-4 text-center w-12 text-[13px]">STT</th>
-                  <th className="py-3 px-4 text-[13px]">Đơn vị quản lý</th>
-                  <th className="py-3 px-4 text-right text-[13px]">Số lượng danh mục tạo mới</th>
-                  <th className="py-3 px-4 text-right text-[13px]">Số lượng danh mục cập nhật</th>
-                  <th className="py-3 px-4 text-right text-[13px]">Tổng số DM</th>
+            <table className="w-full border-collapse collection-table text-[13px]">
+              <thead className="sticky top-0 z-10 bg-[#F8FAFC]">
+                <tr className="h-[42px]">
+                  <th className={`${TH} text-center w-12`}>STT</th>
+                  <th className={`${TH} text-left`}>Đơn vị quản lý</th>
+                  <th className={`${TH} text-right`}>Số lượng danh mục tạo mới</th>
+                  <th className={`${TH} text-right`}>Số lượng danh mục cập nhật</th>
+                  <th className={`${TH} text-right`}>Tổng số DM</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-[13px] text-slate-700">
+              <tbody>
                 {appliedData.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                    <td className="py-3 px-4 text-center text-slate-500 text-[13px]">{idx + 1}</td>
-                    <td className="py-3 px-4 text-slate-600 text-[13px]">{item.agency}</td>
-                    <td className="py-3 px-4 text-right text-slate-700 text-[13px]">{item.recent}</td>
-                    <td className="py-3 px-4 text-right text-slate-700 text-[13px]">{item.updated}</td>
-                    <td className="py-3 px-4 text-right font-semibold text-slate-900 text-[13px]">{item.total}</td>
+                  <tr key={idx} className={TR}>
+                    <td className={`${TD} text-center`}>{idx + 1}</td>
+                    <td className={`${TD} text-left max-w-[360px]`}><TruncatedText text={item.agency} /></td>
+                    <td className={`${TD} text-right tabular-nums`}>{item.recent}</td>
+                    <td className={`${TD} text-right tabular-nums`}>{item.updated}</td>
+                    <td className={`${TD} text-right tabular-nums`}>{item.total}</td>
                   </tr>
                 ))}
-                <tr className="bg-slate-50 font-semibold border-t border-slate-200">
-                  <td colSpan={2} className="py-3 px-4 text-center text-slate-700 uppercase text-[13px]">Tổng cộng</td>
-                  <td className="py-3 px-4 text-right text-slate-700 text-[13px]">{totalRecent}</td>
-                  <td className="py-3 px-4 text-right text-slate-700 text-[13px]">{totalUpdated}</td>
-                  <td className="py-3 px-4 text-right text-blue-600 text-[13px]">{totalCategories}</td>
+                <tr className={TOTAL_TR}>
+                  <td colSpan={2} className={`${TD} text-center`}>Tổng cộng</td>
+                  <td className={`${TD} text-right tabular-nums`}>{totalRecent}</td>
+                  <td className={`${TD} text-right tabular-nums`}>{totalUpdated}</td>
+                  <td className={`${TD} text-right tabular-nums`}>{totalCategories}</td>
                 </tr>
               </tbody>
             </table>

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Shield, Key, Copy, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK } from '../../collection/collectionUi';
+// Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
+const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
 interface ProvisionAccessControlModalProps {
   isOpen: boolean;
@@ -69,7 +73,7 @@ export function ProvisionAccessControlModal({
     
     const newlySelected = selectedOrgs.filter(org => !preConfiguredOrganizations.includes(org));
     if (newlySelected.length === 0) {
-      alert('Vui lòng chọn thêm ít nhất một Đơn vị/Tổ chức thụ hưởng mới.');
+      toast.error('Vui lòng chọn thêm ít nhất một Đơn vị/Tổ chức thụ hưởng mới.');
       return;
     }
 
@@ -93,27 +97,23 @@ export function ProvisionAccessControlModal({
   };
 
   return createPortal(
-    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200 provision-access-control-modal-root">
-      <style dangerouslySetInnerHTML={{__html: `
-        .provision-access-control-modal-root *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(svg):not(path):not(circle):not(rect):not(polyline):not(line) {
-          font-size: 13px !important;
-        }
-      `}} />
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200">
+    <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+        <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-bold text-slate-800">
+            <h2 className="text-[16px] font-medium text-[#020817]">
               Cấp quyền truy cập API
             </h2>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className={BTN_GHOST_ICON}
             title="Đóng"
+            aria-label="Đóng"
           >
             <X className="w-5 h-5" />
           </button>
@@ -121,14 +121,14 @@ export function ProvisionAccessControlModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 space-y-5">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 custom-scrollbar text-[13px] text-[#020817]">
             
             {/* Target API info alert */}
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200/50 flex items-start gap-3">
-              <Shield className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-blue-800 uppercase tracking-wider block">API được chọn cấp quyền</span>
-                <span className="text-sm font-extrabold text-slate-800 mt-1 block">{apiName}</span>
+            <div className="p-3 bg-[#EAF3FF] rounded-lg border border-[#BFDBFE] flex items-start gap-3">
+              <Shield className="w-5 h-5 text-[#155DFC] shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <span className="text-[13px] text-[#64748B] block">API được chọn cấp quyền</span>
+                <span className="text-[13px] font-medium text-[#020817] mt-0.5 block break-words">{apiName}</span>
               </div>
             </div>
 
@@ -137,23 +137,23 @@ export function ProvisionAccessControlModal({
               {/* Partner Organization - Multi-select with Search & Toggle All */}
               <div className="md:col-span-2 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium text-slate-700">
-                    Đơn vị / Tổ chức thụ hưởng <span className="text-red-500">*</span>
+                  <label className="block text-[13px] font-medium text-[#020817]">
+                    Đơn vị / Tổ chức thụ hưởng <span className={REQUIRED_MARK}>*</span>
                   </label>
                   {(availableOrganizations.length > 0 || preConfiguredOrganizations.length > 0) && (
-                    <div className="flex gap-3 text-xs">
+                    <div className="flex items-center gap-3 text-[13px]">
                       <button
                         type="button"
                         onClick={() => setSelectedOrgs(Array.from(new Set([...preConfiguredOrganizations, ...availableOrganizations])))}
-                        className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
+                        className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                       >
                         Chọn tất cả
                       </button>
-                      <span className="text-slate-300">|</span>
+                      <span className="text-[#CBD5E1]">|</span>
                       <button
                         type="button"
                         onClick={() => setSelectedOrgs([...preConfiguredOrganizations])}
-                        className="text-slate-500 hover:text-slate-700 font-semibold cursor-pointer"
+                        className="text-[#64748B] hover:text-[#020817] font-medium cursor-pointer"
                       >
                         Bỏ chọn tất cả
                       </button>
@@ -162,23 +162,23 @@ export function ProvisionAccessControlModal({
                 </div>
 
                 {availableOrganizations.length === 0 && preConfiguredOrganizations.length === 0 ? (
-                  <p className="text-slate-500 text-xs italic">Không có đơn vị nào khả dụng. Vui lòng kiểm tra tab Danh sách tài khoản.</p>
+                  <p className="text-[#64748B] text-[13px]">Không có đơn vị nào khả dụng. Vui lòng kiểm tra tab Danh sách tài khoản.</p>
                 ) : (
-                  <div className="border border-slate-200 rounded-lg bg-slate-50/30 overflow-hidden flex flex-col">
+                  <div className="border border-[#E2E8F0] rounded-lg overflow-hidden flex flex-col">
                     {/* Search bar inside the list */}
-                    <div className="p-2 border-b border-slate-200 bg-slate-50/50">
+                    <div className="p-2 border-b border-[#E2E8F0] bg-[#F8FAFC]">
                       <input
                         type="text"
                         placeholder="Tìm kiếm nhanh đơn vị..."
                         value={orgSearchQuery}
                         onChange={(e) => setOrgSearchQuery(e.target.value)}
-                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                        className={INPUT_CLS}
                       />
                     </div>
                     {/* Items list */}
-                    <div className="p-2 space-y-1 bg-white" style={{ maxHeight: '160px', overflowY: 'scroll' }}>
+                    <div className="p-2 space-y-1 bg-white max-h-[160px] overflow-y-scroll custom-scrollbar">
                       {Array.from(new Set([...preConfiguredOrganizations, ...availableOrganizations])).filter(org => org.toLowerCase().includes(orgSearchQuery.toLowerCase())).length === 0 ? (
-                        <p className="text-slate-400 text-center py-4 text-xs italic">Không tìm thấy đơn vị phù hợp</p>
+                        <p className="text-[#64748B] text-center py-4 text-[13px]">Không tìm thấy đơn vị phù hợp</p>
                       ) : (
                         Array.from(new Set([...preConfiguredOrganizations, ...availableOrganizations]))
                           .filter(org => org.toLowerCase().includes(orgSearchQuery.toLowerCase()))
@@ -188,12 +188,12 @@ export function ProvisionAccessControlModal({
                             return (
                               <label
                                 key={org}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-lg border transition-all ${
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors ${
                                   isPreConfigured
-                                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed font-normal'
+                                    ? 'bg-[#F1F5F9] border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed'
                                     : isChecked
-                                    ? 'bg-blue-50/50 border-blue-200 text-blue-700 font-medium cursor-pointer'
-                                    : 'bg-white border-slate-100 text-slate-700 hover:bg-slate-50 cursor-pointer'
+                                    ? 'bg-[#EAF3FF] border-[#BFDBFE] text-[#155DFC] cursor-pointer'
+                                    : 'bg-white border-[#E2E8F0] text-[#020817] hover:bg-[#F8FAFC] cursor-pointer'
                                 }`}
                               >
                                 <input
@@ -208,14 +208,12 @@ export function ProvisionAccessControlModal({
                                       setSelectedOrgs([...selectedOrgs, org]);
                                     }
                                   }}
-                                  className={`w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 ${isPreConfigured ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                                  className={`w-4 h-4 shrink-0 accent-blue-600 rounded ${isPreConfigured ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 />
-                                <div className="flex-1 flex items-center justify-between">
+                                <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
                                   <span className="text-[13px]">{org}</span>
                                   {isPreConfigured && (
-                                    <span className="text-[11px] font-medium text-slate-400 bg-slate-200/50 px-2 py-0.5 rounded-full border border-slate-200/50 whitespace-nowrap">
-                                      Mặc định dịch vụ
-                                    </span>
+                                    <Badge label="Mặc định dịch vụ" variant="slate" />
                                   )}
                                 </div>
                               </label>
@@ -229,19 +227,19 @@ export function ProvisionAccessControlModal({
 
               {/* Tài khoản (Username) */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className={LABEL_CLS}>
                   Tài khoản (Username)
                 </label>
-                <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 space-y-1.5 min-h-[42px] max-h-[120px] overflow-y-auto">
+                <div className="border border-[#E2E8F0] rounded-lg p-3 bg-white space-y-1.5 min-h-10 max-h-[120px] overflow-y-auto custom-scrollbar">
                   {selectedOrgs.length === 0 ? (
-                    <span className="text-slate-400 text-xs italic">Chưa chọn đơn vị thụ hưởng</span>
+                    <span className="text-[#94A3B8] text-[13px]">Chưa chọn đơn vị thụ hưởng</span>
                   ) : (
                     selectedOrgs.map(org => {
                       const username = getUsernameForOrg(org);
                       return (
-                        <div key={org} className="flex justify-between items-center text-xs">
-                          <span className="text-slate-600 font-medium">{org}</span>
-                          <span className="font-mono font-bold text-slate-800 bg-slate-200/50 px-2.5 py-0.5 rounded border border-slate-200/50">{username}</span>
+                        <div key={org} className="flex justify-between items-center gap-3 text-[13px]">
+                          <span className="text-[#475569] min-w-0">{org}</span>
+                          <span className="text-[13px] text-[#020817] bg-[#F8FAFC] px-2.5 py-0.5 rounded-lg border border-[#E2E8F0] break-all">{username}</span>
                         </div>
                       );
                     })
@@ -251,14 +249,14 @@ export function ProvisionAccessControlModal({
 
               {/* IP Whitelist */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Danh sách IP Whitelist (cách nhau bởi dấu phẩy)
                 </label>
                 <input
                   name="ipWhitelist"
                   type="text"
                   placeholder="Ví dụ: 192.168.1.100, 10.20.30.45 (Để trống để cho phép tất cả IP)"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium bg-white"
+                  className={INPUT_CLS}
                 />
               </div>
 
@@ -266,28 +264,28 @@ export function ProvisionAccessControlModal({
 
               {/* Start Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Hiệu lực từ ngày <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Hiệu lực từ ngày <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
                   name="validFrom"
                   type="date"
                   required
                   defaultValue="2026-05-19"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
+                  className={INPUT_CLS}
                 />
               </div>
 
               {/* End Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Hiệu lực đến ngày
                 </label>
                 <input
                   name="validTo"
                   type="date"
                   defaultValue="2027-05-19"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
+                  className={INPUT_CLS}
                 />
               </div>
 
@@ -295,19 +293,19 @@ export function ProvisionAccessControlModal({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-slate-200 flex justify-end space-x-3 bg-slate-50">
+          <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
+              className={BTN_OUTLINE}
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center transition-colors font-medium text-sm"
+              className={BTN_PRIMARY}
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-4 h-4" />
               Cấp quyền truy cập
             </button>
           </div>

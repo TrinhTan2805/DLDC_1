@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Save, Database, Shield } from 'lucide-react';
+import { X, Save, Shield } from 'lucide-react';
 import { TargetDatabase } from './mockTargetDatabases';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRED_MARK } from '../collection/collectionUi';
 
 interface TargetDatabaseModalProps {
   isOpen: boolean;
@@ -58,58 +59,58 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px', zIndex: 999999 }}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Database className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-[16px] font-bold text-slate-800">
-                {editingData ? 'Cập nhật kết nối CSDL' : 'Thêm kết nối CSDL mới'}
-              </h2>
-              <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Thông tin kết nối hệ thống</p>
-            </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 999999 }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="target-db-modal-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Header (compomennt.md 5.4) */}
+        <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-3 bg-white">
+          <div className="min-w-0">
+            <h2 id="target-db-modal-title" className="text-[16px] font-medium text-[#020817] leading-6">
+              {editingData ? 'Cập nhật kết nối CSDL' : 'Thêm kết nối CSDL mới'}
+            </h2>
+            <p className="text-[13px] text-[#64748B] mt-0.5">Thông tin kết nối hệ thống</p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+            aria-label="Đóng"
+            title="Đóng"
+            className={BTN_GHOST_ICON}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Content */}
-        <div className="p-6 overflow-y-auto custom-scrollbar">
-          <form id="target-db-form" onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-5">
+        <div className="px-6 py-4 overflow-y-auto custom-scrollbar">
+          <form id="target-db-form" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
               {/* Tên kết nối */}
               <div className="col-span-2">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
-                  Tên kết nối <span className="text-red-500">*</span>
+                <label htmlFor="tdb-name" className={LABEL_CLS}>
+                  Tên kết nối <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
+                  id="tdb-name"
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 text-[13px]"
+                  className={INPUT_CLS}
                   placeholder="Ví dụ: CSDL Kho dữ liệu dùng chung"
                 />
               </div>
 
               {/* Loại CSDL */}
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                  Loại CSDL <span className="text-red-500">*</span>
+                <label htmlFor="tdb-type" className={LABEL_CLS}>
+                  Loại CSDL <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
+                  id="tdb-type"
                   required
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 appearance-none text-[13px]"
+                  className={INPUT_CLS}
                 >
                   <option value="">-- Chọn loại CSDL --</option>
                   <option value="Oracle">Oracle Database</option>
@@ -122,62 +123,66 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
 
               {/* Tên Schema/Database */}
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                  Tên Schema/Database <span className="text-red-500">*</span>
+                <label htmlFor="tdb-schema" className={LABEL_CLS}>
+                  Tên Schema/Database <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
+                  id="tdb-schema"
                   type="text"
                   required
                   value={formData.schema}
                   onChange={(e) => setFormData({ ...formData, schema: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 text-[13px]"
+                  className={INPUT_CLS}
                   placeholder="Ví dụ: public, main_db"
                 />
               </div>
 
               {/* Host/IP */}
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                  Host / IP <span className="text-red-500">*</span>
+                <label htmlFor="tdb-host" className={LABEL_CLS}>
+                  Host / IP <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
+                  id="tdb-host"
                   type="text"
                   required
                   value={formData.host}
                   onChange={(e) => setFormData({ ...formData, host: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 text-[13px]"
+                  className={INPUT_CLS}
                   placeholder="10.15.20.XXX"
                 />
               </div>
 
               {/* Port */}
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                  Port <span className="text-red-500">*</span>
+                <label htmlFor="tdb-port" className={LABEL_CLS}>
+                  Port <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
+                  id="tdb-port"
                   type="text"
                   required
                   value={formData.port}
                   onChange={(e) => setFormData({ ...formData, port: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 text-[13px]"
+                  className={INPUT_CLS}
                   placeholder="Ví dụ: 5432, 1521"
                 />
               </div>
 
               {/* Tên đăng nhập */}
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
-                  Tên đăng nhập <span className="text-red-500">*</span>
+                <label htmlFor="tdb-username" className={LABEL_CLS}>
+                  Tên đăng nhập <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <div className="relative">
-                  <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
                   <input
+                    id="tdb-username"
                     type="text"
                     required
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 text-[13px]"
+                    className={`${INPUT_CLS} pl-9`}
                     placeholder="Nhập username"
                   />
                 </div>
@@ -185,29 +190,31 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
 
               {/* Mật khẩu */}
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
-                  Mật khẩu <span className="text-red-500">*</span>
+                <label htmlFor="tdb-password" className={LABEL_CLS}>
+                  Mật khẩu <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
+                  id="tdb-password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 text-[13px]"
+                  className={INPUT_CLS}
                   placeholder="••••••••"
                 />
               </div>
 
               {/* Ghi chú */}
               <div className="col-span-2">
-                <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
+                <label htmlFor="tdb-note" className={LABEL_CLS}>
                   Ghi chú
                 </label>
                 <textarea
+                  id="tdb-note"
                   value={formData.note}
                   onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-slate-50/50 resize-none text-[13px]"
+                  className={`${INPUT_CLS} h-auto py-2 resize-none`}
                   placeholder="Nhập ghi chú thêm nếu có..."
                 />
               </div>
@@ -216,18 +223,18 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/30">
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 text-[13px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
+            className={BTN_OUTLINE}
           >
             Hủy bỏ
           </button>
           <button
             type="submit"
             form="target-db-form"
-            className="px-6 py-2.5 text-[13px] font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2"
+            className={BTN_PRIMARY}
           >
             <Save className="w-4 h-4" />
             {editingData ? 'Cập nhật thay đổi' : 'Lưu kết nối'}

@@ -1,12 +1,17 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, ReactNode } from 'react';
 import {
-  Settings, CheckSquare, XCircle, Search, Filter, Plus, Globe,
-  X, ChevronDown, Eye, SquarePen, Trash2, Send, PowerOff,
-  FileText, Building2, Tag, Clock, Database
+  CheckSquare, XCircle, Search, Filter, Plus,
+  X, Eye, SquarePen, Trash2, Send, PowerOff,
+  FileText, Clock, Database, MoreVertical
 } from 'lucide-react';
 import { MasterDataEntity, LifecycleStatus } from '../../categoryTypes';
-import { dataTypeLabels, lifecycleLabels, scopeLabels } from '../../categoryConstants';
-import { ClampedText } from '../../../../common/ClampedText';
+import { lifecycleLabels, scopeLabels } from '../../categoryConstants';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../../../ui/dropdown-menu';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../../../ui/tooltip';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, BTN_PRIMARY, ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS,
+  INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch
+} from '../../../collection/collectionUi';
 
 interface SetupTabProps {
   entities: MasterDataEntity[];
@@ -28,6 +33,52 @@ interface SetupTabProps {
   onExpireClick: (entity: MasterDataEntity) => void;
   onViewData?: (entity: MasterDataEntity) => void;
 }
+
+// Màu badge trạng thái — giữ nguyên ý nghĩa màu cũ
+const STATUS_VARIANT: Partial<Record<LifecycleStatus, string>> = {
+  active: 'green',
+  approved: 'blue',
+  pending_approval: 'purple',
+  rejected: 'red',
+  draft: 'slate',
+};
+
+// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
+const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
+  <DropdownMenuItem
+    disabled={!!reason}
+    onClick={reason ? undefined : onSelect}
+    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
+  >
+    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
+    <span className="flex flex-col">
+      <span>{label}</span>
+      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
+    </span>
+  </DropdownMenuItem>
+);
+
+// Điều kiện khả dụng của từng thao tác (giữ nguyên logic cũ) — trả về lý do khi bị khóa
+const getActionRules = (entity: MasterDataEntity) => {
+  const s = entity.lifecycleStatus;
+  return {
+    submit: s === 'active' ? 'Đã duyệt'
+      : s === 'pending_approval' ? 'Đang chờ duyệt'
+      : s === 'pending_expiration' ? 'Đang chờ hết hiệu lực'
+      : null,
+    edit: s === 'pending_approval' ? 'Đang chờ duyệt'
+      : s === 'pending_expiration' ? 'Đang chờ hết hiệu lực'
+      : null,
+    remove: s === 'active' ? 'Danh mục đang hiệu lực'
+      : s === 'pending_approval' ? 'Đang chờ duyệt'
+      : s === 'pending_expiration' ? 'Đang chờ hết hiệu lực'
+      : null,
+    expire: s !== 'active' ? 'Chỉ áp dụng cho danh mục đang hiệu lực' : null,
+  };
+};
+
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
 
 export function SetupTab({
   entities,
@@ -56,172 +107,104 @@ export function SetupTab({
   const [filterScope, setFilterScope] = React.useState<string>('all');
   const [filterManagingAgency, setFilterManagingAgency] = React.useState<string>('all');
 
+  // Điều kiện đã áp dụng: chỉ cập nhật khi bấm nút Tìm kiếm hoặc Enter (mục 5.19)
+  const [applied, setApplied] = React.useState({
+    search: searchTerm,
+    status: filterStatus,
+    scope: 'all',
+    agency: 'all',
+  });
+
+  const runSearch = () => {
+    setApplied({ search: searchTerm, status: filterStatus, scope: filterScope, agency: filterManagingAgency });
+    setCurrentPageNum(1);
+  };
+
   const managingAgencyOptions = Array.from(new Set(entities.map(e => e.managingAgency).filter(Boolean))) as string[];
 
-  // Reset pagination to page 1 on filter or search query change
-  React.useEffect(() => {
-    setCurrentPageNum(1);
-  }, [searchTerm, filterStatus, filterScope, filterManagingAgency]);
-
   const filteredEntities = entities.filter(e => {
-    const matchesSearch = e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || e.lifecycleStatus === filterStatus;
-    const matchesScope = filterScope === 'all' || e.scope === filterScope;
-    const matchesManagingAgency = filterManagingAgency === 'all' || e.managingAgency === filterManagingAgency;
+    const q = normalizeSearch(applied.search);
+    const matchesSearch = q === '' || normalizeSearch(e.name).includes(q) || normalizeSearch(e.code).includes(q);
+    const matchesFilter = applied.status === 'all' || e.lifecycleStatus === applied.status;
+    const matchesScope = applied.scope === 'all' || e.scope === applied.scope;
+    const matchesManagingAgency = applied.agency === 'all' || e.managingAgency === applied.agency;
     return matchesSearch && matchesFilter && matchesScope && matchesManagingAgency;
   });
 
   const paginatedEntities = filteredEntities.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
-
-  const renderPagination = (totalItemsCount: number) => {
-    if (totalItemsCount <= 0) return null;
-    const totalPages = Math.ceil(totalItemsCount / pageSize);
-    const startItem = (currentPageNum - 1) * pageSize + 1;
-    const endItem = Math.min(currentPageNum * pageSize, totalItemsCount);
-
-    return (
-      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-        {/* Left Side: Page Size Selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 font-normal">Hiển thị</span>
-          <select
-            aria-label="Select record count"
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPageNum(1);
-            }}
-            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600 font-normal">bản ghi/trang</span>
-        </div>
-
-        {/* Right Side: Page Range and Navigation */}
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600 font-normal">
-            {startItem} - {endItem} / {totalItemsCount}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
-              disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPageNum(page)}
-                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
-              disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const totalCount = entities.length;
   const pendingCount = entities.filter(e => e.lifecycleStatus === 'pending_approval').length;
   const approvedCount = entities.filter(e => e.lifecycleStatus === 'active').length;
   const rejectedCount = entities.filter(e => e.lifecycleStatus === 'inactive').length;
 
+  const stats = [
+    { label: 'Tổng số danh mục', value: totalCount, icon: FileText, bg: 'bg-blue-50', fg: 'text-blue-600' },
+    { label: 'Chờ phê duyệt', value: pendingCount, icon: Clock, bg: 'bg-orange-50', fg: 'text-orange-600' },
+    { label: 'Đã phê duyệt', value: approvedCount, icon: CheckSquare, bg: 'bg-green-50', fg: 'text-green-600' },
+    { label: 'Từ chối', value: rejectedCount, icon: XCircle, bg: 'bg-red-50', fg: 'text-red-600' },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Tổng số danh mục</span>
-            <FileText className="w-5 h-5 text-blue-600" />
+      {/* Statistics Cards (compomennt.md 5.6.1) */}
+      <div className="grid grid-cols-4 gap-4">
+        {stats.map(card => (
+          <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${card.bg}`}>
+                <card.icon className={`w-5 h-5 ${card.fg}`} />
+              </div>
+              <div>
+                <div className="text-[16px] text-[#64748B]">{card.label}</div>
+                <div className="text-[16px] font-semibold text-[#0F172A]">{card.value}</div>
+              </div>
+            </div>
           </div>
-          <div className="text-2xl font-bold text-slate-900">{totalCount}</div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Chờ phê duyệt</span>
-            <Clock className="w-5 h-5 text-orange-500" />
-          </div>
-          <div className="text-2xl font-bold text-slate-900">{pendingCount}</div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Đã phê duyệt</span>
-            <CheckSquare className="w-5 h-5 text-green-600" />
-          </div>
-          <div className="text-2xl font-bold text-slate-900">{approvedCount}</div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[13px] text-slate-500">Từ chối</span>
-            <XCircle className="w-5 h-5 text-red-600" />
-          </div>
-          <div className="text-2xl font-bold text-slate-900">{rejectedCount}</div>
-        </div>
+        ))}
       </div>
 
-      {/* Search and Action Bar */}
-      <div className="space-y-3 mb-6">
-        <div className="flex flex-col md:flex-row items-center gap-3">
-          <div className="flex-1 w-full flex items-center gap-2">
-            <div className="flex-1 relative">
+      {/* Search and Action Bar (compomennt.md 5.19) */}
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 flex items-center gap-1.5">
+            <div className="relative flex-1">
               <input
                 type="text"
+                aria-label="Tìm kiếm danh mục"
                 placeholder="Tìm kiếm danh mục theo tên hoặc mã..."
                 value={searchTerm}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                className={SEARCH_INPUT_CLS}
               />
             </div>
             <button
               type="button"
-              className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+              aria-label="Tìm kiếm"
               title="Tìm kiếm"
+              onClick={runSearch}
+              className={SEARCH_BTN_CLS}
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-5 h-5" />
             </button>
             <button
               type="button"
+              aria-label="Bộ lọc"
+              aria-expanded={showFilters}
               onClick={() => setShowFilters(!showFilters)}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border cursor-pointer active:scale-95 ${
-                showFilters
-                  ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
+              className={filterBtnClass(showFilters)}
               title={showFilters ? "Đóng bộ lọc" : "Bộ lọc nâng cao"}
             >
-              {showFilters ? <X className="w-4.5 h-4.5" /> : <Filter className="w-4 h-4" />}
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={onAdd}
-              className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+              className={BTN_PRIMARY}
               title="Thêm mới danh mục qua Wizard"
             >
               <Plus className="w-4 h-4" />
@@ -232,191 +215,133 @@ export function SetupTab({
 
         {/* Collapsible Filter Panel */}
         {showFilters && (
-          <div className="relative p-4 bg-white border border-slate-200 rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] before:content-[''] before:absolute before:-top-[7px] before:right-[208px] md:before:right-[auto] md:before:left-[calc(100%-100px)] lg:before:left-[calc(100%-242px)] before:w-3 before:h-3 before:bg-white before:rotate-45 before:border-l before:border-t before:border-slate-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Trạng thái danh mục</label>
-                <div className="relative">
-                  <select
-                    value={filterStatus}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value as LifecycleStatus | 'all')}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="active">Đã hiệu lực</option>
-                    <option value="draft">Đang soạn thảo</option>
-                    <option value="inactive">Hết hiệu lực</option>
-                    <option value="archived">Đã lưu trữ</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
+          <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+            <div>
+              <label className={FILTER_LABEL}>Trạng thái danh mục</label>
+              <select
+                aria-label="Trạng thái danh mục"
+                value={filterStatus}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value as LifecycleStatus | 'all')}
+                className={INPUT_CLS}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đã hiệu lực</option>
+                <option value="draft">Đang soạn thảo</option>
+                <option value="inactive">Hết hiệu lực</option>
+                <option value="archived">Đã lưu trữ</option>
+              </select>
+            </div>
 
-              <div>
-                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Phạm vi</label>
-                <div className="relative">
-                  <select
-                    value={filterScope}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterScope(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả phạm vi</option>
-                    <option value="national">Cấp quốc gia</option>
-                    <option value="ministry">Cấp bộ</option>
-                    <option value="provincial">Cấp tỉnh/thành</option>
-                    <option value="internal">Sử dụng nội bộ</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
+            <div>
+              <label className={FILTER_LABEL}>Phạm vi</label>
+              <select
+                aria-label="Phạm vi"
+                value={filterScope}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterScope(e.target.value)}
+                className={INPUT_CLS}
+              >
+                <option value="all">Tất cả phạm vi</option>
+                <option value="national">Cấp quốc gia</option>
+                <option value="ministry">Cấp bộ</option>
+                <option value="provincial">Cấp tỉnh/thành</option>
+                <option value="internal">Sử dụng nội bộ</option>
+              </select>
+            </div>
 
-              <div>
-                <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Đơn vị chủ quản</label>
-                <div className="relative">
-                  <select
-                    value={filterManagingAgency}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterManagingAgency(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer text-slate-700 font-medium"
-                  >
-                    <option value="all">Tất cả đơn vị chủ quản</option>
-                    {managingAgencyOptions.map(agency => (
-                      <option key={agency} value={agency}>{agency}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
+            <div>
+              <label className={FILTER_LABEL}>Đơn vị chủ quản</label>
+              <select
+                aria-label="Đơn vị chủ quản"
+                value={filterManagingAgency}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterManagingAgency(e.target.value)}
+                className={INPUT_CLS}
+              >
+                <option value="all">Tất cả đơn vị chủ quản</option>
+                {managingAgencyOptions.map(agency => (
+                  <option key={agency} value={agency}>{agency}</option>
+                ))}
+              </select>
             </div>
           </div>
         )}
       </div>
 
-      {/* Entity Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      {/* Entity Table (compomennt.md 5.3) */}
+      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left collection-table">
-            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-              <tr>
-                {/* Cột nhãn dùng w-px để co sát nội dung, phần rộng còn lại dồn cho cột Tên / Mã danh mục */}
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap w-px text-center">STT</th>
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap min-w-[220px]">Tên / Mã danh mục</th>
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 min-w-[140px]">Đơn vị chủ quản</th>
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px">Phạm vi</th>
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 w-px">Người tạo / Ngày tạo</th>
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Trạng thái</th>
-                <th className="px-4 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center w-px">Thao tác</th>
+          <table className="w-full border-collapse collection-table text-[13px]">
+            <thead className="bg-[#F8FAFC]">
+              <tr className="h-[42px]">
+                <th className={`${TH} text-center w-12`}>STT</th>
+                <th className={`${TH} text-left min-w-[220px]`}>Tên / Mã danh mục</th>
+                <th className={`${TH} text-left min-w-[140px]`}>Đơn vị chủ quản</th>
+                <th className={`${TH} text-left w-px`}>Phạm vi</th>
+                <th className={`${TH} text-left w-px`}>Người tạo / Ngày tạo</th>
+                <th className={`${TH} text-left w-px`}>Trạng thái</th>
+                <th className={`${TH} text-center w-px`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody>
               {paginatedEntities.length > 0 ? (
                 paginatedEntities.map((entity, index) => {
-                  const isPublished = publishedEntities.includes(entity.id);
+                  const rules = getActionRules(entity);
                   return (
-                    <tr key={entity.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                      <td className="px-4 py-4 text-slate-500 text-[13px] font-normal text-center">{(currentPageNum - 1) * pageSize + index + 1}</td>
-                      <td className="px-4 py-4 text-[13px]">
-                        <ClampedText text={entity.name} className="font-semibold text-[#0f172a] leading-snug break-words text-[13px]" />
-                        <ClampedText text={entity.code} className="font-mono text-slate-500 font-medium break-all mt-0.5 text-[13px]" />
+                    <tr key={entity.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                      <td className={`${TD} text-center whitespace-nowrap`}>{(currentPageNum - 1) * pageSize + index + 1}</td>
+                      <td className={`${TD} text-left max-w-[360px] leading-[18px]`}>
+                        <TruncatedText text={entity.name} />
+                        <TruncatedText text={entity.code} className="text-[#64748B]" />
                       </td>
-                      <td className="px-4 py-4 text-slate-700 text-[13px] font-normal">{entity.managingAgency || '--'}</td>
-                      <td className="px-4 py-4 text-slate-700 text-[13px] font-normal whitespace-nowrap">{scopeLabels[entity.scope] || entity.scope || '--'}</td>
-                      <td className="px-4 py-4 text-[13px]">
-                        <div className="text-slate-900 font-medium whitespace-nowrap">{entity.createdBy || '--'}</div>
-                        <div className="text-slate-500 font-medium font-mono mt-0.5 whitespace-nowrap">{entity.createdDate || '--'}</div>
+                      <td className={`${TD} text-left max-w-[240px]`}>
+                        <TruncatedText text={entity.managingAgency || '--'} />
                       </td>
-                      <td className="px-4 py-4 text-center">
-                        <div className="flex justify-center">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-normal border whitespace-nowrap ${
-                            entity.lifecycleStatus === 'active'
-                              ? 'bg-green-50 text-green-700 border-green-100'
-                              : entity.lifecycleStatus === 'approved'
-                                ? 'bg-blue-50 text-blue-700 border-blue-100'
-                                : entity.lifecycleStatus === 'pending_approval'
-                                  ? 'bg-purple-50 text-purple-700 border-purple-100'
-                                  : entity.lifecycleStatus === 'rejected'
-                                    ? 'bg-red-50 text-red-700 border-red-100'
-                                    : entity.lifecycleStatus === 'draft'
-                                      ? 'bg-slate-50 text-slate-700 border-slate-200'
-                                      : 'bg-orange-50 text-orange-700 border-orange-100'
-                          }`}>
-                            {lifecycleLabels[entity.lifecycleStatus].label}
-                          </span>
-                        </div>
+                      <td className={`${TD} text-left whitespace-nowrap`}>{scopeLabels[entity.scope] || entity.scope || '--'}</td>
+                      <td className={`${TD} text-left whitespace-nowrap leading-[18px]`}>
+                        <div>{entity.createdBy || '--'}</div>
+                        <div className="text-[#64748B]">{entity.createdDate || '--'}</div>
                       </td>
-                      <td className="px-4 py-4 text-center">
-                        <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-all">
+                      <td className={`${TD} text-left`}>
+                        <Badge label={lifecycleLabels[entity.lifecycleStatus].label} variant={STATUS_VARIANT[entity.lifecycleStatus] || 'orange'} />
+                      </td>
+                      <td className={`${TD} text-center`}>
+                        {/* Cột thao tác (compomennt.md 5.3.2): 6 thao tác => Xem chi tiết + Sửa + menu ⋯ */}
+                        <div className="inline-flex items-center justify-center gap-1">
                           {onView && (
-                            <button
-                              onClick={() => onView(entity)}
-                              className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                              title="Xem chi tiết"
-                            >
+                            <RowIconAction label="Xem chi tiết" onClick={() => onView(entity)}>
                               <Eye className="w-4 h-4" />
-                            </button>
+                            </RowIconAction>
                           )}
-                          {onViewData && (
-                            <button
-                              onClick={() => onViewData(entity)}
-                              className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors cursor-pointer"
-                              title="Xem dữ liệu"
-                            >
-                              <Database className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => onSubmitApproval(entity.id, 'category')}
-                            disabled={entity.lifecycleStatus === 'active' || entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              entity.lifecycleStatus === 'active' || entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'
-                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
-                                : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 cursor-pointer'
-                            }`}
-                            title={entity.lifecycleStatus === 'active' ? "Đã duyệt" : (entity.lifecycleStatus === 'pending_approval' ? "Đang chờ duyệt" : "Trình duyệt")}
-                          >
-                            <Send className="w-4 h-4" />
-                          </button>
-
-                          <div className="w-px h-4 bg-slate-200 mx-1"></div>
-
-                          <button
-                            onClick={() => onEdit(entity)}
-                            disabled={entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'
-                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
-                                : 'text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer'
-                            }`}
-                            title="Sửa"
-                          >
+                          <RowIconAction label="Sửa" disabledReason={rules.edit ?? undefined} onClick={() => onEdit(entity)}>
                             <SquarePen className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => onDelete(entity.id)}
-                            disabled={entity.lifecycleStatus === 'active' || entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              entity.lifecycleStatus === 'active' || entity.lifecycleStatus === 'pending_approval' || entity.lifecycleStatus === 'pending_expiration'
-                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
-                                : 'text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer'
-                            }`}
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          </RowIconAction>
 
-                          <div className="w-px h-4 bg-slate-200 mx-1"></div>
-
-                          <button
-                            onClick={() => onExpireClick(entity)}
-                            disabled={entity.lifecycleStatus !== 'active'}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              entity.lifecycleStatus !== 'active'
-                                ? 'text-slate-300 cursor-not-allowed bg-transparent'
-                                : 'text-slate-500 hover:text-orange-600 hover:bg-orange-50 cursor-pointer'
-                            }`}
-                            title="Hết hiệu lực"
-                          >
-                            <PowerOff className="w-4 h-4" />
-                          </button>
+                          <DropdownMenu>
+                            <Tooltip>
+                              {/* Chỉ hiện tooltip khi hover: khi menu đóng focus quay về nút, không để tooltip tự bật đè lên modal */}
+                              <TooltipTrigger asChild onFocus={(e: { preventDefault: () => void }) => e.preventDefault()}>
+                                <span className="inline-flex">
+                                  <DropdownMenuTrigger asChild>
+                                    <button type="button" aria-label="Thao tác khác" className={ROW_ICON_BTN}>
+                                      <MoreVertical className="w-4 h-4" />
+                                    </button>
+                                  </DropdownMenuTrigger>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>Thao tác khác</TooltipContent>
+                            </Tooltip>
+                            <DropdownMenuContent align="end" className="w-56 rounded-lg border border-[#E2E8F0] bg-white shadow-lg p-1">
+                              {onViewData && (
+                                <MenuAction icon={<Database className="w-4 h-4" />} label="Xem dữ liệu" reason={null}
+                                  onSelect={() => onViewData(entity)} />
+                              )}
+                              <MenuAction icon={<Send className="w-4 h-4" />} label="Trình duyệt" reason={rules.submit}
+                                onSelect={() => onSubmitApproval(entity.id, 'category')} />
+                              <MenuAction icon={<PowerOff className="w-4 h-4" />} label="Hết hiệu lực" reason={rules.expire}
+                                onSelect={() => onExpireClick(entity)} />
+                              <MenuAction icon={<Trash2 className="w-4 h-4" />} label="Xóa" reason={rules.remove} danger
+                                onSelect={() => onDelete(entity.id)} />
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </td>
                     </tr>
@@ -424,7 +349,7 @@ export function SetupTab({
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={7} className="px-3 py-16 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>
@@ -432,8 +357,17 @@ export function SetupTab({
             </tbody>
           </table>
         </div>
-        {/* Pagination block */}
-        {renderPagination(filteredEntities.length)}
+        {/* Pagination (compomennt.md 5.14) */}
+        {filteredEntities.length > 0 && (
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPageNum}
+            totalItems={filteredEntities.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPageNum}
+            onPageSizeChange={setPageSize}
+          />
+        )}
       </div>
     </div>
   );

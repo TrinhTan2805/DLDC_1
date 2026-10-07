@@ -9,6 +9,22 @@ import { MasterDataEntity, MasterDataAttribute, FieldDataType } from '../../cate
 import { BaseModal } from '../../../../common/BaseModal';
 import { mockAttributesByEntity, approvers } from '../../categoryConstants';
 import { ApprovalRequestModal } from '../modals/ApprovalRequestModal';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, BTN_PRIMARY, BTN_OUTLINE, INPUT_CLS, LABEL_CLS, REQUIRED_MARK,
+  FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, normalizeSearch,
+} from '../../../collection/collectionUi';
+
+// Lớp dùng chung theo quy chuẩn (compomennt.md 5.2, 5.3)
+const SELECT_CLS = `${INPUT_CLS} pr-8 appearance-none cursor-pointer`;
+const TABLE_CLS = 'w-full border-collapse collection-table text-[13px]';
+const TH_CLS = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px] text-left';
+const TR_CLS = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const TD_CLS = 'px-3 py-1 text-[13px] text-black';
+const EMPTY_TD_CLS = 'px-3 py-16 text-center text-[13px] text-[#64748B]';
+const CARD_HEADER_CLS = 'px-4 py-3 bg-[#F8FAFC] border-b border-[#E2E8F0] flex items-center';
+const CARD_TITLE_CLS = 'text-[14px] font-medium text-[#020817]';
+const SECTION_CARD_CLS = 'border border-[#E2E8F0] rounded-2xl bg-white overflow-hidden';
+const DASH = <span className="text-[#64748B]">--</span>;
 
 const FIELD_DATA_TYPES: { value: FieldDataType; label: string }[] = [
   { value: 'string',   label: 'Chuỗi (String)' },
@@ -457,19 +473,19 @@ export function AttributesTab({
     switch (status) {
       case 'approved':
       case 'partial':
-        return { label: 'Đã duyệt', color: 'bg-green-50 text-green-700 border-green-200' };
+        return { label: 'Đã duyệt', variant: 'green' };
       case 'pending':
-        return { label: 'Chờ duyệt', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+        return { label: 'Chờ duyệt', variant: 'orange' };
       case 'rejected':
-        return { label: 'Từ chối', color: 'bg-red-50 text-red-700 border-red-200' };
+        return { label: 'Từ chối', variant: 'red' };
       case 'draft':
       default:
         // Fallback: if all attributes are approved, consider it approved
         const allApproved = attributes.length > 0 && attributes.every(a => a.status === 'approved');
         if (allApproved) {
-          return { label: 'Đã duyệt', color: 'bg-green-50 text-green-700 border-green-200' };
+          return { label: 'Đã duyệt', variant: 'green' };
         }
-        return { label: 'Bản nháp', color: 'bg-slate-50 text-slate-700 border-slate-200' };
+        return { label: 'Bản nháp', variant: 'slate' };
     }
   };
   
@@ -491,6 +507,12 @@ export function AttributesTab({
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
+  // Từ khóa chỉ áp dụng khi bấm Tìm kiếm hoặc Enter (mục 5.19)
+  const [appliedSearch, setAppliedSearch] = useState('');
+  const runSearch = () => {
+    setAppliedSearch(searchTerm);
+    setCurrentPageNum(1);
+  };
   const [filterConstraints, setFilterConstraints] = useState<string[]>([]);
   const [filterKeyType, setFilterKeyType] = useState('all');
   const [filterDataType, setFilterDataType] = useState('all');
@@ -506,7 +528,7 @@ export function AttributesTab({
   // Reset page number on search or filter change
   React.useEffect(() => {
     setCurrentPageNum(1);
-  }, [searchTerm, filterConstraints, filterKeyType, filterDataType]);
+  }, [appliedSearch, filterConstraints, filterKeyType, filterDataType]);
 
   React.useEffect(() => {
     if (showDldcModal) {
@@ -535,8 +557,9 @@ export function AttributesTab({
 
   // Filter Logic
   const filteredAttributes = attributes.filter(attr => {
-    const matchesSearch = attr.fieldName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          attr.displayName.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = normalizeSearch(appliedSearch);
+    const matchesSearch = normalizeSearch(attr.fieldName).includes(q) ||
+                          normalizeSearch(attr.displayName).includes(q);
     const matchesConstraint = filterConstraints.length === 0
       || filterConstraints.some(c =>
           (c === 'required' && attr.required) ||
@@ -556,68 +579,15 @@ export function AttributesTab({
 
   const renderPagination = (totalItemsCount: number) => {
     if (totalItemsCount <= 0) return null;
-    const totalPages = Math.ceil(totalItemsCount / pageSize);
-    const startItem = (currentPageNum - 1) * pageSize + 1;
-    const endItem = Math.min(currentPageNum * pageSize, totalItemsCount);
-
     return (
-      <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-white text-[13px] font-medium">
-        {/* Left Side: Page Size Selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-slate-600 font-normal">Hiển thị</span>
-          <select
-            aria-label="Select record count"
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPageNum(1);
-            }}
-            className="px-2 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 bg-white text-[13px] cursor-pointer font-medium"
-            title="Số bản ghi trên trang"
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <span className="text-slate-600 font-normal">bản ghi/trang</span>
-        </div>
-
-        {/* Right Side: Page Range and Navigation */}
-        <div className="flex items-center gap-4">
-          <span className="text-slate-600 font-normal">
-            {startItem} - {endItem} / {totalItemsCount}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
-              disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Trước
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPageNum(page)}
-                className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors cursor-pointer ${currentPageNum === page
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
-              disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
+      <Pagination
+        className="border-t border-[#E2E8F0]"
+        currentPage={currentPageNum}
+        totalItems={totalItemsCount}
+        pageSize={pageSize}
+        onPageChange={setCurrentPageNum}
+        onPageSizeChange={setPageSize}
+      />
     );
   };
 
@@ -704,16 +674,16 @@ export function AttributesTab({
       {!wizardMode && (
         <div className="grid grid-cols-2 gap-4">
           {/* Card 1: Chọn danh mục dùng chung */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
-            <label className="block text-[13px] text-slate-700 font-medium">
-              Chọn danh mục dữ liệu dùng chung <span className="text-red-500">*</span>
+          <div className="bg-white p-4 rounded-2xl border border-[#E2E8F0]">
+            <label className={LABEL_CLS}>
+              Chọn danh mục dữ liệu dùng chung <span className={REQUIRED_MARK}>*</span>
             </label>
             <div className="relative">
               <select
                 title="Chọn thực thể"
                 value={selectedEntityId}
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedEntityId(e.target.value)}
-                className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-[13px] bg-white font-medium appearance-none cursor-pointer"
+                className={SELECT_CLS}
               >
                 {entities.map(entity => (
                   <option key={entity.id} value={entity.id}>
@@ -721,19 +691,17 @@ export function AttributesTab({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
             </div>
           </div>
 
           {/* Card 2: Trạng thái cấu trúc */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <label className="block text-[13px] text-slate-700 font-medium">
+          <div className="bg-white p-4 rounded-2xl border border-[#E2E8F0] flex flex-col justify-between">
+            <label className={LABEL_CLS}>
               Trạng thái cấu trúc
             </label>
-            <div className="flex items-center h-[38px] pb-1">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-[13px] font-semibold border shadow-sm ${statusInfo.color}`}>
-                {statusInfo.label}
-              </span>
+            <div className="flex items-center h-10">
+              <Badge label={statusInfo.label} variant={statusInfo.variant} />
             </div>
           </div>
         </div>
@@ -741,24 +709,27 @@ export function AttributesTab({
 
       {/* Search and Action Bar — ẩn trong wizard modal */}
       {!wizardMode && (
-        <div className="space-y-3 mb-6">
+        <div>
           <div className="flex flex-col md:flex-row items-center gap-3">
-            <div className="flex-1 w-full flex items-center gap-2">
-              <div className="flex-1 relative">
+            <div className="flex-1 w-full flex items-center gap-1.5">
+              <div className="flex-1 min-w-0 relative">
                 <input
                   type="text"
                   placeholder="Tìm kiếm trường hoặc tên hiển thị..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400 bg-white hover:bg-slate-50/50 font-medium shadow-sm"
+                  onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                  className={SEARCH_INPUT_CLS}
                 />
               </div>
               <button
                 type="button"
-                className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-95 shadow-sm"
+                aria-label="Tìm kiếm"
                 title="Tìm kiếm"
+                onClick={runSearch}
+                className={SEARCH_BTN_CLS}
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-5 h-5" />
               </button>
             </div>
 
@@ -773,7 +744,7 @@ export function AttributesTab({
                       onAddAttribute();
                     }
                   }}
-                  className="flex-1 md:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[13px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer"
+                  className={`${BTN_PRIMARY} flex-1 md:flex-none whitespace-nowrap`}
                   title="Thêm trường dữ liệu mới"
                 >
                   <Plus className="w-4 h-4" />
@@ -795,38 +766,33 @@ export function AttributesTab({
               {isViewOnly ? (
                 /* ── Chế độ xem chi tiết: chỉ hiển thị tên CSDL, tên bảng, các trường — không cho chỉnh sửa ── */
                 <>
-                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                    <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                      <Database className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Cấu hình nguồn dữ liệu</p>
+                  <div className={SECTION_CARD_CLS}>
+                    <div className={`${CARD_HEADER_CLS} gap-2`}>
+                      <Database className="w-4 h-4 text-[#475569]" />
+                      <p className={CARD_TITLE_CLS}>Cấu hình nguồn dữ liệu</p>
                     </div>
-                    <div className="p-5 space-y-3">
-                      <div className="flex justify-between items-center text-[13px]">
-                        <span className="text-slate-500">Cơ sở dữ liệu</span>
-                        <span className="font-medium text-slate-900">
+                    <div className="p-4 grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div>
+                        <div className={FIELD_LABEL}>Cơ sở dữ liệu</div>
+                        <div className={`${FIELD_VALUE} mt-1`}>
                           {DLDC_DATABASES.find(d => d.id === primaryDldcDbId)?.label || primaryDldcDbId || '--'}
-                        </span>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center text-[13px]">
-                        <span className="text-slate-500">Bảng dữ liệu chính</span>
-                        <span className="font-medium text-slate-900">
+                      <div>
+                        <div className={FIELD_LABEL}>Bảng dữ liệu chính</div>
+                        <div className={`${FIELD_VALUE} mt-1`}>
                           {DLDC_TABLES[primaryDldcDbId]?.find(t => t.id === primaryDldcTableId)?.displayName || primaryDldcTableId || '--'}
-                        </span>
+                        </div>
                       </div>
                       {joinedDldcTableIds.length > 0 && (
-                        <div className="flex justify-between items-start text-[13px] pt-1 border-t border-slate-100">
-                          <span className="text-slate-500 whitespace-nowrap">Bảng liên kết bổ sung</span>
-                          <div className="flex flex-wrap justify-end gap-1.5">
+                        <div className="col-span-2">
+                          <div className={FIELD_LABEL}>Bảng liên kết bổ sung</div>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
                             {joinedDldcTableIds.map(tableId => {
                               const tableDbId = getDatabaseForTable(tableId);
                               const tableLabel = DLDC_TABLES[tableDbId]?.find(t => t.id === tableId)?.displayName || tableId;
                               return (
-                                <span
-                                  key={tableId}
-                                  className="px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-[13px] font-medium"
-                                >
-                                  {tableLabel} <span className="text-blue-400 font-mono">({tableId})</span>
-                                </span>
+                                <Badge key={tableId} label={`${tableLabel} (${tableId})`} variant="blue" />
                               );
                             })}
                           </div>
@@ -835,45 +801,41 @@ export function AttributesTab({
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                    <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Các trường dữ liệu</p>
-                      <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                        {attributes.length} trường
-                      </span>
+                  <div className={SECTION_CARD_CLS}>
+                    <div className={`${CARD_HEADER_CLS} gap-2`}>
+                      <FileText className="w-4 h-4 text-[#475569]" />
+                      <p className={CARD_TITLE_CLS}>Các trường dữ liệu</p>
+                      <Badge label={`${attributes.length} trường`} variant="blue" />
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-[13px] dldc-summary-table">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                          <tr>
-                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên bảng</th>
-                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Trường gốc</th>
-                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
-                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu dữ liệu</th>
-                            <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap text-center">PK</th>
+                      <table className={`${TABLE_CLS} dldc-summary-table`}>
+                        <thead className="bg-[#F8FAFC]">
+                          <tr className="h-[42px]">
+                            <th className={`${TH_CLS}`}>Tên bảng</th>
+                            <th className={`${TH_CLS}`}>Trường gốc</th>
+                            <th className={`${TH_CLS}`}>Tên hiển thị</th>
+                            <th className={`${TH_CLS}`}>Kiểu dữ liệu</th>
+                            <th className={`${TH_CLS} !text-center`}>PK</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
+                        <tbody>
                           {attributes.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                              <td colSpan={5} className={EMPTY_TD_CLS}>
                                 Chưa có trường dữ liệu nào
                               </td>
                             </tr>
                           ) : (
                             attributes.map(attr => (
-                              <tr key={attr.id} className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-4 py-3 text-[13px] font-mono text-slate-700">{attr.sourceTable || primaryDldcTableId || '--'}</td>
-                                <td className="px-4 py-3 text-[13px] font-mono text-slate-700">{attr.sourceField || attr.fieldName}</td>
-                                <td className="px-4 py-3 text-[13px] text-slate-700">{attr.displayName}</td>
-                                <td className="px-4 py-3 text-[13px] text-slate-600">{getDataTypeLabel(attr.dataType)}</td>
-                                <td className="px-4 py-3 text-[13px] text-center">
+                              <tr key={attr.id} className={TR_CLS}>
+                                <td className={TD_CLS}>{attr.sourceTable || primaryDldcTableId || '--'}</td>
+                                <td className={TD_CLS}>{attr.sourceField || attr.fieldName}</td>
+                                <td className={TD_CLS}>{attr.displayName}</td>
+                                <td className={TD_CLS}>{getDataTypeLabel(attr.dataType)}</td>
+                                <td className={`${TD_CLS} text-center`}>
                                   {attr.keyType === 'primary' ? (
-                                    <span className="px-1.5 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200">PK</span>
-                                  ) : (
-                                    <span className="text-slate-400">--</span>
-                                  )}
+                                    <Badge label="PK" variant="amber" />
+                                  ) : DASH}
                                 </td>
                               </tr>
                             ))
@@ -887,30 +849,32 @@ export function AttributesTab({
               <>
 
               {/* Cấu hình nguồn dữ liệu card */}
-              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+              <div className={SECTION_CARD_CLS}>
                 {/* Blue header */}
-                <div className="px-5 py-3.5 bg-blue-600 flex items-center justify-between">
+                <div className={`${CARD_HEADER_CLS} justify-between`}>
                   <div className="flex items-center gap-2">
-                    <Database className="w-4 h-4 text-white" />
-                    <p className="text-[13px] font-semibold text-white">Cấu hình nguồn dữ liệu</p>
+                    <Database className="w-4 h-4 text-[#475569]" />
+                    <p className={CARD_TITLE_CLS}>Cấu hình nguồn dữ liệu</p>
                   </div>
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={useJoin}
                     onClick={() => setUseJoin(v => !v)}
-                    className="flex items-center gap-2 text-white text-[12px] cursor-pointer"
+                    className="flex items-center gap-2 text-[13px] text-[#334155] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-lg"
                   >
                     <span>Sử dụng liên kết bảng (Join)</span>
-                    <div className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/40 transition-colors ${useJoin ? 'bg-white/30' : 'bg-blue-500'}`}>
-                      <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${useJoin ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                    <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${useJoin ? 'bg-blue-600' : 'bg-[#CBD5E1]'}`}>
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${useJoin ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
                     </div>
                   </button>
                 </div>
 
                 {/* Info row — shown after table selected */}
                 {dldcDatabase && wizardConfig?.dldcTable && (
-                  <div className="px-5 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                    <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                    <p className="text-[13px] text-blue-700">
+                  <div className="px-4 py-2.5 bg-[#EAF3FF] border-b border-[#BFDBFE] flex items-center gap-2">
+                    <Database className="w-4 h-4 text-[#155DFC] flex-shrink-0" />
+                    <p className="text-[13px] text-[#020817]">
                       Kho dữ liệu: <span className="font-medium">{DLDC_DATABASES.find(d => d.id === dldcDatabase)?.label}</span>
                       {' — '}
                       <span className="font-medium">{DLDC_TABLES[dldcDatabase]?.find(t => t.id === wizardConfig?.dldcTable)?.displayName}</span>
@@ -918,55 +882,55 @@ export function AttributesTab({
                   </div>
                 )}
 
-                <div className="p-5 space-y-4">
+                <div className="p-4 space-y-4">
                   {/* CSDL selector — standalone row */}
-                  <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-slate-600">Cơ sở dữ liệu</label>
+                  <div>
+                    <label className={LABEL_CLS}>Cơ sở dữ liệu</label>
                     <div className="relative">
                       <select
                         title="Chọn cơ sở dữ liệu"
                         value={dldcDatabase}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcDatabaseChange(e.target.value)}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        className={SELECT_CLS}
                       >
                         <option value="">-- Chọn cơ sở dữ liệu --</option>
                         {DLDC_DATABASES.map(db => (
                           <option key={db.id} value={db.id}>{db.label}</option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                     </div>
                   </div>
 
                   {/* Primary table — single dropdown */}
                   {dldcDatabase && (
-                    <div className="space-y-1.5">
+                    <div>
                       <div className="flex items-center justify-between">
-                        <label className="block text-[13px] font-medium text-slate-600">Bảng dữ liệu chính</label>
-                        <span className="text-[13px] text-blue-500 font-medium italic">Primary Table</span>
+                        <label className={LABEL_CLS}>Bảng dữ liệu chính</label>
+                        <span className="text-[12px] text-[#64748B]">Primary Table</span>
                       </div>
                       <div className="relative">
                         <select
                           title="Chọn bảng dữ liệu chính"
                           value={wizardConfig?.dldcTable || ''}
                           onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcTableChange(e.target.value)}
-                          className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          className={SELECT_CLS}
                         >
                           <option value="">-- Chọn bảng dữ liệu --</option>
                           {(DLDC_TABLES[dldcDatabase] || []).map(t => (
                             <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
                           ))}
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                       </div>
                     </div>
                   )}
 
                   {/* Join tables — shown when useJoin toggled */}
                   {useJoin && (
-                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                    <div className="space-y-3 pt-2 border-t border-[#E2E8F0]">
                       <div className="flex items-center justify-between">
-                        <p className="text-[13px] font-semibold text-slate-700">
+                        <p className={CARD_TITLE_CLS}>
                           Bảng liên kết bổ sung ({dldcJoins.length})
                         </p>
                         <button
@@ -978,9 +942,9 @@ export function AttributesTab({
                               tableId: '', alias, leftField: '', rightField: '',
                             }]);
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                          className={BTN_OUTLINE}
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-4 h-4" />
                           Thêm bảng liên kết
                         </button>
                       </div>
@@ -989,26 +953,22 @@ export function AttributesTab({
                         const joinTableFields = join.tableId ? (DLDC_FIELDS[join.tableId] || []) : [];
                         const primaryFields = wizardConfig?.dldcTable ? (DLDC_FIELDS[wizardConfig.dldcTable] || []) : [];
                         return (
-                          <div key={join.id} className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50/50">
+                          <div key={join.id} className="border border-[#E2E8F0] rounded-lg p-4 space-y-3 bg-[#F8FAFC]">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">BẢNG LIÊN KẾT #{idx + 1}</span>
-                                <span className="text-[13px] text-slate-500">Alias: {join.alias}</span>
+                                <Badge label={`Bảng liên kết #${idx + 1}`} variant="blue" />
+                                <span className="text-[13px] text-[#64748B]">Alias: {join.alias}</span>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => {
+                              <RowIconAction label="Xóa" onClick={() => {
                                   setDldcJoins(prev => prev.filter(j => j.id !== join.id));
                                   setDldcFieldRows(prev => prev.filter(r => r.sourceJoinId !== join.id));
-                                }}
-                                className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                                }}>
+                                <Trash2 className="w-4 h-4" />
+                              </RowIconAction>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1.5">
-                                <label className="block text-[13px] font-medium text-slate-600">Kiểu liên kết</label>
+                              <div>
+                                <label className={LABEL_CLS}>Kiểu liên kết</label>
                                 <div className="relative">
                                   <select
                                     title="Kiểu liên kết"
@@ -1016,17 +976,17 @@ export function AttributesTab({
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                       setDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, joinType: e.target.value as DldcJoin['joinType'] } : j))
                                     }
-                                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className={SELECT_CLS}
                                   >
                                     <option value="LEFT JOIN">LEFT JOIN</option>
                                     <option value="INNER JOIN">INNER JOIN</option>
                                     <option value="RIGHT JOIN">RIGHT JOIN</option>
                                   </select>
-                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                                 </div>
                               </div>
-                              <div className="space-y-1.5">
-                                <label className="block text-[13px] font-medium text-slate-600">Bảng dữ liệu bổ sung</label>
+                              <div>
+                                <label className={LABEL_CLS}>Bảng dữ liệu bổ sung</label>
                                 <div className="relative">
                                   <select
                                     title="Bảng dữ liệu bổ sung"
@@ -1046,52 +1006,52 @@ export function AttributesTab({
                                       });
                                       setDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, tableId: newTableId, leftField: '', rightField: '' } : j));
                                     }}
-                                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className={SELECT_CLS}
                                   >
                                     <option value="">-- Chọn bảng --</option>
                                     {dldcDatabase && (DLDC_TABLES[dldcDatabase] || [])
                                       .filter(t => t.id !== wizardConfig?.dldcTable)
                                       .map(t => <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>)}
                                   </select>
-                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                                 </div>
                               </div>
                             </div>
-                            <div className="space-y-1.5">
-                              <label className="block text-[13px] font-medium text-slate-600">Điều kiện liên kết (Join Condition)</label>
+                            <div>
+                              <label className={LABEL_CLS}>Điều kiện liên kết (Join Condition)</label>
                               <div className="flex items-center gap-2">
-                                <div className="flex-1 relative">
+                                <div className="flex-1 min-w-0 relative">
                                   <select
                                     title="Trường bảng liên kết"
                                     value={join.leftField}
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                       setDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, leftField: e.target.value } : j))
                                     }
-                                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className={SELECT_CLS}
                                   >
                                     <option value="">-- {join.alias}.field --</option>
                                     {joinTableFields.map(f => (
                                       <option key={f.fieldName} value={`${join.alias}.${f.fieldName}`}>{join.alias}.{f.fieldName}</option>
                                     ))}
                                   </select>
-                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                                 </div>
-                                <div className="w-8 h-9 flex items-center justify-center bg-slate-100 rounded-lg border border-slate-200 text-slate-600 font-bold text-[13px] flex-shrink-0">=</div>
-                                <div className="flex-1 relative">
+                                <div className="w-8 h-10 flex items-center justify-center bg-[#F1F5F9] rounded-lg border border-[#E2E8F0] text-[#475569] font-medium text-[13px] flex-shrink-0">=</div>
+                                <div className="flex-1 min-w-0 relative">
                                   <select
                                     title="Trường bảng chính"
                                     value={join.rightField}
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                       setDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, rightField: e.target.value } : j))
                                     }
-                                    className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                    className={SELECT_CLS}
                                   >
                                     <option value="">-- {wizardConfig?.dldcTable || 'table'}.field --</option>
                                     {primaryFields.map(f => (
                                       <option key={f.fieldName} value={`${wizardConfig?.dldcTable}.${f.fieldName}`}>{wizardConfig?.dldcTable}.{f.fieldName}</option>
                                     ))}
                                   </select>
-                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                                 </div>
                               </div>
                             </div>
@@ -1105,14 +1065,12 @@ export function AttributesTab({
 
               {/* Field Selection table */}
               {wizardConfig?.dldcTable && (
-                <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div className={SECTION_CARD_CLS}>
+                  <div className={`${CARD_HEADER_CLS} justify-between`}>
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-slate-500" />
-                      <p className="text-[13px] font-semibold text-slate-700">Chọn trường dữ liệu chia sẻ (Field Selection)</p>
-                      <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                        {dldcFieldRows.filter(r => r.shared).length}/{dldcFieldRows.length} trường được chọn
-                      </span>
+                      <FileText className="w-4 h-4 text-[#475569]" />
+                      <p className={CARD_TITLE_CLS}>Chọn trường dữ liệu chia sẻ (Field Selection)</p>
+                      <Badge label={`${dldcFieldRows.filter(r => r.shared).length}/${dldcFieldRows.length} trường được chọn`} variant="blue" />
                     </div>
                     <button
                       type="button"
@@ -1123,14 +1081,14 @@ export function AttributesTab({
                           columnName: '', targetColumn: '', apiFieldName: '', dataType: 'string', masked: false,
                         }]);
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                      className={BTN_OUTLINE}
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-4 h-4" />
                       Thêm trường dữ liệu
                     </button>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
+                    <table className={`${TABLE_CLS} table-fixed`}>
                       <colgroup>
                         <col style={{ width: '5%' }} />
                         <col style={{ width: '5%' }} />
@@ -1142,23 +1100,23 @@ export function AttributesTab({
                         <col style={{ width: '14%' }} />
                         <col style={{ width: '5%' }} />
                       </colgroup>
-                      <thead className="bg-slate-50 border-b border-slate-100">
-                        <tr>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chọn</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
-                          <th className="px-1 py-3 text-[13px] font-semibold text-slate-500 text-center"></th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên cột</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
-                          <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px]">
+                          <th className={`${TH_CLS} !text-center`}>Chọn</th>
+                          <th className={`${TH_CLS} !text-center`}>PK</th>
+                          <th className={`${TH_CLS}`}>Nguồn dữ liệu (Table)</th>
+                          <th className={`${TH_CLS}`}>Trường gốc (Column)</th>
+                          <th className={`${TH_CLS} !px-1 !text-center`}></th>
+                          <th className={`${TH_CLS}`}>Tên cột</th>
+                          <th className={`${TH_CLS}`}>Tên hiển thị</th>
+                          <th className={`${TH_CLS}`}>Kiểu dữ liệu</th>
+                          <th className={`${TH_CLS} !text-center`}>Xóa</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white">
+                      <tbody>
                         {dldcFieldRows.length === 0 ? (
                           <tr>
-                            <td colSpan={9} className="px-5 py-8 text-center text-[13px] text-slate-400">
+                            <td colSpan={9} className={EMPTY_TD_CLS}>
                               Chọn bảng dữ liệu để tải danh sách trường
                             </td>
                           </tr>
@@ -1167,77 +1125,74 @@ export function AttributesTab({
                             const allTablesForDb = dldcDatabase ? (DLDC_TABLES[dldcDatabase] || []) : [];
                             const tableFieldsForRow = DLDC_FIELDS[row.tableId] || [];
                             return (
-                              <tr key={row.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
-                                <td className="px-3 py-2.5 text-center overflow-hidden">
+                              <tr key={row.id} className={TR_CLS}>
+                                <td className="px-3 py-1 text-center overflow-hidden">
                                   <input type="checkbox" checked={row.shared}
                                     onChange={() => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, shared: !r.shared } : r))}
-                                    className="w-4 h-4 rounded text-blue-600 border-slate-300 cursor-pointer" />
+                                    className="w-4 h-4 rounded accent-blue-600 cursor-pointer" />
                                 </td>
-                                <td className="px-3 py-2.5 text-center overflow-hidden">
+                                <td className="px-3 py-1 text-center overflow-hidden">
                                   <input type="checkbox" checked={row.isPK}
                                     onChange={() => setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, isPK: !r.isPK } : r))}
-                                    className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-pointer" />
+                                    className="w-4 h-4 rounded accent-[#D97706] cursor-pointer" />
                                 </td>
-                                <td className="px-3 py-2.5 overflow-hidden">
+                                <td className="px-3 py-1 overflow-hidden">
                                   <select title="Nguồn dữ liệu" value={row.tableId}
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: e.target.value, columnName: '', apiFieldName: '' } : r))
                                     }
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer"
+                                    className={`${INPUT_CLS} min-w-0`}
                                   >
                                     <option value="">--</option>
                                     {allTablesForDb.map(t => <option key={t.id} value={t.id}>{t.id}</option>)}
                                   </select>
                                 </td>
-                                <td className="px-3 py-2.5 overflow-hidden">
+                                <td className="px-3 py-1 overflow-hidden">
                                   <select title="Trường gốc" value={row.columnName}
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                                       const fd = tableFieldsForRow.find(f => f.fieldName === e.target.value);
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, columnName: e.target.value, targetColumn: e.target.value, apiFieldName: e.target.value, dataType: fd?.dataType || r.dataType } : r));
                                     }}
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer"
+                                    className={`${INPUT_CLS} min-w-0`}
                                   >
                                     <option value="">--</option>
                                     {tableFieldsForRow.map(f => <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>)}
                                   </select>
                                 </td>
-                                <td className="px-1 py-2.5 text-center overflow-hidden">
-                                  <ArrowRight className="w-4 h-4 text-slate-400 mx-auto" />
+                                <td className="px-1 py-1 text-center overflow-hidden">
+                                  <ArrowRight className="w-4 h-4 text-[#64748B] mx-auto" />
                                 </td>
-                                <td className="px-3 py-2.5 overflow-hidden">
+                                <td className="px-3 py-1 overflow-hidden">
                                   <input type="text" value={row.targetColumn}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, targetColumn: e.target.value } : r))
                                     }
                                     placeholder="Tên cột đích"
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                    className={`${INPUT_CLS} min-w-0`}
                                   />
                                 </td>
-                                <td className="px-3 py-2.5 overflow-hidden">
+                                <td className="px-3 py-1 overflow-hidden">
                                   <input type="text" value={row.apiFieldName}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, apiFieldName: e.target.value } : r))
                                     }
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                    className={`${INPUT_CLS} min-w-0`}
                                   />
                                 </td>
-                                <td className="px-3 py-2.5 overflow-hidden">
+                                <td className="px-3 py-1 overflow-hidden">
                                   <select title="Kiểu dữ liệu" value={row.dataType}
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                       setDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))
                                     }
-                                    className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                    className={`${INPUT_CLS} min-w-0`}
                                   >
                                     {FIELD_DATA_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                                   </select>
                                 </td>
-                                <td className="px-3 py-2.5 text-center overflow-hidden">
-                                  <button type="button"
-                                    onClick={() => setDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}
-                                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
+                                <td className="px-3 py-1 text-center overflow-hidden">
+                                  <RowIconAction label="Xóa" onClick={() => setDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}>
+                                <Trash2 className="w-4 h-4" />
+                              </RowIconAction>
                                 </td>
                               </tr>
                             );
@@ -1246,12 +1201,12 @@ export function AttributesTab({
                       </tbody>
                     </table>
                   </div>
-                  <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex justify-end">
+                  <div className="px-4 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end">
                     <button
                       type="button"
                       disabled={dldcFieldRows.filter(r => r.shared && r.columnName).length === 0}
                       onClick={handleDldcApply}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium transition-colors active:scale-95"
+                      className={BTN_PRIMARY}
                     >
                       <Check className="w-4 h-4" />
                       Áp dụng cấu trúc ({dldcFieldRows.filter(r => r.shared && r.columnName).length} trường)
@@ -1269,15 +1224,15 @@ export function AttributesTab({
           {dataSource === 'manual' && (
             <>
               {/* Inline Attribute Form — ẩn khi xem chi tiết */}
-              {!isViewOnly && <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-                  <p className="text-[13px] font-semibold text-slate-700">Thêm trường dữ liệu mới</p>
+              {!isViewOnly && <div className={SECTION_CARD_CLS}>
+                <div className={CARD_HEADER_CLS}>
+                  <p className={CARD_TITLE_CLS}>Thêm trường dữ liệu mới</p>
                 </div>
-            <div className="p-5 space-y-4">
+            <div className="p-4 space-y-4">
               {/* Row 1: Tên trường */}
-              <div className="space-y-1.5">
-                <label className="block text-[13px] font-medium text-slate-600">
-                  Tên trường <span className="text-red-500">*</span>
+              <div>
+                <label className={LABEL_CLS}>
+                  Tên trường <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
                   type="text"
@@ -1287,16 +1242,16 @@ export function AttributesTab({
                     if (inlineErrors.fieldName) setInlineErrors({ ...inlineErrors, fieldName: undefined });
                   }}
                   placeholder="VD: citizen_id"
-                  className={`w-full px-3 py-2 border rounded-lg text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${inlineErrors.fieldName ? 'border-red-400 bg-red-50' : 'border-slate-200'}`}
+                  className={`${INPUT_CLS} ${inlineErrors.fieldName ? '!border-[#DC2626]' : ''}`}
                 />
-                {inlineErrors.fieldName && <p className="text-[13px] text-red-500">{inlineErrors.fieldName}</p>}
-                <p className="text-[13px] text-slate-400 italic">Tên định danh trong cơ sở dữ liệu (không dấu, chữ thường)</p>
+                {inlineErrors.fieldName && <p className="mt-1 text-[12px] text-[#DC2626]">{inlineErrors.fieldName}</p>}
+                <p className="mt-1 text-[12px] text-[#64748B]">Tên định danh trong cơ sở dữ liệu (không dấu, chữ thường)</p>
               </div>
 
               {/* Row 2: Tên hiển thị */}
-              <div className="space-y-1.5">
-                <label className="block text-[13px] font-medium text-slate-600">
-                  Tên hiển thị <span className="text-red-500">*</span>
+              <div>
+                <label className={LABEL_CLS}>
+                  Tên hiển thị <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
                   type="text"
@@ -1306,54 +1261,54 @@ export function AttributesTab({
                     if (inlineErrors.displayName) setInlineErrors({ ...inlineErrors, displayName: undefined });
                   }}
                   placeholder="VD: Số CCCD"
-                  className={`w-full px-3 py-2 border rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${inlineErrors.displayName ? 'border-red-400 bg-red-50' : 'border-slate-200'}`}
+                  className={`${INPUT_CLS} ${inlineErrors.displayName ? '!border-[#DC2626]' : ''}`}
                 />
-                {inlineErrors.displayName && <p className="text-[13px] text-red-500">{inlineErrors.displayName}</p>}
+                {inlineErrors.displayName && <p className="mt-1 text-[12px] text-[#DC2626]">{inlineErrors.displayName}</p>}
               </div>
 
               {/* Row 3: Kiểu dữ liệu + Độ dài */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">
-                    Kiểu dữ liệu <span className="text-red-500">*</span>
+                <div>
+                  <label className={LABEL_CLS}>
+                    Kiểu dữ liệu <span className={REQUIRED_MARK}>*</span>
                   </label>
                   <select
                     title="Kiểu dữ liệu"
                     value={inlineForm.dataType || 'string'}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setInlineForm({ ...inlineForm, dataType: e.target.value as FieldDataType })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className={INPUT_CLS}
                   >
                     {FIELD_DATA_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-slate-600">Độ dài tối đa</label>
+                <div>
+                  <label className={LABEL_CLS}>Độ dài tối đa</label>
                   <input
                     type="number"
                     value={inlineForm.length ?? ''}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, length: e.target.value ? parseInt(e.target.value) : undefined })}
                     placeholder="VD: 255"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className={INPUT_CLS}
                   />
                 </div>
               </div>
 
               {/* Row 4: Là trường bắt buộc checkbox */}
-              <div className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <label className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+              <div className="flex items-center p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <label className="flex items-center gap-2 cursor-pointer text-[13px] text-[#020817]">
                   <input
                     type="checkbox"
                     checked={inlineForm.required || false}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, required: e.target.checked })}
-                    className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
                   />
-                  <span className="font-medium text-slate-800">Là trường bắt buộc</span>
+                  <span className={FIELD_LABEL}>Là trường bắt buộc</span>
                 </label>
               </div>
 
               {/* Row 4.5: Cấu hình khóa (Khóa chính / Khóa ngoại) */}
-              <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <label className="text-[13px] font-medium text-slate-600 shrink-0">Cấu hình khóa:</label>
+              <div className="flex items-center gap-6 p-4 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <label className={`${FIELD_LABEL} shrink-0`}>Cấu hình khóa:</label>
                 <div className="flex items-center gap-6">
                   {[
                     { value: 'primary', label: 'Khóa chính (PK)' },
@@ -1361,7 +1316,7 @@ export function AttributesTab({
                   ].map((option) => {
                     const isSelected = inlineForm.keyType === option.value;
                     return (
-                      <label key={option.value} className="flex items-center gap-2 cursor-pointer font-sans text-[13px] text-slate-700">
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer text-[13px] text-[#020817]">
                         <input
                           type="radio"
                           name="inlineKeyType"
@@ -1385,7 +1340,7 @@ export function AttributesTab({
                               });
                             }
                           }}
-                          className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                          className="w-4 h-4 accent-blue-600 cursor-pointer"
                         />
                         <span>{option.label}</span>
                       </label>
@@ -1395,14 +1350,14 @@ export function AttributesTab({
               </div>
 
               {/* Row 5: Giá trị mặc định */}
-              <div className="space-y-1.5">
-                <label className="block text-[13px] font-medium text-slate-600">Giá trị mặc định</label>
+              <div>
+                <label className={LABEL_CLS}>Giá trị mặc định</label>
                 <input
                   type="text"
                   value={inlineForm.defaultValue || ''}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setInlineForm({ ...inlineForm, defaultValue: e.target.value })}
                   placeholder="Để trống nếu không có"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className={INPUT_CLS}
                 />
               </div>
 
@@ -1411,7 +1366,7 @@ export function AttributesTab({
                 <button
                   type="button"
                   onClick={handleInlineAdd}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-[13px] font-medium transition-colors active:scale-95"
+                  className={BTN_PRIMARY}
                 >
                   <Plus className="w-4 h-4" />
                   Thêm trường
@@ -1421,58 +1376,50 @@ export function AttributesTab({
           </div>}
 
           {/* Compact list of added attributes */}
-          <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-slate-700">Danh sách trường đã thêm</p>
-              <span className="text-[13px] text-slate-500">{attributes.length} trường</span>
+          <div className={SECTION_CARD_CLS}>
+            <div className={`${CARD_HEADER_CLS} justify-between`}>
+              <p className={CARD_TITLE_CLS}>Danh sách trường đã thêm</p>
+              <span className="text-[13px] text-[#64748B]">{attributes.length} trường</span>
             </div>
             {attributes.length === 0 ? (
-              <div className="py-8 text-center text-[13px] text-slate-400">Chưa có trường nào được thêm</div>
+              <div className="py-16 text-center text-[13px] text-[#64748B]">Chưa có trường nào được thêm</div>
             ) : (
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên trường</th>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Tên hiển thị</th>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Kiểu DL</th>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Cấu hình khóa</th>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap">Bắt buộc</th>
-                    <th className="px-4 py-3 text-[13px] font-semibold text-slate-500 whitespace-nowrap text-center w-20">Thao tác</th>
+              <table className={`${TABLE_CLS}`}>
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={`${TH_CLS}`}>Tên trường</th>
+                    <th className={`${TH_CLS}`}>Tên hiển thị</th>
+                    <th className={`${TH_CLS}`}>Kiểu DL</th>
+                    <th className={`${TH_CLS}`}>Cấu hình khóa</th>
+                    <th className={`${TH_CLS}`}>Bắt buộc</th>
+                    <th className={`${TH_CLS} !text-center w-20`}>Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {attributes.map(attr => (
-                    <tr key={attr.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-4 py-3 text-[13px] font-mono text-slate-900">{attr.fieldName}</td>
-                      <td className="px-4 py-3 text-[13px] text-slate-700">{attr.displayName}</td>
-                      <td className="px-4 py-3 text-[13px] text-slate-600">{getDataTypeLabel(attr.dataType)}</td>
-                      <td className="px-4 py-3">
+                    <tr key={attr.id} className={TR_CLS}>
+                      <td className={TD_CLS}>{attr.fieldName}</td>
+                      <td className={TD_CLS}>{attr.displayName}</td>
+                      <td className={TD_CLS}>{getDataTypeLabel(attr.dataType)}</td>
+                      <td className={TD_CLS}>
                         {attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
                           <div className="flex gap-1 flex-wrap">
-                            {attr.keyType === 'primary' && <span className="px-1.5 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
+                            {attr.keyType === 'primary' && <span title="Khóa chính (Primary Key)"><Badge label="PK" variant="amber" /></span>}
                             {attr.keyType === 'foreign' && (
-                              <span className="px-1.5 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                              <span title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}><Badge label="FK" variant="emerald" /></span>
                             )}
                           </div>
-                        ) : (
-                          <span className="text-slate-400">--</span>
-                        )}
+                        ) : DASH}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={TD_CLS}>
                         {attr.required ? (
-                          <span className="px-1.5 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">Bắt buộc</span>
-                        ) : (
-                          <span className="text-slate-400">--</span>
-                        )}
+                          <Badge label="Bắt buộc" variant="red" />
+                        ) : DASH}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => onDeleteAttribute(attr.id)}
-                          className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                          title="Xóa trường"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <td className={`${TD_CLS} text-center`}>
+                        <RowIconAction label="Xóa trường" onClick={() => onDeleteAttribute(attr.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </RowIconAction>
                       </td>
                     </tr>
                   ))}
@@ -1487,58 +1434,58 @@ export function AttributesTab({
         /* ── FULL PAGE MODE: entity info + full table ── */
         <>
           {/* Current Managed Entity Info */}
-          <div className={`border rounded-xl p-5 flex items-start gap-4 shadow-sm text-[13px] ${
+          <div className={`border rounded-lg px-4 py-3 flex items-start gap-3 text-[13px] text-[#020817] ${
             (entityDataSource === 'dldc')
-              ? 'bg-amber-50 border-amber-200 text-amber-800'
-              : 'bg-blue-50/50 border-blue-200 text-blue-800'
+              ? 'bg-[#FFF7ED] border-[#FED7AA]'
+              : 'bg-[#EAF3FF] border-[#BFDBFE]'
           }`}>
-            <AlertCircle className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+            <AlertCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
               (entityDataSource === 'dldc')
-                ? 'text-amber-600'
-                : 'text-blue-600'
+                ? 'text-[#D97706]'
+                : 'text-[#155DFC]'
             }`} />
             <div className="leading-relaxed">
-              <span className="font-semibold">Thông tin cấu hình:</span>{' '}
+              <span className="font-medium">Thông tin cấu hình:</span>{' '}
               <span>Đang thực hiện cấu hình cấu trúc trường dữ liệu cho danh mục </span>
-              <strong className="font-bold underline underline-offset-2">
+              <strong className="font-medium underline underline-offset-2">
                 {currentEntity?.name || 'Chưa chọn thực thể'}
               </strong>
               <span>. Nguồn dữ liệu: </span>
-              <span className="font-semibold">{getDataSourceLabel(entityDataSource)}</span>
+              <span className="font-medium">{getDataSourceLabel(entityDataSource)}</span>
             </div>
           </div>
 
           {/* Attributes Table */}
-          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+          <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-[#f8fafc] text-slate-700 border-b border-slate-100">
+              <table className={TABLE_CLS}>
+                <thead className="bg-[#F8FAFC]">
                   {entityDataSource === 'dldc' ? (
-                    <tr>
-                      <th className="w-12 px-6 py-4 text-[13px] font-semibold text-slate-700 text-center">STT</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên CSDL</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Nguồn dữ liệu</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Trường gốc</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">PK</th>
-                      {!hideStructureActions && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
+                    <tr className="h-[42px]">
+                      <th className={`${TH_CLS} !text-center`}>STT</th>
+                      <th className={`${TH_CLS}`}>Tên CSDL</th>
+                      <th className={`${TH_CLS}`}>Nguồn dữ liệu</th>
+                      <th className={`${TH_CLS}`}>Trường gốc</th>
+                      <th className={`${TH_CLS}`}>Tên hiển thị</th>
+                      <th className={`${TH_CLS}`}>Kiểu dữ liệu</th>
+                      <th className={`${TH_CLS} !text-center`}>PK</th>
+                      {!hideStructureActions && <th className={`${TH_CLS} !text-center w-[120px]`}>Thao tác</th>}
                     </tr>
                   ) : (
-                    <tr>
-                      <th className="w-12 px-6 py-4 text-[13px] font-semibold text-slate-700 text-center">STT</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên trường</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tên hiển thị</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Kiểu dữ liệu</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Độ dài</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Cấu hình khóa</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Bắt buộc</th>
-                      <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-center">Giá trị mặc định</th>
-                      {!hideStructureActions && <th className="px-6 py-4 text-[13px] font-semibold text-slate-700 whitespace-nowrap text-right w-48">Thao tác</th>}
+                    <tr className="h-[42px]">
+                      <th className={`${TH_CLS} !text-center`}>STT</th>
+                      <th className={`${TH_CLS}`}>Tên trường</th>
+                      <th className={`${TH_CLS}`}>Tên hiển thị</th>
+                      <th className={`${TH_CLS}`}>Kiểu dữ liệu</th>
+                      <th className={`${TH_CLS}`}>Độ dài</th>
+                      <th className={`${TH_CLS}`}>Cấu hình khóa</th>
+                      <th className={`${TH_CLS}`}>Bắt buộc</th>
+                      <th className={`${TH_CLS} !text-center`}>Giá trị mặc định</th>
+                      {!hideStructureActions && <th className={`${TH_CLS} !text-center w-[120px]`}>Thao tác</th>}
                     </tr>
                   )}
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody>
                   {paginatedAttributes.length > 0 ? (
                     paginatedAttributes.map((attr, idx) => {
                       const isLocked = entityDataSource === 'dldc';
@@ -1546,73 +1493,65 @@ export function AttributesTab({
                       const dbLabel = DLDC_DATABASES.find(d => d.id === dbId)?.label || dbId || '--';
 
                       return (
-                        <tr key={attr.id} className="hover:bg-slate-50/50 transition-all group border-b border-slate-100">
-                          <td className="px-6 py-4 text-center text-[13px] text-slate-600 font-medium">
+                        <tr key={attr.id} className={TR_CLS}>
+                          <td className={`${TD_CLS} text-center`}>
                             {(currentPageNum - 1) * pageSize + idx + 1}
                           </td>
                           {entityDataSource === 'dldc' ? (
                             <>
-                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{dbLabel}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.sourceTable || '--'}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.sourceField || '--'}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName || attr.fieldName || '--'}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
-                              <td className="px-6 py-4 text-center">
+                              <td className={`${TD_CLS} max-w-[200px]`}><TruncatedText text={dbLabel} /></td>
+                              <td className={`${TD_CLS} max-w-[240px]`}><TruncatedText text={attr.sourceTable || '--'} /></td>
+                              <td className={`${TD_CLS} max-w-[240px]`}><TruncatedText text={attr.sourceField || '--'} /></td>
+                              <td className={`${TD_CLS} max-w-[280px]`}><TruncatedText text={attr.displayName || attr.fieldName || '--'} /></td>
+                              <td className={TD_CLS}>{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
+                              <td className={`${TD_CLS} text-center`}>
                                 {attr.keyType === 'primary' ? (
-                                  <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>
-                                ) : (
-                                  <span className="text-slate-400">--</span>
-                                )}
+                                  <span title="Khóa chính (Primary Key)"><Badge label="PK" variant="amber" /></span>
+                                ) : DASH}
                               </td>
                             </>
                           ) : (
                             <>
-                              <td className="px-6 py-4 text-[13px] text-slate-900 font-mono">{attr.fieldName || '--'}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-900 font-medium">{attr.displayName || '--'}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-700 font-medium">{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-600">{attr.length ?? '--'}</td>
-                              <td className="px-6 py-4">
+                              <td className={`${TD_CLS} max-w-[240px]`}><TruncatedText text={attr.fieldName || '--'} /></td>
+                              <td className={`${TD_CLS} max-w-[280px]`}><TruncatedText text={attr.displayName || '--'} /></td>
+                              <td className={TD_CLS}>{attr.dataType ? getDataTypeLabel(attr.dataType) : '--'}</td>
+                              <td className={`${TD_CLS} text-right tabular-nums`}>{attr.length ?? '--'}</td>
+                              <td className={TD_CLS}>
                                 {attr.keyType === 'primary' || attr.keyType === 'foreign' ? (
-                                  <div className="flex gap-1.5 flex-wrap">
-                                    {attr.keyType === 'primary' && <span className="px-2 py-0.5 rounded text-[13px] bg-amber-50 text-amber-700 font-bold border border-amber-200" title="Khóa chính (Primary Key)">PK</span>}
+                                  <div className="flex gap-1 flex-wrap">
+                                    {attr.keyType === 'primary' && <span title="Khóa chính (Primary Key)"><Badge label="PK" variant="amber" /></span>}
                                     {attr.keyType === 'foreign' && (
-                                      <span className="px-2 py-0.5 rounded text-[13px] bg-teal-50 text-teal-700 font-bold border border-teal-200" title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}>FK</span>
+                                      <span title={`Khóa ngoại (Foreign Key) liên kết với danh mục ID: ${attr.foreignTable}, trường: ${attr.foreignField}`}><Badge label="FK" variant="emerald" /></span>
                                     )}
                                   </div>
-                                ) : (
-                                  <span className="text-slate-400">--</span>
-                                )}
+                                ) : DASH}
                               </td>
-                              <td className="px-6 py-4">
+                              <td className={TD_CLS}>
                                 {attr.required ? (
-                                  <span className="px-2 py-0.5 rounded text-[13px] bg-red-50 text-red-600 font-bold border border-red-100">Bắt buộc</span>
-                                ) : (
-                                  <span className="text-slate-400">--</span>
-                                )}
+                                  <Badge label="Bắt buộc" variant="red" />
+                                ) : DASH}
                               </td>
-                              <td className="px-6 py-4 text-[13px] text-slate-600 text-center">{attr.defaultValue || '--'}</td>
+                              <td className={`${TD_CLS} max-w-[200px]`}><TruncatedText text={attr.defaultValue || '--'} /></td>
                             </>
                           )}
 
                           {!hideStructureActions && (
-                            <td className="px-6 py-4 text-right">
-                              <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-all">
-                                <button
+                            <td className={`${TD_CLS} text-center`}>
+                              <div className="flex items-center justify-center gap-1">
+                                <RowIconAction
+                                  label="Sửa"
                                   onClick={() => onEditAttribute(attr)}
-                                  disabled={isLocked}
-                                  className={`p-1.5 rounded-lg transition-colors ${isLocked ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer'}`}
-                                  title="Sửa"
+                                  disabledReason={isLocked ? 'Trường đồng bộ từ Kho DLDC, không thể chỉnh sửa' : undefined}
                                 >
                                   <SquarePen className="w-4 h-4" />
-                                </button>
-                                <button
+                                </RowIconAction>
+                                <RowIconAction
+                                  label="Xóa"
                                   onClick={() => onDeleteAttribute(attr.id)}
-                                  disabled={isLocked}
-                                  className={`p-1.5 rounded-lg transition-colors ${isLocked ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:text-red-600 hover:bg-red-50 cursor-pointer'}`}
-                                  title="Xóa"
+                                  disabledReason={isLocked ? 'Trường đồng bộ từ Kho DLDC, không thể xóa' : undefined}
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                </button>
+                                </RowIconAction>
                               </div>
                             </td>
                           )}
@@ -1621,7 +1560,7 @@ export function AttributesTab({
                     })
                   ) : (
                     <tr>
-                      <td colSpan={getColSpan()} className="px-6 py-8 text-center text-[13px] text-slate-500">
+                      <td colSpan={getColSpan()} className={EMPTY_TD_CLS}>
                         Không tìm thấy dữ liệu
                       </td>
                     </tr>
@@ -1643,7 +1582,7 @@ export function AttributesTab({
             <div className="flex justify-end w-full">
               <button
                 onClick={() => setShowSourceWarning(false)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[13px] font-semibold transition-colors cursor-pointer animate-all active:scale-95 shadow-sm"
+                className={BTN_PRIMARY}
               >
                 Đã hiểu và đóng
               </button>
@@ -1651,18 +1590,18 @@ export function AttributesTab({
           }
         >
           <div className="space-y-4 text-left">
-            <div className="flex items-center gap-2.5 text-amber-700 bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-[13px] font-semibold">
-              <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
+            <div className="flex items-center gap-2.5 text-[#020817] bg-[#FFF7ED] border border-[#FED7AA] px-4 py-3 rounded-lg text-[13px]">
+              <AlertCircle className="w-4 h-4 shrink-0 text-[#D97706]" />
               <span>Nguồn dữ liệu hiện tại: {getDataSourceLabel(entityDataSource)}</span>
             </div>
             <div className="space-y-2 leading-relaxed">
-              <p className="text-[13px] text-slate-600">
+              <p className="text-[13px] text-[#334155]">
                 Danh mục này đang được đồng bộ hoặc liên kết trực tiếp qua <b>{getDataSourceLabel(entityDataSource)}</b>. 
               </p>
-              <p className="text-[13px] text-slate-600">
+              <p className="text-[13px] text-[#334155]">
                 Để bảo đảm tính toàn vẹn dữ liệu và tránh xung đột cấu trúc với nguồn gốc, hệ thống <b>ngăn chặn thao tác thêm mới trường dữ liệu thủ công</b>.
               </p>
-              <p className="text-[12px] text-slate-500 italic mt-2">
+              <p className="text-[12px] text-[#64748B] mt-2">
                 * Vui lòng đồng bộ lại cấu trúc mới từ hệ thống gốc hoặc liên hệ quản trị viên để được hỗ trợ.
               </p>
             </div>
@@ -1685,98 +1624,125 @@ export function AttributesTab({
           title="Cấu hình nguồn dữ liệu"
           subtitle="Kho dữ liệu từ nguồn đồng bộ và cấu hình các trường"
           maxWidth="max-w-5xl"
+          footer={
+            <div className="flex justify-end gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDldcModal(false);
+                  setModalDldcDatabase('');
+                  setModalDldcTable('');
+                  setModalDldcFieldRows([]);
+                }}
+                className={BTN_OUTLINE}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={!modalDldcTable || modalDldcFieldRows.filter(r => r.shared && r.columnName).length === 0}
+                onClick={() => setShowDldcApproval(true)}
+                className={BTN_PRIMARY}
+              >
+                <Send className="w-4 h-4" />
+                Gửi duyệt cấu trúc
+              </button>
+            </div>
+          }
         >
           <div className="space-y-4 text-left">
             {/* Blue Header Style Card */}
-            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+            <div className={SECTION_CARD_CLS}>
               {/* Blue Header Bar */}
-              <div className="px-5 py-3.5 bg-blue-600 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Database className="w-4 h-4 text-white" />
-                  <p className="text-[13px] font-semibold text-white">Cấu hình nguồn dữ liệu</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setModalUseJoin(v => !v)}
-                  className="flex items-center gap-2 text-white text-[12px] cursor-pointer"
-                >
-                  <span>Sử dụng liên kết bảng (Join)</span>
-                  <div className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/40 transition-colors ${modalUseJoin ? 'bg-white/30' : 'bg-blue-500'}`}>
-                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${modalUseJoin ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              <div className={`${CARD_HEADER_CLS} justify-between`}>
+                  <div className="flex items-center gap-2">
+                    <Database className="w-4 h-4 text-[#475569]" />
+                    <p className={CARD_TITLE_CLS}>Cấu hình nguồn dữ liệu</p>
                   </div>
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={modalUseJoin}
+                    onClick={() => setModalUseJoin(v => !v)}
+                    className="flex items-center gap-2 text-[13px] text-[#334155] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-lg"
+                  >
+                    <span>Sử dụng liên kết bảng (Join)</span>
+                    <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${modalUseJoin ? 'bg-blue-600' : 'bg-[#CBD5E1]'}`}>
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${modalUseJoin ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                    </div>
+                  </button>
+                </div>
 
               {/* Sub Info Bar */}
-              <div className="px-5 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                <Database className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                <p className="text-[13px] text-blue-700 font-sans">
+              <div className="px-4 py-2.5 bg-[#EAF3FF] border-b border-[#BFDBFE] flex items-center gap-2">
+                <Database className="w-4 h-4 text-[#155DFC] flex-shrink-0" />
+                <p className="text-[13px] text-[#020817]">
                   Kho dữ liệu:{' '}
-                  <span className="font-semibold">
+                  <span className="font-medium">
                     {DLDC_DATABASES.find(d => d.id === modalDldcDatabase)?.label || '--'}
                   </span>
                   {' — '}
-                  <span className="font-semibold">
+                  <span className="font-medium">
                     {DLDC_TABLES[modalDldcDatabase]?.find(t => t.id === modalDldcTable)?.displayName || '--'}
                   </span>
                 </p>
               </div>
 
               {/* Form Content */}
-              <div className="p-5 space-y-4">
+              <div className="p-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   {/* CSDL Selector (disabled) */}
-                  <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-slate-600">Cơ sở dữ liệu</label>
+                  <div>
+                    <label className={LABEL_CLS}>Cơ sở dữ liệu</label>
                     <div className="relative">
                       <select
                         title="Chọn cơ sở dữ liệu"
                         disabled
                         value={modalDldcDatabase}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-500 appearance-none focus:outline-none cursor-not-allowed font-medium"
+                        className={SELECT_CLS}
                       >
                         <option value="">-- Chọn cơ sở dữ liệu --</option>
                         {DLDC_DATABASES.map(db => (
                           <option key={db.id} value={db.id}>{db.label}</option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                     </div>
                   </div>
 
                   {/* Primary table (disabled) */}
-                  <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-slate-600">Bảng dữ liệu chính</label>
+                  <div>
+                    <label className={LABEL_CLS}>Bảng dữ liệu chính</label>
                     <div className="relative">
                       <select
                         title="Chọn bảng dữ liệu chính"
                         disabled
                         value={modalDldcTable}
-                        className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-slate-50 text-slate-500 appearance-none focus:outline-none cursor-not-allowed font-medium"
+                        className={SELECT_CLS}
                       >
                         <option value="">-- Chọn bảng dữ liệu --</option>
                         {modalDldcDatabase && (DLDC_TABLES[modalDldcDatabase] || []).map(t => (
                           <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
                 {/* Join tables — shown when modalUseJoin toggled */}
                 {modalUseJoin && (
-                  <div className="space-y-3 pt-2 border-t border-slate-100">
+                  <div className="space-y-3 pt-2 border-t border-[#E2E8F0]">
                     <div className="flex items-center justify-between">
-                      <p className="text-[13px] font-semibold text-slate-700">
+                      <p className={CARD_TITLE_CLS}>
                         Bảng liên kết bổ sung ({modalDldcJoins.length})
                       </p>
                       <button
                         type="button"
                         onClick={handleModalAddJoin}
-                        className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                        className={BTN_OUTLINE}
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-4 h-4" />
                         Thêm bảng liên kết
                       </button>
                     </div>
@@ -1786,19 +1752,16 @@ export function AttributesTab({
                       const primaryFields = DLDC_FIELDS[modalDldcTable] || [];
 
                       return (
-                        <div key={join.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-4 relative animate-in fade-in zoom-in-95 duration-200">
-                          <button
-                            type="button"
-                            onClick={() => handleModalRemoveJoin(join.id)}
-                            className="absolute top-3 right-3 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                            title="Xóa liên kết"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
+                        <div key={join.id} className="p-4 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] space-y-4 relative animate-in fade-in zoom-in-95 duration-200">
+                          <div className="absolute top-3 right-3">
+                            <RowIconAction label="Xóa liên kết" onClick={() => handleModalRemoveJoin(join.id)}>
+                              <X className="w-4 h-4" />
+                            </RowIconAction>
+                          </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="space-y-1.5">
-                              <label className="block text-[13px] font-medium text-slate-600">Loại liên kết (Join Type)</label>
+                            <div>
+                              <label className={LABEL_CLS}>Loại liên kết (Join Type)</label>
                               <div className="relative">
                                 <select
                                   title="Loại liên kết"
@@ -1806,78 +1769,78 @@ export function AttributesTab({
                                   onChange={(e) =>
                                     setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, joinType: e.target.value as any } : j))
                                   }
-                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                  className={SELECT_CLS}
                                 >
                                   <option value="LEFT JOIN">LEFT JOIN</option>
                                   <option value="INNER JOIN">INNER JOIN</option>
                                   <option value="RIGHT JOIN">RIGHT JOIN</option>
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                               </div>
                             </div>
-                            <div className="space-y-1.5">
-                              <label className="block text-[13px] font-medium text-slate-600">Bảng liên kết (Table)</label>
+                            <div>
+                              <label className={LABEL_CLS}>Bảng liên kết (Table)</label>
                               <div className="relative">
                                 <select
                                   title="Bảng liên kết"
                                   value={join.tableId}
                                   onChange={(e) => handleModalJoinTableChange(join.id, e.target.value)}
-                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                  className={SELECT_CLS}
                                 >
                                   <option value="">-- Chọn bảng --</option>
                                   {modalDldcDatabase && (DLDC_TABLES[modalDldcDatabase] || [])
                                     .filter(t => t.id !== modalDldcTable)
                                     .map(t => <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>)}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                               </div>
                             </div>
-                            <div className="space-y-1.5">
-                              <label className="block text-[13px] font-medium text-slate-600">Bảng phụ danh định (Alias)</label>
+                            <div>
+                              <label className={LABEL_CLS}>Bảng phụ danh định (Alias)</label>
                               <input
                                 type="text"
                                 disabled
                                 value={join.alias}
-                                className="w-full px-3 py-2.5 border border-slate-200 bg-slate-50 text-slate-500 rounded-lg text-[13px] font-mono outline-none cursor-not-allowed font-medium"
+                                className={INPUT_CLS}
                               />
                             </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className="block text-[13px] font-medium text-slate-600">Điều kiện liên kết (Join Condition)</label>
+                          <div>
+                            <label className={LABEL_CLS}>Điều kiện liên kết (Join Condition)</label>
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 relative">
+                              <div className="flex-1 min-w-0 relative">
                                 <select
                                   title="Trường bảng liên kết"
                                   value={join.leftField}
                                   onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                     setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, leftField: e.target.value } : j))
                                   }
-                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                  className={SELECT_CLS}
                                 >
                                   <option value="">-- {join.alias}.field --</option>
                                   {joinTableFields.map(f => (
                                     <option key={f.fieldName} value={`${join.alias}.${f.fieldName}`}>{join.alias}.{f.fieldName}</option>
                                   ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                               </div>
-                              <div className="w-8 h-9 flex items-center justify-center bg-slate-100 rounded-lg border border-slate-200 text-slate-600 font-bold text-[13px] flex-shrink-0">=</div>
-                              <div className="flex-1 relative">
+                              <div className="w-8 h-10 flex items-center justify-center bg-[#F1F5F9] rounded-lg border border-[#E2E8F0] text-[#475569] font-medium text-[13px] flex-shrink-0">=</div>
+                              <div className="flex-1 min-w-0 relative">
                                 <select
                                   title="Trường bảng chính"
                                   value={join.rightField}
                                   onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                     setModalDldcJoins(prev => prev.map(j => j.id === join.id ? { ...j, rightField: e.target.value } : j))
                                   }
-                                  className="w-full pl-3 pr-8 py-2.5 border border-slate-200 rounded-lg text-[13px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium cursor-pointer"
+                                  className={SELECT_CLS}
                                 >
                                   <option value="">-- {modalDldcTable}.field --</option>
                                   {primaryFields.map(f => (
                                     <option key={f.fieldName} value={`${modalDldcTable}.${f.fieldName}`}>{modalDldcTable}.{f.fieldName}</option>
                                   ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
                               </div>
                             </div>
                           </div>
@@ -1891,14 +1854,12 @@ export function AttributesTab({
 
             {/* Field Selection table */}
             {modalDldcTable && (
-              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden mt-4 shadow-sm">
-                <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div className={SECTION_CARD_CLS}>
+                <div className={`${CARD_HEADER_CLS} justify-between`}>
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-slate-500" />
-                    <p className="text-[13px] font-semibold text-slate-700 font-sans">Chọn trường dữ liệu chia sẻ (Field Selection)</p>
-                    <span className="text-[13px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-                      {modalDldcFieldRows.filter(r => r.shared).length}/{modalDldcFieldRows.length} trường được chọn
-                    </span>
+                    <FileText className="w-4 h-4 text-[#475569]" />
+                    <p className={CARD_TITLE_CLS}>Chọn trường dữ liệu chia sẻ (Field Selection)</p>
+                    <Badge label={`${modalDldcFieldRows.filter(r => r.shared).length}/${modalDldcFieldRows.length} trường được chọn`} variant="blue" />
                   </div>
                   <button
                     type="button"
@@ -1909,14 +1870,14 @@ export function AttributesTab({
                         columnName: '', targetColumn: '', apiFieldName: '', dataType: 'string', masked: false,
                       }]);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-200 text-blue-600 text-[13px] font-medium rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                    className={BTN_OUTLINE}
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-4 h-4" />
                     Thêm trường dữ liệu
                   </button>
                 </div>
                 <div className="overflow-x-auto max-h-[350px]">
-                  <table className="w-full text-left text-[13px]" style={{ tableLayout: 'fixed' }}>
+                  <table className={`${TABLE_CLS} table-fixed`}>
                     <colgroup>
                       <col style={{ width: '6%' }} />
                       <col style={{ width: '6%' }} />
@@ -1926,49 +1887,49 @@ export function AttributesTab({
                       <col style={{ width: '15%' }} />
                       <col style={{ width: '5%' }} />
                     </colgroup>
-                    <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-[2]">
-                      <tr>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Chia sẻ</th>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">PK</th>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Nguồn dữ liệu (Table)</th>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Trường gốc (Column)</th>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Tên hiển thị</th>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500">Kiểu dữ liệu</th>
-                        <th className="px-3 py-3 text-[13px] font-semibold text-slate-500 text-center">Xóa</th>
+                    <thead className="bg-[#F8FAFC] sticky top-0 z-[2]">
+                      <tr className="h-[42px]">
+                        <th className={`${TH_CLS} !text-center`}>Chia sẻ</th>
+                        <th className={`${TH_CLS} !text-center`}>PK</th>
+                        <th className={`${TH_CLS}`}>Nguồn dữ liệu (Table)</th>
+                        <th className={`${TH_CLS}`}>Trường gốc (Column)</th>
+                        <th className={`${TH_CLS}`}>Tên hiển thị</th>
+                        <th className={`${TH_CLS}`}>Kiểu dữ liệu</th>
+                        <th className={`${TH_CLS} !text-center`}>Xóa</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
+                    <tbody>
                       {modalDldcFieldRows.map(row => {
                         const tableFieldsForRow = DLDC_FIELDS[row.tableId] || [];
                         return (
-                          <tr key={row.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+                          <tr key={row.id} className={TR_CLS}>
                             {/* Chia sẻ */}
-                            <td className="px-3 py-2.5 text-center overflow-hidden">
+                            <td className="px-3 py-1 text-center overflow-hidden">
                               <input
                                 type="checkbox"
                                 checked={row.shared}
                                 onChange={() => setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, shared: !r.shared } : r))}
-                                className="w-4 h-4 rounded text-blue-600 border-slate-300 cursor-pointer"
+                                className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
                               />
                             </td>
                             {/* PK */}
-                            <td className="px-3 py-2.5 text-center overflow-hidden">
+                            <td className="px-3 py-1 text-center overflow-hidden">
                               <input
                                 type="checkbox"
                                 checked={row.isPK}
                                 onChange={() => setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, isPK: !r.isPK } : r))}
-                                className="w-4 h-4 rounded text-amber-500 border-slate-300 cursor-pointer"
+                                className="w-4 h-4 rounded accent-[#D97706] cursor-pointer"
                               />
                             </td>
                             {/* Nguồn dữ liệu (Table) */}
-                            <td className="px-3 py-2.5 overflow-hidden">
+                            <td className="px-3 py-1 overflow-hidden">
                               <select
                                 title="Nguồn dữ liệu"
                                 value={row.tableId}
                                 onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                   setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, tableId: e.target.value, columnName: '', apiFieldName: '' } : r))
                                 }
-                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer font-sans"
+                                className={`${INPUT_CLS} min-w-0`}
                               >
                                 <option value="">--</option>
                                 <option value={modalDldcTable}>{modalDldcTable}</option>
@@ -1978,7 +1939,7 @@ export function AttributesTab({
                               </select>
                             </td>
                             {/* Trường gốc (Column) */}
-                            <td className="px-3 py-2.5 overflow-hidden">
+                            <td className="px-3 py-1 overflow-hidden">
                               <select
                                 title="Trường gốc"
                                 value={row.columnName}
@@ -1992,7 +1953,7 @@ export function AttributesTab({
                                     dataType: matchingField?.dataType || r.dataType
                                   } : r));
                                 }}
-                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400 font-medium cursor-pointer font-sans"
+                                className={`${INPUT_CLS} min-w-0`}
                               >
                                 <option value="">--</option>
                                 {tableFieldsForRow.map(f => (
@@ -2001,38 +1962,34 @@ export function AttributesTab({
                               </select>
                             </td>
                             {/* Tên hiển thị */}
-                            <td className="px-3 py-2.5 overflow-hidden">
+                            <td className="px-3 py-1 overflow-hidden">
                               <input
                                 type="text"
                                 value={row.apiFieldName}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                   setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, apiFieldName: e.target.value } : r))
                                 }
-                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] font-mono bg-white focus:outline-none focus:ring-1 focus:ring-blue-400/40 focus:border-blue-400"
+                                className={`${INPUT_CLS} min-w-0`}
                               />
                             </td>
                             {/* Kiểu dữ liệu */}
-                            <td className="px-3 py-2.5 overflow-hidden">
+                            <td className="px-3 py-1 overflow-hidden">
                               <select
                                 title="Kiểu dữ liệu"
                                 value={row.dataType}
                                 onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                                   setModalDldcFieldRows(prev => prev.map(r => r.id === row.id ? { ...r, dataType: e.target.value as FieldDataType } : r))
                                 }
-                                className="w-full min-w-0 px-2 py-1.5 border border-slate-200 rounded-lg text-[13px] bg-white focus:outline-none font-sans"
+                                className={`${INPUT_CLS} min-w-0`}
                               >
                                 {FIELD_DATA_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                               </select>
                             </td>
                             {/* Xóa */}
-                            <td className="px-3 py-2.5 text-center overflow-hidden">
-                              <button
-                                type="button"
-                                onClick={() => setModalDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}
-                                className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                            <td className="px-3 py-1 text-center overflow-hidden">
+                              <RowIconAction label="Xóa" onClick={() => setModalDldcFieldRows(prev => prev.filter(r => r.id !== row.id))}>
+                                <Trash2 className="w-4 h-4" />
+                              </RowIconAction>
                             </td>
                           </tr>
                         );
@@ -2043,29 +2000,6 @@ export function AttributesTab({
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDldcModal(false);
-                  setModalDldcDatabase('');
-                  setModalDldcTable('');
-                  setModalDldcFieldRows([]);
-                }}
-                className="px-4 py-2 border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                type="button"
-                disabled={!modalDldcTable || modalDldcFieldRows.filter(r => r.shared && r.columnName).length === 0}
-                onClick={() => setShowDldcApproval(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium transition-colors active:scale-95 cursor-pointer shadow-sm"
-              >
-                <Send className="w-4 h-4" />
-                Gửi duyệt cấu trúc
-              </button>
-            </div>
           </div>
         </BaseModal>
       )}

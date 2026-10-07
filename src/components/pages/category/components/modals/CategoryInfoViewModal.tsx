@@ -1,9 +1,15 @@
 import { useState, ChangeEvent, ReactNode } from 'react';
-import { Info, CheckCircle2, XCircle, FileText, KeyRound, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, FileText, KeyRound, ArrowRight } from 'lucide-react';
 import { MasterDataEntity, ScopeType, DataSourceType } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
 import { ReviewResultCard } from './ReviewResultCard';
 import { categoryTypeLabels } from '../../categoryConstants';
+import { Badge, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, LABEL_CLS, FIELD_LABEL, FIELD_VALUE, tabClass } from '../../../collection/collectionUi';
+
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
+const TH_CLS = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD_CLS = 'px-3 py-1 text-[13px] text-black';
+const TR_CLS = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
 
 export interface CategoryDetailAttr { fieldName: string; displayName: string; dataType: string; isPK?: boolean; }
 export interface CategoryDetailRel { sourceEntityName: string; targetEntityName: string; relationshipType: string; foreignKey: string; }
@@ -37,19 +43,19 @@ const dataSourceLabels: Record<DataSourceType, string> = {
 function Field({ label, value, colSpan = 1, icon }: { label: string; value?: string | number | null; colSpan?: number; icon?: ReactNode }) {
   return (
     <div className={colSpan === 2 ? 'col-span-2' : ''}>
-      <div className="flex items-center gap-1.5 text-[13px] text-slate-500 font-medium mb-1">
+      <div className={`${FIELD_LABEL} flex items-center gap-1.5`}>
         {icon}
         {label}
       </div>
-      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-700 font-medium min-h-[34px]">
-        {value ?? <span className="text-slate-400 italic">Chưa cập nhật</span>}
+      <div className={`${FIELD_VALUE} mt-1 whitespace-pre-wrap break-words`}>
+        {value ?? <span className="text-[#94A3B8]">Chưa cập nhật</span>}
       </div>
     </div>
   );
 }
 
 function EmptyDetail({ label }: { label: string }) {
-  return <div className="text-[13px] text-slate-400 italic py-6 text-center">{label}</div>;
+  return <div className="text-[13px] text-[#64748B] py-16 text-center">{label}</div>;
 }
 
 export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, submissionContent, reviewComment, onApprove, onReject, viewOnly = false, attributes, relationships }: CategoryInfoViewModalProps) {
@@ -66,43 +72,35 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
       title={viewOnly ? 'Chi tiết danh mục' : 'Thông tin chung danh mục'}
       subtitle={viewOnly ? 'Thông tin chi tiết danh mục dùng chung' : 'Thông tin được cấu hình tại bước 1 — Thiết lập danh mục dùng chung'}
       maxWidth="max-w-2xl"
-      customHeaderIcon={
-        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center mr-3 shrink-0">
-          <Info className="w-5 h-5 text-blue-600" />
-        </div>
-      }
       footer={
-        <div className="flex items-center justify-between w-full">
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[13px]"
-          >
+        <>
+          <button onClick={onClose} className={BTN_OUTLINE}>
             Đóng
           </button>
           {!viewOnly && (requestStatus === 'pending' || !requestStatus) ? (
-            <div className="flex gap-2">
+            <>
               <button
                 onClick={() => { onReject(note); }}
-                className="px-5 py-2.5 bg-red-500 text-white rounded-xl flex items-center gap-2 hover:bg-red-600 transition-all text-[13px] shadow-sm shadow-red-100"
+                className={BTN_DESTRUCTIVE}
               >
                 <XCircle className="w-4 h-4" />
                 Từ chối
               </button>
               <button
                 onClick={() => { onApprove(note); }}
-                className="px-5 py-2.5 bg-emerald-500 text-white rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all text-[13px] shadow-sm shadow-emerald-100"
+                className={BTN_PRIMARY}
               >
                 <CheckCircle2 className="w-4 h-4" />
                 Phê duyệt
               </button>
-            </div>
+            </>
           ) : null}
-        </div>
+        </>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         {showTabs && (
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+          <div className="flex items-center border-b border-[#E2E8F0]">
             {([
               { k: 'general', l: 'Thông tin chung' },
               { k: 'structure', l: 'Thuộc tính', c: attributes?.length },
@@ -111,11 +109,11 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
               <button
                 key={t.k}
                 onClick={() => setDetailTab(t.k)}
-                className={`px-4 py-2 rounded-lg text-[13px] transition-all flex items-center gap-1.5 ${detailTab === t.k ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-slate-600 hover:bg-slate-200'}`}
+                className={tabClass(detailTab === t.k)}
               >
                 {t.l}
                 {typeof t.c === 'number' && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${detailTab === t.k ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'}`}>{t.c}</span>
+                  <span className={`min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full text-[12px] font-medium tabular-nums ${detailTab === t.k ? 'bg-[#EAF3FF] text-[#155DFC]' : 'bg-[#F1F5F9] text-[#64748B]'}`}>{t.c}</span>
                 )}
               </button>
             ))}
@@ -123,7 +121,7 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
         )}
 
         {(!showTabs || detailTab === 'general') && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <Field label="Phiên bản danh mục" value={`v${entity.version ?? 1}.0`} colSpan={2} />
             <Field label="Tên danh sách danh mục" value={entity.name} colSpan={2} />
             <Field label="Loại danh mục" value={entity.categoryType ? categoryTypeLabels[entity.categoryType] : undefined} colSpan={2} />
@@ -132,29 +130,29 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
             <Field label="Căn cứ" value={entity.canCu} colSpan={2} />
             <Field label="Phạm vi vĩ mô" value={entity.scope ? scopeLabels[entity.scope] : undefined} />
             <Field label="Nguồn dữ liệu" value={entity.dataSource ? dataSourceLabels[entity.dataSource] : undefined} />
-            {!viewOnly && <Field label="Nội dung trình duyệt" value={submissionContent} colSpan={2} icon={<FileText className="w-4 h-4 text-slate-400" />} />}
+            {!viewOnly && <Field label="Nội dung trình duyệt" value={submissionContent} colSpan={2} icon={<FileText className="w-4 h-4 text-[#64748B]" />} />}
           </div>
         )}
 
         {showTabs && detailTab === 'structure' && (
-          <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
             {attributes && attributes.length > 0 ? (
-              <table className="w-full text-[13px]">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-4 py-2.5 text-left font-semibold text-slate-500">Mã trường</th>
-                    <th className="px-4 py-2.5 text-left font-semibold text-slate-500">Tên hiển thị</th>
-                    <th className="px-4 py-2.5 text-left font-semibold text-slate-500">Kiểu dữ liệu</th>
-                    <th className="px-4 py-2.5 text-center font-semibold text-slate-500">PK</th>
+              <table className="w-full border-collapse collection-table text-[13px] text-left">
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="h-[42px]">
+                    <th className={TH_CLS}>Mã trường</th>
+                    <th className={TH_CLS}>Tên hiển thị</th>
+                    <th className={TH_CLS}>Kiểu dữ liệu</th>
+                    <th className={`${TH_CLS} text-center w-20`}>PK</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {attributes.map((a, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50">
-                      <td className="px-4 py-2.5 font-mono text-slate-700">{a.fieldName}</td>
-                      <td className="px-4 py-2.5 text-slate-700">{a.displayName}</td>
-                      <td className="px-4 py-2.5 text-slate-600">{a.dataType}</td>
-                      <td className="px-4 py-2.5 text-center">{a.isPK ? <KeyRound className="w-4 h-4 text-amber-500 inline" /> : <span className="text-slate-300">—</span>}</td>
+                    <tr key={i} className={TR_CLS}>
+                      <td className={TD_CLS}>{a.fieldName}</td>
+                      <td className={TD_CLS}>{a.displayName}</td>
+                      <td className={TD_CLS}>{a.dataType}</td>
+                      <td className={`${TD_CLS} text-center`}>{a.isPK ? <KeyRound className="w-4 h-4 text-[#D97706] inline" /> : <span className="text-[#94A3B8]">—</span>}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -166,12 +164,12 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
         {showTabs && detailTab === 'relationship' && (
           <div className="space-y-2">
             {relationships && relationships.length > 0 ? relationships.map((r, i) => (
-              <div key={i} className="flex items-center gap-2 flex-wrap border border-slate-200 rounded-xl px-4 py-3 text-[13px]">
-                <span className="font-medium text-slate-800">{r.sourceEntityName}</span>
-                <ArrowRight className="w-4 h-4 text-slate-400" />
-                <span className="font-medium text-slate-800">{r.targetEntityName}</span>
-                <span className="ml-auto px-2 py-0.5 rounded border bg-blue-50 text-blue-700 border-blue-200 text-[13px] font-semibold">{r.relationshipType}</span>
-                <span className="text-slate-500 font-mono">FK: {r.foreignKey}</span>
+              <div key={i} className="flex items-center gap-2 flex-wrap bg-white border border-[#E2E8F0] rounded-lg px-4 py-3 text-[13px] text-[#020817]">
+                <span>{r.sourceEntityName}</span>
+                <ArrowRight className="w-4 h-4 text-[#94A3B8]" />
+                <span>{r.targetEntityName}</span>
+                <span className="ml-auto"><Badge label={r.relationshipType} variant="blue" /></span>
+                <span className="text-[#64748B]">FK: {r.foreignKey}</span>
               </div>
             )) : <EmptyDetail label="Chưa có quan hệ" />}
           </div>
@@ -180,14 +178,14 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
         {viewOnly ? null : requestStatus === 'approved' || requestStatus === 'rejected' ? (
           <ReviewResultCard status={requestStatus} comment={reviewComment} />
         ) : (
-          <div className="space-y-2">
-            <label className="block text-[13px] font-semibold text-slate-700">Ý kiến phê duyệt</label>
+          <div>
+            <label className={LABEL_CLS}>Ý kiến phê duyệt</label>
             <textarea
               rows={3}
               value={note}
               onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
               placeholder="Nhập ý kiến phê duyệt hoặc lý do từ chối (nếu có)..."
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none resize-none"
+              className={TEXTAREA_CLS}
             />
           </div>
         )}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Unit } from './ConnectionManagementPage';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRED_MARK } from './collectionUi';
 
 interface SourceSystem {
   id: string;
@@ -104,49 +105,46 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
   };
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-sans backdrop-blur-sm">
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+      <div role="dialog" aria-modal="true" aria-labelledby="source-system-modal-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-lg">
-          <h2 className="text-lg font-semibold text-slate-800">
+        <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+          <h2 id="source-system-modal-title" className="text-[16px] font-medium text-[#020817]">
             {editingData ? 'Sửa thông tin hệ thống nguồn' : 'Thêm mới hệ thống nguồn'}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            <X className="w-6 h-6" />
+          <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Content */}
-        <div className="p-6 overflow-y-auto">
-          <form id="source-system-form" onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <div className="px-6 py-4 overflow-y-auto custom-scrollbar">
+          <form id="source-system-form" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
-                  Tên hệ thống <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Tên hệ thống <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.systemName}
                   onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                   placeholder="Nhập tên hệ thống"
                 />
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
-                  Tên đơn vị <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Tên đơn vị <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   required
+                  aria-label="Tên đơn vị"
                   value={formData.unitName}
                   onChange={(e) => handleUnitChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+                  className={INPUT_CLS}
                 >
                   <option value="">Chọn đơn vị</option>
                   {dropdownOptions.map(unit => (
@@ -158,14 +156,15 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
-                  Loại nguồn <span className="text-red-500">*</span>
+                <label className={LABEL_CLS}>
+                  Loại nguồn <span className={REQUIRED_MARK}>*</span>
                 </label>
                 <select
                   required
+                  aria-label="Loại nguồn"
                   value={formData.sourceType}
                   onChange={(e) => setFormData({ ...formData, sourceType: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
+                  className={INPUT_CLS}
                 >
                   <option value="">Chọn loại nguồn</option>
                   <option value="Trong ngành">Trong ngành</option>
@@ -174,66 +173,66 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Đầu mối liên hệ
                 </label>
                 <input
                   type="text"
                   value={formData.contactPerson}
                   onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                   placeholder="Tên người đầu mối"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Địa chỉ
                 </label>
                 <input
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                   placeholder="Nhập địa chỉ"
                 />
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Số điện thoại
                 </label>
                 <input
                   type="text"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                   placeholder="Nhập số điện thoại"
                 />
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Email
                 </label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={INPUT_CLS}
                   placeholder="Nhập email"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-[13px] font-medium text-slate-700 mb-1">
+                <label className={LABEL_CLS}>
                   Ghi chú
                 </label>
                 <textarea
                   value={formData.note}
                   onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`${INPUT_CLS} h-auto py-2 resize-y`}
                   placeholder="Nhập ghi chú"
                 />
               </div>
@@ -242,25 +241,16 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 sticky bottom-0 bg-white rounded-b-lg">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-[13px] font-medium text-[#020817] bg-white border border-[#e2e8f0] rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
-          >
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
+          <button type="button" onClick={onClose} className={BTN_OUTLINE}>
             Hủy
           </button>
-          <button
-            type="submit"
-            form="source-system-form"
-            className="px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
-          >
+          <button type="submit" form="source-system-form" className={BTN_PRIMARY}>
             <Save className="w-4 h-4" />
             Lưu
           </button>
         </div>
       </div>
-    </div>
     </div>
   );
 }

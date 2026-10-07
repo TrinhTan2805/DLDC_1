@@ -39,7 +39,7 @@ export function DatabasePageTemplate({
       {/* Right Content */}
       {stretchHeight ? (
         <div
-          className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm p-6 overflow-y-auto flex flex-col"
+          className="flex-1 bg-white border border-[#E2E8F0] rounded-2xl p-6 overflow-y-auto flex flex-col"
           style={{ height: 'calc(100vh - 140px)' }}
         >
           {children}

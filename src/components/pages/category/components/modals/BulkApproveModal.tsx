@@ -2,6 +2,9 @@ import { ChangeEvent, useState } from 'react';
 import { CheckCircle2, ChevronRight } from 'lucide-react';
 import { ApprovalRequest } from '../../categoryTypes';
 import { BaseModal } from '../../../../common/BaseModal';
+import { BTN_PRIMARY, BTN_OUTLINE, LABEL_CLS } from '../../../collection/collectionUi';
+
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
 
 interface BulkApproveModalProps {
   isOpen: boolean;
@@ -28,37 +31,32 @@ export function BulkApproveModal({
       maxWidth="max-w-lg"
       footer={
         <>
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all text-[13px]"
-          >
+          <button onClick={onClose} className={BTN_OUTLINE}>
             Hủy
           </button>
           <button
             onClick={() => onConfirm(note)}
-            className="px-6 py-2.5 bg-emerald-500 text-white rounded-xl flex items-center gap-2 hover:bg-emerald-600 transition-all text-[13px] shadow-lg shadow-emerald-100"
+            className={BTN_PRIMARY}
           >
-            <CheckCircle2 className="w-5 h-5" />
+            <CheckCircle2 className="w-4 h-4" />
             Xác nhận phê duyệt ({requests.length})
           </button>
         </>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Info Banner */}
-        <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+        <div className="bg-[#EAF3FF] border border-[#BFDBFE] rounded-lg p-3">
           <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-lg border-2 border-blue-600 flex items-center justify-center mt-0.5 shrink-0">
-              <ChevronRight className="w-3 h-3 text-blue-600 stroke-[3]" />
-            </div>
+            <ChevronRight className="w-4 h-4 text-[#155DFC] mt-0.5 shrink-0" />
             <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="text-[13px] text-blue-700 font-medium uppercase tracking-tight">
+              <div className="text-[13px] text-[#020817] font-medium">
                 Danh mục được chọn ({requests.length})
               </div>
               <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
                 {requests.map(r => (
-                  <div key={r.id} className="text-[13px] text-blue-900">
-                    <span className="font-mono text-blue-600 mr-1.5">{r.entityCode}</span>
+                  <div key={r.id} className="text-[13px] text-[#020817]">
+                    <span className="text-[#64748B] mr-1.5">{r.entityCode}</span>
                     {r.entityName}
                   </div>
                 ))}
@@ -68,16 +66,16 @@ export function BulkApproveModal({
         </div>
 
         {/* Input field */}
-        <div className="space-y-2">
-          <label className="block text-[13px] font-semibold text-slate-700">
-            Ý kiến phê duyệt <span className="text-slate-400 font-normal">(Không bắt buộc)</span>
+        <div>
+          <label className={LABEL_CLS}>
+            Ý kiến phê duyệt <span className="text-[#64748B] font-normal">(Không bắt buộc)</span>
           </label>
           <textarea
             rows={4}
             value={note}
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
             placeholder="Nhập ý kiến phê duyệt áp dụng cho tất cả các yêu cầu đã chọn (nếu có)..."
-            className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white text-[13px] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+            className={TEXTAREA_CLS}
           />
         </div>
       </div>
