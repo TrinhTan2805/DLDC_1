@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Database, Plus, RefreshCw, Edit2, Trash2, Search } from 'lucide-react';
+import { Database, Plus, RefreshCw, SquarePen, Trash2, Search } from 'lucide-react';
 import { AddServiceConfigModal, ReconciliationApiConfigFormData } from './AddServiceConfigModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import {
@@ -245,7 +245,7 @@ export function ReconciliationServiceSetupTab() {
                           setIsEditModalOpen(true);
                         }}
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <SquarePen className="w-4 h-4" />
                       </RowIconAction>
                       <RowIconAction
                         label="Xóa"

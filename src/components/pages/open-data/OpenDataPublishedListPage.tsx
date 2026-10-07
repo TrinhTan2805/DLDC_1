@@ -2014,7 +2014,7 @@ export function OpenDataPublishedListPage() {
                             {/* Cột thao tác (compomennt.md 5.3.2): 3 thao tác => hiện đủ icon */}
                             <div className="inline-flex items-center justify-center gap-1">
                               <RowIconAction label="Sửa lịch" onClick={() => openEditSchedule(schedule)}>
-                                <Edit2 className="w-4 h-4" />
+                                <SquarePen className="w-4 h-4" />
                               </RowIconAction>
                               {schedule.status === 'active' ? (
                                 <RowIconAction label="Tạm dừng" onClick={() => setScheduleStatusConfirm({ schedule, action: 'pause' })}>

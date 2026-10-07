@@ -10,7 +10,7 @@ import {
   Search,
   Filter,
   Eye,
-  Edit2,
+  SquarePen,
   Trash2,
   X,
   Save,
@@ -439,7 +439,7 @@ export function CategorySetupPageNew() {
                                 className="p-1 text-orange-600 hover:bg-orange-50 rounded"
                                 title="Chỉnh sửa"
                               >
-                                <Edit2 className="w-4 h-4" />
+                                <SquarePen className="w-4 h-4" />
                               </button>
                               <button
                                 className="p-1 text-red-600 hover:bg-red-50 rounded"
@@ -622,7 +622,7 @@ export function CategorySetupPageNew() {
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
                               title="Chỉnh sửa"
                             >
-                              <Edit2 className="w-3 h-3" />
+                              <SquarePen className="w-3 h-3" />
                             </button>
                             <button
                               onClick={() => {
@@ -771,7 +771,7 @@ export function CategorySetupPageNew() {
                 Đóng
               </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                <Edit2 className="w-4 h-4" />
+                <SquarePen className="w-4 h-4" />
                 Chỉnh sửa
               </button>
             </div>

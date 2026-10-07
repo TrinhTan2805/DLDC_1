@@ -1,5 +1,30 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Đồng bộ icon nút Chỉnh sửa: Edit2 (cây bút) → SquarePen (Ngày thực hiện: 08/10/2026) — 167
+
+**Nội dung (PM yêu cầu, theo mục 3 `compomennt.md` — mục 166):** đổi 24 chỗ nút Chỉnh sửa/Sửa đang dùng `Edit2` sang `SquarePen`; chỉ đổi icon, không đổi màu, kích thước, chữ hay logic. Import `lucide-react` cập nhật tương ứng.
+- Nút icon trong bảng/danh sách (20): `collection/APIMethodsList` (2), `collection/DataCollectionList`, `collection/ViewDataRecordsList`, `collection/ConnectionConfig`, `pages/category/CategoryMojUnitsPage`, `pages/category/CategorySetupPageNew` (2), `pages/CategoryManagementPage`, `masterdata/AttributeManagementModal`, `masterdata/MergeRuleModal`, `pages/MasterDataPage`, `pages/master-data-list/MasterDataPage`, `processing/DataViewer`, `processing/WarningDataList`, `pages/processing/ScheduleManagementModal`, `pages/reconciliation/ReconciliationServiceSetupTab`, `pages/OpenDataCategoryPage`, `pages/open-data/OpenDataPublishedListPage` (Sửa lịch), `user/ImportExcelModal`.
+- Nút có chữ "Chỉnh sửa" (4): `collection/ViewDataCollectionDetail`, `pages/category/CategorySetupPageNew` (chân modal), `DataDetailModal` (Chỉnh sửa giá trị), `processing/DataClassificationModal`.
+- **Không đổi:** icon minh họa (lịch sử thao tác "update" ở AccessLogPage, ActionHistoryModal; tiêu đề modal ở OpenDataPublishedListPage) và 3 file không được import.
+
+**Mở khóa `stauts.md` (PM cho phép):** `[ ]` → `[x]`: CategoryMojUnitsPage, CategorySetupPageNew, ScheduleManagementModal; thêm mục "Đồng bộ icon Chỉnh sửa → SquarePen" cho 13 file chưa có trong danh sách.
+
+**Kiểm tra:** tsc không có lỗi liên quan `SquarePen`/`Edit2` ở 21 file; `npm run build` thành công.
+
+## compomennt.md — mục 3: sửa icon Chỉnh sửa, thay Xuất Excel/PDF bằng Kết xuất (Ngày thực hiện: 07/10/2026) — 166
+
+**Nội dung (PM yêu cầu), đối chiếu mã nguồn:**
+- **Chỉnh sửa:** `Edit2`/`Pencil` (cây bút, Indigo) → **`SquarePen`** (alias `Edit` trong lucide-react), màu Slate `#475569`. Mã nguồn: nút Sửa dùng `Edit` 32 chỗ + `SquarePen` 7 chỗ (cùng icon) so với `Edit2` 17 chỗ.
+- **Bỏ** dòng "Xuất Excel" (`FileSpreadsheet`) và "Xuất PDF" (`FileText`); **thêm** dòng **"Kết xuất"** — `Download`, nút viền chữ `#334155` (26 chỗ dùng trong mã nguồn).
+- Icon cục bộ: thêm `icons/square-pen-475569.svg`, `icons/download-334155.svg`; xóa 3 file icon không còn dùng.
+
+**Lưu ý:** mã nguồn vẫn còn vài chỗ cũ ghi "Xuất Excel" và 17 nút Sửa dùng `Edit2` — chưa sửa code (chờ PM).
+
+## compomennt.md — icon mục 3 dùng file cục bộ (Ngày thực hiện: 07/10/2026) — 165
+
+**Lỗi (PM báo):** biểu tượng ở mục 3 "Hệ thống Icon Chung" không hiển thị khi xem file. Link gốc `api.iconify.design` vẫn trả SVG hợp lệ → nguyên nhân là trình xem markdown không tải ảnh từ máy chủ ngoài.
+**Sửa:** tải 17 icon về `tailieu/docs/icons/<tên>-<màu>.svg` (giữ đúng màu, kích thước 24px) và đổi 17 link trong `compomennt.md` sang đường dẫn cục bộ. Không đổi nội dung bảng.
+
 ## Mô hình dữ liệu chủ — điều chỉnh bảng grid nguồn đăng ký (Ngày thực hiện: 07/10/2026) — 164
 
 **Nội dung (PM yêu cầu, tiếp mục 163):**

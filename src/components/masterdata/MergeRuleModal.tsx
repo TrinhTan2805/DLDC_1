@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Plus, GitBranch, Save, Trash2, Edit2, Play } from 'lucide-react';
+import { X, Plus, GitBranch, Save, Trash2, SquarePen, Play } from 'lucide-react';
 
 interface MergeRule {
   id: string;
@@ -262,7 +262,7 @@ export function MergeRuleModal({ onClose, entityName = 'Dữ liệu chủ' }: Me
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           title="Sửa"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <SquarePen className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(rule.id)}

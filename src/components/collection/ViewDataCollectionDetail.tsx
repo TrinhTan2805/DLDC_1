@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, FileText, Calendar, FileType, AlertCircle, CheckCircle, Clock, Edit2, Link2, Key, User, Lock, Server } from 'lucide-react';
+import { ArrowLeft, Building2, FileText, Calendar, FileType, AlertCircle, CheckCircle, Clock, SquarePen, Link2, Key, User, Lock, Server } from 'lucide-react';
 import { DataFieldClassification } from './DataFieldClassification';
 
 interface ViewDataCollectionDetailProps {
@@ -81,7 +81,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
             e.currentTarget.style.backgroundColor = categoryColor === 'blue' ? '#2563eb' : '#16a34a';
           }}
         >
-          <Edit2 className="w-4 h-4" />
+          <SquarePen className="w-4 h-4" />
           Chỉnh sửa
         </button>
       </div>

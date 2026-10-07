@@ -3,7 +3,7 @@ import {
   FolderTree, 
   Plus,
   Search,
-  Edit2,
+  SquarePen,
   Trash2,
   Send,
   CheckCircle,
@@ -685,7 +685,7 @@ export function CategoryManagementPage() {
                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                 title="Sửa"
                               >
-                                <Edit2 className="w-4 h-4" />
+                                <SquarePen className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(category.id)}

@@ -1,4 +1,4 @@
-import { Search, Filter, Download, Plus, Eye, Edit2, Trash2, FileText, Database } from 'lucide-react';
+import { Search, Filter, Download, Plus, Eye, SquarePen, Trash2, FileText, Database } from 'lucide-react';
 import React, { useState } from 'react';
 import { ViewAPIMethodDetail } from './ViewAPIMethodDetail';
 import { EditAPIMethodForm } from './EditAPIMethodForm';
@@ -444,7 +444,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
                               className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
                               title="Chỉnh sửa"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <SquarePen className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setDeleteData(item)}
@@ -528,7 +528,7 @@ export function APIMethodsList({ onAddNew }: APIMethodsListProps) {
                               className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
                               title="Chỉnh sửa"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <SquarePen className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setDeleteData(item)}
