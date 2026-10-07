@@ -259,6 +259,13 @@ export const SECTION_TITLE = 'text-[14px] font-medium text-[#020817] mb-4 flex i
 // Tiêu đề nhóm trong khối: dùng chung cỡ H2 (14px/500), không có vạch xanh — PM chốt 07/10/2026 bỏ H3
 export const GROUP_TITLE = 'text-[14px] font-medium text-[#020817]';
 // Thẻ nhóm thông tin (mục 5.6): nền trắng, viền #E2E8F0, bo 16px
+// Bảng dữ liệu (mục 5.3, PM chốt 07/10/2026 — thử ở Thiết lập thu thập):
+// tiêu đề nền #F1F5F9 (tách khỏi nền trang #F8FAFC) + kẻ dưới #E2E8F0; khung bảng nền trắng, viền #E2E8F0, bóng mức vừa
+export const TABLE_HEAD_BG = 'bg-[#F1F5F9]';
+export const TABLE_HEAD_ROW_CLS = 'h-[42px] border-b border-[#E2E8F0]';
+export const TABLE_SHADOW = 'shadow-[0_1px_3px_rgba(16,24,40,0.10),0_1px_2px_rgba(16,24,40,0.06)]';
+export const TABLE_WRAP_CLS = `bg-white rounded-lg border border-[#E2E8F0] overflow-hidden ${TABLE_SHADOW}`;
+
 export const CARD_CLS = 'bg-white p-6 rounded-2xl border border-[#E2E8F0]';
 
 // --- Phân trang (compomennt.md 5.14 — mẫu PM cung cấp 06/10/2026) ---

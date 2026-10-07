@@ -12,7 +12,7 @@ import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
-import { TOOLTIP_CLS, Badge, TruncatedText, BTN_FOCUS, BTN_DISABLED, BTN_PRIMARY, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, RowIconAction, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, DateInput, formatDateVN, toLocalIsoDate, normalizeSearch, Pagination, SearchableSelect } from './collectionUi';
+import { TOOLTIP_CLS, Badge, TruncatedText, BTN_FOCUS, BTN_DISABLED, BTN_PRIMARY, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, RowIconAction, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, DateInput, formatDateVN, toLocalIsoDate, normalizeSearch, Pagination, SearchableSelect, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, TABLE_WRAP_CLS } from './collectionUi';
 
 // Định dạng dung lượng dữ liệu suy ra từ số bản ghi (dùng khi dịch vụ chưa có sẵn dataSize)
 const formatDataSize = (records: number) => {
@@ -493,11 +493,11 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
             </div>
 
             {/* Services Table */}
-            <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+            <div className={TABLE_WRAP_CLS}>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse collection-table text-[13px]">
-                  <thead className="bg-[#F8FAFC] sticky top-0 z-[1]">
-                    <tr className="h-[42px]">
+                  <thead className={`${TABLE_HEAD_BG} sticky top-0 z-[1]`}>
+                    <tr className={TABLE_HEAD_ROW_CLS}>
                       <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap w-12 text-[13px]">STT</th>
                       <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px] min-w-[190px]">Tên / Mã dịch vụ</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Loại nguồn</th>
@@ -507,7 +507,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                       <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Người tạo / Ngày tạo</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Trạng thái dịch vụ</th>
                       <th className={`px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]`}>Trạng thái dữ liệu</th>
-                      <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap text-[13px] sticky right-0 bg-[#F8FAFC] shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]">Thao tác</th>
+                      <th className={`px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap text-[13px] sticky right-0 ${TABLE_HEAD_BG} shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]`}>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>

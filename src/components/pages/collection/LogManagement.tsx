@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Eye, Download, User, Activity, Monitor, Filter, X, Calendar, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { Badge, TruncatedText, RowIconAction, BTN_FOCUS, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, INPUT_CLS, FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch, Pagination, DateInput } from './collectionUi';
+import { Badge, TruncatedText, RowIconAction, BTN_FOCUS, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, INPUT_CLS, FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch, Pagination, DateInput, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, TABLE_WRAP_CLS } from './collectionUi';
 
 // yyyy-MM-dd HH:mm:ss -> [dd/MM/yyyy, HH:mm:ss] (mục 5.3: ngày dd/MM/yyyy, giờ xuống dòng)
 const formatDateTime = (ts: string): [string, string] => {
@@ -325,11 +325,11 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
       </div>
 
       {/* Bảng nhật ký */}
-      <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+      <div className={TABLE_WRAP_CLS}>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse collection-table text-[13px]">
-              <thead className="bg-[#F8FAFC] sticky top-0 z-10">
-                <tr className="h-[42px]">
+              <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+                <tr className={TABLE_HEAD_ROW_CLS}>
                   <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap w-12">STT</th>
                   <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap">Người dùng</th>
                   <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap">Hành động</th>

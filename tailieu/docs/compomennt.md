@@ -495,6 +495,18 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 - Backdrop mặc định: Làm mờ nền 50% (`bg-black/50`).
 - Tiêu đề: Luôn nằm ở phía trên bên trái.
 - Nút đóng: Icon `X` ở góc trên bên phải.
+- **Chiều cao cố định cho modal Xem chi tiết và modal nhiều bước/nhiều tab** *(PM chốt 07/10/2026)*: khung modal có **chiều cao cố định** — không co giãn theo nội dung khi đổi tab/bước — và **thân modal tự cuộn** bên trong; header (tiêu đề, nút X, thanh tab) và footer (nút hành động) **luôn cố định**, không trôi theo nội dung.
+  - Chiều cao: `h-[90vh]` (tối đa `max-h-[800px]` với modal rộng ≤ 1024px); modal nhỏ chỉ có vài trường (xác nhận, nhập lý do) **không áp dụng** — giữ chiều cao theo nội dung.
+  - Cấu trúc: khung `flex flex-col overflow-hidden` → header `shrink-0` → thân `flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4` → footer `shrink-0` nền `#F8FAFC`, viền trên `#E2E8F0`.
+  - Bảng/khối code dài bên trong thân modal **không tạo thanh cuộn lồng** (trừ khối code mẫu JSON/XML có `max-h` riêng); để thân modal cuộn chung.
+
+```tsx
+<div className="bg-white rounded-2xl w-[1024px] max-w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden">
+  <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0]">{/* tiêu đề + X (+ tab) */}</div>
+  <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4">{/* nội dung cuộn */}</div>
+  <div className="shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">{/* nút */}</div>
+</div>
+```
 - **Khi có Modal chồng nhau (Nested Modals):** Modal mở sau bắt buộc phải sinh ra một lớp Backdrop mới đè lên Modal trước đó, giữ nguyên độ mờ 50% để tạo chiều sâu và tập trung vào Modal hiện tại. Tuyệt đối không để vô tình đóng Modal 1 khi click ra ngoài Modal 2.
 
 **Ví dụ hiển thị:**

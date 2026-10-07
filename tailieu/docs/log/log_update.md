@@ -1,5 +1,65 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Chuẩn hóa giao diện — Quản trị & vận hành › Quản trị người dùng (Ngày thực hiện: 07/10/2026) — 154
+
+**Nội dung (PM yêu cầu):** sửa giao diện mục Quản trị người dùng theo `compomennt.md`; giữ nội dung, dữ liệu, logic.
+
+**Quản lý người dùng** (`admin/UserManagementPage.tsx`): thẻ thống kê nhỏ 5.6.1 (thay StatsCard); tìm kiếm + bộ lọc (trạng thái, đơn vị, nhóm) áp dụng khi bấm Tìm kiếm/Enter (trước nút tìm kiếm không hoạt động); bảng 5.3 (cắt chữ + tooltip, vai trò/trạng thái dạng Badge, Đăng nhập gần nhất 2 dòng dd/mm/yyyy, Thao tác ghim phải); phân trang chuẩn; modal 5.4 (Chi tiết người dùng và Đồng bộ chiều cao cố định, thân cuộn); xác nhận xóa / khóa / mở khóa dùng ConfirmModal; `alert()` → toast; thêm dòng trống "Không tìm thấy người dùng nào.".
+
+**Quản lý nhóm người dùng** (`admin/GroupManagementPage.tsx`): H1 chuẩn; thẻ thống kê nhỏ; panel đơn vị (mục chọn nền #EAF3FF); tìm kiếm + lọc trạng thái áp dụng khi bấm; thẻ nhóm bo 16px, Sửa/Xóa dạng nút icon; Badge thay StatusTag; modal 5.4 (Chi tiết/Phân quyền chiều cao cố định, bỏ thanh cuộn lồng); cây phân quyền checkbox xanh, cấp gốc 14px/500; bảng bảo mật trường theo 5.3; `alert()` → toast; ngày dd/mm/yyyy.
+
+**Danh sách chức năng** (`admin/FunctionManagementPage.tsx`): bỏ khối style ép 13px; cây menu + form bo 16px; tìm menu áp dụng khi bấm; mục chọn nền #EAF3FF; form chuẩn 5.2, công tắc `role="switch"`; xóa dùng ConfirmModal; modal Thêm mới 5.4; **sửa lỗi cũ** gọi `React.createElement` khi chưa import React (chọn icon sẽ lỗi lúc chạy) — hết 16 lỗi tsc cũ.
+
+**Quản lý vai trò** (`admin/RoleManagementPage.tsx`): thẻ thống kê nhỏ; tìm kiếm + bộ lọc áp dụng khi bấm; thẻ vai trò bo 16px, Sửa/Xóa nút icon, Badge; bỏ chữ 10px; 5 modal theo 5.4 (Gán người dùng/nhóm, Lịch sử phiên bản chiều cao cố định, tab chuẩn); `alert()` → toast; ngày dd/mm/yyyy.
+
+**Chữ mới:** nhãn lọc "Trạng thái"; tiêu đề "Xác nhận xóa" (ConfirmModal); dòng trống bảng người dùng; tooltip/aria-label.
+
+**Chờ PM quyết định:** danh sách nhóm và vai trò đang dạng thẻ — có chuyển sang bảng 5.3 + phân trang không; các modal Thêm/Sửa/Xóa người dùng, Đặt lại mật khẩu, Nhập Excel, Gán vai trò hiện không có nút mở — có bổ sung không; bộ lọc Đơn vị/Nhóm dùng ô chọn có tìm kiếm không; nút xác nhận khóa tài khoản màu đỏ hay xanh; xóa chức năng hiện chỉ ghi console (logic gốc).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (còn 7 lỗi cũ `createdDate`, `fullName`, `ImportExcelModal`; giảm 18 lỗi cũ); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Chi tiết CSDL đích theo thiết kế PM + quy định chiều cao cố định modal (Ngày thực hiện: 07/10/2026) — 153
+
+**1. Màn Chi tiết cơ sở dữ liệu đích** (`processing/TargetDatabaseDetailPage.tsx`) — sửa trên bản cũ (mục 151) theo ảnh PM gửi; giữ logic, dữ liệu.
+- Tiêu đề trang 20px/700 + nút quay lại tròn có viền; khung chính nền trắng, viền #E2E8F0, bóng mức vừa.
+- Header CSDL: ô icon nền #EAF3FF (bỏ ô xanh đậm có bóng, bỏ nền chuyển màu), tên 16px/600, dòng "kiểu • host:port" 13px xám.
+- Cột trái rộng 300px: "THÔNG TIN KẾT NỐI" gồm **Schema/Database** (icon khiên) và **Ngày tạo** (icon lịch) — **bỏ dòng Username và khung ghi chú** theo ảnh; "DANH SÁCH BẢNG (n)" + nút viền "Thêm bảng"; ô tìm kiếm 40px; mục bảng đang chọn nền xanh chữ trắng, dòng phụ **"n cột"** (trước là mô tả bảng).
+- Cột phải: ô icon bảng xám, tiêu đề "Cấu trúc bảng: **tên bảng (xanh)**", dòng mô tả 12px; nút Chỉnh sửa cấu trúc / Đổi tên bảng dạng viền, Xóa bảng viền đỏ chữ đỏ.
+- Thẻ Cấu trúc bảng / Dữ liệu bảng: gạch chân xanh, bỏ nền xám.
+- Bảng cấu trúc: tiêu đề nền #F1F5F9 (theo mục 152), chữ đen đậm, **không viết hoa**; hàng 48px kẻ #E0E0E0; Type dạng nhãn xám chữ thường; Not null ô tích xanh; Key icon vàng.
+- Phân trang dùng thành phần chuẩn (5.14).
+
+**1b. Áp dụng chiều cao cố định cho màn Chi tiết CSDL đích** (PM yêu cầu làm trước ở màn này): khung trang cao bằng màn hình (`h-[calc(100vh-64px)]`), không kéo dài cả trang; cột trái cuộn riêng; cột phải giữ cố định tiêu đề bảng + nút + thẻ Cấu trúc/Dữ liệu, **bảng cấu trúc cuộn bên trong** (tiêu đề cột dính trên cùng), **phân trang luôn ở đáy**; chế độ Dữ liệu cuộn trong vùng nội dung.
+
+**2. Quy định mới** — `tailieu/docs/compomennt.md` mục 5.4: modal Xem chi tiết và modal nhiều bước/nhiều tab có **chiều cao cố định** (`h-[90vh]`, tối đa 800px với modal ≤1024px), header/footer cố định, thân tự cuộn (`flex-1 min-h-0 overflow-y-auto custom-scrollbar`); modal nhỏ (xác nhận, nhập lý do) không áp dụng; tránh thanh cuộn lồng.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (lỗi cũ `FilterItem.value`); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Làm nổi bảng dữ liệu — thử ở Thiết lập thu thập (Ngày thực hiện: 07/10/2026) — 152
+
+**Nội dung (PM yêu cầu):** tiêu đề bảng đang trùng màu nền trang (#F8FAFC) → quy định lại để bảng nổi bật hơn, kèm đổ bóng khung bảng. PM chọn **màu A + bóng mức vừa**, **làm thử ở màn Thiết lập thu thập** trước.
+
+**Quy định thử:**
+- Tiêu đề bảng: nền **#F1F5F9** (trước #F8FAFC) + kẻ dưới **#E2E8F0**; ô "Thao tác" ghim phải cùng nền.
+- Khung bảng: nền trắng, viền #E2E8F0, bo 8px, **bóng mức vừa** `0 1px 3px rgba(16,24,40,0.10), 0 1px 2px rgba(16,24,40,0.06)`.
+- Hàng dữ liệu giữ nguyên (nền trắng, kẻ #E0E0E0, di chuột #F8FAFC).
+
+**File sửa:**
+- `pages/collection/collectionUi.tsx` (dùng chung, chỉ thêm): `TABLE_HEAD_BG`, `TABLE_HEAD_ROW_CLS`, `TABLE_SHADOW`, `TABLE_WRAP_CLS`.
+- `pages/collection/CollectionSetupPage.tsx` (bảng danh sách dịch vụ) và `pages/collection/LogManagement.tsx` (bảng tab Quản lý nhật ký) dùng các hằng trên.
+
+**Chưa cập nhật `compomennt.md`** — chờ PM xem thử rồi chốt áp dụng toàn hệ thống.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Hoàn tác giao diện màn Chi tiết CSDL đích (Ngày thực hiện: 07/10/2026) — 151
+
+**Nội dung (PM yêu cầu):** màn Chi tiết cơ sở dữ liệu đích giữ nguyên theo thiết kế cũ.
+
+**File:** `processing/TargetDatabaseDetailPage.tsx` khôi phục về bản trước khi chuẩn hóa (commit `a9c1fb36`) — hoàn tác toàn bộ thay đổi của mục 150 trên màn này. Danh sách CSDL đích (`TargetDatabaseManagementPage.tsx`) và modal Thêm/Sửa (`TargetDatabaseModal.tsx`) vẫn giữ bản đã chuẩn hóa.
+
+**Kiểm tra:** file trùng khớp bản `a9c1fb36`; tsc chỉ còn 1 lỗi cũ (`FilterItem.value`, có từ trước); `npm run build` thành công; đã xác nhận server port 3000 trả đúng bản cũ.
+
 ## Chuẩn hóa giao diện — Quản trị & vận hành › Danh mục đơn vị quản lý dữ liệu (Ngày thực hiện: 07/10/2026) — 150
 
 **Nội dung (PM yêu cầu):** sửa giao diện mục Danh mục đơn vị quản lý dữ liệu theo `compomennt.md` (Quản lý kết nối + Quản lý CSDL đích); giữ nội dung, dữ liệu, logic.
