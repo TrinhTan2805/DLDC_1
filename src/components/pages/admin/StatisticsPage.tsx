@@ -1,5 +1,11 @@
 import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
+import { toast } from 'sonner';
+import {
+  Badge, TruncatedText, RowIconAction, DateInput,
+  BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, BTN_FOCUS, LABEL_CLS, FIELD_LABEL, FIELD_VALUE,
+  SECTION_TITLE, GROUP_TITLE, tabClass, TABLE_WRAP_CLS, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, CARD_CLS,
+} from '../collection/collectionUi';
 import {
   BarChart3,
   Download,
@@ -81,10 +87,32 @@ const integrationData: IntegrationStats[] = [
 ];
 
 const INTEGRATION_METRIC_CONFIG: { key: 'integrated' | 'processed' | 'shared'; label: string; color: string }[] = [
-  { key: 'integrated', label: 'Đã tích hợp', color: '#1d4ed8' },
-  { key: 'processed', label: 'Đã xử lý', color: '#15803d' },
-  { key: 'shared', label: 'Chia sẻ đi', color: '#6d28d9' },
+  // Màu theo bảng màu compomennt.md mục 2 / 5.8: Primary #155DFC, Success #16A34A, tím badge #8200DB
+  { key: 'integrated', label: 'Đã tích hợp', color: '#155DFC' },
+  { key: 'processed', label: 'Đã xử lý', color: '#16A34A' },
+  { key: 'shared', label: 'Chia sẻ đi', color: '#8200DB' },
 ];
+
+// Bảng dữ liệu (mục 5.3): th 13px/700 đen, td 13px/400 đen
+const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
+// Trục / tooltip biểu đồ: chữ 12px, màu theo mục 2
+const AXIS_TICK = { fill: '#475569', fontSize: 12 };
+const CHART_TOOLTIP_STYLE = { backgroundColor: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px', color: '#020817' };
+const SectionBar = () => <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />;
+
+// Badge tỷ lệ: ≥95% xanh lá, ≥90% vàng, còn lại đỏ (giữ ngưỡng cũ)
+const rateVariant = (rate: number) => (rate >= 95 ? 'green' : rate >= 90 ? 'amber' : 'red');
+
+// '2026-05-22 17:15:32' → ngày dd/mm/yyyy, giờ xuống dòng (mục 5.3.3)
+const splitTimestamp = (ts: string) => {
+  const [date = '', time = ''] = ts.split(' ');
+  const [y, m, d] = date.split('-');
+  return { date: y && m && d ? `${d}/${m}/${y}` : date, time };
+};
 
 const INTEGRATION_ITEM_COLORS = [
   '#1d4ed8', '#15803d', '#6d28d9', '#b45309', '#0f766e',
@@ -195,7 +223,7 @@ export function StatisticsPage() {
   const activeMetricConfig = INTEGRATION_METRIC_CONFIG.find(m => m.key === chartMetric)!;
 
   const handleExportReport = () => {
-    alert('Đang xuất báo cáo thống kê...');
+    toast.info('Đang xuất báo cáo thống kê...');
   };
 
   // Transaction 7: Tải biểu đồ thống kê CSDL tích hợp về máy tính cá nhân (chụp đúng vùng biểu đồ/bảng đang hiển thị thành ảnh PNG)
@@ -214,7 +242,7 @@ export function StatisticsPage() {
       link.click();
     } catch (error) {
       console.error('Lỗi khi tải biểu đồ:', error);
-      alert('Không thể tải biểu đồ, vui lòng thử lại.');
+      toast.error('Không thể tải biểu đồ, vui lòng thử lại.');
     } finally {
       setIsDownloadingChart(false);
     }
@@ -234,86 +262,82 @@ export function StatisticsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-        <div className="flex flex-row items-center justify-between gap-4 flex-wrap md:flex-nowrap">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 border border-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 bg-white shadow-sm">
-              <BarChart3 className="w-6 h-6 text-slate-700" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="text-slate-900 font-bold text-lg leading-tight">Thống kê CSDL tích hợp</h2>
-              <p className="text-sm text-slate-500 font-normal mt-1 leading-relaxed">
-                Tổng quan dữ liệu tích hợp, xử lý và chia sẻ giữa các hệ thống
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-all font-medium text-sm shadow-sm"
-              title="Xem lịch sử truy cập & thao tác"
-            >
-              <History className="w-4 h-4" />
-              Lịch sử
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium text-sm shadow-sm"
-              title="In báo cáo"
-            >
-              <Printer className="w-4 h-4" />
-              In
-            </button>
-            <button
-              onClick={handleDownloadChart}
-              disabled={isDownloadingChart}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium text-sm shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              title="Tải biểu đồ"
-            >
-              <Download className="w-4 h-4" />
-              {isDownloadingChart ? 'Đang tải...' : 'Tải xuống'}
-            </button>
-          </div>
+      {/* Tiêu đề trang (H1 20px/700 #2A0F0F) + nhóm nút — mỗi màn một nút Primary (mục 5.1) */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Thống kê CSDL tích hợp</h1>
+          <p className="text-[13px] text-[#64748B]">
+            Tổng quan dữ liệu tích hợp, xử lý và chia sẻ giữa các hệ thống
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowHistoryModal(true)}
+            className={BTN_OUTLINE}
+            title="Xem lịch sử truy cập & thao tác"
+          >
+            <History className="w-4 h-4" />
+            Lịch sử
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className={BTN_OUTLINE}
+            title="In báo cáo"
+          >
+            <Printer className="w-4 h-4" />
+            In
+          </button>
+          <button
+            type="button"
+            onClick={handleDownloadChart}
+            disabled={isDownloadingChart}
+            className={BTN_PRIMARY}
+            title="Tải biểu đồ"
+          >
+            <Download className="w-4 h-4" />
+            {isDownloadingChart ? 'Đang tải...' : 'Tải xuống'}
+          </button>
         </div>
       </div>
 
       {/* Chart View */}
       {viewMode === 'chart' && (
         <div className="space-y-6">
-          {/* Main Chart */}
           {/* Main Chart Panel & Customization Side Panel */}
-          <div className="flex flex-row w-full items-start" style={{ gap: '1.5rem' }}>
+          <div className="flex flex-row w-full items-start gap-6">
             {/* Left Chart/Table Panel */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between shadow-sm" style={{ flex: '7 1 0%', minWidth: 0 }}>
+            <div className={`${CARD_CLS} flex flex-col justify-between`} style={{ flex: '7 1 0%', minWidth: 0 }}>
               <div>
-                <div className="mb-6 border-b border-slate-100 pb-4">
-                  <h3 className="text-slate-900 font-bold text-lg m-0">
+                <div className="mb-4 border-b border-[#E2E8F0] pb-4">
+                  <h2 className={`${SECTION_TITLE} !mb-0`}>
+                    <SectionBar />
                     Biểu đồ thống kê theo tích hợp
-                  </h3>
-                  <p className="text-sm text-slate-500 mt-1 font-normal">
+                  </h2>
+                  <p className="text-[12px] text-[#64748B] mt-1">
                     So sánh số lượng dữ liệu tích hợp / xử lý / chia sẻ theo dung lượng (GB)
                   </p>
                 </div>
 
                 {/* Tab Content Container with Consistent Height */}
-                <div ref={chartContentRef} className="mt-4 flex-1 flex flex-col justify-center min-h-[420px] bg-white">
+                <div ref={chartContentRef} className="flex-1 flex flex-col justify-center min-h-[420px] bg-white">
                   {filteredIntegrationData.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center text-slate-500 min-h-[400px]">
-                      <Filter className="w-8 h-8 text-slate-300 mb-2" />
-                      <p className="text-sm font-medium">Không có dữ liệu phù hợp với bộ lọc đã chọn</p>
-                      <p className="text-xs text-slate-400 mt-1">Vui lòng điều chỉnh lại tiêu chí lọc ở trên</p>
+                    <div className="flex flex-col items-center justify-center py-16 text-center min-h-[400px]">
+                      <Filter className="w-8 h-8 text-[#CBD5E1] mb-2" />
+                      <p className="text-[13px] font-medium text-[#020817]">Không có dữ liệu phù hợp với bộ lọc đã chọn</p>
+                      <p className="text-[12px] text-[#64748B] mt-1">Vui lòng điều chỉnh lại tiêu chí lọc ở trên</p>
                     </div>
                   ) : (
                   <>
                   {activeChartTab === 'chart' && (
                     <div>
                       {chartDisplayData.length === 0 ? (
-                        <div className="flex items-center justify-center h-[300px] text-slate-400 text-sm">
+                        <div className="flex items-center justify-center h-[300px] text-[13px] text-[#64748B]">
                           Chọn ít nhất một hạng mục dữ liệu để hiển thị
                         </div>
                       ) : (
-                        <div className="w-full overflow-x-auto">
+                        <div className="w-full overflow-x-auto custom-scrollbar">
                           <div style={{ height: '500px', minWidth: `${chartDisplayData.length * 50 + 40}px` }}>
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
@@ -321,21 +345,22 @@ export function StatisticsPage() {
                                 barCategoryGap="2%"
                                 margin={{ top: 30, right: 20, left: 10, bottom: 100 }}
                               >
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                                 <XAxis
                                   dataKey="name"
-                                  stroke="#94a3b8"
-                                  fontSize={11}
-                                  tick={{ fill: '#334155' }}
+                                  stroke="#CBD5E1"
+                                  tick={AXIS_TICK}
                                   interval={0}
                                   angle={-35}
                                   textAnchor="end"
                                   height={100}
                                 />
-                                <YAxis type="number" tickFormatter={formatNumber} stroke="#94a3b8" fontSize={11} />
+                                <YAxis type="number" tickFormatter={formatNumber} stroke="#CBD5E1" tick={AXIS_TICK} />
                                 <Tooltip
                                   formatter={(value: number) => [formatNumber(value), activeMetricConfig.label]}
-                                  contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                                  contentStyle={CHART_TOOLTIP_STYLE}
+                                  labelStyle={{ color: '#020817', fontWeight: 500 }}
+                                  cursor={{ fill: '#F8FAFC' }}
                                 />
                                 <Bar
                                   dataKey={chartMetric}
@@ -347,8 +372,8 @@ export function StatisticsPage() {
                                     position: 'top',
                                     formatter: formatNumber,
                                     fill: '#475569',
-                                    fontSize: 10,
-                                    fontWeight: '600'
+                                    fontSize: 12,
+                                    fontWeight: '500'
                                   }}
                                 />
                               </BarChart>
@@ -360,27 +385,29 @@ export function StatisticsPage() {
                   )}
 
                   {activeChartTab === 'table' && (
-                    <div className="overflow-x-auto rounded-lg border border-slate-200 w-full overflow-y-auto" style={{ maxHeight: '420px', minHeight: '400px' }}>
-                      <table className="w-full text-left border-collapse text-sm">
-                        <thead>
-                          <tr className="bg-slate-50 border-b border-slate-200">
-                            <th className="px-4 py-3 font-semibold text-slate-700">Hạng mục dữ liệu</th>
-                            <th className="px-4 py-3 font-semibold text-slate-700 text-right">Đã tích hợp</th>
-                            <th className="px-4 py-3 font-semibold text-slate-700 text-right">Đã xử lý</th>
-                            <th className="px-4 py-3 font-semibold text-slate-700 text-right">Chia sẻ đi</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {filteredIntegrationData.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50">
-                              <td className="px-4 py-3 text-slate-900 font-medium">{row.name}</td>
-                              <td className="px-4 py-3 text-right text-blue-500 font-semibold">{formatNumber(row.integrated)}</td>
-                              <td className="px-4 py-3 text-right text-green-500 font-semibold">{formatNumber(row.processed)}</td>
-                              <td className="px-4 py-3 text-right text-violet-500 font-semibold">{formatNumber(row.shared)}</td>
+                    <div className={`${TABLE_WRAP_CLS} w-full`}>
+                      <div className="overflow-auto custom-scrollbar" style={{ maxHeight: '420px', minHeight: '400px' }}>
+                        <table className="w-full border-collapse">
+                          <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+                            <tr className={TABLE_HEAD_ROW_CLS}>
+                              <th className={`${TH} text-left`}>Hạng mục dữ liệu</th>
+                              <th className={`${TH} text-right`}>Đã tích hợp</th>
+                              <th className={`${TH} text-right`}>Đã xử lý</th>
+                              <th className={`${TH} text-right`}>Chia sẻ đi</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {filteredIntegrationData.map((row, idx) => (
+                              <tr key={idx} className={TR}>
+                                <td className={`${TD} text-left max-w-[320px]`}><TruncatedText text={row.name} /></td>
+                                <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{formatNumber(row.integrated)}</td>
+                                <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{formatNumber(row.processed)}</td>
+                                <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{formatNumber(row.shared)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
                   </>
@@ -390,64 +417,72 @@ export function StatisticsPage() {
             </div>
 
             {/* Right Display Customization Sidebar */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between shadow-sm" style={{ flex: '3 1 0%', minWidth: 0 }}>
+            <div className={`${CARD_CLS} flex flex-col justify-between`} style={{ flex: '3 1 0%', minWidth: 0 }}>
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-slate-900 font-bold text-base m-0">Tùy chỉnh hiển thị</h4>
-                  <p className="text-xs text-slate-500 mt-1 font-normal">Chuyển chế độ xem và ẩn/hiện nhãn số liệu</p>
+                  <h2 className={`${SECTION_TITLE} !mb-0`}>
+                    <SectionBar />
+                    Tùy chỉnh hiển thị
+                  </h2>
+                  <p className="text-[12px] text-[#64748B] mt-1">Chuyển chế độ xem và ẩn/hiện nhãn số liệu</p>
                 </div>
 
-                {/* Chế độ hiển thị */}
+                {/* Chế độ hiển thị — tab mục 5.9 */}
                 <div>
-                  <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Chế độ hiển thị</div>
-                  <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                  <div className={LABEL_CLS}>Chế độ hiển thị</div>
+                  <div role="tablist" aria-label="Chế độ hiển thị" className="flex border-b border-[#E2E8F0]">
                     <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeChartTab === 'chart'}
                       onClick={() => setActiveChartTab('chart')}
-                      className={`flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                        activeChartTab === 'chart'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-800'
-                      }`}
+                      className={`${tabClass(activeChartTab === 'chart')} ${BTN_FOCUS} flex-1 justify-center`}
                     >
-                      📈 Biểu đồ
+                      <BarChart3 className="w-4 h-4" />
+                      Biểu đồ
                     </button>
                     <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeChartTab === 'table'}
                       onClick={() => setActiveChartTab('table')}
-                      className={`flex-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                        activeChartTab === 'table'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-600 hover:text-slate-800'
-                      }`}
+                      className={`${tabClass(activeChartTab === 'table')} ${BTN_FOCUS} flex-1 justify-center`}
                     >
-                      📋 Dạng bảng
+                      <Table2 className="w-4 h-4" />
+                      Dạng bảng
                     </button>
                   </div>
                 </div>
 
                 {/* Lọc theo khoảng ngày kết nối - áp dụng cho cả Biểu đồ và Dạng bảng */}
                 <div>
-                  <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Khoảng ngày kết nối</div>
-                  <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5 flex-wrap">
-                    <input
-                      type="date"
+                  <div className={LABEL_CLS}>Khoảng ngày kết nối</div>
+                  {/* Một hàng: Từ — đến — Đến — nút X (không xuống dòng) */}
+                  <div className="flex items-center gap-2">
+                    <DateInput
                       value={dateRange.from}
-                      onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700 flex-1 min-w-0"
+                      onChange={(iso) => setDateRange(prev => ({ ...prev, from: iso }))}
+                      ariaLabel="Từ ngày kết nối"
+                      max={dateRange.to || undefined}
+                      className="flex-1 min-w-0"
                     />
-                    <span className="text-slate-400 text-[12px]">đến</span>
-                    <input
-                      type="date"
+                    <span className="shrink-0 text-[13px] text-[#64748B]">đến</span>
+                    <DateInput
                       value={dateRange.to}
-                      onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                      className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700 flex-1 min-w-0"
+                      onChange={(iso) => setDateRange(prev => ({ ...prev, to: iso }))}
+                      ariaLabel="Đến ngày kết nối"
+                      min={dateRange.from || undefined}
+                      className="flex-1 min-w-0"
                     />
                     {(dateRange.from || dateRange.to) && (
                       <button
+                        type="button"
                         onClick={() => setDateRange({ from: '', to: '' })}
-                        className="text-[12px] text-slate-500 hover:text-slate-800 px-1"
+                        className={`${BTN_GHOST_ICON} shrink-0`}
                         title="Bỏ lọc thời gian"
+                        aria-label="Bỏ lọc thời gian"
                       >
-                        ✕
+                        <X className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -457,50 +492,59 @@ export function StatisticsPage() {
                   <>
                     {/* Chọn chỉ tiêu hiển thị */}
                     <div>
-                      <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Chỉ tiêu hiển thị</div>
-                      <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-                        {INTEGRATION_METRIC_CONFIG.map(option => (
-                          <button
-                            key={option.key}
-                            onClick={() => setChartMetric(option.key)}
-                            className={`flex-1 px-2 py-1.5 text-[12px] rounded-md transition-colors ${
-                              chartMetric === option.key
-                                ? 'bg-white shadow-sm font-semibold'
-                                : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                            style={chartMetric === option.key ? { color: option.color } : undefined}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
+                      <div className={LABEL_CLS}>Chỉ tiêu hiển thị</div>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {INTEGRATION_METRIC_CONFIG.map(option => {
+                          const isActive = chartMetric === option.key;
+                          return (
+                            <button
+                              type="button"
+                              key={option.key}
+                              aria-pressed={isActive}
+                              onClick={() => setChartMetric(option.key)}
+                              className={`h-10 px-2 inline-flex items-center justify-center gap-1.5 rounded-lg border text-[13px] transition-colors ${BTN_FOCUS} ${
+                                isActive
+                                  ? 'bg-[#EAF3FF] border-[#BFDBFE] text-blue-600 font-medium'
+                                  : 'bg-white border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC] hover:text-[#020817]'
+                              }`}
+                            >
+                              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: option.color }} />
+                              <span className="truncate">{option.label}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* Chọn hạng mục dữ liệu tích hợp hiển thị */}
                     <div>
-                      <div className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">Hạng mục dữ liệu</div>
-                      <div className="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto pr-1">
+                      <div className={LABEL_CLS}>Hạng mục dữ liệu</div>
+                      {/* relative: giữ ô tích sr-only (position:absolute) trong khung cuộn, tránh kéo dài trang */}
+                      <div className="relative flex flex-wrap gap-2 max-h-[220px] overflow-y-auto custom-scrollbar p-0.5 pr-1">
                         {integrationData.map((item, index) => {
                           const isChecked = selectedIntegrationItems.includes(item.name);
                           const color = INTEGRATION_ITEM_COLORS[index % INTEGRATION_ITEM_COLORS.length];
                           return (
                             <label
                               key={item.name}
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[12px] cursor-pointer transition-colors ${
-                                isChecked ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50 text-slate-400'
+                              className={`inline-flex items-center gap-1.5 h-[26px] px-2 max-w-full min-w-0 rounded-2xl border text-[13px] cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-blue-600 ${
+                                isChecked
+                                  ? 'border-[#CBD5E1] bg-white text-[#020817] hover:bg-[#F8FAFC]'
+                                  : 'border-[#E2E8F0] bg-[#F8FAFC] text-[#94A3B8] hover:text-[#475569]'
                               }`}
                             >
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => toggleIntegrationItem(item.name)}
-                                className="hidden"
+                                className="sr-only"
                               />
                               <span
                                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: isChecked ? color : '#cbd5e1' }}
+                                style={{ backgroundColor: isChecked ? color : '#CBD5E1' }}
                               />
-                              <span className={isChecked ? 'text-slate-700' : 'text-slate-400'}>{item.name}</span>
+                              {/* Tên dài: cắt "…" trên 1 dòng, hover hiện đầy đủ (mục 5.3.1) */}
+                              <TruncatedText text={item.name} className="min-w-0" />
                             </label>
                           );
                         })}
@@ -512,8 +556,6 @@ export function StatisticsPage() {
               </div>
             </div>
           </div>
-
-
         </div>
       )}
 
@@ -521,89 +563,51 @@ export function StatisticsPage() {
       {viewMode === 'table' && (
         <div className="space-y-6">
           {/* Monthly Data Table */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-200">
-              <h3 className="text-slate-900">Dữ liệu thống kê theo tháng - Năm 2024</h3>
+          <div className={TABLE_WRAP_CLS}>
+            <div className="px-4 py-3 border-b border-[#E2E8F0]">
+              <h2 className={`${SECTION_TITLE} !mb-0`}><SectionBar />Dữ liệu thống kê theo tháng - Năm 2024</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">
-                      Tháng
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Tổng số
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Thành công
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Thất bại
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Tỷ lệ
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs text-slate-600 uppercase tracking-wider">
-                      Thao tác
-                    </th>
+              <table className="w-full border-collapse">
+                <thead className={TABLE_HEAD_BG}>
+                  <tr className={TABLE_HEAD_ROW_CLS}>
+                    <th className={`${TH} text-left`}>Tháng</th>
+                    <th className={`${TH} text-right`}>Tổng số</th>
+                    <th className={`${TH} text-right`}>Thành công</th>
+                    <th className={`${TH} text-right`}>Thất bại</th>
+                    <th className={`${TH} text-right`}>Tỷ lệ</th>
+                    <th className={`${TH} text-center`}>Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody>
                   {monthlyData.map((row, index) => {
                     const rate = ((row.success / row.total) * 100).toFixed(1);
                     return (
-                      <tr key={index} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 text-sm text-slate-900">{row.name}</td>
-                        <td className="px-6 py-4 text-sm text-right text-slate-900">
-                          {row.total.toLocaleString()}
+                      <tr key={index} className={TR}>
+                        <td className={`${TD} text-left`}>{row.name}</td>
+                        <td className={`${TD} text-right tabular-nums`}>{row.total.toLocaleString()}</td>
+                        <td className={`${TD} text-right tabular-nums`}>{row.success.toLocaleString()}</td>
+                        <td className={`${TD} text-right tabular-nums`}>{row.failed.toLocaleString()}</td>
+                        <td className={`${TD} text-right`}>
+                          <Badge label={`${rate}%`} variant={rateVariant(parseFloat(rate))} />
                         </td>
-                        <td className="px-6 py-4 text-sm text-right text-green-600">
-                          {row.success.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-right text-red-600">
-                          {row.failed.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-right">
-                          <span className={`px-2.5 py-1 rounded-full text-xs ${
-                            parseFloat(rate) >= 95
-                              ? 'bg-green-100 text-green-700'
-                              : parseFloat(rate) >= 90
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {rate}%
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button
-                            onClick={() => handleViewDetail(row)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Xem chi tiết"
-                          >
+                        <td className={`${TD} text-center`}>
+                          <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(row)}>
                             <Eye className="w-4 h-4" />
-                          </button>
+                          </RowIconAction>
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
-                <tfoot className="bg-slate-50 border-t-2 border-slate-300">
-                  <tr>
-                    <td className="px-6 py-4 text-sm text-slate-900">Tổng cộng</td>
-                    <td className="px-6 py-4 text-sm text-right text-slate-900">
-                      {totalRecords.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right text-green-600">
-                      {totalSuccess.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right text-red-600">
-                      {totalFailed.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right">
-                      <span className="px-2.5 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-                        {successRate}%
-                      </span>
+                <tfoot className="bg-[#F8FAFC] border-t border-[#E2E8F0]">
+                  <tr className="h-12">
+                    <td className={`${TD} text-left font-medium`}>Tổng cộng</td>
+                    <td className={`${TD} text-right tabular-nums font-medium`}>{totalRecords.toLocaleString()}</td>
+                    <td className={`${TD} text-right tabular-nums font-medium`}>{totalSuccess.toLocaleString()}</td>
+                    <td className={`${TD} text-right tabular-nums font-medium`}>{totalFailed.toLocaleString()}</td>
+                    <td className={`${TD} text-right`}>
+                      <Badge label={`${successRate}%`} variant="blue" />
                     </td>
                     <td></td>
                   </tr>
@@ -613,68 +617,38 @@ export function StatisticsPage() {
           </div>
 
           {/* Source Data Table */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-200">
-              <h3 className="text-slate-900">Dữ liệu thống kê theo nguồn</h3>
+          <div className={TABLE_WRAP_CLS}>
+            <div className="px-4 py-3 border-b border-[#E2E8F0]">
+              <h2 className={`${SECTION_TITLE} !mb-0`}><SectionBar />Dữ liệu thống kê theo nguồn</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs text-slate-600 uppercase tracking-wider">
-                      Nguồn dữ liệu
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Tổng số
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Thành công
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Thất bại
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs text-slate-600 uppercase tracking-wider">
-                      Tỷ lệ
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs text-slate-600 uppercase tracking-wider">
-                      Thao tác
-                    </th>
+              <table className="w-full border-collapse">
+                <thead className={TABLE_HEAD_BG}>
+                  <tr className={TABLE_HEAD_ROW_CLS}>
+                    <th className={`${TH} text-left`}>Nguồn dữ liệu</th>
+                    <th className={`${TH} text-right`}>Tổng số</th>
+                    <th className={`${TH} text-right`}>Thành công</th>
+                    <th className={`${TH} text-right`}>Thất bại</th>
+                    <th className={`${TH} text-right`}>Tỷ lệ</th>
+                    <th className={`${TH} text-center`}>Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody>
                   {sourceData.map((row, index) => {
                     const rate = ((row.success / row.total) * 100).toFixed(1);
                     return (
-                      <tr key={index} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 text-sm text-slate-900">{row.name}</td>
-                        <td className="px-6 py-4 text-sm text-right text-slate-900">
-                          {row.total.toLocaleString()}
+                      <tr key={index} className={TR}>
+                        <td className={`${TD} text-left max-w-[320px]`}><TruncatedText text={row.name} /></td>
+                        <td className={`${TD} text-right tabular-nums`}>{row.total.toLocaleString()}</td>
+                        <td className={`${TD} text-right tabular-nums`}>{row.success.toLocaleString()}</td>
+                        <td className={`${TD} text-right tabular-nums`}>{row.failed.toLocaleString()}</td>
+                        <td className={`${TD} text-right`}>
+                          <Badge label={`${rate}%`} variant={rateVariant(parseFloat(rate))} />
                         </td>
-                        <td className="px-6 py-4 text-sm text-right text-green-600">
-                          {row.success.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-right text-red-600">
-                          {row.failed.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-right">
-                          <span className={`px-2.5 py-1 rounded-full text-xs ${
-                            parseFloat(rate) >= 95
-                              ? 'bg-green-100 text-green-700'
-                              : parseFloat(rate) >= 90
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {rate}%
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button
-                            onClick={() => handleViewDetail(row)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Xem chi tiết"
-                          >
+                        <td className={`${TD} text-center`}>
+                          <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(row)}>
                             <Eye className="w-4 h-4" />
-                          </button>
+                          </RowIconAction>
                         </td>
                       </tr>
                     );
@@ -686,80 +660,74 @@ export function StatisticsPage() {
         </div>
       )}
 
-      {/* Detail Modal */}
+      {/* Detail Modal — modal Xem chi tiết: chiều cao cố định, thân tự cuộn (mục 5.4) */}
       {showDetailModal && selectedDetail && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Eye className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-slate-900">Chi tiết chỉ tiêu thống kê</h3>
-                  <p className="text-sm text-slate-600 mt-0.5">{selectedDetail.name}</p>
-                </div>
+        <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="stat-detail-title" className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden">
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-4">
+              <div>
+                <h3 id="stat-detail-title" className={MODAL_TITLE}>Chi tiết chỉ tiêu thống kê</h3>
+                <p className="text-[13px] text-[#64748B] mt-0.5">{selectedDetail.name}</p>
               </div>
               <button
+                type="button"
                 onClick={() => setShowDetailModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className={BTN_GHOST_ICON}
+                title="Đóng"
+                aria-label="Đóng"
               >
-                <Download className="w-5 h-5 rotate-180" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Summary Cards */}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+              {/* Summary Cards (mục 5.6.1) */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="text-xs text-slate-600 mb-1">Tổng số bản ghi</div>
-                  <div className="text-2xl text-slate-900">{selectedDetail.total.toLocaleString()}</div>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                  <div className="text-[16px] text-[#64748B]">Tổng số bản ghi</div>
+                  <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{selectedDetail.total.toLocaleString()}</div>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="text-xs text-green-600 mb-1">Thành công</div>
-                  <div className="text-2xl text-green-600">{selectedDetail.success.toLocaleString()}</div>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                  <div className="text-[16px] text-[#64748B]">Thành công</div>
+                  <div className="text-[16px] font-semibold text-[#16A34A] tabular-nums">{selectedDetail.success.toLocaleString()}</div>
                 </div>
-                <div className="bg-red-50 rounded-lg p-4">
-                  <div className="text-xs text-red-600 mb-1">Thất bại</div>
-                  <div className="text-2xl text-red-600">{selectedDetail.failed.toLocaleString()}</div>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                  <div className="text-[16px] text-[#64748B]">Thất bại</div>
+                  <div className="text-[16px] font-semibold text-[#DC2626] tabular-nums">{selectedDetail.failed.toLocaleString()}</div>
                 </div>
               </div>
 
               {/* Detailed Info */}
-              <div className="space-y-3">
-                <div className="flex justify-between py-3 border-b border-slate-200">
-                  <span className="text-sm text-slate-600">Tỷ lệ thành công:</span>
-                  <span className="text-sm text-green-600">
+              <div>
+                <div className="flex items-center justify-between py-3 border-b border-[#E2E8F0]">
+                  <span className={FIELD_LABEL}>Tỷ lệ thành công:</span>
+                  <span className={`${FIELD_VALUE} tabular-nums`}>
                     {((selectedDetail.success / selectedDetail.total) * 100).toFixed(2)}%
                   </span>
                 </div>
-                <div className="flex justify-between py-3 border-b border-slate-200">
-                  <span className="text-sm text-slate-600">Tỷ lệ thất bại:</span>
-                  <span className="text-sm text-red-600">
+                <div className="flex items-center justify-between py-3 border-b border-[#E2E8F0]">
+                  <span className={FIELD_LABEL}>Tỷ lệ thất bại:</span>
+                  <span className={`${FIELD_VALUE} tabular-nums`}>
                     {((selectedDetail.failed / selectedDetail.total) * 100).toFixed(2)}%
                   </span>
                 </div>
-                <div className="flex justify-between py-3 border-b border-slate-200">
-                  <span className="text-sm text-slate-600">Trạng thái:</span>
-                  <span className={`text-sm px-2.5 py-1 rounded-full ${
-                    (selectedDetail.success / selectedDetail.total) >= 0.95
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {(selectedDetail.success / selectedDetail.total) >= 0.95 ? 'Tốt' : 'Cần cải thiện'}
-                  </span>
+                <div className="flex items-center justify-between py-3 border-b border-[#E2E8F0]">
+                  <span className={FIELD_LABEL}>Trạng thái:</span>
+                  {(selectedDetail.success / selectedDetail.total) >= 0.95
+                    ? <Badge label="Tốt" variant="green" />
+                    : <Badge label="Cần cải thiện" variant="amber" />}
                 </div>
               </div>
 
               {/* Chart in Modal */}
               <div>
-                <h4 className="text-sm text-slate-900 mb-3">Biểu đồ phân bổ</h4>
+                <h4 className={`${GROUP_TITLE} mb-3`}>Biểu đồ phân bổ</h4>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Thành công', value: selectedDetail.success, color: '#10b981' },
-                        { name: 'Thất bại', value: selectedDetail.failed, color: '#ef4444' }
+                        { name: 'Thành công', value: selectedDetail.success, color: '#16A34A' },
+                        { name: 'Thất bại', value: selectedDetail.failed, color: '#DC2626' }
                       ]}
                       cx="50%"
                       cy="50%"
@@ -767,21 +735,19 @@ export function StatisticsPage() {
                       label={(entry) => `${entry.name}: ${entry.value}`}
                       outerRadius={80}
                       dataKey="value"
+                      style={{ fontSize: 12 }}
                     >
-                      <Cell fill="#10b981" />
-                      <Cell fill="#ef4444" />
+                      <Cell fill="#16A34A" />
+                      <Cell fill="#DC2626" />
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200">
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="w-full px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
-              >
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowDetailModal(false)} className={BTN_OUTLINE}>
                 Đóng
               </button>
             </div>
@@ -791,61 +757,62 @@ export function StatisticsPage() {
 
       {/* Transaction 8: History Modal */}
       {showHistoryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => setShowHistoryModal(false)}>
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
-              <div className="flex items-center gap-3">
-                <History className="w-5 h-5 text-blue-600" />
-                <h3 className="text-slate-900 font-semibold text-lg m-0">Lịch sử truy cập & thao tác biểu đồ</h3>
-              </div>
+        <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowHistoryModal(false)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="stat-history-title" className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+              <h3 id="stat-history-title" className={MODAL_TITLE}>Lịch sử truy cập & thao tác biểu đồ</h3>
               <button
+                type="button"
                 onClick={() => setShowHistoryModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded transition-colors"
+                className={BTN_GHOST_ICON}
+                title="Đóng"
+                aria-label="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="p-6">
-              <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Thời gian</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Tài khoản</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Họ và tên</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Thao tác thực hiện</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Địa chỉ IP</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase text-center">Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {mockAccessLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">{log.timestamp}</td>
-                        <td className="px-4 py-3 text-sm font-semibold text-slate-900">{log.username}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{log.fullName}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className="inline-block text-blue-700 bg-blue-50 px-2.5 py-1 rounded text-xs font-medium">{log.action}</span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-500 font-mono">{log.ipAddress}</td>
-                        <td className="px-4 py-3 text-sm text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Thành công
-                          </span>
-                        </td>
+
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4">
+              <div className={TABLE_WRAP_CLS}>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead className={TABLE_HEAD_BG}>
+                      <tr className={TABLE_HEAD_ROW_CLS}>
+                        <th className={`${TH} text-left`}>Thời gian</th>
+                        <th className={`${TH} text-left`}>Tài khoản</th>
+                        <th className={`${TH} text-left`}>Họ và tên</th>
+                        <th className={`${TH} text-left`}>Thao tác thực hiện</th>
+                        <th className={`${TH} text-left`}>Địa chỉ IP</th>
+                        <th className={`${TH} text-left`}>Trạng thái</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {mockAccessLogs.map((log) => {
+                        const ts = splitTimestamp(log.timestamp);
+                        return (
+                          <tr key={log.id} className={TR}>
+                            <td className={`${TD} text-left whitespace-nowrap tabular-nums leading-4`}>
+                              <div>{ts.date}</div>
+                              <div>{ts.time}</div>
+                            </td>
+                            <td className={`${TD} text-left whitespace-nowrap`}>{log.username}</td>
+                            <td className={`${TD} text-left max-w-[180px]`}><TruncatedText text={log.fullName} /></td>
+                            <td className={`${TD} text-left max-w-[300px]`}><TruncatedText text={log.action} /></td>
+                            <td className={`${TD} text-left whitespace-nowrap tabular-nums`}>{log.ipAddress}</td>
+                            <td className={`${TD} text-left`}>
+                              <Badge label="Thành công" variant="green" />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-            
-            <div className="p-6 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setShowHistoryModal(false)}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
-              >
+
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowHistoryModal(false)} className={BTN_OUTLINE}>
                 Đóng
               </button>
             </div>
@@ -855,101 +822,89 @@ export function StatisticsPage() {
 
       {/* Transaction 6: All Details Modal */}
       {showAllDetailsModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={() => setShowAllDetailsModal(false)}>
-          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
-              <div className="flex items-center gap-3">
-                <Eye className="w-5 h-5 text-blue-600" />
-                <h3 className="text-slate-900 font-semibold text-lg m-0">Số liệu chi tiết các chỉ tiêu CSDL tích hợp</h3>
-              </div>
+        <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAllDetailsModal(false)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="stat-all-details-title" className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+              <h3 id="stat-all-details-title" className={MODAL_TITLE}>Số liệu chi tiết các chỉ tiêu CSDL tích hợp</h3>
               <button
+                type="button"
                 onClick={() => setShowAllDetailsModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded transition-colors"
+                className={BTN_GHOST_ICON}
+                title="Đóng"
+                aria-label="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="p-6 space-y-6">
-              {/* Summary cards */}
+
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+              {/* Summary cards (mục 5.6.1) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100 shadow-sm flex items-center gap-3">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4 flex items-center gap-3">
+                  <span className="w-3 h-3 bg-[#16A34A] rounded-full shrink-0" />
                   <div>
-                    <div className="text-xs text-emerald-700 font-medium">{"Chỉ tiêu Đạt chuẩn (>=95%)"}</div>
-                    <div className="text-xl text-emerald-950 font-bold mt-0.5">6 / 9 chỉ tiêu</div>
+                    <div className="text-[13px] text-[#64748B]">{"Chỉ tiêu Đạt chuẩn (>=95%)"}</div>
+                    <div className="text-[16px] font-semibold text-[#0F172A]">6 / 9 chỉ tiêu</div>
                   </div>
                 </div>
-                <div className="bg-amber-50 rounded-lg p-4 border border-amber-100 shadow-sm flex items-center gap-3">
-                  <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4 flex items-center gap-3">
+                  <span className="w-3 h-3 bg-[#CA8A04] rounded-full shrink-0" />
                   <div>
-                    <div className="text-xs text-amber-700 font-medium">Chỉ tiêu Cảnh báo (90% - 95%)</div>
-                    <div className="text-xl text-amber-950 font-bold mt-0.5">2 / 9 chỉ tiêu</div>
+                    <div className="text-[13px] text-[#64748B]">Chỉ tiêu Cảnh báo (90% - 95%)</div>
+                    <div className="text-[16px] font-semibold text-[#0F172A]">2 / 9 chỉ tiêu</div>
                   </div>
                 </div>
-                <div className="bg-rose-50 rounded-lg p-4 border border-rose-100 shadow-sm flex items-center gap-3">
-                  <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4 flex items-center gap-3">
+                  <span className="w-3 h-3 bg-[#DC2626] rounded-full shrink-0" />
                   <div>
-                    <div className="text-xs text-rose-700 font-medium">{"Chỉ tiêu Nguy cơ (<90%)"}</div>
-                    <div className="text-xl text-rose-950 font-bold mt-0.5">1 / 9 chỉ tiêu</div>
+                    <div className="text-[13px] text-[#64748B]">{"Chỉ tiêu Nguy cơ (<90%)"}</div>
+                    <div className="text-[16px] font-semibold text-[#0F172A]">1 / 9 chỉ tiêu</div>
                   </div>
                 </div>
               </div>
 
               {/* Table */}
-              <div className="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase w-12 text-center">STT</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Nguồn dữ liệu</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Tên chỉ tiêu tích hợp</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase text-center w-24">Đơn vị</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase text-right w-36">Kế hoạch / Chỉ tiêu</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase text-right w-36">Thực tế đạt được</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase text-right w-36">Tỷ lệ</th>
-                      <th className="px-4 py-3 text-xs font-semibold text-slate-600 uppercase text-center w-28">Đánh giá</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {mockIndicatorDetails.map((ind, index) => (
-                      <tr key={ind.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-500 text-center">{index + 1}</td>
-                        <td className="px-4 py-3 text-sm font-semibold text-slate-800">{ind.source}</td>
-                        <td className="px-4 py-3 text-sm text-slate-700">{ind.indicatorName}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600 text-center">{ind.unit}</td>
-                        <td className="px-4 py-3 text-sm text-slate-800 text-right font-mono">{ind.targetValue.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-sm text-slate-800 text-right font-mono font-medium">{ind.actualValue.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-sm text-right font-mono font-semibold">
-                          <span className={`${
-                            ind.status === 'good' ? 'text-emerald-600' : ind.status === 'warning' ? 'text-amber-600' : 'text-rose-600'
-                          }`}>
-                            {ind.rate.toFixed(1)}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-center">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            ind.status === 'good' 
-                              ? 'bg-emerald-100 text-emerald-800' 
-                              : ind.status === 'warning' 
-                              ? 'bg-amber-100 text-amber-800' 
-                              : 'bg-rose-100 text-rose-800'
-                          }`}>
-                            {ind.status === 'good' ? 'Đạt' : ind.status === 'warning' ? 'Theo dõi' : 'Chậm'}
-                          </span>
-                        </td>
+              <div className={TABLE_WRAP_CLS}>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead className={TABLE_HEAD_BG}>
+                      <tr className={TABLE_HEAD_ROW_CLS}>
+                        <th className={`${TH} text-center w-14`}>STT</th>
+                        <th className={`${TH} text-left`}>Nguồn dữ liệu</th>
+                        <th className={`${TH} text-left`}>Tên chỉ tiêu tích hợp</th>
+                        <th className={`${TH} text-left`}>Đơn vị</th>
+                        <th className={`${TH} text-right`}>Kế hoạch / Chỉ tiêu</th>
+                        <th className={`${TH} text-right`}>Thực tế đạt được</th>
+                        <th className={`${TH} text-right`}>Tỷ lệ</th>
+                        <th className={`${TH} text-left`}>Đánh giá</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {mockIndicatorDetails.map((ind, index) => (
+                        <tr key={ind.id} className={TR}>
+                          <td className={`${TD} text-center tabular-nums`}>{index + 1}</td>
+                          <td className={`${TD} text-left max-w-[200px]`}><TruncatedText text={ind.source} /></td>
+                          <td className={`${TD} text-left max-w-[240px]`}><TruncatedText text={ind.indicatorName} /></td>
+                          <td className={`${TD} text-left whitespace-nowrap`}>{ind.unit}</td>
+                          <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{ind.targetValue.toLocaleString()}</td>
+                          <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{ind.actualValue.toLocaleString()}</td>
+                          <td className={`${TD} text-right tabular-nums whitespace-nowrap`}>{ind.rate.toFixed(1)}%</td>
+                          <td className={`${TD} text-left`}>
+                            <Badge
+                              label={ind.status === 'good' ? 'Đạt' : ind.status === 'warning' ? 'Theo dõi' : 'Chậm'}
+                              variant={ind.status === 'good' ? 'green' : ind.status === 'warning' ? 'amber' : 'red'}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-            
-            <div className="p-6 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setShowAllDetailsModal(false)}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
-              >
+
+            <div className={MODAL_FOOTER}>
+              <button type="button" onClick={() => setShowAllDetailsModal(false)} className={BTN_OUTLINE}>
                 Đóng
               </button>
             </div>

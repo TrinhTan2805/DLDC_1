@@ -1,8 +1,14 @@
 import { useState } from 'react';
-import { Settings, Search, Download, Calendar, Filter, Eye, X, Clock, User, CheckCircle2, XCircle, Shield, Database, Mail, Lock, Globe, Bell, Palette, HardDrive, FileText, ArrowRight, Plus, Edit, Trash2, Save, AlertTriangle } from "lucide-react";
-import { StatsCard } from '../../common/StatsCard';
-import { StatusTag } from '../../common/StatusTag';
+import { toast } from 'sonner';
+import { Settings, Search, Filter, Eye, X, Clock, CheckCircle2, XCircle, Shield, Database, FileText } from "lucide-react";
 import { LogRetentionConfigPage } from './LogRetentionConfigPage';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, DateInput,
+  BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS,
+  FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
+  TABLE_WRAP_CLS, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, tabClass, normalizeSearch,
+} from '../collection/collectionUi';
 
 interface ConfigLog {
   id: number;
@@ -46,7 +52,7 @@ const configLogs: ConfigLog[] = [
     id: 3,
     timestamp: '22/12/2024 16:15:42',
     configCategory: 'maintenance',
-    configCategoryName: 'Cấu hình chế độ bảo trị hệ thống',
+    configCategoryName: 'Cấu hình chế độ bảo trì hệ thống',
     performedBy: 'Admin Hệ thống',
     performedById: 'admin',
     ip: '192.168.1.100',
@@ -164,6 +170,39 @@ const configLogs: ConfigLog[] = [
   }
 ];
 
+// Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
+const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
+
+// Thẻ thống kê nhỏ (mục 5.6.1)
+const STAT_TONES = {
+  blue: 'bg-blue-50 text-blue-600',
+  red: 'bg-red-50 text-red-600',
+  green: 'bg-green-50 text-green-600',
+} as const;
+
+const StatCard = ({ icon: Icon, tone, title, value }: { icon: typeof Settings; tone: keyof typeof STAT_TONES; title: string; value: string }) => (
+  <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+    <div className="flex items-center gap-3">
+      <div className={`p-2 rounded-lg ${STAT_TONES[tone]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div>
+        <div className="text-[16px] text-[#64748B]">{title}</div>
+        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{value}</div>
+      </div>
+    </div>
+  </div>
+);
+
+// 'dd/mm/yyyy HH:mm:ss' → ngày và giờ (giờ xuống dòng thứ 2 trong bảng — mục 5.3.3)
+const splitTimestamp = (ts: string) => {
+  const [date, time] = (ts || '').split(' ');
+  return { date: date || '-', time: time || '' };
+};
+
 export function ConfigChangeLogPage() {
   const [activeTab, setActiveTab] = useState<'logs' | 'retention'>('logs');
   const [searchTerm, setSearchTerm] = useState('');
@@ -171,6 +210,8 @@ export function ConfigChangeLogPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  // Điều kiện đang áp dụng — chỉ cập nhật khi bấm Tìm kiếm / Enter (compomennt.md 5.19)
+  const [applied, setApplied] = useState({ searchTerm: '', filterType: 'all', filterStatus: 'all', startDate: '', endDate: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedLog, setSelectedLog] = useState<ConfigLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -185,34 +226,35 @@ export function ConfigChangeLogPage() {
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const runSearch = () => {
+    setApplied({ searchTerm, filterType, filterStatus, startDate, endDate });
     setCurrentPage(1);
   };
 
+  const appliedTerm = normalizeSearch(applied.searchTerm);
   const filteredLogs = configLogs.filter(log => {
-    const matchesSearch = log.configCategoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.performedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || log.configCategory === filterType;
-    const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
+    const matchesSearch = normalizeSearch(log.configCategoryName).includes(appliedTerm) ||
+                         normalizeSearch(log.performedBy).includes(appliedTerm) ||
+                         normalizeSearch(log.description).includes(appliedTerm);
+    const matchesType = applied.filterType === 'all' || log.configCategory === applied.filterType;
+    const matchesStatus = applied.filterStatus === 'all' || log.status === applied.filterStatus;
     let matchesDate = true;
-    if (startDate || endDate) {
+    if (applied.startDate || applied.endDate) {
       const logDate = parseDate(log.timestamp);
       if (logDate) {
-        if (startDate) {
-          const start = new Date(startDate);
+        if (applied.startDate) {
+          const start = new Date(applied.startDate);
           start.setHours(0, 0, 0, 0);
           if (logDate < start) matchesDate = false;
         }
-        if (endDate) {
-          const end = new Date(endDate);
+        if (applied.endDate) {
+          const end = new Date(applied.endDate);
           end.setHours(23, 59, 59, 999);
           if (logDate > end) matchesDate = false;
         }
       }
     }
-    
+
     return matchesSearch && matchesType && matchesStatus && matchesDate;
   });
 
@@ -226,192 +268,117 @@ export function ConfigChangeLogPage() {
     setSelectedLog(null);
   };
 
+  // Chưa có nút Kết xuất trên màn hình này (giữ nguyên như bản cũ)
   const handleExportExcel = () => {
-    alert('Đang kết xuất nhật ký thay đổi cấu hình ra file Excel...');
+    toast.info('Đang kết xuất nhật ký thay đổi cấu hình ra file Excel...');
   };
 
-  const getConfigCategoryIcon = (category: ConfigLog['configCategory']) => {
-    switch (category) {
-      case 'upload_limit':
-        return <HardDrive className="w-4 h-4" />;
-      case 'display':
-        return <Palette className="w-4 h-4" />;
-      case 'maintenance':
-        return <Settings className="w-4 h-4" />;
-      case 'login_limit':
-        return <Shield className="w-4 h-4" />;
-      case 'session':
-        return <Clock className="w-4 h-4" />;
-      case 'backup':
-        return <Database className="w-4 h-4" />;
-    }
-  };
+  const statusBadge = (status: ConfigLog['status']) => (
+    <Badge
+      label={status === 'success' ? 'Thành công' : 'Thất bại'}
+      variant={status === 'success' ? 'green' : 'red'}
+      icon={status === 'success' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+    />
+  );
 
-  const getConfigCategoryColor = (category: ConfigLog['configCategory']) => {
-    switch (category) {
-      case 'upload_limit':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'display':
-        return 'bg-pink-100 text-pink-700 border-pink-200';
-      case 'maintenance':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'login_limit':
-        return 'bg-red-100 text-red-700 border-red-200';
-      case 'session':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'backup':
-        return 'bg-green-100 text-green-700 border-green-200';
-    }
-  };
+  // Loại cấu hình hiển thị dạng chữ thường (PM yêu cầu 07/10/2026 — không dùng badge)
+  const categoryBadge = (log: ConfigLog) => log.configCategoryName;
 
-  const getConfigCategoryLabel = (category: ConfigLog['configCategory']) => {
-    switch (category) {
-      case 'upload_limit':
-        return 'Cấu hình giới hạn dung lượng tải lên';
-      case 'display':
-        return 'Cấu hình hiển thị danh sách';
-      case 'maintenance':
-        return 'Cấu hình chế độ bảo trị hệ thống';
-      case 'login_limit':
-        return 'Cấu hình giới hạn đăng nhập sai';
-      case 'session':
-        return 'Cấu hình phiên làm việc';
-      case 'backup':
-        return 'Cấu hình sao lưu dự phòng';
-    }
-  };
+  const pagedLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-6 config-log-container">
-      <style>{`
-        .config-log-container,
-        .config-log-container .text-sm,
-        .config-log-container .text-xs:not(th),
-        .config-log-container input,
-        .config-log-container select,
-        .config-log-container button,
-        .config-log-container td,
-        .config-log-container option,
-        .config-log-container div.text-slate-600,
-        .config-log-container div.text-slate-700,
-        .config-log-container div.text-slate-500,
-        .config-log-container div.text-slate-900:not(.text-2xl) {
-          font-size: 13px !important;
-        }
-      `}</style>
+    <div className="space-y-4">
+      {/* Tiêu đề trang (H1 20px/700 #2A0F0F) */}
+      <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Nhật ký thay đổi cấu hình</h1>
 
-      {/* Tabs */}
-      <div className="bg-white border-b border-slate-200 px-6 -mx-6 -mt-6 mb-6">
-        <div className="flex gap-6">
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${
-              activeTab === 'logs'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <FileText className="w-5 h-5" />
-            Nhật ký thay đổi cấu hình
-          </button>
-          <button
-            onClick={() => setActiveTab('retention')}
-            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${
-              activeTab === 'retention'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Clock className="w-5 h-5" />
-            Quản lý thời gian lưu trữ nhật ký
-          </button>
-        </div>
+      {/* Tab nội dung (5.9) */}
+      <div className="border-b border-[#E2E8F0] flex" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'logs'}
+          onClick={() => setActiveTab('logs')}
+          className={tabClass(activeTab === 'logs')}
+        >
+          <FileText className="w-4 h-4" />
+          Nhật ký thay đổi cấu hình
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'retention'}
+          onClick={() => setActiveTab('retention')}
+          className={tabClass(activeTab === 'retention')}
+        >
+          <Clock className="w-4 h-4" />
+          Quản lý thời gian lưu trữ nhật ký
+        </button>
       </div>
       {activeTab === 'logs' ? (
         <>
+          {/* Thẻ thống kê nhỏ (compomennt.md 5.6.1) */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <StatsCard 
-              icon={Settings} 
-              iconColor="blue" 
-              title="Tổng thay đổi (30 ngày)" 
-              value={configLogs.length.toString()} 
-            />
-            <StatsCard 
-              icon={Shield} 
-              iconColor="red" 
-              title="Cấu hình đăng nhập sai" 
-              value={configLogs.filter(l => l.configCategory === 'login_limit').length.toString()} 
-            />
-            <StatsCard 
-              icon={Database} 
-              iconColor="green" 
-              title="Cấu hình sao lưu" 
-              value={configLogs.filter(l => l.configCategory === 'backup').length.toString()} 
-            />
-            <StatsCard 
-              icon={XCircle} 
-              iconColor="red" 
-              title="Thay đổi thất bại" 
-              value={configLogs.filter(l => l.status === 'failed').length.toString()} 
-            />
+            <StatCard icon={Settings} tone="blue" title="Tổng thay đổi (30 ngày)" value={configLogs.length.toString()} />
+            <StatCard icon={Shield} tone="red" title="Cấu hình đăng nhập sai" value={configLogs.filter(l => l.configCategory === 'login_limit').length.toString()} />
+            <StatCard icon={Database} tone="green" title="Cấu hình sao lưu" value={configLogs.filter(l => l.configCategory === 'backup').length.toString()} />
+            <StatCard icon={XCircle} tone="red" title="Thay đổi thất bại" value={configLogs.filter(l => l.status === 'failed').length.toString()} />
           </div>
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input aria-label="Input field"
-                    type="text"
-                    placeholder="Tìm kiếm loại cấu hình, người thực hiện..."
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                </div>
-                <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
-                  <Search className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
-                  title="Bộ lọc"
-                >
-                  {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-                </button>
-              </div>
-            {showFilters && (
-              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-                <div className="absolute -top-2 left-[50px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
+          {/* Tìm kiếm & bộ lọc (5.19) — chỉ áp dụng khi bấm Tìm kiếm / Enter */}
+          <div>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                aria-label="Tìm kiếm nhật ký thay đổi cấu hình"
+                placeholder="Tìm kiếm theo loại cấu hình, người thực hiện..."
+                className={SEARCH_INPUT_CLS}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+              />
+              <button type="button" title="Tìm kiếm" aria-label="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+                <Search className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                aria-expanded={showFilters}
+                aria-label="Bộ lọc"
+                title="Bộ lọc"
+                className={filterBtnClass(showFilters)}
+              >
+                {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+              </button>
+            </div>
 
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Loại cấu hình</label>
-                  <select aria-label="Select config type"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+            {/* Vùng bộ lọc */}
+            {showFilters && (
+              <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+                <div>
+                  <label className={FILTER_LABEL}>Loại cấu hình</label>
+                  <select
+                    aria-label="Lọc theo loại cấu hình"
+                    className={INPUT_CLS}
                     value={filterType}
-                    onChange={(e) => {
-                      setFilterType(e.target.value);
-                      setCurrentPage(1);
-                    }}
+                    onChange={(e) => setFilterType(e.target.value)}
                   >
                     <option value="all">Tất cả loại cấu hình</option>
                     <option value="upload_limit">Cấu hình giới hạn dung lượng tải lên</option>
                     <option value="display">Cấu hình hiển thị danh sách</option>
-                    <option value="maintenance">Cấu hình chế độ bảo trị hệ thống</option>
+                    <option value="maintenance">Cấu hình chế độ bảo trì hệ thống</option>
                     <option value="login_limit">Cấu hình giới hạn đăng nhập sai</option>
                     <option value="session">Cấu hình phiên làm việc</option>
                     <option value="backup">Cấu hình sao lưu dự phòng</option>
                   </select>
                 </div>
 
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
-                  <select aria-label="Select status"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                <div>
+                  <label className={FILTER_LABEL}>Trạng thái</label>
+                  <select
+                    aria-label="Lọc theo trạng thái"
+                    className={INPUT_CLS}
                     value={filterStatus}
-                    onChange={(e) => {
-                      setFilterStatus(e.target.value);
-                      setCurrentPage(1);
-                    }}
+                    onChange={(e) => setFilterStatus(e.target.value)}
                   >
                     <option value="all">Tất cả trạng thái</option>
                     <option value="success">Thành công</option>
@@ -419,113 +386,74 @@ export function ConfigChangeLogPage() {
                   </select>
                 </div>
 
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                    <input aria-label="Input field"
-                      type="date"
-                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                      value={startDate}
-                      onChange={(e) => {
-                        setStartDate(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                    />
-                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                  </div>
+                <div>
+                  <label className={FILTER_LABEL}>Thời gian từ</label>
+                  <DateInput value={startDate} onChange={setStartDate} ariaLabel="Thời gian từ" max={endDate || undefined} />
                 </div>
 
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                    <input aria-label="Input field"
-                      type="date"
-                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                      value={endDate}
-                      onChange={(e) => {
-                        setEndDate(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                    />
-                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                  </div>
+                <div>
+                  <label className={FILTER_LABEL}>Thời gian đến</label>
+                  <DateInput value={endDate} onChange={setEndDate} ariaLabel="Thời gian đến" min={startDate || undefined} />
                 </div>
               </div>
             )}
           </div>
-        </div>
 
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+          {/* Bảng nhật ký thay đổi cấu hình (5.3) */}
+          <div className={TABLE_WRAP_CLS}>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse collection-table text-[13px]">
-                <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
-                  <tr>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người thực hiện</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Loại cấu hình</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Nội dung thay đổi</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">IP người thực hiện</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
+              <table className="w-full border-collapse">
+                <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+                  <tr className={TABLE_HEAD_ROW_CLS}>
+                    <th className={`${TH} text-center w-14`}>STT</th>
+                    <th className={`${TH} text-left`}>Người thực hiện</th>
+                    <th className={`${TH} text-left`}>Thời gian</th>
+                    <th className={`${TH} text-left`}>Loại cấu hình</th>
+                    <th className={`${TH} text-left`}>Nội dung thay đổi</th>
+                    <th className={`${TH} text-left`}>IP người thực hiện</th>
+                    <th className={`${TH} text-left`}>Trạng thái</th>
+                    <th className={`${TH} text-center w-24 sticky right-0 ${TABLE_HEAD_BG} shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredLogs
-                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                    .map((log, index) => (
-                      <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                        <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+                <tbody>
+                  {pagedLogs.map((log, index) => {
+                    const ts = splitTimestamp(log.timestamp);
+                    return (
+                      <tr key={log.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                        <td className={`${TD} text-center tabular-nums whitespace-nowrap`}>
                           {(currentPage - 1) * itemsPerPage + index + 1}
                         </td>
-                        <td className="px-4 py-3 text-center text-[13px]">
-                          <div className="font-medium text-slate-950 leading-snug text-[13px]">{log.performedBy}</div>
+                        <td className={`${TD} text-left max-w-[240px] leading-[18px]`}>
+                          <TruncatedText text={log.performedBy} />
+                          <TruncatedText text={log.performedById} className="text-[12px] text-[#64748B]" />
                         </td>
-                        <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.timestamp}</td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex justify-center">
-                            <StatusTag 
-                              label={log.configCategoryName} 
-                              variant={
-                                log.configCategory === 'login_limit' ? 'red' :
-                                log.configCategory === 'session' ? 'orange' :
-                                log.configCategory === 'backup' ? 'green' :
-                                log.configCategory === 'upload_limit' ? 'blue' :
-                                log.configCategory === 'display' ? 'pink' : 'purple'
-                              }
-                              icon={getConfigCategoryIcon(log.configCategory)}
-                            />
-                          </div>
+                        <td className={`${TD} text-left whitespace-nowrap leading-[18px] tabular-nums`}>
+                          <div>{ts.date}</div>
+                          {ts.time && <div>{ts.time}</div>}
                         </td>
-                        <td className="px-4 py-3 text-center text-[13px]">
-                          <div className="font-medium text-slate-900 leading-snug text-[13px] max-w-sm mx-auto truncate" title={log.description}>{log.description}</div>
+                        <td className={`${TD} text-left whitespace-nowrap`}>
+                          {categoryBadge(log)}
                         </td>
-                        <td className="px-4 py-3 text-center text-slate-600 font-mono text-[13px]">{log.ip}</td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex justify-center">
-                            <StatusTag 
-                              label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                              variant={log.status === 'success' ? 'green' : 'red'} 
-                              icon={log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                            />
-                          </div>
+                        <td className={`${TD} text-left max-w-[360px]`}>
+                          <TruncatedText text={log.description} />
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center">
-                            <button
-                              onClick={() => handleViewDetail(log)}
-                              className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                              title="Xem chi tiết"
-                            >
+                        <td className={`${TD} text-left whitespace-nowrap font-mono tabular-nums`}>{log.ip}</td>
+                        <td className={`${TD} text-left whitespace-nowrap`}>
+                          {statusBadge(log.status)}
+                        </td>
+                        <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]`}>
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(log)}>
                               <Eye className="w-4 h-4" />
-                            </button>
+                            </RowIconAction>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    );
+                  })}
                   {filteredLogs.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                      <td colSpan={8} className="py-16 text-center text-[13px] text-[#64748B]">
                         Không tìm thấy bản ghi nào phù hợp
                       </td>
                     </tr>
@@ -533,203 +461,114 @@ export function ConfigChangeLogPage() {
                 </tbody>
               </table>
             </div>
-            
-            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <select aria-label="Select record count" 
-                  className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-                  title="Số bản ghi trên trang"
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-                <span className="text-slate-600">bản ghi/trang</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <span className="text-slate-600">
-                  {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Trước
-                  </button>
-                  
-                  {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                        currentPage === page
-                          ? 'bg-blue-600 border-blue-600 text-white'
-                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
 
-                  <button
-                    onClick={() => {
-                      const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-                      if (currentPage < totalPages) {
-                        setCurrentPage(currentPage + 1);
-                      }
-                    }}
-                    disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Sau
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Phân trang (5.14) */}
+            <Pagination
+              className="border-t border-[#E2E8F0]"
+              currentPage={currentPage}
+              totalItems={filteredLogs.length}
+              pageSize={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setItemsPerPage}
+            />
           </div>
 
+          {/* Chi tiết thay đổi cấu hình — chiều cao cố định, thân tự cuộn (5.4) */}
           {showDetailModal && selectedLog && (
-            <div 
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={closeDetailModal}
-            >
-              <div 
-                className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={closeDetailModal}>
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="config-log-detail-title"
+                className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between p-6 border-b border-slate-200">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${getConfigCategoryColor(selectedLog.configCategory)}`}>
-                      {getConfigCategoryIcon(selectedLog.configCategory)}
-                    </div>
-                    <div>
-                      <h3 className="text-slate-900 font-bold text-[15px]">Chi tiết thay đổi cấu hình</h3>
-                      <p className="text-[13px] text-slate-600 mt-0.5">{selectedLog.configCategoryName}</p>
-                    </div>
+                {/* Header */}
+                <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <h3 id="config-log-detail-title" className={MODAL_TITLE}>Chi tiết thay đổi cấu hình</h3>
+                    <p className="text-[13px] text-[#64748B] mt-0.5 truncate">{selectedLog.configCategoryName}</p>
                   </div>
-                  <button
-                    onClick={closeDetailModal}
-                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" 
-                    title="Đóng" 
-                    aria-label="Đóng"
-                  >
+                  <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                      <div className="flex items-center gap-2 text-slate-500 mb-2">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-[11px] font-medium uppercase tracking-wider">Thời gian thay đổi</span>
+                {/* Body */}
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+                  {/* Thông tin cấu hình */}
+                  <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                    <h4 className={SECTION_TITLE}>
+                      <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                      Thông tin cấu hình
+                    </h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div className="space-y-1">
+                        <div className={FIELD_LABEL}>Thời gian thay đổi</div>
+                        <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp}</div>
                       </div>
-                      <div className="text-[13px] text-slate-900 font-medium">{selectedLog.timestamp}</div>
-                    </div>
-
-                    <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                      <div className="flex items-center gap-2 text-slate-500 mb-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span className="text-[11px] font-medium uppercase tracking-wider">Trạng thái</span>
+                      <div className="space-y-1">
+                        <div className={FIELD_LABEL}>Trạng thái</div>
+                        {statusBadge(selectedLog.status)}
                       </div>
-                      <div className="inline-block">
-                        <StatusTag 
-                          label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                          variant={selectedLog.status === 'success' ? 'green' : 'red'} 
-                          icon={selectedLog.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                        />
+                      <div className="space-y-1 col-span-2">
+                        <div className={FIELD_LABEL}>Loại cấu hình</div>
+                        {categoryBadge(selectedLog)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Settings className="w-4 h-4 text-blue-600" />
-                      <h4 className="text-[13px] font-semibold text-slate-900">Thông tin cấu hình</h4>
+                  {/* Người thực hiện */}
+                  <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                    <h4 className={SECTION_TITLE}>
+                      <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                      Người thực hiện
+                    </h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div className="space-y-1">
+                        <div className={FIELD_LABEL}>Họ tên</div>
+                        <div className={`${FIELD_VALUE} break-words`}>{selectedLog.performedBy}</div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className={FIELD_LABEL}>IP Address</div>
+                        <div className={`${FIELD_VALUE} font-mono tabular-nums`}>{selectedLog.ip}</div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <div className="text-[11px] text-slate-500 mb-1">Loại cấu hình</div>
-                        <div className="inline-block">
-                          <StatusTag 
-                            label={selectedLog.configCategoryName} 
-                            variant={
-                              selectedLog.configCategory === 'login_limit' ? 'red' :
-                              selectedLog.configCategory === 'session' ? 'orange' :
-                              selectedLog.configCategory === 'backup' ? 'green' :
-                              selectedLog.configCategory === 'upload_limit' ? 'blue' :
-                              selectedLog.configCategory === 'display' ? 'pink' : 'purple'
-                            }
-                            icon={getConfigCategoryIcon(selectedLog.configCategory)}
-                          />
+                  </div>
+
+                  {/* Nội dung thay đổi */}
+                  <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                    <h4 className={SECTION_TITLE}>
+                      <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                      Nội dung thay đổi
+                    </h4>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div className="space-y-1 col-span-2">
+                        <div className={FIELD_LABEL}>Mô tả</div>
+                        <div className={`${FIELD_VALUE} whitespace-pre-line break-words`}>{selectedLog.description}</div>
+                      </div>
+                      {selectedLog.reason && (
+                        <div className="space-y-1 col-span-2">
+                          <div className={FIELD_LABEL}>Lý do thay đổi</div>
+                          <div className={`${FIELD_VALUE} whitespace-pre-line break-words`}>{selectedLog.reason}</div>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <User className="w-4 h-4 text-green-600" />
-                      <h4 className="text-[13px] font-semibold text-slate-900">Người thực hiện</h4>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <div className="text-[11px] text-slate-500 mb-1">Họ tên</div>
-                        <div className="text-[13px] text-slate-900 font-medium">{selectedLog.performedBy}</div>
-                      </div>
-                      <div>
-                        <div className="text-[11px] text-slate-500 mb-1">IP Address</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">
-                          {selectedLog.ip}
-                        </code>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <FileText className="w-4 h-4 text-cyan-600" />
-                      <h4 className="text-[13px] font-semibold text-slate-900">Nội dung thay đổi</h4>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
-                      <div className="text-[11px] text-blue-700 mb-1">Mô tả</div>
-                      <p className="text-[13px] text-slate-900">{selectedLog.description}</p>
-                    </div>
-                    
-                    {selectedLog.reason && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                        <div className="text-[11px] text-amber-700 mb-1">Lý do thay đổi</div>
-                        <p className="text-[13px] text-amber-900">{selectedLog.reason}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                <div className="p-6 border-t border-slate-200">
-                  <div className="flex justify-end">
-                    <button
-                      onClick={closeDetailModal}
-                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium text-[13px]"
-                    >
-                      Đóng
-                    </button>
-                  </div>
+                {/* Footer */}
+                <div className={MODAL_FOOTER}>
+                  <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
+                    Đóng
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </>
       ) : (
-        <LogRetentionConfigPage />
+        <LogRetentionConfigPage embedded />
       )}
     </div>
   );

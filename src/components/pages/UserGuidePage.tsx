@@ -19,6 +19,9 @@ import {
   ExternalLink,
   MessageSquare
 } from 'lucide-react';
+import {
+  BTN_OUTLINE, BTN_FOCUS, SECTION_TITLE, GROUP_TITLE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, normalizeSearch,
+} from './collection/collectionUi';
 
 interface Section {
   id: string;
@@ -288,18 +291,23 @@ const sections: Section[] = [
 
 export function UserGuidePage() {
   const [selectedSection, setSelectedSection] = useState('intro');
+  // Từ khóa đang gõ (searchInput) chỉ áp dụng khi bấm nút Tìm kiếm hoặc nhấn Enter (compomennt.md 5.19)
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const runSearch = () => setSearchQuery(searchInput.trim());
 
+  // So khớp không phân biệt hoa/thường và dấu tiếng Việt (mục 5.19)
+  const query = normalizeSearch(searchQuery);
   const filteredSections = sections.map(section => {
-    if (searchQuery === '') return section;
+    if (query === '') return section;
 
     const matchedSubsections = section.subsections.filter(sub =>
-      sub.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sub.content.toLowerCase().includes(searchQuery.toLowerCase())
+      normalizeSearch(sub.title).includes(query) ||
+      normalizeSearch(sub.content).includes(query)
     );
 
     if (matchedSubsections.length > 0 ||
-      section.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+      normalizeSearch(section.title).includes(query)) {
       return { ...section, subsections: matchedSubsections.length > 0 ? matchedSubsections : section.subsections };
     }
 
@@ -307,181 +315,200 @@ export function UserGuidePage() {
   }).filter(Boolean) as Section[];
 
   const currentSection = sections.find(s => s.id === selectedSection) || sections[0];
+  const currentIndex = sections.findIndex(s => s.id === selectedSection);
 
   return (
     <div className="flex gap-6 h-[calc(100vh-180px)]">
       {/* Left Sidebar - Table of Contents */}
-      <div className="w-80 bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-slate-200">
-          <h3 className="text-slate-900 mb-3">Mục lục</h3>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="w-80 shrink-0 bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden flex flex-col">
+        <div className="p-4 border-b border-[#E2E8F0]">
+          <h2 className={`${SECTION_TITLE} !mb-3`}>
+            <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+            Mục lục
+          </h2>
+          <div className="flex items-center gap-1.5">
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && runSearch()}
               placeholder="Tìm kiếm..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              aria-label="Tìm kiếm trong hướng dẫn"
+              className={SEARCH_INPUT_CLS}
             />
+            <button type="button" onClick={runSearch} className={SEARCH_BTN_CLS} title="Tìm kiếm" aria-label="Tìm kiếm">
+              <Search className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-1">
-            {filteredSections.map((section) => {
-              const Icon = section.icon;
-              const isActive = selectedSection === section.id;
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+          {filteredSections.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+              <Search className="w-8 h-8 text-[#CBD5E1] mb-2" />
+              <p className="text-[13px] text-[#64748B]">Không tìm thấy nội dung phù hợp</p>
+            </div>
+          ) : (
+            <nav aria-label="Mục lục hướng dẫn" className="space-y-0.5">
+              {filteredSections.map((section) => {
+                const Icon = section.icon;
+                const isActive = selectedSection === section.id;
 
-              return (
-                <button
-                  key={section.id}
-                  onClick={() => setSelectedSection(section.id)}
-                  className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${isActive
-                    ? 'bg-violet-50 text-violet-700'
-                    : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                >
-                  <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isActive ? 'text-violet-600' : 'text-slate-400'}`} />
-                  <span className="text-sm leading-tight">{section.title}</span>
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    type="button"
+                    key={section.id}
+                    onClick={() => setSelectedSection(section.id)}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={`w-full flex items-center gap-2 min-h-[35px] px-2 py-1.5 rounded-[10px] text-[13px] text-left transition-colors ${BTN_FOCUS} ${isActive
+                      ? 'bg-[#EAF3FF] text-blue-600 font-medium'
+                      : 'text-[#020817] hover:bg-[#F8FAFC]'
+                      }`}
+                  >
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-600' : 'text-[#475569]'}`} />
+                    <span className="leading-5">{section.title}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
         </div>
 
         {/* Quick Actions */}
-        <div className="p-4 border-t border-slate-200 space-y-2">
+        <div className="p-4 border-t border-[#E2E8F0] space-y-2">
           <a
             href="#"
-            className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+            className={`${BTN_OUTLINE} w-full !justify-start`}
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 text-blue-600" />
             Tải tài liệu PDF
           </a>
           <a
             href="#"
-            className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-sm"
+            className={`${BTN_OUTLINE} w-full !justify-start`}
           >
-            <Video className="w-4 h-4" />
+            <Video className="w-4 h-4 text-[#475569]" />
             Xem video hướng dẫn
           </a>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="h-full overflow-y-auto">
-          <div className="p-8">
+      <div className="flex-1 min-w-0 bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden">
+        <div className="h-full overflow-y-auto custom-scrollbar">
+          <div className="p-6">
             {/* Section Header */}
-            <div className="flex items-start gap-4 mb-6 pb-6 border-b border-slate-200">
+            <div className="flex items-start gap-3 mb-6 pb-4 border-b border-[#E2E8F0]">
               {(() => {
                 const Icon = currentSection.icon;
-                return <Icon className="w-8 h-8 text-violet-600 flex-shrink-0 mt-1" />;
+                return (
+                  <div className="w-10 h-10 rounded-lg bg-[#EAF3FF] text-blue-600 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                );
               })()}
-              <div className="flex-1">
-                <h1 className="text-slate-900 mb-2">{currentSection.title}</h1>
-                <p className="text-sm text-slate-600">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">{currentSection.title}</h1>
+                <p className="text-[12px] text-[#64748B]">
                   {currentSection.subsections.length} phần nội dung
                 </p>
               </div>
             </div>
 
             {/* Subsections */}
-            <div className="space-y-8">
+            <div className="space-y-6">
               {currentSection.subsections.map((subsection, index) => (
                 <div key={subsection.id} id={subsection.id}>
-                  <h2 className="text-slate-900 mb-4 flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-sm flex-shrink-0">
+                  <h2 className={`${SECTION_TITLE} !mb-3`}>
+                    <span className="w-6 h-6 rounded-full bg-[#EAF3FF] text-blue-600 flex items-center justify-center text-[12px] font-medium shrink-0 tabular-nums">
                       {index + 1}
                     </span>
                     {subsection.title}
                   </h2>
-                  <div className="pl-11">
-                    <div className="prose prose-slate max-w-none">
-                      {subsection.content.split('\n\n').map((paragraph, pIndex) => {
-                        // Check if paragraph is a list
-                        if (paragraph.startsWith('•') || paragraph.startsWith('-')) {
-                          const items = paragraph.split('\n').filter(item => item.trim());
-                          return (
-                            <ul key={pIndex} className="space-y-2 mb-4">
-                              {items.map((item, iIndex) => (
-                                <li key={iIndex} className="text-slate-700">
-                                  {item.replace(/^[•\-]\s*/, '')}
-                                </li>
-                              ))}
-                            </ul>
-                          );
-                        }
-
-                        // Check if paragraph is numbered list
-                        if (/^\d+\./.test(paragraph.trim())) {
-                          const items = paragraph.split('\n').filter(item => item.trim());
-                          return (
-                            <ol key={pIndex} className="space-y-2 mb-4 list-decimal list-inside">
-                              {items.map((item, iIndex) => (
-                                <li key={iIndex} className="text-slate-700">
-                                  {item.replace(/^\d+\.\s*/, '')}
-                                </li>
-                              ))}
-                            </ol>
-                          );
-                        }
-
-                        // Check if it's a bold heading
-                        if (paragraph.startsWith('**') && paragraph.includes(':**')) {
-                          const [heading, ...content] = paragraph.split(':**');
-                          return (
-                            <div key={pIndex} className="mb-4">
-                              <h4 className="text-slate-900 mb-2">
-                                {heading.replace(/\*\*/g, '')}:
-                              </h4>
-                              <p className="text-slate-700">{content.join(':**')}</p>
-                            </div>
-                          );
-                        }
-
-                        // Regular paragraph
+                  <div className="pl-8 text-[13px] text-[#020817] leading-6">
+                    {subsection.content.split('\n\n').map((paragraph, pIndex) => {
+                      // Check if paragraph is a list
+                      if (paragraph.startsWith('•') || paragraph.startsWith('-')) {
+                        const items = paragraph.split('\n').filter(item => item.trim());
                         return (
-                          <p key={pIndex} className="text-slate-700 mb-4 leading-relaxed">
-                            {paragraph}
-                          </p>
+                          <ul key={pIndex} className="space-y-1 mb-4 list-disc pl-5 marker:text-[#64748B]">
+                            {items.map((item, iIndex) => (
+                              <li key={iIndex}>
+                                {item.replace(/^[•\-]\s*/, '')}
+                              </li>
+                            ))}
+                          </ul>
                         );
-                      })}
-                    </div>
+                      }
+
+                      // Check if paragraph is numbered list
+                      if (/^\d+\./.test(paragraph.trim())) {
+                        const items = paragraph.split('\n').filter(item => item.trim());
+                        return (
+                          <ol key={pIndex} className="space-y-1 mb-4 list-decimal list-inside marker:text-[#64748B]">
+                            {items.map((item, iIndex) => (
+                              <li key={iIndex}>
+                                {item.replace(/^\d+\.\s*/, '')}
+                              </li>
+                            ))}
+                          </ol>
+                        );
+                      }
+
+                      // Check if it's a bold heading
+                      if (paragraph.startsWith('**') && paragraph.includes(':**')) {
+                        const [heading, ...content] = paragraph.split(':**');
+                        return (
+                          <div key={pIndex} className="mb-4">
+                            <h3 className={`${GROUP_TITLE} mb-1`}>
+                              {heading.replace(/\*\*/g, '')}:
+                            </h3>
+                            <p>{content.join(':**')}</p>
+                          </div>
+                        );
+                      }
+
+                      // Regular paragraph
+                      return (
+                        <p key={pIndex} className="mb-4">
+                          {paragraph}
+                        </p>
+                      );
+                    })}
                   </div>
 
                   {index < currentSection.subsections.length - 1 && (
-                    <div className="mt-8 pt-8 border-t border-slate-100" />
+                    <div className="mt-6 border-t border-[#E2E8F0]" />
                   )}
                 </div>
               ))}
             </div>
 
             {/* Navigation */}
-            <div className="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between">
+            <div className="mt-8 pt-4 border-t border-[#E2E8F0] flex items-center justify-between gap-2">
               <button
+                type="button"
                 onClick={() => {
-                  const currentIndex = sections.findIndex(s => s.id === selectedSection);
                   if (currentIndex > 0) {
                     setSelectedSection(sections[currentIndex - 1].id);
                   }
                 }}
-                disabled={sections.findIndex(s => s.id === selectedSection) === 0}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={currentIndex === 0}
+                className={BTN_OUTLINE}
               >
                 <ChevronRight className="w-4 h-4 rotate-180" />
                 Phần trước
               </button>
 
               <button
+                type="button"
                 onClick={() => {
-                  const currentIndex = sections.findIndex(s => s.id === selectedSection);
                   if (currentIndex < sections.length - 1) {
                     setSelectedSection(sections[currentIndex + 1].id);
                   }
                 }}
-                disabled={sections.findIndex(s => s.id === selectedSection) === sections.length - 1}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={currentIndex === sections.length - 1}
+                className={BTN_OUTLINE}
               >
                 Phần tiếp theo
                 <ChevronRight className="w-4 h-4" />

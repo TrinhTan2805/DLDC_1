@@ -49,6 +49,8 @@ export interface WizardSource {
   name: string;
   kind: SourceKind;
   grain: SourceGrain;
+  // Bảng nguồn (id bảng DLDC thuộc nguồn) — hiển thị cột "Bảng nguồn" và dạng "Tên nguồn - Bảng nguồn" ở Xem chi tiết
+  table?: string;
   grainKey?: string;
   groupRules?: SourceGroupRule[];
 }
@@ -568,10 +570,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
     systemName: '',
     effectiveDate: '',
     lifecycleStatus: 'draft',
-    sources: [
-      { id: 'src-hotich', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
-      { id: 'src-cccd', name: 'CCCD', kind: 'table', grain: '1:1' },
-    ],
+    // Thêm mới bắt đầu chưa có nguồn — bảng grid chỉ hiện sau khi thêm nguồn (PM yêu cầu)
+    sources: [],
     dataSource: 'dldc',
     attributes: [],
     mergeRules: [],
@@ -647,18 +647,21 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
 
   // Step 1 — đăng ký nguồn dữ liệu (form thêm nguồn inline)
   const [sourceFormOpen, setSourceFormOpen] = useState(false);
-  const [sourceForm, setSourceForm] = useState<{ name: string; grain: SourceGrain; grainKey: string }>({
-    name: WIZARD_SOURCE_OPTIONS[0], grain: '1:n', grainKey: '',
+  const [sourceForm, setSourceForm] = useState<{ name: string; table: string; grain: SourceGrain; grainKey: string }>({
+    name: WIZARD_SOURCE_OPTIONS[0], table: '', grain: '1:n', grainKey: '',
   });
+  // Nguồn đang sửa (null = đang thêm mới)
+  const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
   const [sourceGroupRules, setSourceGroupRules] = useState<SourceGroupRule[]>([]);
   const [sourceGroupRuleDraft, setSourceGroupRuleDraft] = useState<{ fieldName: string; ruleType: GroupRuleType }>({
     fieldName: '', ruleType: 'latest',
   });
 
   // Union các trường từ mọi bảng thuộc kho DLDC ánh xạ với nguồn đang đăng ký
-  const getSourceFieldOptions = (sourceName: string) => {
+  const getSourceFieldOptions = (sourceName: string, tableId = '') => {
     const dbId = SOURCE_NAME_TO_DB_ID[sourceName] || '';
-    const tables = DLDC_TABLES[dbId] || [];
+    // Đã chọn bảng nguồn → chỉ lấy trường của bảng đó
+    const tables = tableId ? (DLDC_TABLES[dbId] || []).filter(t => t.id === tableId) : (DLDC_TABLES[dbId] || []);
     const seen = new Set<string>();
     const options: { fieldName: string; displayName: string; dataType: FieldDataType }[] = [];
     tables.forEach(t => {
@@ -685,21 +688,45 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
     setSourceGroupRules(prev => prev.filter(r => r.fieldName !== fieldName));
   };
 
+  const resetSourceForm = () => {
+    setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], table: '', grain: '1:n', grainKey: '' });
+    setSourceGroupRules([]);
+    setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
+    setEditingSourceId(null);
+    setSourceFormOpen(false);
+  };
+
   const handleAddSource = () => {
     if (!sourceForm.name) return;
-    const newSource: WizardSource = {
-      id: `src-${Date.now()}`,
+    if (!sourceForm.table) {
+      toast.error('Vui lòng chọn bảng nguồn');
+      return;
+    }
+    const fields = {
       name: sourceForm.name,
-      kind: 'table',
+      table: sourceForm.table,
       grain: sourceForm.grain,
       grainKey: sourceForm.grainKey || undefined,
       groupRules: sourceGroupRules.length > 0 ? sourceGroupRules : undefined,
     };
-    setWizardData(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
-    setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:n', grainKey: '' });
-    setSourceGroupRules([]);
+    if (editingSourceId) {
+      // Sửa: giữ nguyên id để không mất ánh xạ ở các bước sau
+      setWizardData(prev => ({ ...prev, sources: prev.sources.map(s => s.id === editingSourceId ? { ...s, ...fields } : s) }));
+      toast.success('Cập nhật nguồn dữ liệu thành công');
+    } else {
+      const newSource: WizardSource = { id: `src-${Date.now()}`, kind: 'table', ...fields };
+      setWizardData(prev => ({ ...prev, sources: [...prev.sources, newSource] }));
+      toast.success('Thêm nguồn dữ liệu thành công');
+    }
+    resetSourceForm();
+  };
+
+  const handleEditSource = (src: WizardSource) => {
+    setEditingSourceId(src.id);
+    setSourceForm({ name: src.name, table: src.table || '', grain: src.grain, grainKey: src.grainKey || '' });
+    setSourceGroupRules(src.groupRules || []);
     setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
-    setSourceFormOpen(false);
+    setSourceFormOpen(true);
   };
 
   const handleRemoveSource = (sourceId: string) => {
@@ -1245,7 +1272,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 </div>
               </div>
 
-              {/* Đăng ký nguồn dữ liệu (chip + grain) */}
+              {/* Đăng ký nguồn dữ liệu (bảng grid + form thêm/sửa nguồn) */}
               <div className="pt-4 border-t border-[#E2E8F0]">
                 <div className="flex items-center justify-between mb-3">
                   <div>
@@ -1263,32 +1290,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   )}
                 </div>
 
-                {/* Danh sách chip */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {wizardData.sources.length === 0 && (
-                    <span className="text-[13px] text-[#64748B]">Chưa đăng ký nguồn dữ liệu nào</span>
-                  )}
-                  {wizardData.sources.map(src => (
-                    <span
-                      key={src.id}
-                      className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 bg-white border border-[#E2E8F0] rounded-full text-[13px]"
-                    >
-                      <span className="font-medium text-[#020817]">{src.name}</span>
-                      <Badge label={SOURCE_KIND_LABELS[src.kind]} variant={SOURCE_KIND_COLORS[src.kind]} />
-                      <Badge label={src.grain} variant={SOURCE_GRAIN_COLORS[src.grain]} />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSource(src.id)}
-                        className="text-[#94A3B8] hover:text-[#DC2626] rounded cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
-                        title="Xóa nguồn"
-                        aria-label="Xóa nguồn"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-
                 {/* Form thêm nguồn inline */}
                 {sourceFormOpen && (
                   <div className="mt-3 border border-[#E2E8F0] rounded-2xl bg-[#F8FAFC] p-4">
@@ -1296,10 +1297,25 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                       <label className={LABEL_CLS}>Tên nguồn</label>
                       <select
                         value={sourceForm.name}
-                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, name: e.target.value, grainKey: '' }))}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => { setSourceForm(prev => ({ ...prev, name: e.target.value, table: '', grainKey: '' })); setSourceGroupRules([]); }}
                         className={SELECT_CLS}
                       >
                         {WIZARD_SOURCE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="mt-3">
+                      <label className={LABEL_CLS}>Bảng nguồn <span className={REQUIRED_MARK}>*</span></label>
+                      <select
+                        aria-label="Bảng nguồn"
+                        value={sourceForm.table}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => { setSourceForm(prev => ({ ...prev, table: e.target.value, grainKey: '' })); setSourceGroupRules([]); }}
+                        className={SELECT_CLS}
+                      >
+                        <option value="">-- Chọn bảng --</option>
+                        {(DLDC_TABLES[SOURCE_NAME_TO_DB_ID[sourceForm.name] || ''] || []).map(t => (
+                          <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
+                        ))}
                       </select>
                     </div>
 
@@ -1311,7 +1327,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         className={SELECT_CLS}
                       >
                         <option value="">-- Chọn trường --</option>
-                        {getSourceFieldOptions(sourceForm.name).map(f => (
+                        {getSourceFieldOptions(sourceForm.name, sourceForm.table).map(f => (
                           <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
                         ))}
                       </select>
@@ -1350,7 +1366,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                             className={SELECT_CLS}
                           >
                             <option value="">-- Chọn trường --</option>
-                            {getSourceFieldOptions(sourceForm.name).map(f => (
+                            {getSourceFieldOptions(sourceForm.name, sourceForm.table).map(f => (
                               <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
                             ))}
                           </select>
@@ -1381,12 +1397,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                     <div className="flex justify-end gap-2 mt-3">
                       <button
                         type="button"
-                        onClick={() => {
-                          setSourceFormOpen(false);
-                          setSourceForm({ name: WIZARD_SOURCE_OPTIONS[0], grain: '1:n', grainKey: '' });
-                          setSourceGroupRules([]);
-                          setSourceGroupRuleDraft({ fieldName: '', ruleType: 'latest' });
-                        }}
+                        onClick={resetSourceForm}
                         className={BTN_OUTLINE}
                       >
                         Hủy
@@ -1396,10 +1407,49 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         onClick={handleAddSource}
                         className={BTN_PRIMARY}
                       >
-                        <Plus className="w-3.5 h-3.5" /> Thêm vào danh sách
+                        {editingSourceId ? <><Check className="w-3.5 h-3.5" /> Cập nhật</> : <><Plus className="w-3.5 h-3.5" /> Thêm vào danh sách</>}
                       </button>
                     </div>
                   </div>
+                )}
+
+                {/* Danh sách nguồn đã đăng ký — bảng grid nằm dưới form thêm nguồn; chỉ hiện khi đã có nguồn (PM yêu cầu) */}
+                {wizardData.sources.length > 0 && (
+                <div className="mt-3 bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead className="bg-[#F8FAFC]">
+                        <tr className="h-[42px] border-b border-[#E2E8F0]">
+                          <th className={`${TH_CLS} text-left`}>Tên nguồn</th>
+                          <th className={`${TH_CLS} text-left`}>Bảng nguồn</th>
+                          <th className={`${TH_CLS} text-left`}>Khóa làm mịn</th>
+                          <th className={`${TH_CLS} text-right`}>Quy tắc gom</th>
+                          <th className={`${TH_CLS} text-center w-24`}>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {wizardData.sources.map(src => (
+                            <tr key={src.id} className={`${TR_CLS} last:border-b-0`}>
+                              <td className="px-3 py-1 text-[13px] text-black max-w-[240px]"><TruncatedText text={src.name} /></td>
+                              <td className="px-3 py-1 text-[13px] text-black max-w-[240px]"><TruncatedText text={src.table || '-'} /></td>
+                              <td className="px-3 py-1 text-[13px] text-black max-w-[200px]"><TruncatedText text={src.grainKey || '-'} /></td>
+                              <td className="px-3 py-1 text-[13px] text-black text-right tabular-nums">{(src.groupRules || []).length}</td>
+                              <td className="px-3 py-1 text-center">
+                                <div className="inline-flex items-center justify-center gap-1">
+                                  <RowIconAction label="Sửa" onClick={() => handleEditSource(src)}>
+                                    <SquarePen className="w-4 h-4" />
+                                  </RowIconAction>
+                                  <RowIconAction label="Xóa" onClick={() => { if (editingSourceId === src.id) resetSourceForm(); handleRemoveSource(src.id); }}>
+                                    <Trash2 className="w-4 h-4 text-[#DC2626]" />
+                                  </RowIconAction>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
                 )}
               </div>
 

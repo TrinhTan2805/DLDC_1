@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Bell, Search, Trash2, Check, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
-import { PageHeader } from '../common/PageHeader';
+import { Bell, Search, Filter, X, Trash2, Check, Mail, Clock, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { notificationCatalog, NotificationItem, NotificationType, subscribeToNotifications } from '../../data/notificationCatalog';
+import {
+  Badge, TruncatedText, RowIconAction, BTN_OUTLINE, INPUT_CLS,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
+  tabClass, normalizeSearch,
+} from './collection/collectionUi';
 
 // Màn hình Quản lý thông báo — xem được TẤT CẢ thông báo trên hệ thống.
 // 4 loại: Thành công (success) / Lỗi (error) / Cảnh báo (warning - bị từ chối) / Thông báo (info).
 // Hệ thống KHÔNG phân chia thông báo theo mức độ ưu tiên.
+// Giao diện theo tailieu/docs/compomennt.md (H1, thẻ thống kê 5.6.1, tìm kiếm & bộ lọc 5.19, tab 5.9, badge 5.8).
 
 type ReadFilter = 'all' | 'unread' | 'read';
 type TypeFilter = 'all' | NotificationType;
@@ -17,6 +22,22 @@ const typeLabel: Record<NotificationType, string> = {
   info: 'Thông báo',
 };
 
+// Tông màu theo loại thông báo (badge 5.8 + ô icon 5.6.1)
+const typeBadgeVariant: Record<NotificationType, string> = {
+  success: 'green',
+  error: 'red',
+  warning: 'amber',
+  info: 'blue',
+};
+
+// Thời gian hiển thị dd/mm/yyyy HH:mm:ss — thông báo phát mới dùng định dạng 'vi-VN' (HH:mm:ss d/m/yyyy) nên quy đổi khi hiển thị
+const formatTime = (s: string) => {
+  const m = /^(\d{1,2}):(\d{2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((s || '').trim());
+  if (!m) return s;
+  const p = (v: string) => v.padStart(2, '0');
+  return `${p(m[4])}/${p(m[5])}/${m[6]} ${p(m[1])}:${m[2]}:${m[3]}`;
+};
+
 export function NotificationPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>(notificationCatalog);
 
@@ -25,20 +46,30 @@ export function NotificationPage() {
     return subscribeToNotifications((newItem) => setNotifications(prev => [newItem, ...prev]));
   }, []);
 
+  // Từ khóa & bộ lọc loại: nhập/chọn trước, chỉ áp dụng khi bấm Tìm kiếm hoặc Enter (5.19)
   const [searchTerm, setSearchTerm] = useState('');
-  const [readFilter, setReadFilter] = useState<ReadFilter>('all');
+  const [typeDraft, setTypeDraft] = useState<TypeFilter>('all');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  // Trạng thái đọc chuyển bằng tab (5.9)
+  const [readFilter, setReadFilter] = useState<ReadFilter>('all');
+
+  const runSearch = () => {
+    setAppliedSearch(searchTerm);
+    setTypeFilter(typeDraft);
+  };
 
   const getTypeIcon = (type: NotificationType) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <div className="w-8 h-8 shrink-0 rounded-lg bg-green-50 flex items-center justify-center"><CheckCircle className="w-4 h-4 text-green-600" /></div>;
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <div className="w-8 h-8 shrink-0 rounded-lg bg-red-50 flex items-center justify-center"><XCircle className="w-4 h-4 text-red-600" /></div>;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-600" />;
+        return <div className="w-8 h-8 shrink-0 rounded-lg bg-yellow-50 flex items-center justify-center"><AlertTriangle className="w-4 h-4 text-yellow-600" /></div>;
       default:
-        return <Info className="w-5 h-5 text-blue-600" />;
+        return <div className="w-8 h-8 shrink-0 rounded-lg bg-blue-50 flex items-center justify-center"><Info className="w-4 h-4 text-blue-600" /></div>;
     }
   };
 
@@ -56,10 +87,12 @@ export function NotificationPage() {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
+  const q = normalizeSearch(appliedSearch);
   const filteredNotifications = notifications.filter(n => {
-    const matchesSearch = n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         n.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         n.source.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = !q ||
+                         normalizeSearch(n.title).includes(q) ||
+                         normalizeSearch(n.message).includes(q) ||
+                         normalizeSearch(n.source).includes(q);
     const matchesReadFilter = readFilter === 'all' ||
                          (readFilter === 'unread' && !n.isRead) ||
                          (readFilter === 'read' && n.isRead);
@@ -72,219 +105,165 @@ export function NotificationPage() {
   const errorCount = notifications.filter(n => n.type === 'error').length;
   const warningCount = notifications.filter(n => n.type === 'warning').length;
 
-  return (
-    <div className="space-y-6">
-      <PageHeader title="Quản lý thông báo" icon={Bell} />
+  // Thẻ thống kê (5.6.1) — theo 4 loại thông báo, không theo mức độ ưu tiên
+  const stats = [
+    { label: 'Tổng thông báo', value: notifications.length, icon: Bell, tone: 'bg-blue-50 text-blue-600' },
+    { label: 'Chưa đọc', value: unreadCount, icon: Mail, tone: 'bg-blue-50 text-blue-600' },
+    { label: 'Thành công', value: successCount, icon: CheckCircle, tone: 'bg-green-50 text-green-600' },
+    { label: 'Cảnh báo', value: warningCount, icon: AlertTriangle, tone: 'bg-yellow-50 text-yellow-600' },
+    { label: 'Lỗi', value: errorCount, icon: XCircle, tone: 'bg-red-50 text-red-600' },
+  ];
 
-      {/* Stats — theo 4 loại thông báo, không theo mức độ ưu tiên */}
+  const readTabs: { key: ReadFilter; label: string }[] = [
+    { key: 'all', label: 'Tất cả' },
+    { key: 'unread', label: `Chưa đọc (${unreadCount})` },
+    { key: 'read', label: 'Đã đọc' },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Quản lý thông báo</h1>
+
+      {/* Thẻ thống kê (5.6.1) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white border border-slate-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600">Tổng thông báo</p>
-              <p className="text-2xl text-slate-900 mt-1">{notifications.length}</p>
+        {stats.map(({ label, value, icon: Icon, tone }) => (
+          <div key={label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${tone}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[16px] text-[#64748B] truncate">{label}</div>
+                <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{value}</div>
+              </div>
             </div>
-            <Bell className="w-8 h-8 text-slate-400" />
           </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600">Chưa đọc</p>
-              <p className="text-2xl text-blue-600 mt-1">{unreadCount}</p>
-            </div>
-            <Mail className="w-8 h-8 text-blue-400" />
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600">Thành công</p>
-              <p className="text-2xl text-green-600 mt-1">{successCount}</p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-400" />
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600">Cảnh báo</p>
-              <p className="text-2xl text-amber-600 mt-1">{warningCount}</p>
-            </div>
-            <AlertTriangle className="w-8 h-8 text-amber-400" />
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-600">Lỗi</p>
-              <p className="text-2xl text-red-600 mt-1">{errorCount}</p>
-            </div>
-            <XCircle className="w-8 h-8 text-red-400" />
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Filters */}
-      <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+      {/* Tìm kiếm & bộ lọc (5.19) — chỉ áp dụng khi bấm Tìm kiếm / Enter */}
+      <div>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex-1 min-w-[280px] flex items-center gap-1.5">
             <input
               type="text"
-              placeholder="Tìm kiếm thông báo..."
+              aria-label="Tìm kiếm thông báo"
+              placeholder="Tìm kiếm theo tiêu đề, nội dung, nguồn thông báo"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+              className={SEARCH_INPUT_CLS}
             />
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setReadFilter('all')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                readFilter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              Tất cả
+            <button type="button" title="Tìm kiếm" aria-label="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+              <Search className="w-5 h-5" />
             </button>
             <button
-              onClick={() => setReadFilter('unread')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                readFilter === 'unread'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              aria-expanded={showFilters}
+              aria-label="Bộ lọc"
+              title="Bộ lọc"
+              className={filterBtnClass(showFilters)}
             >
-              Chưa đọc ({unreadCount})
-            </button>
-            <button
-              onClick={() => setReadFilter('read')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                readFilter === 'read'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              Đã đọc
+              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
+
+          {unreadCount > 0 && (
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={markAllAsRead} className={BTN_OUTLINE}>
+                <Check className="w-4 h-4" /> Đánh dấu tất cả đã đọc
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Bộ lọc theo loại thông báo (thay cho mức độ ưu tiên) */}
-        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
-          <span className="text-sm text-slate-500 mr-1">Loại:</span>
-          <button
-            onClick={() => setTypeFilter('all')}
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              typeFilter === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            Tất cả loại
-          </button>
-          <button
-            onClick={() => setTypeFilter('success')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              typeFilter === 'success' ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100'
-            }`}
-          >
-            <CheckCircle className="w-4 h-4" /> Thành công
-          </button>
-          <button
-            onClick={() => setTypeFilter('warning')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              typeFilter === 'warning' ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-            }`}
-          >
-            <AlertTriangle className="w-4 h-4" /> Cảnh báo
-          </button>
-          <button
-            onClick={() => setTypeFilter('error')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              typeFilter === 'error' ? 'bg-red-600 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'
-            }`}
-          >
-            <XCircle className="w-4 h-4" /> Lỗi
-          </button>
-          <button
-            onClick={() => setTypeFilter('info')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-              typeFilter === 'info' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-            }`}
-          >
-            <Info className="w-4 h-4" /> Thông báo
-          </button>
-
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-              <Check className="w-4 h-4" /> Đánh dấu tất cả đã đọc
-            </button>
-          )}
-        </div>
+        {showFilters && (
+          <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+            <div>
+              <label htmlFor="notification-type-filter" className={FILTER_LABEL}>Loại</label>
+              <select
+                id="notification-type-filter"
+                className={INPUT_CLS}
+                value={typeDraft}
+                onChange={(e) => setTypeDraft(e.target.value as TypeFilter)}
+              >
+                <option value="all">Tất cả loại</option>
+                <option value="success">Thành công</option>
+                <option value="warning">Cảnh báo</option>
+                <option value="error">Lỗi</option>
+                <option value="info">Thông báo</option>
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Notifications List */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div className="divide-y divide-slate-200">
+      {/* Danh sách thông báo */}
+      <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+        {/* Tab trạng thái đọc (5.9) */}
+        <div role="tablist" aria-label="Trạng thái đọc" className="flex border-b border-[#E2E8F0] px-2">
+          {readTabs.map(t => (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={readFilter === t.key}
+              onClick={() => setReadFilter(t.key)}
+              className={tabClass(readFilter === t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="divide-y divide-[#E2E8F0]">
           {filteredNotifications.length === 0 ? (
-            <div className="p-12 text-center">
-              <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">Không có thông báo nào</p>
+            <div className="py-16 text-center">
+              <Bell className="w-12 h-12 text-[#CBD5E1] mx-auto mb-3" />
+              <p className="text-[13px] text-[#64748B]">Không có thông báo nào</p>
             </div>
           ) : (
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 hover:bg-slate-50 transition-colors ${
-                  !notification.isRead ? 'bg-blue-50/30' : ''
+                className={`px-4 py-3 transition-colors hover:bg-[#F8FAFC] ${
+                  !notification.isRead ? 'bg-[#EAF3FF]/50' : 'bg-white'
                 }`}
               >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    {getTypeIcon(notification.type)}
-                  </div>
+                <div className="flex items-start gap-3">
+                  {getTypeIcon(notification.type)}
                   <div className="flex-1 min-w-0">
-                    <div className="mb-2">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className={`text-slate-900 ${!notification.isRead ? 'font-semibold' : ''}`}>
-                          {notification.title}
-                        </h3>
-                        {!notification.isRead && (
-                          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
-                        )}
-                      </div>
-                      <p className="text-sm text-slate-600 line-clamp-2">
-                        {notification.message}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {notification.time}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <TruncatedText
+                        text={notification.title}
+                        className={`min-w-0 text-[13px] text-[#020817] ${!notification.isRead ? 'font-semibold' : 'font-medium'}`}
+                      />
+                      {!notification.isRead && (
+                        <span className="w-2 h-2 shrink-0 bg-blue-600 rounded-full" aria-label="Chưa đọc" />
+                      )}
+                      <span className="shrink-0">
+                        <Badge label={typeLabel[notification.type]} variant={typeBadgeVariant[notification.type]} />
                       </span>
                     </div>
+                    <p className="mt-1 text-[13px] text-[#475569] line-clamp-2">
+                      {notification.message}
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-1 text-[12px] text-[#64748B] tabular-nums">
+                      <Clock className="w-3.5 h-3.5" />
+                      {formatTime(notification.time)}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="shrink-0 inline-flex items-center gap-1">
                     {!notification.isRead && (
-                      <button
-                        onClick={() => markAsRead(notification.id)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Đánh dấu đã đọc"
-                      >
+                      <RowIconAction label="Đánh dấu đã đọc" onClick={() => markAsRead(notification.id)}>
                         <Check className="w-4 h-4" />
-                      </button>
+                      </RowIconAction>
                     )}
-                    <button
-                      onClick={() => deleteNotification(notification.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Xóa"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <RowIconAction label="Xóa" onClick={() => deleteNotification(notification.id)}>
+                      <Trash2 className="w-4 h-4 text-[#DC2626]" />
+                    </RowIconAction>
                   </div>
                 </div>
               </div>

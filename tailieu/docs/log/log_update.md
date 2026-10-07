@@ -1,5 +1,119 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Mô hình dữ liệu chủ — điều chỉnh bảng grid nguồn đăng ký (Ngày thực hiện: 07/10/2026) — 164
+
+**Nội dung (PM yêu cầu, tiếp mục 163):**
+- `master-data/MasterDataWizard.tsx` (Thêm mới): bỏ 2 nguồn mẫu mặc định (Hộ tịch, CCCD) — wizard bắt đầu chưa có nguồn; bảng grid **chỉ hiện khi đã có nguồn** (không hiện dòng/khung trống) và đặt **dưới form thêm nguồn**.
+- `master-data/MasterDataScaleManagementPage.tsx` (Xem chi tiết — Bước 1): ngoài trường "Nguồn dữ liệu đăng ký", thêm khối **"Đăng ký nguồn dữ liệu"** dạng bảng grid chỉ xem (Tên nguồn, Bảng nguồn, Khóa làm mịn, Quy tắc gom) — không có nút Thêm nguồn, không có cột Thao tác; chỉ hiện khi thực thể có nguồn. `EntitySource` thêm `grainKey`, `groupRules` (nhận từ wizard khi lưu).
+
+**Kiểm tra:** tsc không lỗi ở các file master-data đã sửa; `npm run build` thành công.
+
+## Mô hình dữ liệu chủ — Đăng ký nguồn dữ liệu dạng bảng grid + trường "Nguồn dữ liệu đăng ký" (Ngày thực hiện: 07/10/2026) — 163
+
+**Nội dung (PM yêu cầu, theo ảnh mẫu):**
+- `master-data/MasterDataWizard.tsx` (Thêm mới / Chỉnh sửa — Bước 1):
+  - Danh sách nguồn đã đăng ký đổi từ chip sang **bảng grid**: Tên nguồn | Bảng nguồn | Khóa làm mịn | Quy tắc gom (số quy tắc) | Thao tác (Sửa, Xóa đỏ). Trống: "Chưa đăng ký nguồn dữ liệu nào".
+  - Form thêm nguồn: thêm ô bắt buộc **Bảng nguồn** (danh sách bảng DLDC của nguồn đã chọn); Khóa làm mịn và thuộc tính Quy tắc gom chỉ lấy trường của bảng đã chọn; đổi nguồn/bảng thì xóa khóa và quy tắc gom đã chọn.
+  - Thêm chức năng **Sửa nguồn**: mở lại form với giá trị cũ, nút "Cập nhật", giữ nguyên id nguồn (không mất ánh xạ ở bước sau). Thêm/sửa thành công có toast.
+  - `WizardSource` thêm trường `table`; 2 nguồn mặc định gán bảng `tbl_khaisinh`, `tbl_can_cuoc`.
+- `master-data/MasterDataScaleManagementPage.tsx` (Xem chi tiết — Bước 1): bỏ chip, đổi thành trường **"Nguồn dữ liệu đăng ký"**, mỗi nguồn một dòng "Tên nguồn - Bảng nguồn"; `EntitySource` thêm `table`, dữ liệu mẫu gán bảng.
+
+**Chưa làm (chờ PM):** Bước 2 wizard ("Chọn bảng nguồn dữ liệu") vẫn hiện nguồn dạng chip; Chỉnh sửa mở wizard không truyền dữ liệu thực thể đang sửa (logic cũ) nên danh sách nguồn là mặc định của wizard; form sửa cũ trong ScaleManagementPage (`showForm`) không có đường mở nên chưa sửa.
+
+**Kiểm tra:** tsc không lỗi ở 2 file; `npm run build` thành công.
+
+## Quản lý nhóm người dùng — bỏ thẻ "TB thành viên/nhóm" (Ngày thực hiện: 07/10/2026) — 162
+
+**Nội dung (PM yêu cầu):** `admin/GroupManagementPage.tsx` — bỏ thẻ thống kê "TB thành viên/nhóm"; 3 thẻ còn lại (Tổng nhóm, Đang hoạt động, Tổng thành viên) chia đều `grid-cols-3`, thẳng mép trái/phải với thanh tìm kiếm.
+
+**Kiểm tra:** tsc không lỗi ở file; `npm run build` thành công.
+
+## Chi tiết cơ sở dữ liệu đích — khung viền cho từng bảng (Ngày thực hiện: 07/10/2026) — 161
+
+**Nội dung (PM yêu cầu):** `processing/TargetDatabaseDetailPage.tsx` — mỗi mục trong danh sách bảng (cột trái) có viền 1px #E2E8F0 bo 8px, nền trắng, cách nhau 8px; hover nền #F8FAFC viền #CBD5E1; bảng đang chọn giữ nền xanh, viền xanh.
+
+**Kiểm tra:** `npm run build` thành công; tsc không lỗi mới ở file (còn 1 lỗi cũ `FilterItem.value` có sẵn trong bản gốc).
+
+## Xem biểu đồ thống kê — sửa 3 lỗi hiển thị (Ngày thực hiện: 07/10/2026) — 160
+
+`admin/StatisticsPage.tsx` (PM báo):
+1. Nút X bỏ lọc khoảng ngày bị xuống dòng → hàng ngày không còn `flex-wrap`, 2 ô ngày co giãn (`flex-1 min-w-0`), chữ "đến" và nút X không co.
+2. Tên hạng mục dữ liệu dài tràn khỏi ô → chip `max-w-full`, tên cắt "…" trên 1 dòng + tooltip hiện đầy đủ (5.3.1).
+3. Trang cuộn thừa khoảng trắng phía dưới → nguyên nhân: ô tích `sr-only` (position:absolute, đổi từ `hidden` ở mục 156) nằm trong khung cuộn không có `relative` nên định vị theo trang và kéo dài trang; thêm `relative` cho khung cuộn.
+
+**Kiểm tra:** tsc không lỗi mới (14 lỗi cũ Recharts/useRef như mục 156); Vite trả 200.
+
+## Quản lý nhật ký — bỏ badge ở các cột phân loại, hiển thị dạng chữ (Ngày thực hiện: 07/10/2026) — 159
+
+**Nội dung (PM yêu cầu):** các cột sau hiển thị chữ thường 13px/400 đen (như ô bảng 5.3), không dùng badge/icon:
+- `admin/LogRetentionConfigPage.tsx` — cột Loại nhật ký (bỏ `getLogTypeIcon`, `getLogTypeVariant`).
+- `admin/ConfigChangeLogPage.tsx` — cột Loại cấu hình; dòng Loại cấu hình trong modal chi tiết cũng thành chữ (dùng chung hàm) (bỏ `CATEGORY_VARIANT`, `getConfigCategoryIcon`).
+- `admin/AccountManagementLogPage.tsx` — cột Tác vụ (bỏ `getActionIcon`).
+- `admin/ErrorLogPage.tsx` — cột Mức độ (bỏ `getSeverityIcon`, `getSeverityVariant`).
+- Bỏ import icon không còn dùng. Các cột Trạng thái vẫn giữ badge.
+
+**Kiểm tra:** tsc không lỗi ở 4 file; Vite trả 200.
+
+## Quản lý thời gian lưu trữ nhật ký — bỏ thanh tab trùng + chuẩn hóa giao diện (Ngày thực hiện: 07/10/2026) — 158
+
+**Lỗi (PM báo):** tab "Quản lý thời gian lưu trữ nhật ký" trong Nhật ký thay đổi cấu hình hiện 2 thanh tab — trang con `LogRetentionConfigPage` tự vẽ thêm thanh tab riêng.
+
+- `admin/LogRetentionConfigPage.tsx`: thêm prop `embedded` — khi nhúng làm tab thì không vẽ thanh tab riêng; khi mở độc lập (route `admin-log-retention`) vẫn có thanh tab, nay dùng `tabClass` 5.9. Chuẩn hóa giao diện theo `compomennt.md`: thẻ thống kê nhỏ 5.6.1 (thay StatsCard); tìm kiếm 5.19 (nút Tìm kiếm xanh lá, chỉ tìm khi bấm/Enter, không phân biệt dấu); Thêm mới Primary, Kết xuất viền; bảng 5.3 (căn lề theo kiểu cột — Thời gian lưu trữ căn phải, Mô tả cắt chữ + tooltip, Loại/Trạng thái dạng Badge, Cập nhật lần cuối 2 dòng thời gian / người cập nhật, Thao tác ghim phải, nút Sửa/Xóa có tooltip, Xóa đỏ); phân trang chuẩn 5.14; modal Thêm mới / Sửa theo 5.4 (bo 16px, footer #F8FAFC, nhãn 13px/500, ô cao 40px); xóa dùng ConfirmModal; `alert()` → toast; thời gian bản ghi mới/sửa dạng dd/mm/yyyy HH:mm:ss (trước `toLocaleString`). Badge "Nhật ký hệ thống" cyan (ngoài bảng màu) → indigo. Placeholder "Tìm kiếm loại nhật ký..." → "Tìm kiếm theo loại nhật ký, mô tả".
+- `admin/ConfigChangeLogPage.tsx`: gọi `<LogRetentionConfigPage embedded />`.
+
+**Kiểm tra:** tsc không lỗi ở 2 file; Vite trả 200.
+
+## Quản lý nhật ký — thống nhất định dạng cột Người dùng / Người thực hiện (Ngày thực hiện: 07/10/2026) — 157
+
+**Nội dung (PM yêu cầu):** các cột Người dùng, Người thực hiện hiển thị cùng một định dạng 2 dòng: **Tên người dùng** (13px, đen) / **Tên tài khoản** (12px, #64748B); mỗi dòng cắt chữ + tooltip, vẫn trong hàng 48px.
+- `admin/LoginLogPage.tsx` — cột Người dùng: thêm dòng 2 `userId` (trước chỉ có tên).
+- `admin/AccessLogPage.tsx` — tab Nhật ký truy cập, cột Người dùng: tách "Tên (mã)" thành 2 dòng.
+- `admin/AccountManagementLogPage.tsx` — cột Người thực hiện và cột Tài khoản (cùng bảng): bỏ tiền tố `@` và chữ mono ở dòng 2.
+- `admin/ConfigChangeLogPage.tsx` — cột Người thực hiện: thêm dòng 2 `performedById`.
+
+- `admin/ErrorLogPage.tsx` — cột Người dùng: thêm trường `userAccount` vào dữ liệu mẫu (an.nv, binh.tt, cuong.lv — trùng tên tài khoản của cùng người ở AccessLogPage); bản ghi do hệ thống (user `system` hoặc trống, trước hiện "system"/"System") hiển thị "Hệ thống" / "system". Modal chi tiết hiển thị thêm dòng tài khoản dưới tên.
+
+**Lưu ý:** dữ liệu mẫu Nhật ký đăng nhập / truy cập chỉ có `userId` dạng `user_001` (không có tên đăng nhập riêng) nên dòng 2 hiển thị giá trị này. Tab "Nhật ký đăng nhập" trong AccessLogPage đang tách 2 cột Tên đăng nhập / Họ và tên — chưa gộp (chờ PM).
+
+## Chuẩn hóa giao diện — Quản trị & vận hành › Quản lý nhật ký, Thống kê & báo cáo, Quản lý thông báo, Quản lý thông báo hệ thống, Hướng dẫn sử dụng (Ngày thực hiện: 07/10/2026) — 156
+
+**Nội dung (PM yêu cầu):** sửa giao diện các màn còn lại của Quản trị & vận hành theo `compomennt.md`; giữ nội dung, dữ liệu, logic. PM cho phép mở khóa: đã thêm vào `stauts.md` mục "Thông báo & Hướng dẫn" (`NotificationPage`, `SystemNotificationManagementPage`, `UserGuidePage`) ở trạng thái `[x]`; các màn nhật ký và Thống kê vốn đã `[x]`. Không sửa file dùng chung (`collectionUi`, `common/*`, `ui/*`, `data/*`, `index.css`, layout).
+
+**Chung cho mọi màn:** H1 20px/700 #2A0F0F (5 màn nhật ký thêm H1 = tên menu, trước không có tiêu đề); thẻ thống kê nhỏ 5.6.1 thay `StatsCard`; `Badge` thay `StatusTag`; thanh tìm kiếm + vùng bộ lọc 5.19 — **từ khóa/bộ lọc chỉ áp dụng khi bấm Tìm kiếm hoặc Enter**, so khớp không phân biệt hoa/thường và dấu; ô ngày dùng `DateInput` (dd/mm/yyyy); bảng 5.3 (tiêu đề #F1F5F9 chữ đen đậm, hàng 48px, căn lề theo kiểu cột, cắt chữ + tooltip, ngày/giờ 2 dòng, cột Thao tác ghim phải, nút icon 32×32 có tooltip); phân trang `Pagination` chuẩn; modal 5.4 (chi tiết cao cố định, thân cuộn, tiêu đề 16px/500, footer #F8FAFC); `alert()` → toast; bỏ chữ 10–11px, `uppercase`, `opacity-50`, khối `<style>` ép 13px.
+
+**Quản lý nhật ký:**
+- `admin/LoginLogPage.tsx`: như trên; Thiết bị gộp 1 dòng "thiết bị · trình duyệt"; modal chi tiết dạng nhãn–giá trị 5.17.
+- `admin/AccessLogPage.tsx`: tab 5.9; 2 tab dùng chung thanh tìm kiếm; Người dùng 1 dòng "Tên (mã)"; lịch sử thao tác trong modal dùng Badge; số dòng/trang 5/10/20/50 → 10/20/50/100.
+- `admin/ErrorLogPage.tsx`: Badge mức độ / đã xử lý; modal 4 khối (Thông tin chung, request, thông báo lỗi khung đỏ nhạt, Stack Trace khung sáng thay nền đen).
+- `admin/AccountManagementLogPage.tsx`: cột người thực hiện/tài khoản 2 dòng có cắt chữ; giá trị cũ/mới khung đỏ nhạt/xanh lá nhạt; sửa lồng JSX vùng lọc.
+- `admin/ConfigChangeLogPage.tsx`: tab 5.9; sửa vùng lọc nằm trong hàng tìm kiếm; Badge loại `pink` (ngoài bảng màu) → `indigo`; sửa chính tả "bảo trị" → "bảo trì" (dữ liệu mẫu, tùy chọn lọc).
+
+**Thống kê & báo cáo** (`admin/StatisticsPage.tsx`): bỏ khung tiêu đề có icon; Lịch sử/In dạng viền, Tải xuống Primary; khung biểu đồ / Tùy chỉnh hiển thị `CARD_CLS`; trục 12px, màu chỉ tiêu theo bảng màu (#155DFC, #16A34A, #8200DB); Biểu đồ/Dạng bảng thành tab 5.9 (bỏ emoji); 3 modal theo 5.4; sửa icon nút đóng modal Chi tiết (trước là icon Download xoay).
+
+**Quản lý thông báo** (`NotificationPage.tsx`): bỏ `PageHeader` (trả về null) → H1 "Quản lý thông báo" nay mới hiển thị; 5 thẻ thống kê; lọc Loại vào vùng bộ lọc; Tất cả/Chưa đọc/Đã đọc thành tab; dòng thông báo 13px, chấm xanh chưa đọc, Badge loại, nút icon có tooltip.
+
+**Quản lý thông báo hệ thống** (`admin/SystemNotificationManagementPage.tsx`): thanh công cụ 5.19 (icon nút sắp xếp `Filter` → `ArrowUpDown`); bảng 5.3 (Nội dung cắt chữ + tooltip); modal Thêm/Sửa 5.4; xóa dùng ConfirmModal; ngày bản ghi mới tạo `dd/mm/yyyy HH:mm:ss` (trước `HH:mm:ss dd/mm/yyyy` khiến sắp xếp đọc sai).
+
+**Hướng dẫn sử dụng** (`UserGuidePage.tsx`): bỏ màu tím → xanh chính; mục lục 13px, mục chọn nền #EAF3FF; tìm kiếm 5.19; Phần trước/tiếp theo dạng viền, vô hiệu chuẩn; thêm dòng trống "Không tìm thấy nội dung phù hợp".
+
+**Nút Xóa** trong bảng/danh sách (thông báo, thông báo hệ thống): icon đỏ #DC2626 (5.3.2 — thao tác nguy hiểm luôn đỏ).
+
+**Chờ PM quyết định:** Xóa ở Quản lý thông báo chưa có hộp xác nhận (logic gốc xóa ngay); Quản lý thông báo chưa có phân trang; ConfigChangeLog có hàm kết xuất nhưng không có nút; ErrorLog nút "Đánh dấu đã xử lý"/"Copy Stack Trace" chưa có xử lý (gốc); nhãn tiếng Anh trong modal nhật ký (IP Address, Method, URL, Stack Trace…) chưa Việt hóa; lọc ngày ở AccessLog so sánh chuỗi dd/mm/yyyy (lỗi cũ, có thể lọc sai khi khác tháng/năm); Thống kê có chế độ bảng theo tháng/nguồn và modal "Số liệu chi tiết" không có nút mở; Hướng dẫn sử dụng có chữ nghi sai ("Đối tịch tư Bộ ngành ngoài", "Đối tịch tư hệ thống trong nội bộ", "Hệ thống quản lý Bộ Tư Pháp sự cố"), liên kết PDF/video trỏ `#`; modal AccessLog không đóng khi bấm nền còn LoginLog có.
+
+**Kiểm tra:** Vite trả 200 cho cả 9 file; tsc không có lỗi mới ở 9 file — riêng `StatisticsPage.tsx` còn lỗi cũ (kiểu Recharts, `useRef(null)`, `entry` any) trùng y dòng mã bản gốc và cùng loại lỗi với `open-data/OpenDataStatisticsPage.tsx` không sửa. Chưa kiểm tra bằng mắt trên trình duyệt.
+
+## Chuẩn hóa giao diện — Quản trị & vận hành › Cấu hình hệ thống (Ngày thực hiện: 07/10/2026) — 155
+
+**Nội dung (PM yêu cầu):** sửa giao diện mục Cấu hình hệ thống theo `compomennt.md`; giữ nội dung, dữ liệu, logic. Menu gồm 2 màn: "Thiết lập cấu hình hệ thống" (render `SecurityConfigPage`) và "Sao lưu dự phòng" (`BackupPage`) — cả hai đang `[x]` trong `stauts.md`. `SystemConfigPage.tsx` (`[ ]`) không được menu này dùng nên không sửa.
+
+**Thiết lập cấu hình hệ thống** (`admin/SecurityConfigPage.tsx`): H1 20px/700 #2A0F0F (bỏ khung header có icon); nút Đặt lại mặc định dạng viền, Lưu cấu hình Primary với trạng thái vô hiệu chuẩn (#F1F5F9/#94A3B8); 7 khối cấu hình dạng thẻ bo 16px, tiêu đề H2 14px/500 có vạch xanh (bỏ ô icon màu); nhãn 13px/500, mô tả 12px #64748B; ô số/ô chọn/ô giờ/ô văn bản cao 40px (INPUT_CLS); công tắc chuẩn `role="switch"` (bật #155DFC, tắt #CBD5E1); nút tần suất sao lưu: đang chọn nền #EAF3FF chữ xanh, thường dạng viền (`role="radio"`); nhãn Active/Inactive dùng Badge 5.8; thông báo "chưa lưu" chuyển lên đầu trang, nút "Lưu ngay" dạng viền (mỗi màn một nút Primary); `confirm()` → ConfirmModal, `alert()` → toast. Sửa chính tả tiêu đề "bảo trị" → "bảo trì".
+
+**Sao lưu dự phòng** (`admin/BackupPage.tsx`): H1 chuẩn + mô tả 13px; thẻ thống kê nhỏ 5.6.1 (thay StatsCard); bảng 5.3 (tiêu đề nền #F1F5F9 chữ đen đậm, hàng 48px kẻ #E0E0E0, căn lề theo kiểu cột 5.3.3, Tên file cắt chữ + tooltip, Ngày giờ dd/mm/yyyy + giờ dòng 2, Dung lượng căn phải, Loại/Trạng thái dạng Badge, Thao tác ghim phải); nút thao tác 32×32 có tooltip — bản sao lưu thất bại giữ nguyên vị trí nút Tải xuống/Khôi phục ở trạng thái vô hiệu kèm lý do (trước là ô trống), nút Xóa màu đỏ; phân trang chuẩn 5.14; modal xóa dùng ConfirmModal (sửa chữ "Hủy bộ" → "Hủy"); `alert()` → toast; dòng trống có icon.
+
+**Chữ mới:** tiêu đề "Xác nhận đặt lại cấu hình"; lý do vô hiệu "Bản sao lưu không thành công"; tooltip/aria-label các nút.
+
+**Kiểm tra:** tsc không có lỗi ở 2 file đã sửa; Vite biên dịch 2 file thành công (HMR, port 3000).
+
 ## Chuẩn hóa giao diện — Quản trị & vận hành › Quản trị người dùng (Ngày thực hiện: 07/10/2026) — 154
 
 **Nội dung (PM yêu cầu):** sửa giao diện mục Quản trị người dùng theo `compomennt.md`; giữ nội dung, dữ liệu, logic.

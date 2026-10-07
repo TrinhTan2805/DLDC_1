@@ -409,6 +409,11 @@
 ### Thống kê
 - `[x]` Thống kê hệ thống (`admin/StatisticsPage.tsx`)
 
+### Thông báo & Hướng dẫn (PM mở khóa 07/10/2026)
+- `[x]` Quản lý thông báo (`pages/NotificationPage.tsx`)
+- `[x]` Quản lý thông báo hệ thống (`admin/SystemNotificationManagementPage.tsx`)
+- `[x]` Hướng dẫn sử dụng (`pages/UserGuidePage.tsx`)
+
 ---
 
 **Cam kết của AI:** Chỉ phân tích và thay đổi mã nguồn của những tệp liên quan trực tiếp đến các ô đã được bạn đánh dấu `[x]`. Mọi khu vực khác sẽ được đóng băng nguyên trạng!

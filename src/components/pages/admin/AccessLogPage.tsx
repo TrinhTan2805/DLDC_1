@@ -1,18 +1,13 @@
 import { useState } from 'react';
-import { 
-  ScrollText, 
-  Search, 
-  Download, 
-  Calendar, 
-  Filter, 
-  Eye, 
+import {
+  ScrollText,
+  Search,
+  Download,
+  Filter,
+  Eye,
   X,
   Clock,
-  User,
-  Monitor,
-  MapPin,
   Activity,
-  FileText,
   Edit2,
   Trash2,
   Plus,
@@ -20,9 +15,13 @@ import {
   AlertCircle,
   LogIn
 } from 'lucide-react';
-import { StatusTag } from '../../common/StatusTag';
 import { toast } from 'sonner';
-import { StatsCard } from '../../common/StatsCard';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, DateInput,
+  BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
+  tabClass, TABLE_WRAP_CLS, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, normalizeSearch,
+} from '../collection/collectionUi';
 
 interface AccessLog {
   id: number;
@@ -441,6 +440,71 @@ const getSessionActions = (sessionId: string): ActionDetail[] => {
   return actionsBySession[sessionId] || [];
 };
 
+
+// Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
+const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const TR = 'group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-4';
+const SUB_TEXT = 'text-[12px] text-[#64748B]';
+
+// Thẻ thống kê nhỏ (mục 5.6.1)
+const STAT_TONES = {
+  blue: 'bg-blue-50 text-blue-600',
+  green: 'bg-green-50 text-green-600',
+  red: 'bg-red-50 text-red-600',
+  purple: 'bg-purple-50 text-purple-600',
+} as const;
+
+const StatCard = ({ icon: Icon, tone, title, value }: { icon: typeof ScrollText; tone: keyof typeof STAT_TONES; title: string; value: string }) => (
+  <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+    <div className="flex items-center gap-3">
+      <div className={`p-2 rounded-lg ${STAT_TONES[tone]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div>
+        <div className="text-[16px] text-[#64748B]">{title}</div>
+        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{value}</div>
+      </div>
+    </div>
+  </div>
+);
+
+// 'dd/mm/yyyy HH:mm:ss' → ngày và giờ để hiển thị 2 dòng trong bảng (mục 5.3.3)
+const splitTimestamp = (value: string) => {
+  const [date, time] = (value || '').split(' ');
+  return { date: date || '-', time: time || '' };
+};
+
+const TimestampCell = ({ value }: { value: string }) => {
+  const ts = splitTimestamp(value);
+  return (
+    <td className={`${TD} text-left whitespace-nowrap leading-tight tabular-nums`}>
+      <div>{ts.date}</div>
+      {ts.time && <div>{ts.time}</div>}
+    </td>
+  );
+};
+
+const EmptyRow = ({ colSpan }: { colSpan: number }) => (
+  <tr>
+    <td colSpan={colSpan} className="px-3 py-10 text-center">
+      <ScrollText className="w-8 h-8 text-[#94A3B8] mx-auto mb-2" />
+      <p className="text-[13px] font-medium text-[#64748B]">Không tìm thấy bản ghi nào phù hợp</p>
+    </td>
+  </tr>
+);
+
+// Loại thao tác → tông màu badge (mục 5.8)
+const ACTION_VARIANT: Record<ActionDetail['type'], string> = {
+  create: 'green',
+  update: 'blue',
+  delete: 'red',
+  view: 'purple',
+  export: 'orange',
+};
+
 export function AccessLogPage() {
   const [activeTab, setActiveTab] = useState<'access' | 'login'>('access');
 
@@ -450,6 +514,8 @@ export function AccessLogPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  // Điều kiện đã áp dụng — chỉ cập nhật khi bấm Tìm kiếm / Enter (mục 5.19)
+  const [applied, setApplied] = useState({ searchTerm: '', filterStatus: 'all', startDate: '', endDate: '' });
 
   // Login Log Filter States
   const [loginSearchTerm, setLoginSearchTerm] = useState('');
@@ -457,6 +523,7 @@ export function AccessLogPage() {
   const [loginStartDate, setLoginStartDate] = useState('');
   const [loginEndDate, setLoginEndDate] = useState('');
   const [showLoginFilters, setShowLoginFilters] = useState(false);
+  const [loginApplied, setLoginApplied] = useState({ searchTerm: '', filterStatus: 'all', startDate: '', endDate: '' });
 
   // Modals
   const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null);
@@ -465,31 +532,43 @@ export function AccessLogPage() {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
+
   const [loginCurrentPage, setLoginCurrentPage] = useState(1);
   const [loginItemsPerPage, setLoginItemsPerPage] = useState(10);
 
+  const runSearch = () => {
+    setApplied({ searchTerm, filterStatus, startDate, endDate });
+    setCurrentPage(1);
+  };
+
+  const runLoginSearch = () => {
+    setLoginApplied({ searchTerm: loginSearchTerm, filterStatus: loginFilterStatus, startDate: loginStartDate, endDate: loginEndDate });
+    setLoginCurrentPage(1);
+  };
+
   // Filtering access logs
+  const appliedTerm = normalizeSearch(applied.searchTerm);
   const filteredLogs = accessLogs.filter(log => {
-    const matchesSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.userId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
-    const matchesStartDate = !startDate || log.timestamp.split(' ')[0] >= startDate.split('-').reverse().join('/');
-    const matchesEndDate = !endDate || log.timestamp.split(' ')[0] <= endDate.split('-').reverse().join('/');
+    const matchesSearch = normalizeSearch(log.user).includes(appliedTerm) ||
+                         normalizeSearch(log.action).includes(appliedTerm) ||
+                         normalizeSearch(log.module).includes(appliedTerm) ||
+                         normalizeSearch(log.userId).includes(appliedTerm);
+    const matchesStatus = applied.filterStatus === 'all' || log.status === applied.filterStatus;
+    const matchesStartDate = !applied.startDate || log.timestamp.split(' ')[0] >= applied.startDate.split('-').reverse().join('/');
+    const matchesEndDate = !applied.endDate || log.timestamp.split(' ')[0] <= applied.endDate.split('-').reverse().join('/');
     return matchesSearch && matchesStatus && matchesStartDate && matchesEndDate;
   });
 
   // Filtering login logs
+  const loginTerm = normalizeSearch(loginApplied.searchTerm);
   const filteredLoginLogs = loginLogs.filter(log => {
-    const matchesSearch = log.fullName.toLowerCase().includes(loginSearchTerm.toLowerCase()) ||
-                         log.username.toLowerCase().includes(loginSearchTerm.toLowerCase()) ||
-                         log.ip.includes(loginSearchTerm) ||
-                         (log.reason && log.reason.toLowerCase().includes(loginSearchTerm.toLowerCase()));
-    const matchesStatus = loginFilterStatus === 'all' || log.status === loginFilterStatus;
-    const matchesStartDate = !loginStartDate || log.timestamp.split(' ')[0] >= loginStartDate.split('-').reverse().join('/');
-    const matchesEndDate = !loginEndDate || log.timestamp.split(' ')[0] <= loginEndDate.split('-').reverse().join('/');
+    const matchesSearch = normalizeSearch(log.fullName).includes(loginTerm) ||
+                         normalizeSearch(log.username).includes(loginTerm) ||
+                         normalizeSearch(log.ip).includes(loginTerm) ||
+                         (log.reason && normalizeSearch(log.reason).includes(loginTerm));
+    const matchesStatus = loginApplied.filterStatus === 'all' || log.status === loginApplied.filterStatus;
+    const matchesStartDate = !loginApplied.startDate || log.timestamp.split(' ')[0] >= loginApplied.startDate.split('-').reverse().join('/');
+    const matchesEndDate = !loginApplied.endDate || log.timestamp.split(' ')[0] <= loginApplied.endDate.split('-').reverse().join('/');
     return matchesSearch && matchesStatus && matchesStartDate && matchesEndDate;
   });
 
@@ -518,18 +597,19 @@ export function AccessLogPage() {
     }
   };
 
+  // Ô icon theo loại thao tác — dùng bộ màu badge mục 5.8
   const getActionColor = (type: ActionDetail['type']) => {
     switch (type) {
       case 'create':
-        return 'bg-green-100 text-green-700';
+        return 'text-[#15803D] bg-[#F0FDF4] border-[#DCFCE7]';
       case 'update':
-        return 'bg-blue-100 text-blue-700';
+        return 'text-[#2563EB] bg-[#EFF6FF] border-[#BFDBFE]';
       case 'delete':
-        return 'bg-red-100 text-red-700';
+        return 'text-[#B91C1C] bg-[#FEF2F2] border-[#FEE2E2]';
       case 'view':
-        return 'bg-purple-100 text-purple-700';
+        return 'text-[#8200DB] bg-[#FAF5FF] border-[#E7E1EC]';
       case 'export':
-        return 'bg-orange-100 text-orange-700';
+        return 'text-[#C2410C] bg-[#FFF7ED] border-[#FED7AA]';
     }
   };
 
@@ -549,613 +629,416 @@ export function AccessLogPage() {
     });
   };
 
-  return (
-    <div className="space-y-6 access-log-container">
-      <style>{`
-        .access-log-container,
-        .access-log-container .text-sm,
-        .access-log-container .text-xs:not(th),
-        .access-log-container input,
-        .access-log-container select,
-        .access-log-container button,
-        .access-log-container td,
-        .access-log-container option,
-        .access-log-container div.text-slate-600,
-        .access-log-container div.text-slate-700,
-        .access-log-container div.text-slate-500,
-        .access-log-container div.text-slate-900:not(.text-2xl) {
-          font-size: 13px !important;
-        }
-      `}</style>
-      
-      {/* Tabs Switcher */}
-      <div className="bg-white border-b border-slate-200 px-6 -mx-6 -mt-6 mb-6">
-        <div className="flex gap-6">
-          <button
-            onClick={() => setActiveTab('access')}
-            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${
-              activeTab === 'access'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <ScrollText className="w-5 h-5" />
-            Nhật ký truy cập
+  // Thanh tìm kiếm + vùng bộ lọc dùng chung cho 2 tab (mục 5.19)
+  const renderSearchBar = (opts: {
+    ariaLabel: string;
+    placeholder: string;
+    term: string;
+    setTerm: (v: string) => void;
+    onSearch: () => void;
+    open: boolean;
+    setOpen: (v: boolean) => void;
+    onExport: () => void;
+    status: string;
+    setStatus: (v: string) => void;
+    from: string;
+    setFrom: (v: string) => void;
+    to: string;
+    setTo: (v: string) => void;
+  }) => (
+    <div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 flex items-center gap-1.5">
+          <input
+            type="text"
+            aria-label={opts.ariaLabel}
+            placeholder={opts.placeholder}
+            className={SEARCH_INPUT_CLS}
+            value={opts.term}
+            onChange={(e) => opts.setTerm(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') opts.onSearch(); }}
+          />
+          <button type="button" title="Tìm kiếm" aria-label="Tìm kiếm" onClick={opts.onSearch} className={SEARCH_BTN_CLS}>
+            <Search className="w-5 h-5" />
           </button>
           <button
-            onClick={() => setActiveTab('login')}
-            className={`flex items-center gap-2 pb-3 pt-4 text-[13px] font-medium transition-colors border-b-2 ${
-              activeTab === 'login'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
+            type="button"
+            onClick={() => opts.setOpen(!opts.open)}
+            aria-expanded={opts.open}
+            aria-label="Bộ lọc"
+            title="Bộ lọc"
+            className={filterBtnClass(opts.open)}
           >
-            <LogIn className="w-5 h-5" />
-            Nhật ký đăng nhập
+            {opts.open ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={opts.onExport} className={BTN_OUTLINE} title="Kết xuất Excel">
+            <Download className="w-4 h-4" />
+            Kết xuất
           </button>
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {opts.open && (
+        <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+          <div>
+            <label className={FILTER_LABEL}>Trạng thái</label>
+            <select
+              aria-label="Lọc theo trạng thái"
+              className={INPUT_CLS}
+              value={opts.status}
+              onChange={(e) => opts.setStatus(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="success">Thành công</option>
+              <option value="failed">Thất bại</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={FILTER_LABEL}>Thời gian từ</label>
+            <DateInput value={opts.from} onChange={opts.setFrom} ariaLabel="Thời gian từ" max={opts.to || undefined} />
+          </div>
+
+          <div>
+            <label className={FILTER_LABEL}>Thời gian đến</label>
+            <DateInput value={opts.to} onChange={opts.setTo} ariaLabel="Thời gian đến" min={opts.from || undefined} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Tiêu đề trang (H1 20px/700 #2A0F0F) */}
+      <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Nhật ký truy cập</h1>
+
+      {/* Tab nội dung (mục 5.9) */}
+      <div className="flex border-b border-[#E2E8F0]" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'access'}
+          onClick={() => setActiveTab('access')}
+          className={tabClass(activeTab === 'access')}
+        >
+          <ScrollText className="w-4 h-4" />
+          Nhật ký truy cập
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'login'}
+          onClick={() => setActiveTab('login')}
+          className={tabClass(activeTab === 'login')}
+        >
+          <LogIn className="w-4 h-4" />
+          Nhật ký đăng nhập
+        </button>
+      </div>
+
+      {/* Thẻ thống kê nhỏ (mục 5.6.1) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng lượt truy cập (24h)" value="24,532" />
-        <StatsCard icon={CheckCircle2} iconColor="green" title="Tác vụ thành công" value="24,410" />
-        <StatsCard icon={AlertCircle} iconColor="red" title="Tác vụ thất bại" value="122" />
-        <StatsCard icon={Activity} iconColor="purple" title="Phân hệ đã truy cập" value="8" />
+        <StatCard icon={ScrollText} tone="blue" title="Tổng lượt truy cập (24h)" value="24,532" />
+        <StatCard icon={CheckCircle2} tone="green" title="Tác vụ thành công" value="24,410" />
+        <StatCard icon={AlertCircle} tone="red" title="Tác vụ thất bại" value="122" />
+        <StatCard icon={Activity} tone="purple" title="Phân hệ đã truy cập" value="8" />
       </div>
 
       {activeTab === 'access' ? (
         <>
-          {/* Filters for Access Log */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm người dùng, hành động..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  />
-                </div>
-                <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
-                  <Search className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
-                  title="Bộ lọc"
-                >
-                  {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-                </button>
+          {renderSearchBar({
+            ariaLabel: 'Tìm kiếm nhật ký truy cập',
+            placeholder: 'Tìm kiếm theo người dùng, mã người dùng, hành động, phân hệ',
+            term: searchTerm,
+            setTerm: setSearchTerm,
+            onSearch: runSearch,
+            open: showFilters,
+            setOpen: setShowFilters,
+            onExport: handleExportAccessLog,
+            status: filterStatus,
+            setStatus: setFilterStatus,
+            from: startDate,
+            setFrom: setStartDate,
+            to: endDate,
+            setTo: setEndDate,
+          })}
 
-                <button
-                  onClick={handleExportAccessLog}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 text-[13px]"
-                  title="Kết xuất Excel"
-                >
-                  <Download className="w-4 h-4" />
-                  Kết xuất
-                </button>
-              </div>
-            </div>
-
-            {/* Collapsible Filters Row */}
-            {showFilters && (
-              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-3 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-                <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="success">Thành công</option>
-                    <option value="failed">Thất bại</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                    />
-                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                    />
-                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Access Logs Table */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+          {/* Bảng nhật ký truy cập (mục 5.3) */}
+          <div className={TABLE_WRAP_CLS}>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse collection-table text-[13px]">
-                <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
-                  <tr>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Người dùng</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">IP</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Hành động</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thiết bị</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
+              <table className="w-full border-collapse">
+                <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+                  <tr className={TABLE_HEAD_ROW_CLS}>
+                    <th className={`${TH} text-center w-14`}>STT</th>
+                    <th className={`${TH} text-left`}>Thời gian</th>
+                    <th className={`${TH} text-left`}>Người dùng</th>
+                    <th className={`${TH} text-left`}>IP</th>
+                    <th className={`${TH} text-left`}>Hành động</th>
+                    <th className={`${TH} text-left`}>Thiết bị</th>
+                    <th className={`${TH} text-left`}>Trạng thái</th>
+                    <th className={`${TH} text-center w-20 sticky right-0 ${TABLE_HEAD_BG}`}>Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {filteredLogs
                     .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                     .map((log, index) => (
-                      <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                        <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                        <td className="px-4 py-3 text-left text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
-                        <td className="px-4 py-3 text-left text-[13px]">
-                          <div className="font-medium text-slate-950 leading-snug">{log.user}</div>
-                          <div className="text-slate-500 mt-0.5 font-mono text-[13px]">{log.userId}</div>
+                      <tr key={log.id} className={TR}>
+                        <td className={`${TD} text-center tabular-nums`}>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                        <TimestampCell value={log.timestamp} />
+                        <td className={`${TD} text-left max-w-[240px] leading-[18px]`}>
+                          <TruncatedText text={log.user} />
+                          <TruncatedText text={log.userId} className={SUB_TEXT} />
                         </td>
-                        <td className="px-4 py-3 text-left text-slate-600 font-mono text-[13px]">{log.ip}</td>
-                        <td className="px-4 py-3 text-left text-slate-700 text-[13px]">{log.action}</td>
-                        <td className="px-4 py-3 text-left text-[13px]">
-                          <div className="text-slate-900 font-medium">{log.device}</div>
-                          <div className="text-slate-500 mt-0.5">{log.browser}</div>
+                        <td className={`${TD} text-left whitespace-nowrap tabular-nums`}>{log.ip}</td>
+                        <td className={`${TD} text-left max-w-[280px]`}>
+                          <TruncatedText text={log.action} />
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <StatusTag 
-                            label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                            variant={log.status === 'success' ? 'green' : 'red'} 
+                        <td className={`${TD} text-left max-w-[240px]`}>
+                          <TruncatedText text={`${log.device} · ${log.browser}`} />
+                        </td>
+                        <td className={`${TD} text-left whitespace-nowrap`}>
+                          <Badge
+                            label={log.status === 'success' ? 'Thành công' : 'Thất bại'}
+                            variant={log.status === 'success' ? 'green' : 'red'}
                           />
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center">
-                            <button
-                              onClick={() => handleViewDetail(log)}
-                              className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                              title="Xem chi tiết"
-                            >
+                        <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors`}>
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(log)}>
                               <Eye className="w-4 h-4" />
-                            </button>
+                            </RowIconAction>
                           </div>
                         </td>
                       </tr>
                     ))}
+                  {filteredLogs.length === 0 && <EmptyRow colSpan={8} />}
                 </tbody>
               </table>
             </div>
-            
-            {/* Pagination */}
-            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-600">Hiển thị</span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-                  title="Số bản ghi trên trang"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-                <span className="text-slate-600">bản ghi/trang</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <span className="text-slate-600">
-                  {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Trước
-                  </button>
-                  
-                  {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                        currentPage === page
-                          ? 'bg-blue-600 border-blue-600 text-white'
-                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
 
-                  <button
-                    onClick={() => {
-                      const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-                      if (currentPage < totalPages) {
-                        setCurrentPage(currentPage + 1);
-                      }
-                    }}
-                    disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Sau
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Phân trang (mục 5.14) */}
+            <Pagination
+              className="border-t border-[#E2E8F0]"
+              currentPage={currentPage}
+              totalItems={filteredLogs.length}
+              pageSize={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setItemsPerPage}
+            />
           </div>
         </>
       ) : (
         <>
-          {/* Filters for Login Log */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm tài khoản, họ tên, IP, lý do..."
-                    value={loginSearchTerm}
-                    onChange={(e) => setLoginSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  />
-                </div>
-                <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
-                  <Search className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowLoginFilters(!showLoginFilters)}
-                  className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showLoginFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
-                  title="Bộ lọc"
-                >
-                  {showLoginFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-                </button>
+          {renderSearchBar({
+            ariaLabel: 'Tìm kiếm nhật ký đăng nhập',
+            placeholder: 'Tìm kiếm theo tài khoản, họ tên, IP, lý do',
+            term: loginSearchTerm,
+            setTerm: setLoginSearchTerm,
+            onSearch: runLoginSearch,
+            open: showLoginFilters,
+            setOpen: setShowLoginFilters,
+            onExport: handleExportLoginLog,
+            status: loginFilterStatus,
+            setStatus: setLoginFilterStatus,
+            from: loginStartDate,
+            setFrom: setLoginStartDate,
+            to: loginEndDate,
+            setTo: setLoginEndDate,
+          })}
 
-                <button
-                  onClick={handleExportLoginLog}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 bg-white rounded-lg hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 text-[13px]"
-                  title="Kết xuất Excel"
-                >
-                  <Download className="w-4 h-4" />
-                  Kết xuất
-                </button>
-              </div>
-            </div>
-
-            {/* Collapsible Filters Row */}
-            {showLoginFilters && (
-              <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-3 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-                <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
-                  <select
-                    value={loginFilterStatus}
-                    onChange={(e) => setLoginFilterStatus(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="all">Tất cả trạng thái</option>
-                    <option value="success">Thành công</option>
-                    <option value="failed">Thất bại</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                    <input
-                      type="date"
-                      value={loginStartDate}
-                      onChange={(e) => setLoginStartDate(e.target.value)}
-                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                    />
-                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                    <input
-                      type="date"
-                      value={loginEndDate}
-                      onChange={(e) => setLoginEndDate(e.target.value)}
-                      className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                    />
-                    <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Login Logs Table */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+          {/* Bảng nhật ký đăng nhập (mục 5.3) */}
+          <div className={TABLE_WRAP_CLS}>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse collection-table text-[13px]">
-                <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
-                  <tr>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Tên đăng nhập</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Họ và tên</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">IP</th>
-                    <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Chi tiết / Lý do</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thiết bị</th>
-                    <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Vị trí</th>
+              <table className="w-full border-collapse">
+                <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+                  <tr className={TABLE_HEAD_ROW_CLS}>
+                    <th className={`${TH} text-center w-14`}>STT</th>
+                    <th className={`${TH} text-left`}>Thời gian</th>
+                    <th className={`${TH} text-left`}>Tên đăng nhập</th>
+                    <th className={`${TH} text-left`}>Họ và tên</th>
+                    <th className={`${TH} text-left`}>IP</th>
+                    <th className={`${TH} text-left`}>Trạng thái</th>
+                    <th className={`${TH} text-left`}>Chi tiết / Lý do</th>
+                    <th className={`${TH} text-left`}>Thiết bị</th>
+                    <th className={`${TH} text-left`}>Vị trí</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {filteredLoginLogs
                     .slice((loginCurrentPage - 1) * loginItemsPerPage, loginCurrentPage * loginItemsPerPage)
                     .map((log, index) => (
-                      <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                        <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(loginCurrentPage - 1) * loginItemsPerPage + index + 1}</td>
-                        <td className="px-4 py-3 text-left text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
-                        <td className="px-4 py-3 text-left text-slate-900 font-mono font-medium text-[13px]">{log.username}</td>
-                        <td className="px-4 py-3 text-left text-slate-700 text-[13px]">{log.fullName}</td>
-                        <td className="px-4 py-3 text-left text-slate-600 font-mono text-[13px]">{log.ip}</td>
-                        <td className="px-4 py-3 text-center">
-                          <StatusTag 
-                            label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                            variant={log.status === 'success' ? 'green' : 'red'} 
+                      <tr key={log.id} className={TR}>
+                        <td className={`${TD} text-center tabular-nums`}>{(loginCurrentPage - 1) * loginItemsPerPage + index + 1}</td>
+                        <TimestampCell value={log.timestamp} />
+                        <td className={`${TD} text-left max-w-[200px]`}>
+                          <TruncatedText text={log.username} />
+                        </td>
+                        <td className={`${TD} text-left max-w-[240px]`}>
+                          <TruncatedText text={log.fullName} />
+                        </td>
+                        <td className={`${TD} text-left whitespace-nowrap tabular-nums`}>{log.ip}</td>
+                        <td className={`${TD} text-left whitespace-nowrap`}>
+                          <Badge
+                            label={log.status === 'success' ? 'Thành công' : 'Thất bại'}
+                            variant={log.status === 'success' ? 'green' : 'red'}
                           />
                         </td>
-                        <td className="px-4 py-3 text-left text-slate-600 text-[13px]">
-                          {log.status === 'success' ? (
-                            <span className="text-green-600">Đăng nhập thành công</span>
-                          ) : (
-                            <span className="text-red-600 font-medium">{log.reason || 'Sai mật khẩu'}</span>
-                          )}
+                        <td className={`${TD} text-left max-w-[240px]`}>
+                          <TruncatedText text={log.status === 'success' ? 'Đăng nhập thành công' : (log.reason || 'Sai mật khẩu')} />
                         </td>
-                        <td className="px-4 py-3 text-left text-[13px]">
-                          <div className="text-slate-900 font-medium">{log.device}</div>
-                          <div className="text-slate-500 mt-0.5">{log.browser}</div>
+                        <td className={`${TD} text-left max-w-[240px]`}>
+                          <TruncatedText text={`${log.device} · ${log.browser}`} />
                         </td>
-                        <td className="px-4 py-3 text-left text-slate-700 text-[13px]">{log.location}</td>
+                        <td className={`${TD} text-left max-w-[220px]`}>
+                          <TruncatedText text={log.location} />
+                        </td>
                       </tr>
                     ))}
+                  {filteredLoginLogs.length === 0 && <EmptyRow colSpan={9} />}
                 </tbody>
               </table>
             </div>
-            
-            {/* Pagination */}
-            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-600">Hiển thị</span>
-                <select
-                  value={loginItemsPerPage}
-                  onChange={(e) => {
-                    setLoginItemsPerPage(Number(e.target.value));
-                    setLoginCurrentPage(1);
-                  }}
-                  className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-                  title="Số bản ghi trên trang"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-                <span className="text-slate-600">bản ghi/trang</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <span className="text-slate-600">
-                  {filteredLoginLogs.length > 0 ? (loginCurrentPage - 1) * loginItemsPerPage + 1 : 0} - {Math.min(loginCurrentPage * loginItemsPerPage, filteredLoginLogs.length)} / {filteredLoginLogs.length}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setLoginCurrentPage(loginCurrentPage > 1 ? loginCurrentPage - 1 : loginCurrentPage)}
-                    disabled={loginCurrentPage === 1}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Trước
-                  </button>
-                  
-                  {Array.from({ length: Math.ceil(filteredLoginLogs.length / loginItemsPerPage) }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setLoginCurrentPage(page)}
-                      className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                        loginCurrentPage === page
-                          ? 'bg-blue-600 border-blue-600 text-white'
-                          : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
 
-                  <button
-                    onClick={() => {
-                      const totalPages = Math.ceil(filteredLoginLogs.length / loginItemsPerPage);
-                      if (loginCurrentPage < totalPages) {
-                        setLoginCurrentPage(loginCurrentPage + 1);
-                      }
-                    }}
-                    disabled={loginCurrentPage === Math.ceil(filteredLoginLogs.length / loginItemsPerPage) || filteredLoginLogs.length === 0}
-                    className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                  >
-                    Sau
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Phân trang (mục 5.14) */}
+            <Pagination
+              className="border-t border-[#E2E8F0]"
+              currentPage={loginCurrentPage}
+              totalItems={filteredLoginLogs.length}
+              pageSize={loginItemsPerPage}
+              onPageChange={setLoginCurrentPage}
+              onPageSizeChange={setLoginItemsPerPage}
+            />
           </div>
         </>
       )}
 
-      {/* Detail Modal for Access Log */}
+      {/* Modal Xem chi tiết phiên truy cập — chiều cao cố định, thân tự cuộn (mục 5.4) */}
       {showDetailModal && selectedLog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 animate-fade-in">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="access-session-title"
+            className="bg-white rounded-2xl shadow-2xl w-[1024px] max-w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
+          >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-slate-900 font-semibold">Chi tiết phiên truy cập</h3>
-                  <p className="text-sm text-slate-600 mt-0.5">
-                    Session ID: <span className="font-mono">{selectedLog.sessionId}</span>
-                  </p>
-                </div>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h3 id="access-session-title" className={MODAL_TITLE}>Chi tiết phiên truy cập</h3>
+                <p className={`${SUB_TEXT} mt-0.5`}>
+                  Session ID: <span className="tabular-nums">{selectedLog.sessionId}</span>
+                </p>
               </div>
-              <button
-                onClick={closeDetailModal}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" 
-                title="Đóng" 
-                aria-label="Đóng"
-              >
+              <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Session Info */}
-            <div className="p-6 border-b border-slate-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <User className="w-4 h-4" />
-                    <span className="text-xs font-medium">Người dùng</span>
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+              {/* Thông tin phiên (mục 5.17) */}
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Người dùng</div>
+                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.user || '-'}</div>
+                    <div className={SUB_TEXT}>{selectedLog.userId}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.user}</div>
-                  <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.userId}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-xs font-medium">Thời gian bắt đầu</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Thời gian bắt đầu</div>
+                    <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp || '-'}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.timestamp}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <Monitor className="w-4 h-4" />
-                    <span className="text-xs font-medium">Thiết bị</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Thiết bị</div>
+                    <div className={FIELD_VALUE}>{selectedLog.device || '-'}</div>
+                    <div className={SUB_TEXT}>{selectedLog.browser}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.device}</div>
-                  <div className="text-xs text-slate-500 mt-1">{selectedLog.browser}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-xs font-medium">Vị trí & IP</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Vị trí & IP</div>
+                    <div className={FIELD_VALUE}>{selectedLog.location || '-'}</div>
+                    <div className={`${SUB_TEXT} tabular-nums`}>{selectedLog.ip}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.location}</div>
-                  <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.ip}</div>
                 </div>
               </div>
-            </div>
 
-            {/* Actions Timeline */}
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-blue-600" />
-                <h4 className="text-slate-900 font-semibold">Lịch sử thao tác trong phiên</h4>
-                <StatusTag label={`${sessionActions.length} hành động`} variant="blue" />
-              </div>
+              {/* Lịch sử thao tác trong phiên */}
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className={SECTION_TITLE}>
+                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                  Lịch sử thao tác trong phiên
+                  <Badge label={`${sessionActions.length} hành động`} variant="blue" />
+                </h4>
 
-              {sessionActions.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  Không có thao tác nào trong phiên này
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {sessionActions.map((action) => (
-                    <div
-                      key={action.id}
-                      className="bg-slate-50 rounded-lg p-4 border border-slate-100 hover:bg-slate-100/50 transition-colors"
-                    >
-                      <div className="flex items-start gap-4">
-                        {/* Icon */}
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${getActionColor(action.type)}`}>
-                          {getActionIcon(action.type)}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <StatusTag label={action.action} variant={action.type === 'create' ? 'green' : action.type === 'update' ? 'blue' : action.type === 'delete' ? 'red' : action.type === 'view' ? 'purple' : 'orange'} />
-                                <span className="text-sm text-slate-900 font-semibold">{action.module}</span>
-                                {action.status === 'success' ? (
-                                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                ) : (
-                                  <AlertCircle className="w-4 h-4 text-red-600" />
-                                )}
-                              </div>
-                              <div className="text-sm text-slate-700">{action.description}</div>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                              <Clock className="w-3.5 h-3.5" />
-                              {action.time}
-                            </div>
+                {sessionActions.length === 0 ? (
+                  <div className="text-center py-8 text-[13px] text-[#64748B]">
+                    Không có thao tác nào trong phiên này
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sessionActions.map((action) => (
+                      <div
+                        key={action.id}
+                        className="rounded-lg border border-[#E2E8F0] bg-white p-4 hover:bg-[#F8FAFC] transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Icon */}
+                          <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${getActionColor(action.type)}`}>
+                            {getActionIcon(action.type)}
                           </div>
 
-                          {/* Target */}
-                          <div className="text-xs text-slate-600 mt-2">
-                            <span className="text-slate-500 font-medium">Đối tượng tác động:</span>{' '}
-                            <span className="font-mono text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">{action.target}</span>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Badge label={action.action} variant={ACTION_VARIANT[action.type]} />
+                                  <span className="text-[13px] font-medium text-[#020817]">{action.module}</span>
+                                  {action.status === 'success' ? (
+                                    <CheckCircle2 className="w-4 h-4 text-[#16A34A]" aria-label="Thành công" />
+                                  ) : (
+                                    <AlertCircle className="w-4 h-4 text-[#DC2626]" aria-label="Thất bại" />
+                                  )}
+                                </div>
+                                <div className={FIELD_VALUE}>{action.description}</div>
+                              </div>
+                              <div className={`flex items-center gap-1.5 shrink-0 tabular-nums ${SUB_TEXT}`}>
+                                <Clock className="w-4 h-4" />
+                                {action.time}
+                              </div>
+                            </div>
+
+                            {/* Target */}
+                            <div className="mt-2 flex items-center gap-2 flex-wrap text-[13px]">
+                              <span className={FIELD_LABEL}>Đối tượng tác động:</span>
+                              <span className="text-[#020817] bg-[#F8FAFC] px-2 py-0.5 rounded-lg border border-[#E2E8F0] break-all">{action.target}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Activity className="w-4 h-4 text-slate-400" />
-                  <span>
-                    Tổng thời gian hoạt động:{' '}
-                    <strong className="text-slate-900">
-                      {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
-                    </strong>
+            <div className={MODAL_FOOTER}>
+              <div className="flex items-center gap-2 text-[13px] text-[#020817]">
+                <Activity className="w-4 h-4 text-[#475569]" />
+                <span>
+                  Tổng thời gian hoạt động:{' '}
+                  <span className="font-medium">
+                    {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
                   </span>
-                </div>
-                <button
-                  onClick={closeDetailModal}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium transition-colors"
-                >
-                  Đóng
-                </button>
+                </span>
               </div>
+              <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
+                Đóng
+              </button>
             </div>
           </div>
         </div>
