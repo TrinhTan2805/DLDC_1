@@ -1,73 +1,78 @@
+import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { Portal } from '../common/Portal';
+import { Badge, BTN_OUTLINE, BTN_GHOST_ICON, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE } from '../pages/collection/collectionUi';
+import { CURRENT_USER } from '../user/currentUser';
 
 interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Thông tin cá nhân — cùng bố cục, trường dữ liệu với "Chi tiết người dùng" (Quản lý người dùng):
+// modal xem chi tiết chiều cao cố định, thân tự cuộn (5.4); cặp Nhãn – Giá trị (5.17); Badge (5.8)
 export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
   if (!isOpen) return null;
+  const user = CURRENT_USER;
+
+  const Field = ({ label, children }: { label: string; children: ReactNode }) => (
+    <div className="space-y-1">
+      <div className={FIELD_LABEL}>{label}</div>
+      {children}
+    </div>
+  );
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-slate-900">Thông tin cá nhân</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600" title="Đóng" aria-label="Đóng">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-600 text-2xl">NV</span>
-              </div>
-              <div>
-                <h3 className="text-slate-900">Nguyễn Văn A</h3>
-                <p className="text-slate-600 text-sm">Chuyên viên - Phòng Tin học</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Mã nhân viên</label>
-                <p className="text-slate-900">NV001</p>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Email</label>
-                <p className="text-slate-900">nguyenvana@moj.gov.vn</p>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Số điện thoại</label>
-                <p className="text-slate-900">024 3933 3333</p>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Phòng ban</label>
-                <p className="text-slate-900">Phòng Tin học</p>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Chức vụ</label>
-                <p className="text-slate-900">Chuyên viên</p>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">Ngày tham gia</label>
-                <p className="text-slate-900">01/01/2020</p>
+    <Portal>
+      <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="user-profile-title"
+          // Modal ít trường → cao theo nội dung (ngoại lệ mục 5.4), tối đa 90vh rồi thân tự cuộn
+          className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+            <h3 id="user-profile-title" className="text-[16px] font-medium text-[#020817]">Thông tin cá nhân</h3>
+            <button type="button" onClick={onClose} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+            {/* Thông tin cơ bản */}
+            <div className="rounded-2xl border border-[#E2E8F0] p-4">
+              <h4 className={SECTION_TITLE}>
+                <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                Thông tin cơ bản
+              </h4>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <Field label="Họ và tên"><div className={`${FIELD_VALUE} break-words`}>{user.name || '-'}</div></Field>
+                <Field label="Tên đăng nhập"><div className={`${FIELD_VALUE} break-words`}>{user.username || '-'}</div></Field>
+                <Field label="Email"><div className={`${FIELD_VALUE} break-words`}>{user.email || '-'}</div></Field>
+                <Field label="Số điện thoại"><div className={FIELD_VALUE}>{user.phone || '-'}</div></Field>
+                <Field label="Đơn vị"><div className={`${FIELD_VALUE} break-words`}>{user.department || '-'}</div></Field>
+                <Field label="Vai trò">
+                  {user.role ? <Badge label={user.role} variant="blue" /> : <div className={FIELD_VALUE}>-</div>}
+                </Field>
+                <Field label="Trạng thái">
+                  <Badge
+                    label={user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                    variant={user.status === 'active' ? 'green' : 'slate'}
+                  />
+                </Field>
+                <Field label="Đăng nhập gần nhất"><div className={FIELD_VALUE}>{user.lastLogin || '-'}</div></Field>
+                <Field label="Ngày tạo tài khoản"><div className={FIELD_VALUE}>{user.createdDate || '-'}</div></Field>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="flex justify-end gap-2 p-6 border-t border-slate-200">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-          >
-            Đóng
-          </button>
+
+          <div className="shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
+            <button type="button" onClick={onClose} className={BTN_OUTLINE}>Đóng</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Portal>
   );
 }

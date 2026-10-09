@@ -576,7 +576,7 @@ export function APIConfigModal({ isOpen, service, onClose, onSave }: APIConfigMo
                     <input
                       type="text"
                       defaultValue="https://api.dldc.moj.gov.vn"
-                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm bg-slate-50"
+                      className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm bg-[#F0F0F0]"
                       disabled
                     />
                   </div>

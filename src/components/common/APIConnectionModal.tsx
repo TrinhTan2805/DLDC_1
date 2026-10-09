@@ -87,7 +87,7 @@ export function APIConnectionModal({
                 disabled={isViewMode}
                 required
                 placeholder="Ví dụ: API Danh mục giới tính"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
               />
             </div>
 
@@ -103,7 +103,7 @@ export function APIConnectionModal({
                 disabled={isViewMode}
                 required
                 placeholder="https://api.example.com/v1/endpoint"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
               />
             </div>
 
@@ -117,7 +117,7 @@ export function APIConnectionModal({
                   value={formData.method}
                   onChange={(e) => handleChange('method', e.target.value)}
                   disabled={isViewMode}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                 >
                   <option value="GET">GET</option>
                   <option value="POST">POST</option>
@@ -134,7 +134,7 @@ export function APIConnectionModal({
                   value={formData.authType}
                   onChange={(e) => handleChange('authType', e.target.value)}
                   disabled={isViewMode}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                 >
                   <option value="API Key">API Key</option>
                   <option value="Bearer Token">Bearer Token</option>
@@ -157,7 +157,7 @@ export function APIConnectionModal({
                   onChange={(e) => handleChange('apiKey', e.target.value)}
                   disabled={isViewMode}
                   placeholder="••••••••••••••••"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                 />
               </div>
             )}
@@ -173,7 +173,7 @@ export function APIConnectionModal({
                     value={formData.username}
                     onChange={(e) => handleChange('username', e.target.value)}
                     disabled={isViewMode}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                   />
                 </div>
                 <div>
@@ -186,7 +186,7 @@ export function APIConnectionModal({
                     onChange={(e) => handleChange('password', e.target.value)}
                     disabled={isViewMode}
                     placeholder="••••••••"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                   />
                 </div>
               </div>
@@ -203,7 +203,7 @@ export function APIConnectionModal({
                 disabled={isViewMode}
                 rows={3}
                 placeholder="Mô tả về kết nối API này..."
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
               />
             </div>
 

@@ -264,7 +264,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                     type="text"
                     value={formData.providerName || 'Chưa chọn đơn vị'}
                     readOnly
-                    className="flex-1 px-4 py-2 border border-slate-200 rounded-lg bg-white text-slate-700 font-medium focus:outline-none"
+                    className="flex-1 px-4 py-2 border border-slate-200 rounded-lg bg-[#F0F0F0] text-slate-700 font-medium focus:outline-none"
                   />
                   {formData.providerName && (
                     <span className={`px-3 py-2 rounded-lg text-base font-medium whitespace-nowrap border ${formData.providerType === 'internal' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
@@ -742,7 +742,7 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   type="text"
                   value={donViSearch}
                   readOnly
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-900 font-medium focus:outline-none"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-[#F0F0F0] text-slate-900 font-medium focus:outline-none"
                 />
               </div>
               <div>

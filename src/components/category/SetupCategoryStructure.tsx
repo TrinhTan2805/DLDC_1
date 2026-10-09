@@ -465,7 +465,7 @@ export function SetupCategoryStructure() {
                   <input
                     type="text"
                     value={editingField.name}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-[#F0F0F0] font-mono"
                     disabled
                   />
                 </div>

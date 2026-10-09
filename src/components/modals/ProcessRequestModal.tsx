@@ -236,7 +236,7 @@ export function ProcessRequestModal({ isOpen, onClose, request, onProcess }: Pro
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Ghi chú về quá trình xử lý, điều chỉnh, hoặc lưu ý đặc biệt..."
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-[#F0F0F0] disabled:cursor-not-allowed"
                 disabled={processing}
               />
             </div>

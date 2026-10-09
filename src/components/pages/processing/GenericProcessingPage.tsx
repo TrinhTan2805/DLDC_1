@@ -649,7 +649,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.field}
                                 onChange={(e) => handleUpdateRule(rule.id, 'field', e.target.value)}
                                 title="Trường áp dụng"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
                                 <option value="Họ và tên">Họ và tên</option>
@@ -666,7 +666,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.rule}
                                 onChange={(e) => handleUpdateRule(rule.id, 'rule', e.target.value)}
                                 title="Quy tắc định dạng"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn quy tắc --</option>
 
@@ -684,7 +684,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.action}
                                   onChange={(e) => handleUpdateRule(rule.id, 'action', e.target.value)}
                                   title="Xử lý ngoại lệ"
-                                  className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                  className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                 >
                                   <option value="">-- Chọn xử lý --</option>
                                   <option value="Loại bỏ bản ghi lỗi">Loại bỏ bản ghi lỗi</option>
@@ -756,7 +756,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       value={rule.field}
                                       onChange={(e) => handleUpdateValidityRule(rule.id, 'field', e.target.value)}
                                       title="Trường áp dụng"
-                                      className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                      className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                     >
                                       <option value="">-- Chọn trường --</option>
                                       <option value="Họ và tên">Họ và tên</option>
@@ -774,7 +774,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                         value={rule.rule}
                                         onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
                                         title="Điều kiện hợp lệ"
-                                        className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                        className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                       >
                                         <option value="">-- Chọn điều kiện --</option>
                                         <option value="=">Bằng (=)</option>
@@ -843,7 +843,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           value={rule.value}
                                           onChange={(e) => handleUpdateValidityRule(rule.id, 'value', e.target.value)}
                                           placeholder="Nhập giá trị..."
-                                          className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                          className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                         />
                                       )}
                                     </div>
@@ -875,7 +875,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       disabled={rule.isSaved}
                                       value={rule.rule}
                                       onChange={(e) => handleUpdateValidityRule(rule.id, 'rule', e.target.value)}
-                                      className={`w-64 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                      className={`w-64 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 border text-slate-700'}`}
                                       title="Logic Operator"
                                     >
                                       <option value="AND">AND</option>
@@ -903,7 +903,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           disabled={rule.isSaved}
                                           value={cond.field}
                                           onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'field', e.target.value)}
-                                          className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                          className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 border text-slate-700'}`}
                                           title="Trường"
                                         >
                                           <option value="">-- Chọn trường --</option>
@@ -917,7 +917,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           disabled={rule.isSaved}
                                           value={cond.operator}
                                           onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'operator', e.target.value)}
-                                          className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                          className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 border text-slate-700'}`}
                                           title="Toán tử"
                                         >
                                           <option value="=">=</option>
@@ -935,7 +935,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           value={cond.value}
                                           onChange={(e) => handleUpdateValidityCondition(rule.id, cond.id, 'value', e.target.value)}
                                           placeholder="0"
-                                          className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
+                                          className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 border text-slate-700'}`}
                                         />
                                         {!rule.isSaved && rule.conditions.length > 1 && (
                                           <button
@@ -969,7 +969,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                     value={rule.action}
                                     onChange={(e) => handleUpdateValidityRule(rule.id, 'action', e.target.value)}
                                     title="Xử lý ngoại lệ"
-                                    className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                    className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                   >
                                     <option value="">-- Chọn xử lý --</option>
                                     <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
@@ -1016,7 +1016,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.field}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'field', e.target.value)}
                                 title="Trường áp dụng"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
                                 <option value="Họ và tên">Họ và tên</option>
@@ -1033,7 +1033,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.type}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'type', e.target.value)}
                                 title="Chọn điều kiện"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn điều kiện --</option>
                                 <option value="Bằng với">Bằng với</option>
@@ -1051,7 +1051,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.sourceValue || ''}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'sourceValue', e.target.value)}
                                 placeholder="VD: null, empty"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               />
                             </div>
 
@@ -1063,7 +1063,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.value}
                                 onChange={(e) => handleUpdateMissingValueRule(rule.id, 'value', e.target.value)}
                                 placeholder="Nhập giá trị..."
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               />
                             </div>
 
@@ -1157,7 +1157,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           value={matchingConfig.sortField}
                           onChange={(e) => handleUpdateMatchingConfig('sortField', e.target.value)}
                           title="Cột căn cứ sắp xếp"
-                          className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất') ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                          className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất') ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                         >
                           <option value="">-- Chọn trường --</option>
                           <option value="ngay_tao">Ngày tạo</option>
@@ -1203,7 +1203,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.field}
                                   onChange={(e) => handleUpdateReferenceRule(rule.id, 'field', e.target.value)}
                                   title="Trường áp dụng"
-                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
                                   <option value="">-- Chọn trường --</option>
                                   <option value="ma_tinh_thanh">Mã Tỉnh/Thành</option>
@@ -1222,7 +1222,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.csdl}
                                   onChange={(e) => handleUpdateReferenceRule(rule.id, 'csdl', e.target.value)}
                                   title="Chọn CSDL tham chiếu"
-                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
                                   <option value="">-- Chọn CSDL --</option>
                                   {REFERENCE_CSDL_OPTIONS.map((o) => (
@@ -1239,7 +1239,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.refTable}
                                   onChange={(e) => handleUpdateReferenceRule(rule.id, 'refTable', e.target.value)}
                                   title="Bảng tham chiếu"
-                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.csdl) ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.csdl) ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
                                   <option value="">-- Chọn bảng --</option>
                                   {(REFERENCE_TABLES_BY_CSDL[rule.csdl] || []).map((o) => (
@@ -1256,7 +1256,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.refField}
                                   onChange={(e) => handleUpdateReferenceRule(rule.id, 'refField', e.target.value)}
                                   title="Trường tham chiếu"
-                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.refTable) ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.refTable) ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
                                   <option value="">-- Chọn trường --</option>
                                   <option value="ma_danh_muc">Mã danh mục</option>
@@ -1273,7 +1273,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.action}
                                   onChange={(e) => handleUpdateReferenceRule(rule.id, 'action', e.target.value)}
                                   title="Hành động"
-                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
                                   <option value="">-- Chọn hành động --</option>
                                   <option value="Từ chối bản ghi vi phạm">Từ chối bản ghi vi phạm</option>
@@ -1292,7 +1292,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   value={rule.defaultValue}
                                   onChange={(e) => handleUpdateReferenceRule(rule.id, 'defaultValue', e.target.value)}
                                   placeholder="Nhập giá trị mặc định..."
-                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                                  className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 />
                               </div>
                             </div>
@@ -1340,7 +1340,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.field}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'field', e.target.value)}
                                 title="Trường áp dụng"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn trường --</option>
                                 <option value="Họ và tên">Họ và tên</option>
@@ -1357,7 +1357,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.type}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'type', e.target.value)}
                                 title="Kiểu dữ liệu"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn kiểu --</option>
                                 <option value="Số thập phân">Số thập phân</option>
@@ -1376,7 +1376,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.info}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'info', e.target.value)}
                                 title="Thông tin chuyển đổi"
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
                                 <option value="">-- Chọn thông tin --</option>
                                 <option value="dd/mm/yyyy">dd/mm/yyyy</option>
@@ -1395,7 +1395,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 value={rule.value}
                                 onChange={(e) => handleUpdateTransformRule(rule.id, 'value', e.target.value)}
                                 placeholder="Nhập giá trị..."
-                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
+                                className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               />
                             </div>
 

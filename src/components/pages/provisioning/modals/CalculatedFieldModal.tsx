@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Code, Database, HelpCircle, Save, Check, Star, Settings, Wand2, Terminal } from 'lucide-react';
 
@@ -387,7 +387,7 @@ export function CalculatedFieldModal({
                   value={dataType}
                   onChange={(e) => setDataType(e.target.value)}
                   disabled={activeTab === 'preset'} // Presets manage outputs automatically
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm text-slate-800 font-bold disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm text-slate-800 font-bold disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed"
                 >
                   <option value="string">String (Chuỗi văn bản)</option>
                   <option value="number">Number (Số học)</option>

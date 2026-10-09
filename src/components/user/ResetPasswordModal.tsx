@@ -102,7 +102,7 @@ export function ResetPasswordModal({ isOpen, onClose, user }: ResetPasswordModal
                     type="text"
                     value={defaultPassword}
                     readOnly
-                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 font-mono text-sm"
+                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg bg-[#F0F0F0] font-mono text-sm"
                   />
                   <button
                     onClick={handleCopyPassword}

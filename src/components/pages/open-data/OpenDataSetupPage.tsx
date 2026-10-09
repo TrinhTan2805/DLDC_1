@@ -27,7 +27,7 @@ const MODAL_HEADER = 'px-6 py-4 border-b border-[#E2E8F0] flex items-center just
 const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
 const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar flex-1';
 const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0';
-const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] disabled:cursor-not-allowed';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F0F0F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed';
 const BANNER_INFO = 'p-3 rounded-lg border bg-[#EAF3FF] border-[#BFDBFE] text-[13px] text-[#020817] flex items-start gap-2';
 const BANNER_WARN = 'p-3 rounded-lg border bg-[#FFF7ED] border-[#FED7AA] text-[13px] text-[#020817] flex items-start gap-2';
 const BANNER_DANGER = 'p-3 rounded-lg border bg-[#FEF2F2] border-[#FEE2E2] text-[13px] text-[#020817] flex items-start gap-2';
@@ -35,7 +35,7 @@ const BANNER_SUCCESS = 'p-3 rounded-lg border bg-[#F0FDF4] border-[#DCFCE7] text
 const BANNER_NEUTRAL = 'p-3 rounded-lg border bg-[#F8FAFC] border-[#E2E8F0] text-[13px] text-[#020817] flex items-start gap-2';
 const CHIP_ACTIVE = `${BTN_OUTLINE} !bg-[#EAF3FF] !border-[#BFDBFE] !text-[#155DFC]`;
 const STAT_CARD = 'bg-white rounded-2xl border border-[#E2E8F0] p-4';
-const READONLY_BOX = 'w-full h-10 px-3 flex items-center border border-[#E2E8F0] bg-[#F1F5F9] rounded-lg text-[13px] text-[#94A3B8] cursor-not-allowed';
+const READONLY_BOX = 'w-full h-10 px-3 flex items-center border border-[#E2E8F0] bg-[#F0F0F0] rounded-lg text-[13px] text-[#94A3B8] cursor-not-allowed';
 // Thẻ nhóm (mục 5.6)
 const GROUP_CARD = 'rounded-2xl border border-[#E2E8F0] p-4';
 

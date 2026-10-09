@@ -233,7 +233,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                       value={serviceForm.serviceName}
                       onChange={e => setServiceForm({ ...serviceForm, serviceName: e.target.value })}
                       disabled={isView}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-600" 
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" 
                       placeholder="VD: API Tra cứu đăng ký kinh doanh" 
                       required 
                     />
@@ -245,7 +245,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                       title="Chọn phiên bản dịch vụ"
                       aria-label="Chọn phiên bản dịch vụ"
                       disabled={isView}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                     >
                       <option value="v1">v1.0 (Hiện tại)</option>
                       <option value="v2">v2.0 (Bản nháp Mới)</option>
@@ -265,7 +265,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                       value={serviceForm.serviceCode}
                       onChange={e => setServiceForm({ ...serviceForm, serviceCode: e.target.value })}
                       disabled={isView}
-                      className="w-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-blue-700 disabled:bg-slate-50" 
+                      className="w-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-blue-700 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" 
                       placeholder="tra-cuu-doanh-nghiep"
                       title="Mã dịch vụ / Context Path"
                       required 
@@ -285,7 +285,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         type="text" 
                         disabled={isView} 
                         defaultValue={data?.receiver || ''} 
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50" 
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" 
                         placeholder="VD: Bộ Kế hoạch và Đầu tư" 
                         title="Cơ quan / Đơn vị nhận"
                         required 
@@ -298,7 +298,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         type="text" 
                         disabled={isView} 
                         defaultValue={data?.targetSystem || ''} 
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50" 
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" 
                         placeholder="VD: Hệ thống Thông tin Đầu tư quốc gia" 
                         title="Hệ thống đích"
                         required 
@@ -311,7 +311,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         type="text" 
                         disabled={isView} 
                         defaultValue={data?.contactPerson || ''} 
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50" 
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" 
                         placeholder="Họ tên, SĐT, Email..." 
                         title="Thông tin đầu mối nhận"
                       />
@@ -406,7 +406,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                     id="sharing-policy-textarea"
                     title="Chính sách chia sẻ"
                     aria-label="Chính sách chia sẻ (Quỹ đạo, Hạn chế)"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-slate-50"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                     rows={2}
                     value={serviceForm.sharingPolicy}
                     onChange={e => setServiceForm({ ...serviceForm, sharingPolicy: e.target.value })}
@@ -450,7 +450,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         id="primary-table"
                         title="Chọn bảng dữ liệu chính"
                         aria-label="Chọn bảng dữ liệu chính"
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                         value={selectedTable}
                         onChange={(e) => setSelectedTable(e.target.value)}
                         disabled={isView}
@@ -580,10 +580,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                 </div>
                               </div>
                               <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled={isView} title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ma_dn" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-blue-700 font-mono shadow-sm disabled:bg-slate-50" placeholder="Mặc định: ma_dn" defaultValue="company_code" />
+                                <input type="text" disabled={isView} title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ma_dn" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-blue-700 font-mono shadow-sm disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" placeholder="Mặc định: ma_dn" defaultValue="company_code" />
                               </div>
                               <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled={isView} title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ma_dn" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-300 disabled:bg-slate-50" placeholder="VD: IS NOT NULL" defaultValue="IS NOT NULL" />
+                                <input type="text" disabled={isView} title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ma_dn" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-300 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" placeholder="VD: IS NOT NULL" defaultValue="IS NOT NULL" />
                               </div>
                             </label>
                             {/* Row 2 */}
@@ -596,10 +596,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                 </div>
                               </div>
                               <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled={isView} title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ten_dn" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-blue-700 font-mono shadow-sm disabled:bg-slate-50" placeholder="Mặc định: ten_dn" defaultValue="company_name" />
+                                <input type="text" disabled={isView} title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ten_dn" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-blue-700 font-mono shadow-sm disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" placeholder="Mặc định: ten_dn" defaultValue="company_name" />
                               </div>
                               <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled={isView} title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ten_dn" className="w-full px-3 py-1.5 text-sm bg-transparent border border-transparent hover:bg-white hover:border-slate-200 rounded-md focus:border-blue-500 outline-none placeholder:text-slate-300 transition-colors disabled:bg-slate-50" placeholder="+ Thêm bộ lọc" />
+                                <input type="text" disabled={isView} title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ten_dn" className="w-full px-3 py-1.5 text-sm bg-transparent border border-transparent hover:bg-white hover:border-slate-200 rounded-md focus:border-blue-500 outline-none placeholder:text-slate-300 transition-colors disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" placeholder="+ Thêm bộ lọc" />
                               </div>
                             </label>
                             {/* Row 3 - Unchecked */}
@@ -612,10 +612,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                 </div>
                               </div>
                               <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-slate-50 border border-transparent rounded-md text-slate-400 cursor-not-allowed" placeholder="Mặc định: ngay_thanh_lap" />
+                                <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Mặc định: ngay_thanh_lap" />
                               </div>
                               <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-slate-50 border border-transparent rounded-md text-slate-400 cursor-not-allowed" placeholder="Không áp dụng" />
+                                <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
                               </div>
                             </label>
                           </div>
@@ -656,10 +656,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                     </div>
                                   </div>
                                   <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-slate-50 border border-transparent rounded-md text-slate-400 cursor-not-allowed" placeholder="Mặc định: ma_nganh_cap_1" />
+                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Mặc định: ma_nganh_cap_1" />
                                   </div>
                                   <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-slate-50 border border-transparent rounded-md text-slate-400 cursor-not-allowed" placeholder="Không áp dụng" />
+                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
                                   </div>
                                 </label>
                               </>
@@ -690,10 +690,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                     </div>
                                   </div>
                                   <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-slate-50 border border-transparent rounded-md text-slate-400 cursor-not-allowed" placeholder="Mặc định: ngay_nop_thue" />
+                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Mặc định: ngay_nop_thue" />
                                   </div>
                                   <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-slate-50 border border-transparent rounded-md text-slate-400 cursor-not-allowed" placeholder="Không áp dụng" />
+                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
                                   </div>
                                 </label>
                               </>
@@ -758,7 +758,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                      <div>
                        <label htmlFor="quota-input" className="block text-sm font-medium text-slate-700 mb-1">Số Request tối đa / Ngày (Quota)</label>
                        <div className="relative">
-                         <input id="quota-input" type="number" disabled={isView} className="w-full pl-3 pr-16 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50" placeholder="VD: 10000" defaultValue="10000" />
+                         <input id="quota-input" type="number" disabled={isView} className="w-full pl-3 pr-16 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]" placeholder="VD: 10000" defaultValue="10000" />
                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                            <span className="text-slate-400 text-sm">req/day</span>
                          </div>
@@ -807,7 +807,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div>
                       <label htmlFor="sharing-method" className="block text-sm text-slate-700 mb-1">Phương thức chia sẻ <span className="text-red-500">*</span></label>
-                      <select id="sharing-method" title="Chọn phương thức chia sẻ" aria-label="Chọn phương thức chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
+                      <select id="sharing-method" title="Chọn phương thức chia sẻ" aria-label="Chọn phương thức chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]">
                         <option value="">Chọn phương thức</option>
                         <option value="api-push">Đẩy dữ liệu chủ động (Push API)</option>
                         <option value="db-sync">Đồng bộ Database định kỳ</option>
@@ -816,7 +816,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                     </div>
                     <div>
                       <label htmlFor="sharing-frequency" className="block text-sm text-slate-700 mb-1">Tần suất chia sẻ</label>
-                      <select id="sharing-frequency" title="Chọn tần suất chia sẻ" aria-label="Chọn tần suất chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
+                      <select id="sharing-frequency" title="Chọn tần suất chia sẻ" aria-label="Chọn tần suất chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]">
                         <option value="">Chọn tần suất</option>
                         <option value="realtime">Tức thời (Real-time)</option>
                         <option value="hourly">Mỗi giờ (Hourly)</option>
@@ -855,7 +855,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                     <div className="grid grid-cols-1 gap-4">
                       <div>
                         <label htmlFor="approver-select" className="block text-sm font-medium text-slate-700 mb-1">Người phê duyệt <span className="text-red-500">*</span></label>
-                        <select id="approver-select" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
+                        <select id="approver-select" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]">
                           <option value="">-- Chọn người phê duyệt --</option>
                           <option value="gd">Nguyễn Văn A (Giám đốc)</option>
                           <option value="pgd">Trần Thị B (Phó giám đốc)</option>
@@ -870,7 +870,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         id="approval-note"
                         disabled={isView}
                         rows={3}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none placeholder:text-slate-400 disabled:bg-slate-50"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none placeholder:text-slate-400 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]"
                         placeholder="Mô tả mục đích, lý do cần kích hoạt API này để người phê duyệt nắm rõ..."
                       />
                     </div>
@@ -1130,7 +1130,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Bảng gốc</label>
-                <input type="text" readOnly value="dkkd (Cơ sở dữ liệu Đăng ký kinh doanh)" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-500" />
+                <input type="text" readOnly value="dkkd (Cơ sở dữ liệu Đăng ký kinh doanh)" className="w-full px-3 py-2 bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-lg text-sm" />
               </div>
               <div className="flex items-center justify-center">
                 <div className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full flex items-center gap-1 border border-blue-100">
