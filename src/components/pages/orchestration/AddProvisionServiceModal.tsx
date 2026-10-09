@@ -466,7 +466,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         type="button" 
                         onClick={() => setShowJoinModal(true)} 
                         disabled={isView}
-                        className="px-4 py-2 text-sm text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-lg flex items-center gap-2 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 text-sm text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-lg flex items-center gap-2 font-medium transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
                       >
                         <GitMerge className="w-4 h-4" />
                         Thêm bảng liên kết (Join...)
@@ -520,7 +520,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                 <td className="px-4 py-2 border-r border-slate-100 font-mono text-xs text-blue-600">{jt.primaryKey}</td>
                                 <td className="px-4 py-2 border-r border-slate-100 font-mono text-xs text-emerald-600">{jt.foreignKey}</td>
                                 <td className="px-4 py-2 text-center">
-                                  <button type="button" disabled={isView} aria-label="Xóa bảng liên kết" title="Xóa bảng liên kết" onClick={() => setJoinedTables(joinedTables.filter(t => t.id !== jt.id))} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                                  <button type="button" disabled={isView} aria-label="Xóa bảng liên kết" title="Xóa bảng liên kết" onClick={() => setJoinedTables(joinedTables.filter(t => t.id !== jt.id))} className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none ">
                                     <X className="w-4 h-4 mx-auto" />
                                   </button>
                                 </td>
@@ -612,10 +612,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                 </div>
                               </div>
                               <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Mặc định: ngay_thanh_lap" />
+                                <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-md" placeholder="Mặc định: ngay_thanh_lap" />
                               </div>
                               <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
+                                <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_thanh_lap" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
                               </div>
                             </label>
                           </div>
@@ -656,10 +656,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                     </div>
                                   </div>
                                   <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Mặc định: ma_nganh_cap_1" />
+                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-md" placeholder="Mặc định: ma_nganh_cap_1" />
                                   </div>
                                   <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
+                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ma_nganh_cap_1" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
                                   </div>
                                 </label>
                               </>
@@ -690,10 +690,10 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                                     </div>
                                   </div>
                                   <div className="w-[35%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Mặc định: ngay_nop_thue" />
+                                    <input type="text" disabled title="Key hiển thị trên JSON (Alias)" aria-label="Key hiển thị trên JSON (Alias) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-md" placeholder="Mặc định: ngay_nop_thue" />
                                   </div>
                                   <div className="w-[30%] px-2" onClick={e => e.preventDefault()}>
-                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
+                                    <input type="text" disabled title="Điều kiện Lọc (Tùy chọn)" aria-label="Điều kiện Lọc (Tùy chọn) cho ngay_nop_thue" className="w-full px-3 py-1.5 text-sm bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-md" placeholder="Không áp dụng" />
                                   </div>
                                 </label>
                               </>
@@ -717,7 +717,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                       type="button"
                       onClick={handleTestAPI}
                       disabled={isTesting}
-                      className="px-5 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-all disabled:opacity-50"
+                      className="px-5 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-all disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
                     >
                       {isTesting ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -785,7 +785,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                       type="button"
                       onClick={handleTestConnection}
                       disabled={isTestingConnection}
-                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg flex items-center gap-2 transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
                     >
                       {isTestingConnection ? (
                         <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-700 rounded-full animate-spin" />
@@ -1130,7 +1130,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Bảng gốc</label>
-                <input type="text" readOnly value="dkkd (Cơ sở dữ liệu Đăng ký kinh doanh)" className="w-full px-3 py-2 bg-[#F0F0F0] border border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed rounded-lg text-sm" />
+                <input type="text" readOnly value="dkkd (Cơ sở dữ liệu Đăng ký kinh doanh)" className="w-full px-3 py-2 bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] text-[#000000] cursor-not-allowed rounded-lg text-sm" />
               </div>
               <div className="flex items-center justify-center">
                 <div className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full flex items-center gap-1 border border-blue-100">

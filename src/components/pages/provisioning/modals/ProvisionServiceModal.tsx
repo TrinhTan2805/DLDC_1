@@ -785,7 +785,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                   type="button"
                   disabled={isOpenDataShared}
                   onClick={() => setPacketMode('sql')}
-                  className={`${tabClass(packetMode === 'sql')} disabled:text-[#94A3B8] disabled:cursor-not-allowed`}
+                  className={`${tabClass(packetMode === 'sql')} disabled:text-[#94A3B8] disabled:cursor-not-allowed disabled:!text-[#CBD5E1] disabled:!bg-transparent `}
                   title={isOpenDataShared ? "Không thể dùng câu lệnh SQL tự định nghĩa cho gói tin chia sẻ dữ liệu mở" : "Viết câu lệnh (Raw SQL)"}
                 >
                   Viết câu lệnh (Raw SQL)

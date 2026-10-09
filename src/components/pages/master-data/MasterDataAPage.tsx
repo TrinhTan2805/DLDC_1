@@ -546,7 +546,7 @@ export function MasterDataAPage() {
               <button
                 onClick={() => setSelectedRecords(new Set())}
                 disabled={selectedRecords.size === 0}
-                className="ml-auto text-sm text-purple-700 hover:text-purple-900 underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+                className="ml-auto text-sm text-purple-700 hover:text-purple-900 underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed disabled:!text-[#CBD5E1] disabled:!bg-transparent "
               >
                 Bỏ chọn tất cả
               </button>

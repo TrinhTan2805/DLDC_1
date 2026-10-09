@@ -224,7 +224,7 @@ export function SetupCategoryStructure() {
           </div>
           <button
             onClick={() => setShowAddField(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
             disabled={structureStatus !== 'draft'}
           >
             <Plus className="w-4 h-4" />
@@ -284,14 +284,14 @@ export function SetupCategoryStructure() {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setEditingField(field)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
                         disabled={structureStatus !== 'draft'}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteField(field.id)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
                         disabled={structureStatus !== 'draft'}
                       >
                         <Trash2 className="w-4 h-4" />

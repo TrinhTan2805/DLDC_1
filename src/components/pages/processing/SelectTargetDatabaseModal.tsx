@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Database, Server, ArrowRight } from 'lucide-react';
+import { Database, Server, ArrowRight, Search } from 'lucide-react';
 import { initialTargetDatabases, TargetDatabase } from './mockTargetDatabases';
 import { BaseModal } from '../../common/BaseModal';
+import { BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS, normalizeSearch } from '../collection/collectionUi';
 
 interface SelectTargetDatabaseModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface SelectTargetDatabaseModalProps {
 
 export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: SelectTargetDatabaseModalProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const handleContinue = () => {
     const selectedDb = initialTargetDatabases.find(db => db.id === selectedId);
@@ -19,89 +21,105 @@ export function SelectTargetDatabaseModal({ isOpen, onClose, onContinue }: Selec
     }
   };
 
+  // Lọc theo tên, host, port, schema, loại CSDL — không phân biệt hoa/thường và dấu
+  const q = normalizeSearch(search);
+  const filteredDatabases = q
+    ? initialTargetDatabases.filter(db =>
+      [db.name, db.host, db.port, db.schema, db.type, `${db.host}:${db.port}`].some(v => normalizeSearch(v).includes(q)))
+    : initialTargetDatabases;
+
+  const handleCardKeyDown = (e: React.KeyboardEvent, id: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedId(id);
+    }
+  };
+
   const footer = (
-    <div className="flex items-center justify-end gap-3 w-full">
-      <button 
-        onClick={onClose}
-        style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="text-[13px] text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
-      >
+    <>
+      <button type="button" onClick={onClose} className={BTN_OUTLINE}>
         Hủy
       </button>
-      <button 
-        onClick={handleContinue}
-        disabled={!selectedId}
-        style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className={`flex items-center gap-2 text-[13px] text-white transition-all shadow-md ${
-          selectedId 
-            ? 'bg-blue-600 hover:bg-blue-700 active:scale-95' 
-            : 'bg-slate-300 cursor-not-allowed shadow-none'
-        }`}
-      >
+      <button type="button" onClick={handleContinue} disabled={!selectedId} className={BTN_PRIMARY}>
         Tiếp theo
         <ArrowRight className="w-4 h-4" />
       </button>
-    </div>
+    </>
   );
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <BaseModal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Chọn Cơ sở dữ liệu đích"
-        subtitle="Vui lòng chọn một kết nối CSDL để thực hiện ánh xạ"
-        maxWidth="max-w-2xl"
-        className="force-13px"
-        customHeaderIcon={
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mr-4">
-            <Database className="w-6 h-6" />
-          </div>
-        }
-        footer={footer}
-      >
-        <div className="space-y-4 py-2">
-          {initialTargetDatabases.map((db) => (
-            <label 
-              key={db.id}
-              onClick={() => setSelectedId(db.id)}
-              className={`flex items-start gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${
-                selectedId === db.id 
-                  ? 'border-blue-500 bg-blue-50/40 shadow-sm' 
-                  : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50'
-              }`}
-            >
-              <div className="pt-1">
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                  selectedId === db.id ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white'
-                }`}>
-                  {selectedId === db.id && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />
-                  )}
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-bold text-slate-800 text-[13px]">{db.name}</div>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Chọn Cơ sở dữ liệu đích"
+      subtitle="Vui lòng chọn một kết nối CSDL để thực hiện ánh xạ"
+      maxWidth="max-w-[600px]"
+      customHeaderIcon={
+        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#EAF3FF] flex items-center justify-center text-blue-600 mr-3">
+          <Database className="w-5 h-5" />
+        </div>
+      }
+      footer={footer}
+    >
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Tìm theo tên, host, port, schema hoặc loại CSDL..."
+            aria-label="Tìm kiếm CSDL đích"
+            className={`${INPUT_CLS} pl-9`}
+          />
+        </div>
+
+        {filteredDatabases.length === 0 ? (
+          <p className="py-8 text-center text-[13px] text-[#64748B]">Không tìm thấy kết quả phù hợp</p>
+        ) : (
+          <div role="radiogroup" aria-label="Cơ sở dữ liệu đích" className="space-y-3">
+            {filteredDatabases.map((db) => {
+              const isSelected = selectedId === db.id;
+              return (
+                <div
+                  key={db.id}
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={0}
+                  onClick={() => setSelectedId(db.id)}
+                  onKeyDown={(e) => handleCardKeyDown(e, db.id)}
+                  className={`flex items-center gap-3 p-4 rounded-2xl border bg-white cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isSelected
+                    ? 'border-blue-600 ring-1 ring-blue-600'
+                    : 'border-[#E2E8F0] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'
+                    }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-blue-600' : 'border-[#CBD5E1] bg-white'}`}
+                  >
+                    {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[14px] font-semibold text-[#020817] truncate">{db.name}</div>
+                    <div className="mt-1 flex items-center gap-x-4 gap-y-1 flex-wrap text-[12px] text-[#64748B]">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Server className="w-3.5 h-3.5 shrink-0" />
+                        {db.host}:{db.port}
+                      </span>
+                      <span>
+                        <span className="font-medium">Schema:</span> {db.schema}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="shrink-0 inline-flex items-center h-6 px-2.5 rounded-full bg-[#F1F5F9] text-[12px] font-semibold text-[#020817] whitespace-nowrap">
                     {db.type}
                   </span>
                 </div>
-                <div className="flex items-center gap-6 text-[13px] text-slate-500 font-medium">
-                  <span className="flex items-center gap-2">
-                    <Server className="w-4 h-4 text-slate-400" />
-                    <span className="font-mono text-slate-700">{db.host}:{db.port}</span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span className="text-slate-400">Schema:</span> 
-                    <span className="font-mono text-slate-700">{db.schema}</span>
-                  </span>
-                </div>
-              </div>
-            </label>
-          ))}
-        </div>
-      </BaseModal>
-    </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </BaseModal>
   );
 }

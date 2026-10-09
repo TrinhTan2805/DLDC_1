@@ -270,7 +270,7 @@ const RequestEditor = ({ idPrefix, label, urlPlaceholder }: { idPrefix: string; 
             {bodyMode === 'raw' ? (
               <div>
                 <div className="flex justify-end mb-1">
-                  <button type="button" onClick={formatJson} disabled={!bodyRaw.trim()} className={`h-8 px-3 inline-flex items-center rounded-lg text-[13px] font-medium text-blue-600 hover:bg-[#EAF3FF] disabled:text-[#94A3B8] disabled:hover:bg-transparent disabled:cursor-not-allowed ${BTN_FOCUS}`}>
+                  <button type="button" onClick={formatJson} disabled={!bodyRaw.trim()} className={`h-8 px-3 inline-flex items-center rounded-lg text-[13px] font-medium text-blue-600 hover:bg-[#EAF3FF] disabled:text-[#94A3B8] disabled:cursor-not-allowed ${BTN_FOCUS} disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none `}>
                     Định dạng JSON
                   </button>
                 </div>
@@ -548,7 +548,7 @@ const ReceiveApiForm = ({ format }: { format: 'JSON' | 'XML' }) => {
           <div>
             {isJson && (
               <div className="flex justify-end mb-1">
-                <button type="button" onClick={formatRaw} disabled={!raw.trim()} className={`h-8 px-3 inline-flex items-center rounded-lg text-[13px] font-medium text-blue-600 hover:bg-[#EAF3FF] disabled:text-[#94A3B8] disabled:hover:bg-transparent disabled:cursor-not-allowed ${BTN_FOCUS}`}>
+                <button type="button" onClick={formatRaw} disabled={!raw.trim()} className={`h-8 px-3 inline-flex items-center rounded-lg text-[13px] font-medium text-blue-600 hover:bg-[#EAF3FF] disabled:text-[#94A3B8] disabled:cursor-not-allowed ${BTN_FOCUS} disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none `}>
                   Định dạng JSON
                 </button>
               </div>

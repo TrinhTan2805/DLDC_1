@@ -63,7 +63,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
           <button
             onClick={onClose}
             disabled={isScanning}
-            title="Đóng" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
+            title="Đóng" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5" />
           </button>
@@ -146,7 +146,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
               onChange={(e) => setReason(e.target.value)}
               disabled={isScanning}
               rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 border border-slate-300 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#000000] disabled:cursor-not-allowed"
               placeholder="Nhập lý do chi tiết..."
             />
           </div>
@@ -173,14 +173,14 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
           <button
             onClick={onClose}
             disabled={isScanning}
-            title="Thoát" className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-medium transition-colors disabled:opacity-50"
+            title="Thoát" className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-medium transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
           >
             Thoát
           </button>
           <button
             onClick={handleConfirm}
             disabled={isScanning || !reason.trim() || selectedScopes.length === 0}
-            title="Hủy công khai" className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px] justify-center"
+            title="Hủy công khai" className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium transition-colors flex items-center gap-2 disabled:cursor-not-allowed min-w-[120px] justify-center disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
           >
             Hủy công khai
           </button>

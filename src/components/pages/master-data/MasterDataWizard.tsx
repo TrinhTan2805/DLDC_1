@@ -15,7 +15,7 @@ const SELECT_CLS = `${INPUT_CLS} cursor-pointer`;
 const SELECT_ARROW_CLS = `${SELECT_CLS} pr-8 appearance-none`;
 const SELECT_ICON_CLS = 'absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none';
 const INPUT_BOX = INPUT_CLS.replace('w-full ', '');
-const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F0F0F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:cursor-not-allowed';
 const INFO_BANNER = 'bg-[#EAF3FF] border border-[#BFDBFE] rounded-lg p-4';
 const TH_CLS = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
 const TR_CLS = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
@@ -2423,8 +2423,8 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                               <div key={sid} className="flex items-center gap-1.5 border border-[#E2E8F0] rounded-lg px-2 py-1 bg-[#F8FAFC]">
                                                 <span className="w-4 text-[12px] text-[#64748B] tabular-nums">{idx + 1}</span>
                                                 <span className="flex-1 text-[13px] text-[#020817] truncate">{s?.name}</span>
-                                                <button type="button" disabled={idx === 0} onClick={() => { const a = [...ordered]; [a[idx - 1], a[idx]] = [a[idx], a[idx - 1]]; apply(a); }} className="p-0.5 rounded text-[#64748B] hover:text-blue-600 disabled:text-[#CBD5E1] disabled:cursor-not-allowed cursor-pointer" aria-label="Lên"><ChevronUp className="w-3.5 h-3.5" /></button>
-                                                <button type="button" disabled={idx === ordered.length - 1} onClick={() => { const a = [...ordered]; [a[idx + 1], a[idx]] = [a[idx], a[idx + 1]]; apply(a); }} className="p-0.5 rounded text-[#64748B] hover:text-blue-600 disabled:text-[#CBD5E1] disabled:cursor-not-allowed cursor-pointer" aria-label="Xuống"><ChevronDown className="w-3.5 h-3.5" /></button>
+                                                <button type="button" disabled={idx === 0} onClick={() => { const a = [...ordered]; [a[idx - 1], a[idx]] = [a[idx], a[idx - 1]]; apply(a); }} className="p-0.5 rounded text-[#64748B] hover:text-blue-600 disabled:text-[#CBD5E1] disabled:cursor-not-allowed cursor-pointer disabled:!text-[#CBD5E1] disabled:!bg-transparent " aria-label="Lên"><ChevronUp className="w-3.5 h-3.5" /></button>
+                                                <button type="button" disabled={idx === ordered.length - 1} onClick={() => { const a = [...ordered]; [a[idx + 1], a[idx]] = [a[idx], a[idx + 1]]; apply(a); }} className="p-0.5 rounded text-[#64748B] hover:text-blue-600 disabled:text-[#CBD5E1] disabled:cursor-not-allowed cursor-pointer disabled:!text-[#CBD5E1] disabled:!bg-transparent " aria-label="Xuống"><ChevronDown className="w-3.5 h-3.5" /></button>
                                               </div>
                                             );
                                           })}

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { X, Database, Search, TableProperties, Save, Merge, ArrowLeftRight, SquarePen, Trash2, Split, Check, Sparkles } from 'lucide-react';
+import React, { useState, type ReactNode } from 'react';
+import { X, Database, Search, TableProperties, Merge, ArrowLeftRight, SquarePen, Trash2, Split, Check, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 import { BaseModal } from '../../common/BaseModal';
 import { TargetDatabase, mockTables, mockColumns } from './mockTargetDatabases';
 import { MergeSplitModal } from './MergeSplitModal';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import { Badge, BTN_OUTLINE, BTN_PRIMARY, BTN_FOCUS, INPUT_CLS, TOOLTIP_CLS, normalizeSearch } from '../collection/collectionUi';
 
 interface DataMappingModalProps {
   isOpen: boolean;
@@ -10,6 +13,49 @@ interface DataMappingModalProps {
   targetDatabase?: TargetDatabase | null;
   sourceDatasetName?: string;
 }
+
+// Tooltip nằm trong BaseModal (z-index 9000+) nên cần nâng z-index cao hơn modal
+const MODAL_TOOLTIP_CLS = `${TOOLTIP_CLS} !z-[10000]`;
+const CARD_ICON_BTN = `w-8 h-8 inline-flex items-center justify-center rounded-lg text-[#475569] hover:bg-[#F1F5F9] transition-colors ${BTN_FOCUS}`;
+const ACCENT_BTN = `h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] text-[#16A34A] text-[13px] font-medium hover:bg-[#DCFCE7] transition-colors ${BTN_FOCUS}`;
+
+const WithTooltip = ({ label, children }: { label: string; children: ReactNode }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>{children}</TooltipTrigger>
+    <TooltipContent side="top" sideOffset={4} className={MODAL_TOOLTIP_CLS}>{label}</TooltipContent>
+  </Tooltip>
+);
+
+// Dòng thông tin kiểu / độ dài / cho phép null (12px, nhãn #64748B, giá trị #020817)
+const FieldMeta = ({ type, length, nullable }: { type?: string; length?: string; nullable?: boolean }) => (
+  <div className="mt-1 flex items-center gap-x-3 gap-y-0.5 flex-wrap text-[12px] text-[#64748B]">
+    {type && <span>Kiểu: <span className="text-[#020817]">{type}</span></span>}
+    {length && <span>Độ dài: <span className="text-[#020817]">{length}</span></span>}
+    {nullable !== undefined && <span>Cho phép Null: <span className="text-[#020817]">{String(nullable)}</span></span>}
+  </div>
+);
+
+const SearchBox = ({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) => (
+  <div className="relative">
+    <Search className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+    <input
+      type="text"
+      placeholder={placeholder}
+      aria-label={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${INPUT_CLS} pl-9`}
+    />
+  </div>
+);
+
+const onCardKey = (e: React.KeyboardEvent, action: () => void) => {
+  if (e.target !== e.currentTarget) return;
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    action();
+  }
+};
 
 export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatasetName }: DataMappingModalProps) {
   const [selectedTargetTable, setSelectedTargetTable] = useState('HS_KHAI_SINH');
@@ -113,7 +159,7 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
     setSelectedSourceFields(prev => prev.filter(f => f !== id)); // If ID was used as name
   };
 
-  const targetFields = isAutoMapped
+  const targetFields: any[] = isAutoMapped
     ? sourceFields.map(f => ({ ...f, length: f.length || '-' }))
     : (mockColumns[selectedTargetTable] || []);
 
@@ -123,19 +169,19 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
 
   const handleTargetFieldSelect = (targetFieldName: string) => {
     if (isAutoMapped) {
-      alert('Đang trong chế độ tự động ánh xạ. Vui lòng đặt lại nếu muốn chỉnh sửa thủ công.');
+      toast.warning('Đang trong chế độ tự động ánh xạ. Vui lòng đặt lại nếu muốn chỉnh sửa thủ công.');
       return;
     }
 
     if (!activeSourceField) {
-      alert('Vui lòng chọn một trường nguồn trước khi ánh xạ!');
+      toast.warning('Vui lòng chọn một trường nguồn trước khi ánh xạ!');
       return;
     }
 
     // Check if target is already mapped to ANOTHER source
     const existingMapping = Object.entries(mappings).find(([src, tgt]) => tgt === targetFieldName && src !== activeSourceField);
     if (existingMapping) {
-      alert(`Trường '${targetFieldName}' đã được ánh xạ cho trường nguồn '${existingMapping[0]}'. Ánh xạ là 1-1.`);
+      toast.warning(`Trường '${targetFieldName}' đã được ánh xạ cho trường nguồn '${existingMapping[0]}'. Ánh xạ là 1-1.`);
       return;
     }
 
@@ -154,312 +200,271 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
     setMappings(newMappings);
   };
 
+  const handleSaveConfig = () => {
+    toast.success('Đã lưu cấu hình ánh xạ!');
+    onClose();
+  };
+
+  // Lọc không phân biệt hoa/thường và dấu tiếng Việt
+  const filteredSourceFields = sourceFields.filter(f => normalizeSearch(f.name).includes(normalizeSearch(sourceSearch)));
+  const filteredTables = mockTables.filter(t => normalizeSearch(`${t.name} ${t.description}`).includes(normalizeSearch(tableSearch)));
+  const filteredTargetFields = targetFields.filter(f => normalizeSearch(f.name).includes(normalizeSearch(fieldSearch)));
+
+  const emptyText = <p className="py-6 text-center text-[13px] text-[#64748B]">Không tìm thấy kết quả phù hợp</p>;
+
   const footer = (
-    <div className="flex items-center justify-end gap-3 w-full px-6 py-4 bg-white border-t border-slate-100 rounded-b-2xl">
-      <button
-        type="button"
-        onClick={onClose}
-        style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="text-[13px] text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
-      >
+    <>
+      <button type="button" onClick={onClose} className={BTN_OUTLINE}>
         Hủy
       </button>
-      <button
-        type="button"
-        onClick={() => {
-          alert('Đã lưu cấu hình ánh xạ!');
-          onClose();
-        }}
-        style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-        className="text-[13px] text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md active:scale-95"
-      >
+      <button type="button" onClick={handleSaveConfig} className={BTN_PRIMARY}>
         Lưu cấu hình
       </button>
-    </div>
+    </>
   );
 
   return (
-    <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      <BaseModal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Ánh xạ dữ liệu"
-        subtitle="Liên kết bảng nguồn với CSDL Kho DLDC"
-        maxWidth="max-w-5xl"
-        className="force-13px"
-        showCloseButton={true}
-        headerActions={
-          <div className="flex items-center gap-2">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Ánh xạ dữ liệu"
+      subtitle="Liên kết bảng nguồn với CSDL Kho dữ liệu dùng chung"
+      maxWidth="max-w-[1280px]"
+      className="h-[90vh]"
+      showCloseButton={true}
+      headerActions={
+        <div className="flex items-center gap-2">
+          <WithTooltip label={isAutoMapped ? 'Hủy chế độ tự động' : 'Tự động tạo bảng và ánh xạ 1-1'}>
             <button
+              type="button"
               onClick={isAutoMapped ? resetMapping : handleAutoMap}
-              style={{ padding: '6px 12px', borderRadius: '6px', fontWeight: 500 }}
-              className={`flex items-center gap-1.5 transition-all shadow-sm text-[12px] ${isAutoMapped ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100' : 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
-              title={isAutoMapped ? "Hủy chế độ tự động" : "Tự động tạo bảng và ánh xạ 1-1"}
+              className={isAutoMapped ? BTN_OUTLINE : ACCENT_BTN}
             >
-              {isAutoMapped ? <X className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+              {isAutoMapped ? <X className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
               {isAutoMapped ? 'Hủy tự động' : 'Tự động ánh xạ'}
             </button>
-            <button
-              onClick={() => setIsMergeSplitModalOpen(true)}
-              style={{ padding: '6px 12px', borderRadius: '6px', fontWeight: 500 }}
-              className="flex items-center gap-1.5 bg-white border border-[#e2e8f0] text-[#020817] hover:bg-slate-50 transition-all shadow-sm text-[12px]"
-            >
-              <Merge className="w-3.5 h-3.5" />
-              Gộp / Tách cột
-            </button>
+          </WithTooltip>
+          <button
+            type="button"
+            onClick={() => setIsMergeSplitModalOpen(true)}
+            className={BTN_OUTLINE}
+          >
+            <Merge className="w-4 h-4" />
+            Gộp / Tách cột
+          </button>
+        </div>
+      }
+      customHeaderIcon={
+        <div className="w-10 h-10 shrink-0 rounded-lg bg-[#EAF3FF] flex items-center justify-center text-blue-600 mr-3">
+          <ArrowLeftRight className="w-5 h-5" />
+        </div>
+      }
+      footer={footer}
+    >
+      <div className="h-full min-h-0 grid grid-cols-3 grid-rows-[auto_auto_minmax(0,1fr)] gap-x-4 gap-y-3">
+        {/* Hàng 1 — tiêu đề cột */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 shrink-0 rounded-lg bg-[#EAF3FF] flex items-center justify-center text-blue-600">
+            <Database className="w-4 h-4" />
           </div>
-        }
-        customHeaderIcon={
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mr-4">
-            <ArrowLeftRight className="w-6 h-6" />
+          <div className="min-w-0">
+            <h4 className="text-[14px] font-semibold text-[#020817] truncate">Dữ liệu cần xử lý</h4>
+            <p className="text-[12px] text-[#64748B] truncate">{sourceDatasetName || 'Bộ dữ liệu hồ sơ đăng ký khai sinh'}</p>
           </div>
-        }
-        footer={footer}
-      >
-        <div className="flex gap-6 h-[520px] min-h-0 py-2">
-          {/* CỘT 1 - Dữ liệu thu thập */}
-          <div className="w-[380px] shrink-0 flex flex-col min-h-0">
-            <div className="flex items-center justify-between mb-4 shrink-0 px-1">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                  <Database className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-800" style={{ fontSize: '18px' }}>Dữ liệu cần xử lý</h3>
-                  <p className="text-slate-500 font-medium" style={{ fontSize: '12px' }}>Bộ dữ liệu hồ sơ đăng ký khai sinh</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative mb-4 shrink-0 px-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Lọc cột..."
-                value={sourceSearch}
-                onChange={(e) => setSourceSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-blue-400 focus:ring-0 transition-all"
-              />
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar px-1">
-              {sourceFields.filter(f => f.name.toLowerCase().includes(sourceSearch.toLowerCase())).map((field, idx) => {
-                const isMapped = !!mappings[field.name];
-                const isActive = activeSourceField === field.name;
-                const isCustom = field.isCustom;
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => toggleSourceField(field.name)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer group relative ${isActive ? 'border-blue-500 bg-blue-50/40 shadow-md ring-2 ring-blue-500/10' : isMapped ? 'border-green-200 bg-green-50/30' : 'border-slate-100 hover:border-blue-200 bg-white'}`}
-                  >
-                    <div className="flex items-start gap-[10px]">
-                      <div className="pt-0.5">
-                        <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${isMapped ? 'bg-green-600 border-green-600' : isActive ? 'bg-blue-600 border-blue-600 shadow-sm' : 'border-slate-200 bg-white group-hover:border-blue-400'}`}>
-                          {isMapped ? (
-                            <Check className="w-3.5 h-3.5 text-white" />
-                          ) : isActive && (
-                            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-[13px] text-slate-800 truncate">{field.name}</span>
-                          {field.isPk && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[9px] font-bold border border-slate-200">
-                              <Database className="w-2.5 h-2.5 mr-1" /> PK
-                            </span>
-                          )}
-                          {isCustom && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold border ${field.mode === 'merge' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                              {field.mode === 'merge' ? (
-                                <><Merge className="w-2.5 h-2.5 mr-1" /> Gộp</>
-                              ) : (
-                                <><Split className="w-2.5 h-2.5 mr-1" /> Tách</>
-                              )}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-                          <span>Kiểu: <span className="text-slate-700">{field.type}</span></span>
-                          {field.length && <span>Độ dài: {field.length}</span>}
-                          {field.nullable && <span className="italic">Cho phép Null: true</span>}
-                        </div>
-                        {field.sourceInfo && (
-                          <p className="text-[10px] text-orange-600/80 mt-1 font-medium italic">{field.sourceInfo}</p>
-                        )}
-                        {isMapped && (
-                          <div className="mt-2 flex items-center gap-1.5 text-[11px]">
-                            <span className="text-slate-400">Đã ánh xạ tới:</span>
-                            <span className="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-lg border border-green-100">
-                              {mappings[field.name]}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="absolute top-4 right-4 flex items-center gap-2">
-                      {isMapped && (
-                        <button
-                          onClick={(e) => unmapField(field.name, e)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                          title="Bỏ ánh xạ"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      {isCustom && (
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setEditingField(field); setIsMergeSplitModalOpen(true); }}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                            title="Chỉnh sửa"
-                          >
-                            <SquarePen className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={(e) => deleteCustomField(field.id, e)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        </div>
+        <div className="col-span-2 flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 shrink-0 rounded-lg bg-[#EEF2FF] flex items-center justify-center text-[#4338CA]">
+            <Database className="w-4 h-4" />
           </div>
-
-          {/* Dải phân cách dọc */}
-          <div className="w-px bg-slate-100 h-full self-stretch" />
-
-          {/* PHẦN BÊN PHẢI - Dữ liệu xử lý */}
-          <div className="flex-1 flex flex-col min-w-0">
-            <div className="flex items-center gap-2.5 mb-4 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Database className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-800" style={{ fontSize: '18px' }}>Cơ sở dữ liệu xử lý</h3>
-                <p className="text-slate-500 font-medium" style={{ fontSize: '12px' }}>Bảng đích & các trường</p>
-              </div>
-            </div>
-
-            <div className="flex-1 flex gap-4 min-h-0">
-              {/* CỘT GIỮA - Danh sách Bảng */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="relative mb-4 shrink-0">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Lọc bảng..."
-                    value={tableSearch}
-                    onChange={(e) => setTableSearch(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-blue-400 focus:ring-0 transition-all"
-                  />
-                </div>
-                <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                  {isAutoMapped ? (
-                    <div className="p-4 rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/30 flex flex-col items-center justify-center text-center">
-                      <Database className="w-8 h-8 text-emerald-500 mb-2" />
-                      <div className="font-bold text-[13px] text-emerald-800 italic">Bảng tự động tạo</div>
-                      <div className="text-[10px] text-emerald-600 mt-1 font-medium">Cấu trúc khớp 100% với nguồn</div>
-                    </div>
-                  ) : (
-                    mockTables.filter(t => t.name.toLowerCase().includes(tableSearch.toLowerCase())).map((table, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => setSelectedTargetTable(table.name)}
-                        className={`p-4 rounded-2xl border cursor-pointer transition-all ${selectedTargetTable === table.name ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-slate-100 hover:border-indigo-200 text-slate-800'}`}
-                      >
-                        <div className="flex items-start gap-[10px]">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${selectedTargetTable === table.name ? 'bg-white/20' : 'bg-indigo-50 text-indigo-500'}`}>
-                            <TableProperties className="w-4 h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-[13px] truncate leading-tight">{table.name}</div>
-                            <div className={`text-[10px] font-medium truncate mt-1 ${selectedTargetTable === table.name ? 'text-blue-50' : 'text-slate-500'}`}>
-                              {table.name} - {mockColumns[table.name]?.length || 0} trường
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* CỘT PHẢI - Danh sách Trường */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="relative mb-4 shrink-0">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Lọc cột..."
-                    value={fieldSearch}
-                    onChange={(e) => setFieldSearch(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:border-blue-400 focus:ring-0 transition-all"
-                  />
-                </div>
-                <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                  {targetFields.filter(f => f.name.toLowerCase().includes(fieldSearch.toLowerCase())).map((field, idx) => {
-                    const mappedToSource = Object.entries(mappings).find(([_, tgt]) => tgt === field.name)?.[0];
-                    const isSelected = !!mappedToSource;
-                    const isCurrentSelection = activeSourceField ? mappings[activeSourceField] === field.name : false;
-
-                    return (
-                      <div
-                        key={idx}
-                        onClick={() => handleTargetFieldSelect(field.name)}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-sm hover:shadow-md ${isCurrentSelection ? 'border-blue-500 bg-blue-50/40' : isSelected ? 'border-green-100 bg-green-50/20 opacity-80' : 'border-slate-100 bg-white hover:border-blue-200'}`}
-                      >
-                        <div className="flex items-start gap-[10px]">
-                          <div className="pt-0.5">
-                            <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${isCurrentSelection ? 'bg-blue-600 border-blue-600' : isSelected ? 'bg-green-600 border-green-600' : 'border-slate-200 bg-white group-hover:border-blue-400'}`}>
-                              {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-[13px] text-slate-800 truncate">{field.name}</span>
-                              {field.isPk && <span className="text-[10px] text-slate-400 font-bold uppercase">PK</span>}
-                            </div>
-                            <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-                              <span>Kiểu: <span className="text-slate-700 uppercase">{field.type}</span></span>
-                              {field.length && <span>Độ dài: {field.length}</span>}
-                              {field.nullable && <span className="italic">Cho phép Null: true</span>}
-                            </div>
-                            {isSelected && (
-                              <div className="mt-2 text-[10px] text-slate-500">
-                                Ánh xạ từ: <span className="font-bold text-slate-700">{mappedToSource}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+          <div className="min-w-0">
+            <h4 className="text-[14px] font-semibold text-[#020817] truncate">Cơ sở dữ liệu xử lý</h4>
+            <p className="text-[12px] text-[#64748B] truncate">Bảng đích & các trường</p>
           </div>
         </div>
 
-        <MergeSplitModal
-          isOpen={isMergeSplitModalOpen}
-          onClose={() => { setIsMergeSplitModalOpen(false); setEditingField(null); }}
-          sourceFields={sourceFields.filter(f => !f.isCustom)}
-          onMergeSubmit={handleMergeSubmit}
-          onSplitSubmit={handleSplitSubmit}
-          initialData={editingField?.raw}
-          mode={editingField?.mode}
-        />
-      </BaseModal>
-    </div>
+        {/* Hàng 2 — ô lọc */}
+        <SearchBox value={sourceSearch} onChange={setSourceSearch} placeholder="Lọc cột..." />
+        <SearchBox value={tableSearch} onChange={setTableSearch} placeholder="Lọc bảng..." />
+        <SearchBox value={fieldSearch} onChange={setFieldSearch} placeholder="Lọc cột..." />
+
+        {/* Hàng 3 — CỘT 1: trường nguồn */}
+        <div className="min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-2">
+          {filteredSourceFields.length === 0 && emptyText}
+          {filteredSourceFields.map((field, idx) => {
+            const isMapped = !!mappings[field.name];
+            const isActive = activeSourceField === field.name;
+            const isCustom = field.isCustom;
+            return (
+              <div
+                key={field.id || `${field.name}-${idx}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isActive}
+                onClick={() => toggleSourceField(field.name)}
+                onKeyDown={(e) => onCardKey(e, () => toggleSourceField(field.name))}
+                className={`p-3 rounded-xl border bg-white cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isActive ? 'border-blue-600 ring-1 ring-blue-600' : 'border-[#E2E8F0] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'}`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    aria-hidden="true"
+                    className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${isActive ? 'bg-blue-600 border-blue-600' : isMapped ? 'bg-[#16A34A] border-[#16A34A]' : 'border-[#CBD5E1] bg-white'}`}
+                  >
+                    {(isActive || isMapped) && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[13px] font-semibold text-[#020817] break-all">{field.name}</span>
+                      {field.isPk && <Badge label="PK" variant="slate" />}
+                      {isCustom && (
+                        <Badge
+                          label={field.mode === 'merge' ? 'Gộp' : 'Tách'}
+                          variant="orange"
+                          icon={field.mode === 'merge' ? <Merge className="w-3.5 h-3.5" /> : <Split className="w-3.5 h-3.5" />}
+                        />
+                      )}
+                    </div>
+                    <FieldMeta type={field.type} length={field.length} nullable={field.nullable} />
+                    {field.sourceInfo && (
+                      <p className="mt-1 text-[12px] text-[#64748B]">{field.sourceInfo}</p>
+                    )}
+                    {isMapped && (
+                      <div className="mt-2 flex items-center gap-1.5 flex-wrap text-[12px] text-[#64748B]">
+                        <span>Đã ánh xạ tới:</span>
+                        <Badge label={mappings[field.name]} variant="green" />
+                      </div>
+                    )}
+                  </div>
+                  {(isMapped || isCustom) && (
+                    <div className="shrink-0 flex items-center gap-0.5 -mt-1 -mr-1">
+                      {isMapped && !isAutoMapped && (
+                        <WithTooltip label="Bỏ ánh xạ">
+                          <button type="button" aria-label="Bỏ ánh xạ" onClick={(e) => unmapField(field.name, e)} className={`${CARD_ICON_BTN} hover:text-[#DC2626]`}>
+                            <X className="w-4 h-4" />
+                          </button>
+                        </WithTooltip>
+                      )}
+                      {isCustom && (
+                        <>
+                          <WithTooltip label="Chỉnh sửa">
+                            <button
+                              type="button"
+                              aria-label="Chỉnh sửa"
+                              onClick={(e) => { e.stopPropagation(); setEditingField(field); setIsMergeSplitModalOpen(true); }}
+                              className={`${CARD_ICON_BTN} hover:text-blue-600`}
+                            >
+                              <SquarePen className="w-4 h-4" />
+                            </button>
+                          </WithTooltip>
+                          <WithTooltip label="Xóa">
+                            <button type="button" aria-label="Xóa" onClick={(e) => deleteCustomField(field.id, e)} className={`${CARD_ICON_BTN} hover:text-[#DC2626]`}>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </WithTooltip>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CỘT 2: bảng đích */}
+        <div className="min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-2">
+          {isAutoMapped ? (
+            <div className="p-4 rounded-xl border-2 border-dashed border-[#BBF7D0] bg-[#F0FDF4] flex flex-col items-center justify-center text-center">
+              <Database className="w-8 h-8 text-[#16A34A] mb-2" />
+              <div className="text-[13px] font-semibold text-[#020817]">Bảng tự động tạo</div>
+              <div className="text-[12px] text-[#16A34A] mt-1">Cấu trúc khớp 100% với nguồn</div>
+            </div>
+          ) : (
+            <>
+              {filteredTables.length === 0 && emptyText}
+              {filteredTables.map((table) => {
+                const isSelected = selectedTargetTable === table.name;
+                return (
+                  <button
+                    type="button"
+                    key={table.name}
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedTargetTable(table.name)}
+                    className={`w-full text-left p-3 rounded-xl border transition-colors ${BTN_FOCUS} ${isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-[#E2E8F0] text-[#020817] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center ${isSelected ? 'bg-white/20 text-white' : 'bg-[#EEF2FF] text-[#4338CA]'}`}>
+                        <TableProperties className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-semibold truncate">{table.name}</div>
+                        <div className={`text-[12px] truncate mt-0.5 ${isSelected ? 'text-white/85' : 'text-[#64748B]'}`}>
+                          {table.name} - {mockColumns[table.name]?.length || 0} trường
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </>
+          )}
+        </div>
+
+        {/* CỘT 3: trường của bảng đích */}
+        <div className="min-h-0 overflow-y-auto custom-scrollbar pr-1 space-y-2">
+          {filteredTargetFields.length === 0 && emptyText}
+          {filteredTargetFields.map((field, idx) => {
+            const mappedToSource = Object.entries(mappings).find(([_, tgt]) => tgt === field.name)?.[0];
+            const isSelected = !!mappedToSource;
+            const isCurrentSelection = activeSourceField ? mappings[activeSourceField] === field.name : false;
+            const nullable: boolean | undefined = field.nullable ?? (field.notNull === undefined ? undefined : !field.notNull);
+
+            return (
+              <div
+                key={`${field.name}-${idx}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isCurrentSelection}
+                onClick={() => handleTargetFieldSelect(field.name)}
+                onKeyDown={(e) => onCardKey(e, () => handleTargetFieldSelect(field.name))}
+                className={`p-3 rounded-xl border bg-white cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isCurrentSelection ? 'border-blue-600 ring-1 ring-blue-600' : 'border-[#E2E8F0] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'}`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    aria-hidden="true"
+                    className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${isCurrentSelection ? 'border-blue-600 bg-white' : isSelected ? 'bg-[#16A34A] border-[#16A34A]' : 'border-[#CBD5E1] bg-white'}`}
+                  >
+                    {isCurrentSelection
+                      ? <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+                      : isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[13px] font-semibold text-[#020817] break-all">{field.name}</span>
+                      {(field.isPk || field.isKey) && <Badge label="PK" variant="slate" />}
+                    </div>
+                    <FieldMeta type={field.type} length={field.length} nullable={nullable} />
+                    {isSelected && (
+                      <div className="mt-1 text-[12px] text-[#64748B]">
+                        Ánh xạ từ: <span className="font-medium text-[#020817]">{mappedToSource}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <MergeSplitModal
+        isOpen={isMergeSplitModalOpen}
+        onClose={() => { setIsMergeSplitModalOpen(false); setEditingField(null); }}
+        sourceFields={sourceFields.filter(f => !f.isCustom)}
+        onMergeSubmit={handleMergeSubmit}
+        onSplitSubmit={handleSplitSubmit}
+        initialData={editingField?.raw}
+        mode={editingField?.mode}
+      />
+    </BaseModal>
   );
 }

@@ -251,7 +251,7 @@ export function DataTableViewer({ isOpen, onClose, fileTitle, dataType }: DataTa
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="p-2 border border-slate-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 border border-slate-300 rounded-lg hover:bg-white transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
               >
                 <ChevronLeft className="w-5 h-5 text-slate-600" />
               </button>

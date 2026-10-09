@@ -8,7 +8,7 @@
 
 ## 1. PHÂN HỆ ĐĂNG NHẬP & CORE
 
-- `[ ]` Màn hình Đăng nhập (`pages/LoginPage.tsx`)
+- `[x]` Màn hình Đăng nhập (`pages/LoginPage.tsx`)
 - `[x]` Cấu trúc Menu & Điều hướng chính (`admin/menuStructure.ts`)
 
 ---
@@ -16,8 +16,8 @@
 ## 2. PHÂN HỆ THU THẬP DỮ LIỆU
 
 ### Trang chính
-- `[ ]` Dashboard thu thập dữ liệu nội bộ (`collection/InternalDataPage.tsx`)
-- `[ ]` Dashboard thu thập dữ liệu ngoại (`collection/ExternalDataPage.tsx`)
+- `[x]` Dashboard thu thập dữ liệu nội bộ (`collection/InternalDataPage.tsx`)
+- `[x]` Dashboard thu thập dữ liệu ngoại (`collection/ExternalDataPage.tsx`)
 - `[x]` Danh sách thiết lập dịch vụ thu thập (`collection/CollectionSetupPage.tsx`)
 - `[x]` Xem dữ liệu đã thu thập (`collection/ViewCollectedDataPage.tsx`)
 - `[x]` Chi tiết dịch vụ — trang riêng (`collection/ServiceDataDetailPage.tsx`)
@@ -66,12 +66,12 @@
 - `[x]` Thiết lập quy tắc xử lý (`processing/ProcessingRuleSetupPage.tsx`)
 - `[x]` Quản lý cơ sở dữ liệu đích (`processing/TargetDatabaseManagementPage.tsx`)
 - `[x]` Chi tiết cơ sở dữ liệu đích (`processing/TargetDatabaseDetailPage.tsx`)
-- `[ ]` Modal cấu hình CSDL đích (`processing/TargetDatabaseConfigModal.tsx`)
+- `[x]` Modal cấu hình CSDL đích (`processing/TargetDatabaseConfigModal.tsx`)
 - `[ ]` Modal chi tiết CSDL đích (`processing/TargetDatabaseDetailModal.tsx`)
 - `[ ]` Modal thêm/sửa CSDL đích (`processing/TargetDatabaseModal.tsx`)
-- `[ ]` Modal chọn CSDL đích (`processing/SelectTargetDatabaseModal.tsx`)
+- `[x]` Modal chọn CSDL đích (`processing/SelectTargetDatabaseModal.tsx`)
 - `[ ]` Xem dữ liệu đã xử lý (`processing/ProcessedDataPage.tsx`)
-- `[ ]` Modal Mapping dữ liệu (`processing/DataMappingModal.tsx`)
+- `[x]` Modal Mapping dữ liệu (`processing/DataMappingModal.tsx`)
 - `[ ]` Modal gộp/tách bản ghi (`processing/MergeSplitModal.tsx`)
 - `[x]` Quản lý lịch xử lý (`processing/ScheduleManagementModal.tsx`)
 
@@ -102,7 +102,7 @@
 ## 4. PHÂN HỆ ĐỐI SOÁT DỮ LIỆU
 
 ### Trang chính
-- `[ ]` Trang đối soát tổng hợp — theo dõi lệch từ nguồn → thu thập → xử lý → cung cấp (`pages/DataReconciliationPage.tsx`)
+- `[x]` Trang đối soát tổng hợp — theo dõi lệch từ nguồn → thu thập → xử lý → cung cấp (`pages/DataReconciliationPage.tsx`)
 - `[ ]` Trang thiết lập đối soát tổng (`pages/ReconciliationSetupPage.tsx`)
 
 ### Đối soát theo loại dữ liệu
@@ -251,9 +251,9 @@
 
 ### Trang chính
 - `[ ]` Quản lý Master Data tổng (`master-data/MasterDataManagementPage.tsx`)
-- `[ ]` Trang Master Data chính (`master-data/MasterDataAPage.tsx`)
+- `[x]` Trang Master Data chính (`master-data/MasterDataAPage.tsx`)
 - `[ ]` Thiết lập Master Data (`master-data/MasterDataSetupPage.tsx`)
-- `[ ]` Phê duyệt Master Data (`master-data/MasterDataApprovalPage.tsx`)
+- `[x]` Phê duyệt Master Data (`master-data/MasterDataApprovalPage.tsx`)
 - `[ ]` Công bố Master Data (`master-data/MasterDataPublishPage.tsx`)
 - `[x]` Báo cáo Master Data (`master-data/MasterDataReportsPage.tsx`)
 - `[ ]` Quản lý quy mô / tỉ lệ (`master-data/MasterDataScaleManagementPage.tsx`)
@@ -264,7 +264,7 @@
 ### Tabs trong trang Master Data
 - `[ ]` Tab Quản lý thuộc tính (`master-data/AttributesManagementTab.tsx`)
 - `[ ]` Tab Quan hệ thực thể (`master-data/EntityRelationshipsTab.tsx`)
-- `[ ]` Tab Quy tắc gộp (`master-data/MergeRulesManagementTab.tsx`)
+- `[x]` Tab Quy tắc gộp (`master-data/MergeRulesManagementTab.tsx`)
 - `[ ]` Tab Quy tắc định danh (`master-data/UniqueIdentifierRulesTab.tsx`)
 - `[ ]` Tab Lịch sử thay đổi (`master-data/HistoryTab.tsx`)
 - `[ ]` Tab Cập nhật dữ liệu (`master-data/MasterDataUpdateTab.tsx`)
@@ -332,10 +332,10 @@
 
 ### Điều phối API (orchestration/)
 - `[ ]` Quản lý API (`orchestration/APIManagementPage.tsx`)
-- `[ ]` Modal Test API (`orchestration/APITestModal.tsx`)
+- `[x]` Modal Test API (`orchestration/APITestModal.tsx`)
 - `[ ]` Form các trường API (`orchestration/APIFormFields.tsx`)
 - `[x]` Modal Thêm dịch vụ cung cấp (`orchestration/AddProvisionServiceModal.tsx`)
-- `[ ]` Modal Review phê duyệt (`orchestration/ApprovalReviewModal.tsx`)
+- `[x]` Modal Review phê duyệt (`orchestration/ApprovalReviewModal.tsx`)
 - `[x]` Thiết lập dịch vụ (phiên bản cập nhật) (`orchestration/ServiceSetupPageUpdated.tsx`)
 - `[ ]` Danh mục dịch vụ (`orchestration/ServiceCategoryPage.tsx`)
 - `[ ]` Giám sát API / dịch vụ (`orchestration/MonitoringPage.tsx`)
@@ -354,7 +354,7 @@
 
 ### Công bố & Yêu cầu
 - `[ ]` Yêu cầu công bố & Danh sách đề xuất (`open-data/OpenDataPublishedListPage.tsx`)
-- `[ ]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
+- `[x]` Phê duyệt dữ liệu mở (`open-data/OpenDataApprovalPage.tsx`)
 - `[ ]` Công bố dữ liệu mở (`open-data/OpenDataPublishPage.tsx`)
 
 ### Quy tắc & Thống kê
@@ -376,7 +376,7 @@
 - `[ ]` Bộ lọc tìm kiếm (`open-data-category/components/OpenDataCategoryFilters.tsx`)
 - `[ ]` Thanh tab (`open-data-category/components/OpenDataCategoryTabBar.tsx`)
 - `[ ]` Grid danh mục (`open-data-category/components/tabs/OpenDataCategoryGrid.tsx`)
-- `[ ]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
+- `[x]` Phân trang (`open-data-category/components/tabs/OpenDataCategoryPagination.tsx`)
 - `[ ]` Tab Tệp đính kèm (`open-data-category/components/tabs/FilesTab.tsx`)
 - `[ ]` Tab Lịch sử phiên bản (`open-data-category/components/tabs/VersionHistoryTab.tsx`)
 
@@ -392,7 +392,7 @@
 - `[x]` Danh sách chức năng (`admin/FunctionListPage.tsx`)
 
 ### Cấu hình hệ thống
-- `[ ]` Cấu hình hệ thống (`admin/SystemConfigPage.tsx`)
+- `[x]` Cấu hình hệ thống (`admin/SystemConfigPage.tsx`)
 - `[ ]` Cấu hình bảo mật (`admin/SecurityConfigPage.tsx`)
 - `[ ]` Cấu hình quy tắc mật khẩu (`admin/PasswordRuleConfigPage.tsx`)
 - `[ ]` Cấu hình lưu trữ nhật ký (`admin/LogRetentionConfigPage.tsx`)

@@ -187,7 +187,7 @@ export function SharedFieldsConfigModal({
                           <select
                             disabled
                             aria-label={`Che dấu dữ liệu của ${field.name}`}
-                            className={`${INPUT_CLS} disabled:bg-[#F8FAFC] disabled:text-[#020817] disabled:cursor-default`}
+                            className={`${INPUT_CLS} ${VIEW_FIELD_CLS}`}
                             value={field.masking}
                           >
                             <option value="none">Không che dấu</option>

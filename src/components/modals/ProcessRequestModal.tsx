@@ -83,7 +83,7 @@ export function ProcessRequestModal({ isOpen, onClose, request, onProcess }: Pro
           <button
             onClick={onClose}
             disabled={processing}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Đóng" aria-label="Đóng"
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none " title="Đóng" aria-label="Đóng"
           >
             <X className="w-5 h-5 text-slate-500" />
           </button>
@@ -236,7 +236,7 @@ export function ProcessRequestModal({ isOpen, onClose, request, onProcess }: Pro
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Ghi chú về quá trình xử lý, điều chỉnh, hoặc lưu ý đặc biệt..."
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-[#F0F0F0] disabled:cursor-not-allowed"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:cursor-not-allowed"
                 disabled={processing}
               />
             </div>
@@ -293,7 +293,7 @@ export function ProcessRequestModal({ isOpen, onClose, request, onProcess }: Pro
           <button
             onClick={onClose}
             disabled={processing}
-            className="px-6 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
           >
             {processing ? 'Đang xử lý...' : 'Hủy'}
           </button>

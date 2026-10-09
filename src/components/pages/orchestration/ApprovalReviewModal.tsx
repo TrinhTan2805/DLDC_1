@@ -226,7 +226,7 @@ export function ApprovalReviewModal({ isOpen, onClose, serviceData }: ApprovalRe
  type="button"
  disabled={!note.trim()}
  onClick={() => handleDecision('approve')}
- className="group px-5 py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-green-100 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
+ className="group px-5 py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-green-100 transition-all active:scale-95 disabled:grayscale disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
  >
  <CheckCircle2 className="w-5 h-5" />
  <span className=" text-sm">Phê duyệt</span>
@@ -236,7 +236,7 @@ export function ApprovalReviewModal({ isOpen, onClose, serviceData }: ApprovalRe
  type="button"
  disabled={!note.trim()}
  onClick={() => handleDecision('reject')}
- className="group px-5 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-red-100 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
+ className="group px-5 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-red-100 transition-all active:scale-95 disabled:grayscale disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
  >
  <XCircle className="w-5 h-5" />
  <span className=" text-sm">Từ chối</span>
@@ -246,7 +246,7 @@ export function ApprovalReviewModal({ isOpen, onClose, serviceData }: ApprovalRe
  type="button"
  disabled={!note.trim()}
  onClick={() => handleDecision('request')}
- className="group px-5 py-3.5 bg-white border-2 border-amber-400 text-amber-600 hover:bg-amber-50 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
+ className="group px-5 py-3.5 bg-white border-2 border-amber-400 text-amber-600 hover:bg-amber-50 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:grayscale disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
  >
  <MessageSquare className="w-5 h-5" />
  <span className=" text-sm">Yêu cầu bổ sung</span>

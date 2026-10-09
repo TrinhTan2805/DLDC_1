@@ -421,7 +421,7 @@ export function CategoryApprovalPage() {
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 ${selectedCategories.length === 0
                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
+                  } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
               >
                 <Send className="w-4 h-4" />
                 Trình duyệt ({selectedCategories.length})
@@ -503,7 +503,7 @@ export function CategoryApprovalPage() {
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 ${!newCategory.name
                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
+                  } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
               >
                 <Send className="w-4 h-4" />
                 Tạo và trình duyệt
@@ -602,7 +602,7 @@ export function CategoryApprovalPage() {
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 ${!selectedRecipient
                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }`}
+                  } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
               >
                 <Send className="w-4 h-4" />
                 Gửi trình duyệt

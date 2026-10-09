@@ -175,12 +175,12 @@ export function EntityVersionHistoryModal({ isOpen, onClose, entity }: Props) {
                     <th className={TH_CLS}>Ngày hiệu lực</th>
                     <th className={TH_CLS}>Người thay đổi</th>
                     <th className={TH_CLS}>Nội dung thay đổi</th>
-                    <th className={`${TH_CLS} text-center w-16`}>Thao tác</th>
+                    <th className={`${TH_CLS} text-center w-16 sticky right-0 z-[1] bg-[#F8FAFC] shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]`}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
                   {historyList.map((item, index) => (
-                    <tr key={item.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <tr key={item.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
                       <td className={`${TD_CLS} text-center`}>{index + 1}</td>
                       <td className={TD_CLS}>
                         <Badge label={`v${item.versionTo}.0`} variant="green" />
@@ -189,7 +189,7 @@ export function EntityVersionHistoryModal({ isOpen, onClose, entity }: Props) {
                       <td className={`${TD_CLS} whitespace-nowrap`}>{item.effectiveDate || '--'}</td>
                       <td className={`${TD_CLS} whitespace-nowrap`}>{item.author}</td>
                       <td className={`${TD_CLS} max-w-[360px]`}><TruncatedText text={item.description} /></td>
-                      <td className={`${TD_CLS} text-center`}>
+                      <td className={`${TD_CLS} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]`}>
                         <div className="flex items-center justify-center">
                           <RowIconAction label="So sánh với phiên bản trước đó" onClick={() => setSelectedItem(item)}>
                             <GitCompare className="w-4 h-4" />

@@ -70,7 +70,7 @@ export function TargetDatabaseConfigModal({
           className={`flex items-center gap-2 text-[13px] text-white transition-all shadow-md ${isNextDisabled
             ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
             : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
-            }`}
+            } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
         >
           Tiếp theo
           <ChevronRight className="w-4 h-4" />

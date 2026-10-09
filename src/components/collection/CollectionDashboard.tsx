@@ -579,14 +579,14 @@ export function CollectionDashboard() {
                 <button
                   onClick={() => setErrorPage(p => Math.max(0, p - 1))}
                   disabled={errorPage === 0}
-                  className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setErrorPage(p => Math.min(errorTotalPages - 1, p + 1))}
                   disabled={errorPage >= errorTotalPages - 1}
-                  className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="p-1 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

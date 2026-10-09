@@ -136,7 +136,7 @@ export function PublishConfigModal({ isOpen, onClose, onConfirm, recordName }: P
           <button
             onClick={() => onConfirm({ scopes, effectiveDate })}
             disabled={scopes.length === 0}
-            title="Công bố danh mục" className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Công bố danh mục" className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors flex items-center gap-2 disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
           >
             <Globe className="w-5 h-5" />
             Công bố danh mục

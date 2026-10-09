@@ -322,7 +322,7 @@ export function StructureLoadingConfig() {
                             disabled={!isSelected}
                             value={settings.name !== undefined ? settings.name : field.name}
                             onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'name', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-500 disabled:border-slate-200"
+                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] font-mono font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-slate-200"
                           />
                         </td>
                         <td className="px-4 py-2.5">
@@ -331,7 +331,7 @@ export function StructureLoadingConfig() {
                             disabled={!isSelected}
                             value={settings.dataType !== undefined ? settings.dataType : field.dataType}
                             onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'dataType', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-500 disabled:border-slate-200"
+                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] font-mono text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-slate-200"
                           />
                         </td>
                         <td className="px-4 py-2.5 text-center">
@@ -359,7 +359,7 @@ export function StructureLoadingConfig() {
                             placeholder="Tên hiển thị thân thiện"
                             value={settings.displayName || ''}
                             onChange={(e) => updateFieldSetting(activeTable.id, field.id, 'displayName', e.target.value)}
-                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400 disabled:border-slate-200"
+                            className="w-full px-2.5 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-slate-200"
                           />
                         </td>
                       </tr>

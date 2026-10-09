@@ -143,7 +143,7 @@ export function ApiSelectionModal({ isOpen, onClose, onSelect, currentApiId }: A
                             currentApiId === api.id 
                               ? 'bg-slate-200 text-slate-600 cursor-not-allowed' 
                               : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          }`}
+                          } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
                           disabled={currentApiId === api.id}
                         >
                           {currentApiId === api.id ? 'Đang Chọn' : 'Chọn API'}

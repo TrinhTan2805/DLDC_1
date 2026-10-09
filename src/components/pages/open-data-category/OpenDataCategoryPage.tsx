@@ -1771,7 +1771,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         selectedItem.uploadType !== 'api'
                           ? 'bg-[#EAF3FF] text-[#155DFC] border-[#BFDBFE]'
                           : 'bg-[#F1F5F9] text-[#94A3B8] border-[#E2E8F0]'
-                      }`}
+                      } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
                     >
                       <Upload className="w-4 h-4" />
                       Tải lên tệp
@@ -1783,7 +1783,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         selectedItem.uploadType === 'api'
                           ? 'bg-[#EAF3FF] text-[#155DFC] border-[#BFDBFE]'
                           : 'bg-[#F1F5F9] text-[#94A3B8] border-[#E2E8F0]'
-                      }`}
+                      } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
                     >
                       <Globe className="w-4 h-4" />
                       Lấy từ API

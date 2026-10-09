@@ -263,7 +263,7 @@ export function CollectionActivityLog() {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-1.5 border border-slate-200 rounded-lg text-base font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+                className="px-4 py-1.5 border border-slate-200 rounded-lg text-base font-semibold transition-all disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700 disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
               >
                 Trước
               </button>
@@ -294,7 +294,7 @@ export function CollectionActivityLog() {
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="px-4 py-1.5 border border-slate-200 rounded-lg text-base font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700"
+                className="px-4 py-1.5 border border-slate-200 rounded-lg text-base font-semibold transition-all disabled:cursor-not-allowed hover:bg-slate-50 active:scale-95 text-slate-700 disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
               >
                 Sau
               </button>

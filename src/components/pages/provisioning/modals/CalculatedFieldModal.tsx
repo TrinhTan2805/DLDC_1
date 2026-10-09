@@ -387,7 +387,7 @@ export function CalculatedFieldModal({
                   value={dataType}
                   onChange={(e) => setDataType(e.target.value)}
                   disabled={activeTab === 'preset'} // Presets manage outputs automatically
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm text-slate-800 font-bold disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm text-slate-800 font-bold disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#000000] disabled:cursor-not-allowed"
                 >
                   <option value="string">String (Chuỗi văn bản)</option>
                   <option value="number">Number (Số học)</option>
@@ -623,7 +623,7 @@ export function CalculatedFieldModal({
                           type="button"
                           disabled={activeTab === 'preset'}
                           onClick={() => insertAtCursor(func.syntax)}
-                          className="w-full text-left p-2 hover:bg-indigo-50/50 rounded border border-transparent hover:border-indigo-100 transition-all flex flex-col gap-0.5 text-xs text-slate-700 hover:text-slate-800 group disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:border-transparent disabled:cursor-not-allowed"
+                          className="w-full text-left p-2 hover:bg-indigo-50/50 rounded border border-transparent hover:border-indigo-100 transition-all flex flex-col gap-0.5 text-xs text-slate-700 hover:text-slate-800 group disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
                           title={activeTab === 'preset' ? 'Tính năng chỉ khả dụng trong chế độ Tự soạn thảo nâng cao' : 'Chèn vào khung soạn thảo'}
                         >
                           <span className="font-mono font-bold text-slate-700 group-hover:text-indigo-600 group-disabled:text-slate-500">

@@ -499,7 +499,7 @@ export function DataReconciliationPage() {
                         className={`p-2 rounded-lg transition-colors ${reconcilingId === item.id || item.status === 'in-progress'
                           ? 'text-slate-300 cursor-not-allowed'
                           : 'text-blue-600 hover:bg-blue-50'
-                          }`}
+                          } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
                         title="Đối soát ngay"
                       >
                         {reconcilingId === item.id ? (

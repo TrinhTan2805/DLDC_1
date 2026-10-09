@@ -50,7 +50,7 @@ export function ArchiveRecordModal({ isOpen, onClose, onConfirm, recordName }: A
             disabled={isLoading}
             title="Đóng"
             aria-label="Đóng"
-            className={`${BTN_GHOST_ICON} disabled:text-[#CBD5E1] disabled:hover:bg-transparent disabled:cursor-not-allowed`}
+            className={`${BTN_GHOST_ICON} disabled:text-[#CBD5E1] disabled:cursor-not-allowed disabled:!text-[#CBD5E1] disabled:!bg-transparent `}
           >
             <X className="w-5 h-5" />
           </button>

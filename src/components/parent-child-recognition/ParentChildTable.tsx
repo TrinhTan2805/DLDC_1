@@ -98,7 +98,7 @@ export function ParentChildTable({
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               Trước
             </button>
@@ -127,7 +127,7 @@ export function ParentChildTable({
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
+              className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               Sau
             </button>

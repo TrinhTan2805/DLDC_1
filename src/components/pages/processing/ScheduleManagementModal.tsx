@@ -373,7 +373,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                             value={monthDate}
                             onChange={e => setMonthDate(e.target.value)}
                             disabled={monthOption !== 'date'}
-                            className="w-16 px-2 py-1 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400"
+                            className="w-16 px-2 py-1 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)]"
                           />
                         </label>
 
@@ -388,7 +388,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                             value={monthWeek}
                             onChange={e => setMonthWeek(e.target.value)}
                             disabled={monthOption !== 'day'}
-                            className="px-2 py-1 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400"
+                            className="px-2 py-1 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)]"
                           >
                             <option value="Đầu tiên">Đầu tiên</option>
                             <option value="Thứ hai">Thứ hai</option>
@@ -400,7 +400,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                             value={monthDay}
                             onChange={e => setMonthDay(e.target.value)}
                             disabled={monthOption !== 'day'}
-                            className="px-2 py-1 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400"
+                            className="px-2 py-1 text-[13px] border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)]"
                           >
                             <option value="Thứ hai">Thứ hai</option>
                             <option value="Thứ ba">Thứ ba</option>

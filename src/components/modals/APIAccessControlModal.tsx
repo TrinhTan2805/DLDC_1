@@ -212,7 +212,7 @@ export function APIAccessControlModal({ isOpen, service, onClose, onSave }: APIA
                 <button
                   onClick={handleAddRule}
                   disabled={!newRule.organization || newRule.permissions.length === 0 || !newRule.expiryDate}
-                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
                 >
                   Cấp quyền
                 </button>

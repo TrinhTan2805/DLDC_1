@@ -845,7 +845,7 @@ export function MasterDataPage() {
                           entity.isLocked
                             ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                             : 'bg-red-600 text-white hover:bg-red-700'
-                        }`}
+                        } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
                         disabled={entity.isLocked}
                         title={entity.isLocked ? 'Cần mở khóa trước khi xóa' : 'Xóa dữ liệu chủ'}
                       >

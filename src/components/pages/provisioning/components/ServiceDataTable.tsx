@@ -257,7 +257,7 @@ export function ServiceDataTable({ service }: { service: ProvisionService }) {
         <div className="flex items-center gap-1">
           <span className="text-sm text-slate-500 mr-4">1 - {config.data.length} / {config.data.length * 482}</span>
           <div className="flex bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden text-sm">
-            <button className="px-3 py-1.5 text-slate-400 hover:bg-slate-50 border-r border-slate-200" disabled>Trước</button>
+            <button className="px-3 py-1.5 text-slate-400 hover:bg-slate-50 border-r border-slate-200 disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed" disabled>Trước</button>
             <button className="px-3 py-1.5 bg-blue-600 text-white font-medium border-r border-slate-200">1</button>
             <button className="px-3 py-1.5 text-slate-600 hover:bg-slate-50 border-r border-slate-200">2</button>
             <button className="px-3 py-1.5 text-slate-600 hover:bg-slate-50 border-r border-slate-200">3</button>

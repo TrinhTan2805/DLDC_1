@@ -1,5 +1,89 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Quản lý phiên bản danh mục — cố định cột Thao tác (Ngày thực hiện: 09/10/2026) — 196
+
+**Nội dung (PM yêu cầu):** modal "Quản lý phiên bản danh mục" cố định cột Thao tác khi bảng cuộn ngang.
+
+**File sửa:** `category/components/modals/EntityVersionHistoryModal.tsx` — cột Thao tác ghim bên phải (`sticky right-0`, mục 5.3.2): tiêu đề nền #F8FAFC, ô nền trắng đổi theo màu di chuột của hàng, bóng mép trái để tách khỏi các cột cuộn phía dưới.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Bộ lọc "Tất cả …" không còn bị mờ (Ngày thực hiện: 09/10/2026) — 195
+
+**Nội dung (PM yêu cầu):** khi chọn giá trị "Tất cả <tên trường>" trong bộ lọc thì giá trị hiển thị bị mờ — kiểm tra tất cả các file.
+
+**Nguyên nhân:** quy tắc màu placeholder ô chọn trong `src/index.css` áp cho mọi `<select>` đang ở lựa chọn `value=""`. Các lựa chọn "Tất cả …" ở bộ lọc cũng dùng `value=""` (20 file) nên bị tô xám như placeholder.
+
+**Đã sửa (1 chỗ, áp cho toàn hệ thống):** `src/index.css` — chỉ tô màu placeholder khi ô đang ở **dòng gợi ý ẩn** (`option[value=""][hidden]`, dạng "-- Chọn … --"); "Tất cả …" là giá trị thật nên giữ chữ đen.
+
+**Rà soát:** 20 file có "Tất cả …" `value=""` — không file nào đánh dấu ẩn → đều hết mờ; không có ô lọc nào tự tô xám "Tất cả" bằng class riêng.
+
+**Kiểu lỗi ô bắt buộc (bổ sung mục 194, PM chỉnh):** viền đỏ mảnh 1px, không vòng focus đậm, chữ gợi ý độ đậm thường; tự cuộn tới ô lỗi (không focus).
+
+**Kiểm tra:** thử trên CSS build — "Tất cả trạng thái" chữ #020817, "-- Chọn trạm kết nối --" chữ #94A3B8; `npm run build` thành công; đã xác nhận server port 3000 trả đúng CSS mới.
+
+## Wizard danh mục dùng chung — kiểm tra trường bắt buộc, báo lỗi dưới ô (Ngày thực hiện: 09/10/2026) — 194
+
+**Nội dung (PM yêu cầu):** các trường bắt buộc khi không nhập thì không cho chuyển sang bước tiếp theo (nút vẫn sáng/bấm được) và báo lỗi ngay dưới ô nhập.
+
+**File sửa:** `category/components/modals/CategoryWizardModal.tsx` (Thiết lập / Chỉnh sửa danh mục dùng chung — Bước 1 Thông tin chung).
+- Trường bắt buộc: **Mã danh mục**, **Tên danh sách danh mục**, **Loại danh mục**, **Đơn vị chủ quản** (Phạm vi vĩ mô luôn có giá trị mặc định).
+- Bấm **Tiếp tục** (bước 1) hoặc **Gửi trình duyệt**: thiếu trường → không chuyển bước, **viền ô đỏ mảnh 1px** `#DC2626` (không vòng focus đậm, chữ gợi ý độ đậm thường — PM chỉnh), dòng lỗi 12px `#DC2626` ngay dưới ô (VD "Vui lòng chọn loại danh mục"), tự cuộn tới ô lỗi đầu tiên; nếu đang ở bước khác thì quay về bước 1.
+- **Lưu tạm**: chỉ yêu cầu Mã và Tên danh mục.
+- Nhập/chọn giá trị → lỗi của ô đó tự mất; mở lại modal → xóa lỗi cũ. Nút luôn bấm được (không khóa).
+- Thay cho thông báo nổi (toast) trước đây chỉ kiểm tra Mã/Tên.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Nút bị khóa theo chuẩn 5.1; ô bị khóa ở màn Chỉnh sửa giống màn Xem chi tiết (Ngày thực hiện: 09/10/2026) — 193
+
+**Nội dung (PM yêu cầu):**
+1. Sửa các nút bị khóa trên các màn theo định dạng nút disabled chuẩn.
+2. Các trường bị disable ở màn Chỉnh sửa quy định giống các trường ở màn Xem chi tiết.
+
+**1. Nút bị khóa (mục 5.1)** — rà mọi `<button disabled>` trong `src`: 96 nút ở 55 file đang làm mờ (`disabled:opacity-*` / `opacity-50`) hoặc không có kiểu khóa → nút thường: `disabled:` nền `#F1F5F9`, chữ `#94A3B8`, viền `#E2E8F0`, bỏ bóng, con trỏ not-allowed; nút chỉ có icon (trong suốt): icon `#CBD5E1`, không nền. Bỏ toàn bộ `disabled:opacity-*` trên nút. Nút dùng hằng chuẩn (`BTN_*`, `PAGE_ARROW_BTN`, `MOVE_BTN`) đã đúng — không đổi. (Trong lúc sửa tự động có 56 chỗ bị áp nhầm kiểu xám cả khi không khóa — đã phát hiện và hoàn tác trước khi build.)
+
+**2. Ô bị khóa** — một kiểu chung cho Thêm mới / Chỉnh sửa / Xem chi tiết: nền `#F0F0F0`, viền `rgba(0,0,0,0.26)`, **chữ đen `#000000`** (trước: chữ `#94A3B8`, viền `#E2E8F0`).
+- `pages/collection/collectionUi.tsx`: `INPUT_CLS` và `DateInput` (khung + ô) theo kiểu mới — áp cho mọi màn dùng chung (VD "Mã danh mục" ở Chỉnh sửa danh mục dùng chung).
+- Ô viết tay: UnpublishModal, Cấu hình thu thập, Nạp cấu trúc, Wizard dữ liệu chủ, Thiết lập danh mục dữ liệu mở, Lịch biểu, Trường tính toán, Thêm dịch vụ cung cấp (ô chỉ đọc), SetupCategoryList, ProcessRequestModal, CategoryManagementPage.
+- `compomennt.md` mục 5.2: cập nhật quy định ô bị khóa dùng chung.
+
+**stauts.md:** tự mở khóa `[x]` 12 mục bị ảnh hưởng (LoginPage, Internal/ExternalDataPage, DataReconciliationPage, MasterDataAPage, MasterDataApprovalPage, MergeRulesManagementTab, APITestModal, ApprovalReviewModal, OpenDataApprovalPage, OpenDataCategoryPagination, SystemConfigPage).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công.
+
+## Rà soát ô bị khóa (disabled) theo quy chuẩn 5.2 (Ngày thực hiện: 09/10/2026) — 192
+
+**Nội dung (PM yêu cầu):** những ô bị disable (VD "Mã danh mục" ở modal Chỉnh sửa danh mục dùng chung) sửa theo quy chuẩn ô disabled của `compomennt.md`.
+
+**Quy chuẩn (mục 5.2):** form Thêm mới/Chỉnh sửa — nền `#F0F0F0`, viền `#E2E8F0`, chữ `#94A3B8`, con trỏ not-allowed, không dùng opacity; màn Xem chi tiết — nền `#F0F0F0`, viền `rgba(0,0,0,0.26)`, chữ đen `#000000`.
+
+**Kết quả rà (mọi ô input/select/textarea có disabled trong `src`):**
+- "Mã danh mục" ở Wizard danh mục (chế độ Chỉnh sửa) **đã đúng chuẩn** (dùng `INPUT_CLS`: nền #F0F0F0, viền #E2E8F0, chữ #94A3B8) — không sửa. Chế độ Xem chi tiết của wizard và modal Sửa danh mục cũng đã đúng (chữ đen, viền rgba).
+- **Đã sửa:**
+  - `provisioning/modals/SharedFieldsConfigModal.tsx`: ô "Che dấu" (luôn khóa) nền `#F8FAFC` → kiểu ô khóa chuẩn (`VIEW_FIELD_CLS`).
+  - Chữ ô khóa `slate-400/500` → `#94A3B8`: `collection/DataCollectionConfigSection.tsx` (ô ngày/thứ trong tháng), `collection/StructureLoadingConfig.tsx` (ô tên/kiểu trường khi chưa chọn), `processing/ScheduleManagementModal.tsx` (ô ngày/thứ trong tháng).
+- Còn lại là ô dùng hằng chung (`INPUT_CLS`, `DateInput`, khối quy tắc Xử lý dữ liệu, ô chỉ đọc nền #F0F0F0) — đã đúng chuẩn.
+
+**Ngoài phạm vi (chưa sửa):** ~42 file còn **nút** bị khóa dùng `disabled:opacity-*` (trái mục 5.1 — nút khóa phải nền #F1F5F9 chữ #94A3B8).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Chọn CSDL đích, Ánh xạ dữ liệu theo thiết kế PM; chuẩn hóa khối quy tắc (Ngày thực hiện: 09/10/2026) — 191
+
+**Nội dung (PM yêu cầu):** sửa modal Chọn cơ sở dữ liệu đích và modal Ánh xạ dữ liệu (khi ánh xạ để xử lý dữ liệu) theo ảnh PM gửi, lấy `compomennt.md` làm chuẩn; kiểm tra lại các khối quy tắc sau khi lưu.
+
+**File sửa** (tự mở khóa `[x]` 3 mục modal trong `stauts.md`):
+- `processing/SelectTargetDatabaseModal.tsx` — "Chọn Cơ sở dữ liệu đích": ô icon #EAF3FF + mô tả "Vui lòng chọn một kết nối CSDL để thực hiện ánh xạ"; ô tìm "Tìm theo tên, host, port, schema hoặc loại CSDL..." (tìm không dấu); danh sách thẻ chọn (nút chọn tròn, tên 14px/600, dòng host:port + Schema, nhãn loại CSDL bên phải; thẻ chọn viền xanh); không có kết quả → "Không tìm thấy kết quả phù hợp"; footer [Hủy] [Tiếp theo →] (khóa tới khi chọn).
+- `processing/DataMappingModal.tsx` — "Ánh xạ dữ liệu": rộng 1280px, cao cố định; header có "Tự động ánh xạ" (nút phụ màu xanh lá, dùng `handleAutoMap` sẵn có; khi bật đổi "Hủy tự động") và "Gộp / Tách cột" (mở MergeSplitModal sẵn có); 3 cột tự cuộn: *Dữ liệu cần xử lý* (tên bộ dữ liệu nguồn, thẻ trường + Kiểu/Độ dài/Cho phép Null, trạng thái đã ánh xạ), *Cơ sở dữ liệu xử lý* (thẻ bảng, bảng chọn nền xanh chữ trắng), *cột của bảng* (nút chọn tròn, nhãn PK); footer [Hủy] [Lưu cấu hình]. `alert()` → toast; tìm không dấu; bỏ chữ nghiêng/viết hoa/chữ <12px. Logic ánh xạ 1-1 giữ nguyên.
+- `processing/GenericProcessingPage.tsx` (chỉ các khối quy tắc tab Làm sạch / Chuẩn hóa / Biến đổi): khung quy tắc bo 16px, tiêu đề 14px/600; mỗi dòng quy tắc trong hộp #F8FAFC; nhãn 13px/600 (trước 12px xám); ô 40px; **dòng đã lưu: ô khóa chữ đen nền #F0F0F0** (trước chữ xám mờ); Sửa/Xóa dạng nút icon có chú thích; "Thêm quy tắc" nút viền, "Lưu quy tắc" nút chính; thêm nút "Chỉnh sửa" cho quy tắc nhóm AND/OR đã lưu; khối quy tắc chuyển ra ngoài component (tránh mất con trỏ khi gõ — chưa thử).
+
+**Chữ mới / đổi:** phụ đề modal ánh xạ "…CSDL Kho DLDC" → "…CSDL Kho dữ liệu dùng chung"; placeholder ô tìm CSDL; "Không tìm thấy kết quả phù hợp"; nút "Thêm điều kiện" (thay icon "+"); tooltip "Xóa quy tắc" → "Xóa"; placeholder ô chọn quy tắc cụ thể hơn theo nhãn (VD "-- Chọn trường áp dụng --", "-- Chọn quy tắc định dạng --", "-- Chọn xử lý ngoại lệ --", "-- Chọn kiểu dữ liệu --", "-- Chọn CSDL tham chiếu --").
+
+**Chờ PM quyết định:** dòng "Tên gốc" trên thẻ trường nguồn (dữ liệu mẫu chưa có); phụ đề modal ánh xạ dùng tên CSDL đích đã chọn?; placeholder ô chọn dài theo nhãn có giữ không; icon Xóa đỏ khi di chuột; lỗi chính tả có sẵn "Chuyển đôi từ unix timestamp" và tiêu đề tiếng Anh "Logic Operator".
+
+**Kiểm tra:** tsc không có lỗi ở 3 file (trước/sau); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
 ## Gộp nhánh feature/chuan-hoa-o-disabled-typography-20261009 vào main (Ngày thực hiện: 09/10/2026) — 190
 
 **Nội dung (PM yêu cầu):** đối chiếu và gộp nhánh (commit `50e7e917`: nền ô disabled #F0F0F0, wizard Dữ liệu chủ, modal Thông tin cá nhân, báo cáo rà soát typography — log 179–189) vào `main`, xử lý xung đột.

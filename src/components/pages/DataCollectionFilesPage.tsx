@@ -133,7 +133,7 @@ export function DataCollectionFilesPage() {
           Hiển thị <span className="text-slate-900">1-4</span> trong tổng số <span className="text-slate-900">48</span> file
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none " disabled>
             Trang trước
           </button>
           <button title="Hành động" aria-label="Hành động" className="px-4 py-2 bg-blue-600 text-white rounded-lg">1</button>

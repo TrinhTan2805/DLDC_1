@@ -102,6 +102,43 @@ export function CategoryWizardModal({
     };
   }, [isOpen]);
 
+  // Kiểm tra trường bắt buộc bước 1 (PM 09/10/2026): thiếu → không chuyển bước, nút vẫn bấm được, báo lỗi ngay dưới ô
+  const REQUIRED_FIELDS: { key: 'code' | 'name' | 'categoryType' | 'managingAgency'; msg: string }[] = [
+    { key: 'code', msg: 'Vui lòng nhập mã danh mục' },
+    { key: 'name', msg: 'Vui lòng nhập tên danh sách danh mục' },
+    { key: 'categoryType', msg: 'Vui lòng chọn loại danh mục' },
+    { key: 'managingAgency', msg: 'Vui lòng chọn đơn vị chủ quản' },
+  ];
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const isFilled = (key: string) => String((formData as Record<string, unknown>)[key] ?? '').trim() !== '';
+  // Mở lại modal → xóa lỗi cũ
+  useEffect(() => { if (isOpen) setFieldErrors({}); }, [isOpen, entityId]);
+  // Người dùng nhập/chọn → bỏ lỗi của ô đó
+  useEffect(() => {
+    setFieldErrors(prev => {
+      const next = { ...prev };
+      let changed = false;
+      Object.keys(next).forEach(k => { if (isFilled(k)) { delete next[k]; changed = true; } });
+      return changed ? next : prev;
+    });
+  }, [formData]);
+  const validateRequired = (keys: string[] = REQUIRED_FIELDS.map(f => f.key)) => {
+    const errs: Record<string, string> = {};
+    REQUIRED_FIELDS.filter(f => keys.includes(f.key)).forEach(f => { if (!isFilled(f.key)) errs[f.key] = f.msg; });
+    setFieldErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      if (step !== 1) setStep(1);
+      // cuộn tới ô lỗi đầu tiên (không focus để tránh viền đậm)
+      setTimeout(() => document.querySelector<HTMLElement>('[data-field-error="true"]')?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 0);
+      return false;
+    }
+    return true;
+  };
+  // Lỗi: chỉ viền đỏ mảnh 1px (không vòng focus đậm), chữ gợi ý giữ độ đậm thường
+  const errCls = (key: string) => (fieldErrors[key] ? ' !border-[#DC2626] focus:!ring-0 font-normal' : '');
+  const errAttrs = (key: string) => (fieldErrors[key] ? { 'aria-invalid': true, 'data-field-error': 'true' } : {});
+  const ErrorText = ({ k }: { k: string }) => (fieldErrors[k] ? <p className="mt-1 text-[12px] text-[#DC2626]">{fieldErrors[k]}</p> : null);
+
   if (!isOpen) return null;
 
   const currentZIndex = 100 + modalIndex * 10;
@@ -213,8 +250,10 @@ export function CategoryWizardModal({
                       value={formData.code || ''}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, code: e.target.value })}
                       placeholder="VD: DM_GIOITINH"
-                      className={inputCls}
+                      className={`${inputCls}${errCls('code')}`}
+                      {...errAttrs('code')}
                     />
+                    <ErrorText k="code" />
                   </div>
                   <div className="col-span-2 sm:col-span-1">
                     <label className={LABEL_CLS}>Tên danh sách danh mục <span className={REQUIRED_MARK}>*</span></label>
@@ -224,8 +263,10 @@ export function CategoryWizardModal({
                       value={formData.name || ''}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="VD: Danh mục quốc gia, Bộ dữ liệu cán bộ..."
-                      className={inputCls}
+                      className={`${inputCls}${errCls('name')}`}
+                      {...errAttrs('name')}
                     />
+                    <ErrorText k="name" />
                   </div>
                   <div className="col-span-2">
                     <label className={LABEL_CLS}>Loại danh mục <span className={REQUIRED_MARK}>*</span></label>
@@ -235,7 +276,8 @@ export function CategoryWizardModal({
                         disabled={isViewOnly}
                         value={formData.categoryType || ''}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, categoryType: e.target.value as CategoryType })}
-                        className={selectCls}
+                        className={`${selectCls}${errCls('categoryType')}`}
+                      {...errAttrs('categoryType')}
                       >
                         <option value="" disabled hidden>-- Chọn loại danh mục --</option>
                         {(Object.keys(categoryTypeLabels) as CategoryType[]).map(type => (
@@ -244,6 +286,7 @@ export function CategoryWizardModal({
                       </select>
                       <ChevronDown className={SELECT_ICON_CLS} />
                     </div>
+                    <ErrorText k="categoryType" />
                   </div>
                   <div>
                     <label className={LABEL_CLS}>Cơ sở dữ liệu/Hệ thống</label>
@@ -271,7 +314,8 @@ export function CategoryWizardModal({
                         disabled={isViewOnly}
                         value={formData.managingAgency || ''}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, managingAgency: e.target.value })}
-                        className={selectCls}
+                        className={`${selectCls}${errCls('managingAgency')}`}
+                      {...errAttrs('managingAgency')}
                       >
                         <option value="" disabled hidden>-- Chọn đơn vị chủ quản --</option>
                         {[
@@ -287,6 +331,7 @@ export function CategoryWizardModal({
                       </select>
                       <ChevronDown className={SELECT_ICON_CLS} />
                     </div>
+                    <ErrorText k="managingAgency" />
                   </div>
                   <div className="col-span-2">
                     <label className={LABEL_CLS}>Căn cứ</label>
@@ -536,19 +581,19 @@ export function CategoryWizardModal({
 
             <div className="flex gap-3">
               {!isViewOnly && (
-                <button onClick={() => onSaveStep1('draft')} className={BTN_OUTLINE}>
+                <button onClick={() => { if (validateRequired(['code', 'name'])) onSaveStep1('draft'); }} className={BTN_OUTLINE}>
                   <Save className="w-4 h-4" /> Lưu tạm
                 </button>
               )}
               {!isViewOnly && step === 3 && (
-                <button onClick={() => onSaveStep1('submit')} className={BTN_PRIMARY}>
+                <button onClick={() => { if (validateRequired()) onSaveStep1('submit'); }} className={BTN_PRIMARY}>
                   <Send className="w-4 h-4" /> Gửi trình duyệt
                 </button>
               )}
               {step < 3 && (
                 <button onClick={() => {
                   if (isViewOnly) { setStep(step + 1); return; }
-                  if (step === 1) { onSaveStep1('next'); return; }
+                  if (step === 1) { if (validateRequired()) onSaveStep1('next'); return; }
                   if (step === 2) { onSaveStep1('next3'); return; }
                   setStep(step + 1);
                 }} className={approvalActions ? BTN_OUTLINE : BTN_PRIMARY}>

@@ -141,14 +141,14 @@ export function ResetPasswordModal({ isOpen, onClose, user }: ResetPasswordModal
               <button
                 onClick={handleClose}
                 disabled={isResetting}
-                className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+                className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
               >
                 Hủy
               </button>
               <button
                 onClick={handleReset}
                 disabled={isResetting}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed"
               >
                 {isResetting ? (
                   <>

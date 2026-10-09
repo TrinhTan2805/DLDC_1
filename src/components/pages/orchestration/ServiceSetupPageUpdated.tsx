@@ -1289,7 +1289,7 @@ export function ServiceSetupPage() {
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               Trước
             </button>
@@ -1320,7 +1320,7 @@ export function ServiceSetupPage() {
             <button
               onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredServices.length / itemsPerPage), p + 1))}
               disabled={currentPage === Math.ceil(filteredServices.length / itemsPerPage) || filteredServices.length === 0}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               Sau
             </button>
@@ -1630,7 +1630,7 @@ export function ServiceSetupPage() {
                         Công khai dịch vụ
                       </button>
                     ) : service.status === 'publishing' ? (
-                      <button className="px-4 py-2 bg-slate-100 text-slate-400 rounded-lg flex items-center gap-2 text-sm font-medium cursor-not-allowed" disabled>
+                      <button className="px-4 py-2 bg-slate-100 text-slate-400 rounded-lg flex items-center gap-2 text-sm font-medium cursor-not-allowed disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed" disabled>
                         <SettingsIcon className="w-4 h-4 animate-spin" />
                         Đang xử lý...
                       </button>

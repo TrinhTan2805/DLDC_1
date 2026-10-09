@@ -661,7 +661,7 @@ export function ProcessingRuleSetupPage() {
                       rule.status === 'processing'
                         ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                         : 'border border-green-300 text-green-700 hover:bg-green-50'
-                    }`}
+                    } disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none disabled:cursor-not-allowed`}
                   >
                     <Play className="w-3.5 h-3.5" />
                     Chạy quy tắc

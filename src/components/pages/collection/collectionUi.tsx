@@ -116,8 +116,8 @@ export const BTN_DESTRUCTIVE = `h-10 px-4 inline-flex items-center justify-cente
 export const tabClass = (active: boolean) =>
   `h-12 px-4 py-3 inline-flex items-center gap-2 text-[14px] font-semibold border-b-2 transition-colors cursor-pointer ${active ? 'border-blue-600 text-blue-600' : 'border-transparent text-[#64748B] hover:text-[#020817]'}`;
 
-// Ô nhập (mục 5.2): cao 40px, padding ngang 12px, viền #E2E8F0, bo 8px; disabled nền #F0F0F0 (PM chốt 09/10/2026)
-export const INPUT_CLS = 'w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F0F0F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed';
+// Ô nhập (mục 5.2): cao 40px, padding ngang 12px, viền #E2E8F0, bo 8px; ô bị khóa (Thêm mới/Chỉnh sửa/Xem chi tiết) giống nhau: nền #F0F0F0, chữ đen, viền rgba(0,0,0,0.26) (PM chốt 09/10/2026)
+export const INPUT_CLS = 'w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F0F0F0] disabled:text-[#000000] disabled:border-[rgba(0,0,0,0.26)] disabled:cursor-not-allowed';
 // Ô BỊ KHÓA (disabled) ở màn Xem chi tiết (PM chốt 07/10/2026 – module Cung cấp dữ liệu): giá trị đã nhập chữ ĐEN #000000,
 // placeholder XÁM #94A3B8 13px/400, nền #F0F0F0 (như trang BTP), viền rgba(0,0,0,0.26). Không áp cho ô nhập bình thường. Ghép sau INPUT_CLS / textarea.
 export const VIEW_FIELD_CLS = 'disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8] disabled:placeholder:font-normal';
@@ -210,7 +210,7 @@ export function DateInput({ value, onChange, ariaLabel = 'Chọn ngày', placeho
   };
 
   return (
-    <div className={`relative ${DATE_BOX_CLS} ${invalid ? '!border-[#DC2626]' : ''} ${disabled ? '!bg-[#F0F0F0] cursor-not-allowed' : ''} ${className}`}>
+    <div className={`relative ${DATE_BOX_CLS} ${invalid ? '!border-[#DC2626]' : ''} ${disabled ? '!bg-[#F0F0F0] !border-[rgba(0,0,0,0.26)] cursor-not-allowed' : ''} ${className}`}>
       <input
         type="text"
         inputMode="numeric"
@@ -222,7 +222,7 @@ export function DateInput({ value, onChange, ariaLabel = 'Chọn ngày', placeho
         disabled={disabled}
         onChange={(e) => handleType(e.target.value)}
         onBlur={handleBlur}
-        className="w-full min-w-0 border-0 bg-transparent text-[13px] text-[#020817] placeholder:text-[#94A3B8] focus:outline-none p-0 disabled:text-[#94A3B8] disabled:cursor-not-allowed tabular-nums"
+        className="w-full min-w-0 border-0 bg-transparent text-[13px] text-[#020817] placeholder:text-[#94A3B8] focus:outline-none p-0 disabled:text-[#000000] disabled:cursor-not-allowed tabular-nums"
       />
       <button
         type="button"

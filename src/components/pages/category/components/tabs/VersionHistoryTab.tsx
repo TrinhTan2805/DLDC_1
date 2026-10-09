@@ -104,7 +104,7 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm, versions }: Versi
             <button
               onClick={() => setCurrentPageNum(Math.max(1, currentPageNum - 1))}
               disabled={currentPageNum === 1}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               Trước
             </button>
@@ -120,7 +120,7 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm, versions }: Versi
             <button
               onClick={() => setCurrentPageNum(Math.min(totalPages, currentPageNum + 1))}
               disabled={currentPageNum === totalPages}
-              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer"
+              className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium cursor-pointer disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               Sau
             </button>

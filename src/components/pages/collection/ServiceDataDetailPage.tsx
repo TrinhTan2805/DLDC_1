@@ -474,7 +474,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
               title="Trang trước"
-              className="p-2 rounded hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded hover:bg-slate-100 disabled:cursor-not-allowed transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               <ChevronLeft className="w-4 h-4 text-slate-600" />
             </button>
@@ -485,7 +485,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
               title="Trang sau"
-              className="p-2 rounded hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded hover:bg-slate-100 disabled:cursor-not-allowed transition-colors disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
               <ChevronRight className="w-4 h-4 text-slate-600" />
             </button>

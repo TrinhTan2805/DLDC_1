@@ -5642,8 +5642,9 @@ table.master-data-consumption-table tbody td {
    Đổi màu cho TOÀN HỆ THỐNG chỉ cần sửa biến --color-placeholder dưới đây.
    - Áp cho mọi ô input / textarea (form Thêm mới, Chỉnh sửa, ô tìm kiếm, bộ lọc, modal).
    - !important để thắng các class placeholder:text-* còn sót trong từng màn.
-   - <select> đang ở lựa chọn rỗng (value="", VD "-- Chọn ... --") cũng hiện màu placeholder;
-     danh sách lựa chọn khi mở ra vẫn màu chữ thường.
+   - <select> đang ở dòng gợi ý (option value="" hidden, VD "-- Chọn ... --") hiện màu placeholder;
+     lựa chọn "Tất cả …" (value="" nhưng là giá trị thật của bộ lọc) giữ chữ đen.
+     Danh sách lựa chọn khi mở ra vẫn màu chữ thường.
    ========================================================================== */
 @layer base {
   :root {
@@ -5653,10 +5654,10 @@ table.master-data-consumption-table tbody td {
     color: var(--color-placeholder) !important;
     opacity: 1 !important;
   }
-  select:has(> option[value=""]:checked) {
+  select:has(> option[value=""][hidden]:checked) {
     color: var(--color-placeholder) !important;
   }
-  select:has(> option[value=""]:checked) option {
+  select:has(> option[value=""][hidden]:checked) option {
     color: #020817 !important;
   }
 }

@@ -193,7 +193,7 @@ export function ImportDataModal({ isOpen, onClose, onImport }: ImportDataModalPr
           <button
             onClick={handleImport}
             disabled={!selectedFile}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:cursor-not-allowed flex items-center gap-2 disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
           >
             <Upload className="w-4 h-4" />
             Nhập dữ liệu

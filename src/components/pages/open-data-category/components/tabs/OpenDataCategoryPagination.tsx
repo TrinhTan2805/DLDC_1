@@ -50,7 +50,7 @@ export function OpenDataCategoryPagination({
           <button
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer"
+            className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
           >
             Trước
           </button>
@@ -70,7 +70,7 @@ export function OpenDataCategoryPagination({
           <button
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer"
+            className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
           >
             Sau
           </button>
