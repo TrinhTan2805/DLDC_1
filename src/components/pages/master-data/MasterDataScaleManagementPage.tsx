@@ -34,6 +34,10 @@ interface EntitySource {
   name: string;
   kind: SourceKind;
   grain: SourceGrain;
+  // Bảng nguồn, khóa làm mịn, quy tắc gom (đăng ký ở Bước 1 Wizard)
+  table?: string;
+  grainKey?: string;
+  groupRules?: { fieldName: string; ruleType: string }[];
 }
 
 interface MasterDataAttribute {
@@ -103,8 +107,8 @@ const defaultEntities: MasterDataEntity[] = [
     systemName: 'CSDL hộ tịch điện tử',
     effectiveDate: '2024-01-01',
     sources: [
-      { id: 'src-1-1', name: 'Hộ tịch', kind: 'table', grain: '1:1' },
-      { id: 'src-1-2', name: 'CCCD', kind: 'table', grain: '1:1' },
+      { id: 'src-1-1', name: 'Hộ tịch', kind: 'table', grain: '1:1', table: 'tbl_khaisinh' },
+      { id: 'src-1-2', name: 'CCCD', kind: 'table', grain: '1:1', table: 'tbl_can_cuoc' },
     ],
     dataSource: 'dldc',
     dldcTable: 'tbl_citizen',
@@ -1196,24 +1200,48 @@ export function MasterDataScaleManagementPage() {
                     <ViewField label="Trạng thái vòng đời">
                       <Badge label={lifecycleLabels[viewingEntity.lifecycleStatus]?.label} variant={STATUS_VARIANT[viewingEntity.lifecycleStatus]} />
                     </ViewField>
-                    <ViewField label="Đăng ký nguồn dữ liệu" full>
+                    {/* Nguồn dữ liệu đăng ký: mỗi nguồn một dòng "Tên nguồn - Bảng nguồn" (PM yêu cầu, bỏ chip) */}
+                    <ViewField label="Nguồn dữ liệu đăng ký" full>
                       {(viewingEntity.sources || []).length === 0 ? (
                         <span className={MUTED}>Chưa đăng ký nguồn dữ liệu nào</span>
                       ) : (
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="space-y-1">
                           {(viewingEntity.sources || []).map(src => (
-                            <span
-                              key={src.id}
-                              className="inline-flex items-center gap-2 pl-3 pr-1 py-1 bg-white border border-[#E2E8F0] rounded-2xl text-[13px]"
-                            >
-                              <span className="text-[#020817]">{src.name}</span>
-                              <Badge label={SOURCE_KIND_LABELS[src.kind]} variant={SOURCE_KIND_COLORS[src.kind]} />
-                              <Badge label={src.grain} variant={SOURCE_GRAIN_COLORS[src.grain]} />
-                            </span>
+                            <div key={src.id}>{src.table ? `${src.name} - ${src.table}` : src.name}</div>
                           ))}
                         </div>
                       )}
                     </ViewField>
+                    {/* Bảng nguồn đã đăng ký — chỉ xem: không có nút Thêm nguồn, không có cột Thao tác */}
+                    {(viewingEntity.sources || []).length > 0 && (
+                      <div className="col-span-2">
+                        <div className={`${FIELD_LABEL} mb-1`}>Đăng ký nguồn dữ liệu</div>
+                        <div className="bg-white rounded-lg border border-[#E2E8F0] overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                              <thead className="bg-[#F8FAFC]">
+                                <tr className="h-[42px] border-b border-[#E2E8F0]">
+                                  <th className="px-3 py-[13px] text-left text-[13px] font-bold text-black whitespace-nowrap">Tên nguồn</th>
+                                  <th className="px-3 py-[13px] text-left text-[13px] font-bold text-black whitespace-nowrap">Bảng nguồn</th>
+                                  <th className="px-3 py-[13px] text-left text-[13px] font-bold text-black whitespace-nowrap">Khóa làm mịn</th>
+                                  <th className="px-3 py-[13px] text-right text-[13px] font-bold text-black whitespace-nowrap">Quy tắc gom</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(viewingEntity.sources || []).map(src => (
+                                  <tr key={src.id} className="h-12 bg-white border-b border-[#E0E0E0] last:border-b-0">
+                                    <td className="px-3 py-1 text-[13px] text-black max-w-[240px]"><TruncatedText text={src.name} /></td>
+                                    <td className="px-3 py-1 text-[13px] text-black max-w-[240px]"><TruncatedText text={src.table || '-'} /></td>
+                                    <td className="px-3 py-1 text-[13px] text-black max-w-[200px]"><TruncatedText text={src.grainKey || '-'} /></td>
+                                    <td className="px-3 py-1 text-[13px] text-black text-right tabular-nums">{(src.groupRules || []).length}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

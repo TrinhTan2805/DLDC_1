@@ -89,13 +89,13 @@ Sử dụng thư viện **Lucide React** cho toàn bộ icon.
 
 | Hành động | Biểu tượng | Tên Icon (Lucide) | Màu sắc gợi ý | Ghi chú |
 | :--- | :---: | :--- | :--- | :--- |
-| **Dữ liệu / Lớp** | <img src="https://api.iconify.design/lucide:layers.svg?color=%23155dfc" width="20"/> | `Layers` | `Blue` | Quản lý nguồn dữ liệu / Lớp bản đồ |
-| **Làm mới / Test** | <img src="https://api.iconify.design/lucide:refresh-cw.svg?color=%2364748b" width="20"/> | `RefreshCw` | `Slate` | Đồng bộ dữ liệu hoặc Test kết nối |
-| **Thêm nhanh** | <img src="https://api.iconify.design/lucide:plus.svg?color=%23155dfc" width="20"/> | `Plus` | `Primary` | Thêm bản ghi hoặc thành phần mới |
-| **Kích hoạt / Cấp quyền** | <img src="https://api.iconify.design/lucide:power.svg?color=%23f97316" width="20"/> | `Power` | `Orange` | Bật/Tắt trạng thái hoặc Cấu hình |
-| **Xóa sạch / Reset** | <img src="https://api.iconify.design/lucide:eraser.svg?color=%2364748b" width="20"/> | `Eraser` | `Slate` | Xóa trắng dữ liệu nhập hoặc Reset |
-| **Xem chi tiết** | <img src="https://api.iconify.design/lucide:eye.svg?color=%2364748b" width="20"/> | `Eye` | `Slate` | Xem thông tin chi tiết (Read-only) |
-| **Xóa bỏ** | <img src="https://api.iconify.design/lucide:trash-2.svg?color=%23dc2626" width="20"/> | `Trash2` | `Red` | Xóa vĩnh viễn bản ghi |
+| **Dữ liệu / Lớp** | <img src="icons/layers-155dfc.svg" width="20"/> | `Layers` | `Blue` | Quản lý nguồn dữ liệu / Lớp bản đồ |
+| **Làm mới / Test** | <img src="icons/refresh-cw-64748b.svg" width="20"/> | `RefreshCw` | `Slate` | Đồng bộ dữ liệu hoặc Test kết nối |
+| **Thêm nhanh** | <img src="icons/plus-155dfc.svg" width="20"/> | `Plus` | `Primary` | Thêm bản ghi hoặc thành phần mới |
+| **Kích hoạt / Cấp quyền** | <img src="icons/power-f97316.svg" width="20"/> | `Power` | `Orange` | Bật/Tắt trạng thái hoặc Cấu hình |
+| **Xóa sạch / Reset** | <img src="icons/eraser-64748b.svg" width="20"/> | `Eraser` | `Slate` | Xóa trắng dữ liệu nhập hoặc Reset |
+| **Xem chi tiết** | <img src="icons/eye-64748b.svg" width="20"/> | `Eye` | `Slate` | Xem thông tin chi tiết (Read-only) |
+| **Xóa bỏ** | <img src="icons/trash-2-dc2626.svg" width="20"/> | `Trash2` | `Red` | Xóa vĩnh viễn bản ghi |
 
 ### Các hành động bổ sung (Cần thiết cho dự án)
 
@@ -103,16 +103,15 @@ Qua kiểm tra dự án, các hành động sau cũng xuất hiện thường xu
 
 | Hành động | Biểu tượng | Tên Icon (Lucide) | Màu sắc gợi ý | Ghi chú |
 | :--- | :---: | :--- | :--- | :--- |
-| **Chỉnh sửa** | <img src="https://api.iconify.design/lucide:edit-2.svg?color=%234f46e5" width="20"/> | `Edit2` / `Pencil` | `Indigo` | Thay đổi nội dung đã có |
-| **Trình duyệt** | <img src="https://api.iconify.design/lucide:send.svg?color=%234f46e5" width="20"/> | `Send` | `Indigo` | Mở giao diện trình duyệt dữ liệu |
-| **Duyệt** | <img src="https://api.iconify.design/lucide:check-circle.svg?color=%2316a34a" width="20"/> | `CheckCircle` | `Success` | Phê duyệt hồ sơ / dữ liệu |
-| **Từ chối duyệt** | <img src="https://api.iconify.design/lucide:ban.svg?color=%23dc2626" width="20"/> | `Ban` | `Destructive` | Từ chối phê duyệt hồ sơ |
-| **Xuất Excel** | <img src="https://api.iconify.design/lucide:file-spreadsheet.svg?color=%2316a34a" width="20"/> | `FileSpreadsheet` | `Success` | Trích xuất dữ liệu ra định dạng .xlsx |
-| **Xuất PDF** | <img src="https://api.iconify.design/lucide:file-text.svg?color=%23dc2626" width="20"/> | `FileText` | `Destructive` | Trích xuất dữ liệu ra định dạng .pdf |
-| **Tìm kiếm / Lọc** | <img src="https://api.iconify.design/lucide:search.svg?color=%2364748b" width="20"/> | `Search` | `Slate` | Tìm kiếm cơ bản |
-| **Tìm kiếm nâng cao** | <img src="https://api.iconify.design/lucide:filter.svg?color=%2364748b" width="20"/> | `Filter` | `Slate` | Lọc dữ liệu theo nhiều tiêu chí |
-| **Tải về** | <img src="https://api.iconify.design/lucide:download.svg?color=%23155dfc" width="20"/> | `Download` | `Primary` | Tải tài liệu đính kèm |
-| **Lưu lại** | <img src="https://api.iconify.design/lucide:save.svg?color=%23155dfc" width="20"/> | `Save` | `Primary` | Lưu các thay đổi trong form |
+| **Chỉnh sửa** | <img src="icons/square-pen-475569.svg" width="20"/> | `SquarePen` (alias `Edit`) | `Slate` | Thay đổi nội dung đã có. Không dùng `Edit2` / `Pencil` (cây bút) |
+| **Trình duyệt** | <img src="icons/send-4f46e5.svg" width="20"/> | `Send` | `Indigo` | Mở giao diện trình duyệt dữ liệu |
+| **Duyệt** | <img src="icons/check-circle-16a34a.svg" width="20"/> | `CheckCircle` | `Success` | Phê duyệt hồ sơ / dữ liệu |
+| **Từ chối duyệt** | <img src="icons/ban-dc2626.svg" width="20"/> | `Ban` | `Destructive` | Từ chối phê duyệt hồ sơ |
+| **Kết xuất** | <img src="icons/download-334155.svg" width="20"/> | `Download` | `Slate` (chữ nút viền `#334155`) | Nút viền "Kết xuất" trên thanh công cụ (mục 4.4) — trích xuất danh sách ra file |
+| **Tìm kiếm / Lọc** | <img src="icons/search-64748b.svg" width="20"/> | `Search` | `Slate` | Tìm kiếm cơ bản |
+| **Tìm kiếm nâng cao** | <img src="icons/filter-64748b.svg" width="20"/> | `Filter` | `Slate` | Lọc dữ liệu theo nhiều tiêu chí |
+| **Tải về** | <img src="icons/download-155dfc.svg" width="20"/> | `Download` | `Primary` | Tải tài liệu đính kèm |
+| **Lưu lại** | <img src="icons/save-155dfc.svg" width="20"/> | `Save` | `Primary` | Lưu các thay đổi trong form |
 
 
 ---
@@ -227,7 +226,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 - Trạng thái Focus: ring 2px màu primary `#155DFC`.
 - **Nhãn trường:** 13px / **Semibold (600)** / `#020817` (đen), cách ô nhập 4px — **dùng chung một kiểu với tên trường ở màn Xem chi tiết** (mục 5.17).
 - **Disabled (Vô hiệu hóa):** Nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`** (cùng quy tắc với nút, mục 5.1).
-- **Ô bị khóa ở màn Xem chi tiết** *(PM chốt 07/10/2026 — áp dụng module Cung cấp dữ liệu; chỉ cho ô `disabled` ở màn xem chi tiết, không áp cho ô nhập bình thường)*: **giá trị đã có hiển thị chữ đen `#000000`**; ô trống hiển thị **placeholder xám `#94A3B8`**, 13px / 400; nền `#F0F0F0` (như trang BTP hiển thị); viền `rgba(0,0,0,0.26)`. Code: ghép `VIEW_FIELD_CLS` (trong `collectionUi.tsx`) sau `INPUT_CLS` — `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Màn xem chi tiết mà ô không bị khóa sẵn → bọc form bằng `<fieldset disabled={isViewMode}>` để mọi ô nhận kiểu này. Ô giả lập bằng `div` (VD ô tệp đính kèm) theo cùng quy tắc: có giá trị → chữ đen, trống → chữ xám.
+- **Ô bị khóa ở màn Xem chi tiết** *(07/10/2026)*: **giá trị đã có hiển thị chữ đen `#000000`**; ô trống hiển thị **placeholder xám `#94A3B8`**, 13px / 400; nền `#F0F0F0` (như trang BTP hiển thị); viền `rgba(0,0,0,0.26)`. Code: ghép `VIEW_FIELD_CLS` (trong `collectionUi.tsx`) sau `INPUT_CLS` — `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Màn xem chi tiết mà ô không bị khóa sẵn → bọc form bằng `<fieldset disabled={isViewMode}>` để mọi ô nhận kiểu này. Ô giả lập bằng `div` (VD ô tệp đính kèm) theo cùng quy tắc: có giá trị → chữ đen, trống → chữ xám.
 - **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ `*` màu `#DC2626`. Khi có lỗi (validation), viền chuyển `#DC2626` và hiển thị thông báo lỗi 12px `#DC2626` bên dưới.
 - **Cỡ chữ:** Nhãn và nội dung ô nhập đều 13px (theo bảng Typography mục 1).
 - **Placeholder (chữ gợi ý) — một mã màu chung cho toàn hệ thống** *(PM chốt 09/10/2026)*: **`#94A3B8`**, 13px / Regular (400), áp cho mọi ô nhập / ô tìm kiếm / bộ lọc / form Thêm mới – Chỉnh sửa / modal và cả ô bị khóa ở màn Xem chi tiết. `<select>` đang ở lựa chọn rỗng (VD "-- Chọn ... --") hiển thị cùng màu placeholder.
@@ -323,7 +322,6 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 | Độ rộng tối đa | 480px |
 | Vị trí / z-index | Phía trên ô, căn trái theo ô, mũi tên 6px / `z-[300]` (mục 4.2) |
 
-> Thông số tooltip lấy theo ảnh mẫu được PM duyệt (05/10/2026), **chưa đo bằng DevTools**.
 
 **Class Tailwind chuẩn** (dùng `Tooltip` của shadcn/radix có sẵn trong `src/components/ui/tooltip.tsx`):
 ```tsx
@@ -350,7 +348,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 
 **Vị trí:** luôn là cột **cuối cùng** bên phải, tiêu đề "Thao tác", nội dung **căn giữa**. Bảng cuộn ngang thì cột này **cố định bên phải** (`sticky right-0 bg-white`).
 
-**Hiển thị:** các nút thao tác (kể cả nút `⋯`) **luôn hiển thị** trên mọi hàng — **không ẩn chờ hover**. Lý do: hover không dùng được trên thiết bị cảm ứng và làm giảm khả năng người dùng phát hiện thao tác (theo NN/g, IBM Carbon).
+**Hiển thị:** các nút thao tác (kể cả nút `⋯`) **luôn hiển thị** trên mọi hàng — **không ẩn chờ hover**. Lý do: hover không dùng được trên thiết bị cảm ứng và làm giảm khả năng người dùng phát hiện thao tác.
 
 **Quy tắc số lượng nút:**
 
@@ -476,7 +474,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 | Số lượng, số đếm, phần trăm, số tiền | **Phải**, `tabular-nums` | Cùng số chữ số thập phân trong cột; đơn vị ghi ở tiêu đề (VD "Dung lượng (GB)") |
 | Ngày, giờ | Trái | Có cả ngày và giờ (`dd/MM/yyyy HH:mm:ss`) → **giờ xuống dòng thứ 2**; chỉ có ngày → 1 dòng |
 | Phiên bản (v1.0.2), mã danh mục | Trái | Dữ liệu định danh |
-| Badge (trạng thái, loại nguồn, phương thức kết nối) | **Trái** | Badge dài ngắn khác nhau — căn trái để thẳng một mép, dễ quét dọc (PM chốt 05/10/2026) |
+| Badge (trạng thái, loại nguồn, phương thức kết nối) | **Trái** | Badge dài ngắn khác nhau — căn trái để thẳng một mép, dễ quét dọc (05/10/2026) |
 | Thao tác (icon, nút) | Giữa | Mục 5.3.2 |
 | Checkbox chọn dòng | Giữa | — |
 
@@ -497,7 +495,7 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 - Backdrop mặc định: Làm mờ nền 50% (`bg-black/50`).
 - Tiêu đề: Luôn nằm ở phía trên bên trái.
 - Nút đóng: Icon `X` ở góc trên bên phải.
-- **Chiều cao cố định cho modal Xem chi tiết và modal nhiều bước/nhiều tab** *(PM chốt 07/10/2026)*: khung modal có **chiều cao cố định** — không co giãn theo nội dung khi đổi tab/bước — và **thân modal tự cuộn** bên trong; header (tiêu đề, nút X, thanh tab) và footer (nút hành động) **luôn cố định**, không trôi theo nội dung.
+- **Chiều cao cố định cho modal Xem chi tiết và modal nhiều bước/nhiều tab** *(07/10/2026)*: khung modal có **chiều cao cố định** — không co giãn theo nội dung khi đổi tab/bước — và **thân modal tự cuộn** bên trong; header (tiêu đề, nút X, thanh tab) và footer (nút hành động) **luôn cố định**, không trôi theo nội dung.
   - Chiều cao: `h-[90vh]` (tối đa `max-h-[800px]` với modal rộng ≤ 1024px); modal nhỏ chỉ có vài trường (xác nhận, nhập lý do) **không áp dụng** — giữ chiều cao theo nội dung.
   - Cấu trúc: khung `flex flex-col overflow-hidden` → header `shrink-0` → thân `flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4` → footer `shrink-0` nền `#F8FAFC`, viền trên `#E2E8F0`.
   - Bảng/khối code dài bên trong thân modal **không tạo thanh cuộn lồng** (trừ khối code mẫu JSON/XML có `max-h` riêng); để thân modal cuộn chung.
@@ -577,7 +575,7 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 </div>
 ```
 
-**Ngoại lệ – Thẻ header màn Tổng quan (Dashboard)** *(PM chốt 06/10/2026)*: ở các màn **Tổng quan** (có biểu đồ bên dưới), hàng thẻ header **giữ kích thước lớn** để cân bằng với các biểu đồ. Màu, viền và bo góc vẫn theo chuẩn.
+**Ngoại lệ – Thẻ header màn Tổng quan (Dashboard)** *(06/10/2026)*: ở các màn **Tổng quan** (có biểu đồ bên dưới), hàng thẻ header **giữ kích thước lớn** để cân bằng với các biểu đồ. Màu, viền và bo góc vẫn theo chuẩn.
 
 | Thuộc tính | Giá trị (màn Tổng quan) |
 | :--- | :--- |
@@ -628,9 +626,6 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 | Trạng thái dữ liệu | Lỗi cập nhật | `#B91C1C` | `#FEF2F2` | `#FEE2E2` |
 | Trạng thái dữ liệu | Cập nhật thành công | `#047857` | `#ECFDF5` | `#D1FAE5` |
 | Trạng thái dữ liệu | Đang xử lý | `#D97706` ² | `#FFFFFF` | `#F6B657` ² |
-
-¹ Màu trạng thái do PM cung cấp (ảnh mẫu 05/10/2026). Badge "Ngoài ngành" dùng `#2563EB` theo ảnh mẫu — khác màu xanh chính `#155DFC` của nút/menu/tab.
-² Đo từ ảnh mẫu (chữ bị khử răng cưa) — quy về giá trị gần nhất, cần xác nhận lại bằng DevTools.
 
 **Class Tailwind chuẩn:**
 ```tsx
@@ -734,7 +729,7 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 </div>
 
 ### 5.14. Phân trang (Pagination)
-Quy định chung — theo mẫu PM cung cấp 06/10/2026 (MUI `Pagination`: variant outlined, size medium, shape rounded). Component dùng chung: `Pagination` trong `pages/collection/collectionUi.tsx`.
+Quy định chung — (MUI `Pagination`: variant outlined, size medium, shape rounded). Component dùng chung: `Pagination` trong `pages/collection/collectionUi.tsx`.
 
 | Thành phần | Quy chuẩn |
 | :--- | :--- |
@@ -864,12 +859,10 @@ Quy định chung — theo mẫu PM cung cấp 06/10/2026 (MUI `Pagination`: var
 <header className="h-16 bg-white border-b border-[#E2E8F0]">…</header>
 ```
 
-**Tên menu chuẩn (theo trang Bộ Tư pháp):** Tổng quan; Quản lý thu thập (Dashboard, Thiết lập thu thập, Xem dữ liệu thu thập, Đối soát dữ liệu, Xử lý dữ liệu)²; Danh mục dùng chung; Quản lý dữ liệu chủ; Dữ liệu mở; Cung cấp dữ liệu; Quản trị & vận hành.
-
-² Phân cấp con của "Quản lý thu thập" suy ra từ thứ tự hiển thị — *chưa xác nhận*. Đã đổi tên trong `Sidebar.tsx` (05/10/2026): "Tổng quan thu thập" → **Dashboard**, "Dữ liệu chủ" → **Quản lý dữ liệu chủ**. "Xử lý dữ liệu" giữ là menu cấp 1 (PM chốt).
+**Tên menu chuẩn (theo trang Bộ Tư pháp):** Tổng quan; Quản lý thu thập (Dashboard, Thiết lập thu thập, Xem dữ liệu thu thập, Đối soát dữ liệu, Xử lý dữ liệu); Danh mục dùng chung; Quản lý dữ liệu chủ; Dữ liệu mở; Cung cấp dữ liệu; Quản trị & vận hành.
 
 ### 5.19. Tìm kiếm và Bộ lọc
-Theo số đo trang chuẩn Bộ Tư pháp (cửa sổ 1534px), PM chốt 05/10/2026.
+Theo số đo trang chuẩn Bộ Tư pháp (cửa sổ 1534px), (05/10/2026).
 
 **Thanh tìm kiếm**
 | Thuộc tính | Quy chuẩn |
@@ -879,7 +872,7 @@ Theo số đo trang chuẩn Bộ Tư pháp (cửa sổ 1534px), PM chốt 05/10/
 | Ô tìm kiếm | Cao **40px**, bo 8px, viền 1px `#E2E8F0`, nền trắng, đệm ngang **16px**, chữ 13px/400 `#020817`. **Không** đặt icon trong ô, **không** có nút X xóa nhanh |
 | Placeholder | "Tìm kiếm theo " + các trường được tìm. VD: *Tìm kiếm theo tên dịch vụ, mã dịch vụ, hệ thống nguồn* |
 | Nút Tìm kiếm | 40×40, bo 8px, nền `#10B981`, icon trắng (mục 5.1) |
-| Nút Bộ lọc | 40×40, bo 8px, **nền trắng**, viền `#CBD5E1`, icon `#475569` (kiểu Icon outline mục 5.1 — PM chốt, không dùng nền xanh của BTP); vùng lọc đang mở: nền `#EAF3FF`, viền `#BFDBFE`, icon `#155DFC` và đổi thành `X` |
+| Nút Bộ lọc | 40×40, bo 8px, **nền trắng**, viền `#CBD5E1`, icon `#475569`; vùng lọc đang mở: nền `#EAF3FF`, viền `#BFDBFE`, icon `#155DFC` và đổi thành `X` |
 
 **Cách tìm**
 - **Chỉ ra kết quả khi bấm nút Tìm kiếm hoặc nhấn Enter** trong ô tìm kiếm — gõ chữ không tự lọc.
@@ -888,7 +881,7 @@ Theo số đo trang chuẩn Bộ Tư pháp (cửa sổ 1534px), PM chốt 05/10/
 - Không có kết quả → trạng thái rỗng (mục 5.16).
 - Vùng cuộn chứa thanh tìm kiếm phải chừa chỗ cho viền focus 2px (VD `-mx-0.5 px-0.5`), không để ô/nút sát mép bị cắt viền.
 
-**Vùng bộ lọc** (hiện khi bấm nút Bộ lọc, nằm ngay dưới thanh tìm kiếm, **có khung xám bao quanh** — PM chốt)
+**Vùng bộ lọc** (hiện khi bấm nút Bộ lọc, nằm ngay dưới thanh tìm kiếm, **có khung xám bao quanh**)
 | Thuộc tính | Quy chuẩn |
 | :--- | :--- |
 | Khung | Nền `#F8FAFC`, viền 1px `#E2E8F0`, bo 8px, đệm 16px; cách thanh tìm kiếm **15px** |
@@ -916,7 +909,6 @@ Theo số đo trang chuẩn Bộ Tư pháp (cửa sổ 1534px), PM chốt 05/10/
 ---
 
 ### 5.20. Tùy chọn cột (ẩn/hiện và sắp xếp thứ tự trường ở danh sách)
-*(PM duyệt phương án A ngày 07/10/2026 — thí điểm màn Xem dữ liệu thu thập › CSDL Hộ tịch)*
 
 Cho phép người dùng chọn các trường muốn xem **và sắp xếp thứ tự cột** trên bảng danh sách (sắp xếp bổ sung ngày 07/10/2026).
 
@@ -992,19 +984,4 @@ body { font-family: var(--font-sans); font-size: 13px; color: var(--text); }
 button, input, select, textarea { font-family: inherit; }
 ```
 
-### 7.2. Checklist nghiệm thu một màn hình
-- [ ] Font hiển thị là Inter ở mọi phần tử, kể cả nút và ô nhập (DevTools → Computed).
-- [ ] Sidebar rộng 250px, header cao 64px.
-- [ ] Chỉ dùng màu trong mục 2; màu xanh chính duy nhất `#155DFC`.
-- [ ] Thẻ bo 16px, nút bo 8px, hàng menu bo 10px.
-- [ ] Bảng: tiêu đề cao 42px chữ 700 đen, hàng cao 48px, chữ dài cắt `…` + tooltip khi hover, không xuống dòng ngoài ý muốn.
-- [ ] Mọi ô nhập cao 40px; tìm kiếm chỉ chạy khi bấm nút Tìm kiếm / Enter (mục 5.19).
-- [ ] Badge đúng khung (13px/400, padding 2×8, viền 1px, bo 16px) và đúng bộ ba màu.
-- [ ] Tên menu và thứ tự nút trùng trang chuẩn.
 
-### 7.3. Mục còn chưa xác nhận (cần đo thêm bằng DevTools)
-- Trạng thái hover / focus / disabled của nút và ô nhập.
-- Ô nhập: viền, bo góc, placeholder.
-- Badge Bản nháp, Ngưng hoạt động, Lỗi cập nhật, Phương thức kết nối.
-- Màu nền trang; đường kẻ phải của sidebar; gạch dưới tab đang chọn.
-- Thông số tooltip (đang lấy theo ảnh mẫu).

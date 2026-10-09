@@ -1,4 +1,4 @@
-import { X, Search, AlertTriangle, Edit2, Check, Download, RefreshCw, CheckCircle } from 'lucide-react';
+import { X, Search, AlertTriangle, SquarePen, Check, Download, RefreshCw, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import { EditRecordModal } from './EditRecordModal';
 
@@ -454,7 +454,7 @@ export function WarningDataList() {
                         className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         title="Sửa thủ công"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <SquarePen className="w-4 h-4" />
                       </button>
                       {record.status === 'pending' && (
                         <>

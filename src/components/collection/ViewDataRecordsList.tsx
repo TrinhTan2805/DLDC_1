@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, Filter, Download, Database, Calendar, FileText, Eye, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Download, Database, Calendar, FileText, Eye, SquarePen, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AdvancedSearchModal } from './AdvancedSearchModal';
 
@@ -264,7 +264,7 @@ export function ViewDataRecordsList({ dataItem, onBack }: ViewDataRecordsListPro
                         className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
                         title="Chỉnh sửa"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <SquarePen className="w-4 h-4" />
                       </button>
                       <button
                         className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"

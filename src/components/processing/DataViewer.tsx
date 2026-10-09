@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Search, Edit2, Save, XCircle, Filter, ChevronDown, Database, Table, SearchX, Calculator, AlertCircle } from 'lucide-react';
+import { X, Search, SquarePen, Save, XCircle, Filter, ChevronDown, Database, Table, SearchX, Calculator, AlertCircle } from 'lucide-react';
 
 interface DataRecord {
   id: number;
@@ -393,7 +393,7 @@ export function DataViewer({ dataName, onClose }: DataViewerProps) {
                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                             title="Sửa"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <SquarePen className="w-4 h-4" />
                           </button>
                         )}
                       </td>

@@ -1,4 +1,4 @@
-import { X, Search, ChevronLeft, ChevronRight, Upload, FileDown, RefreshCw, Filter, Eye, Calendar, CheckCircle, XCircle, FileText, Database, Info, Plus, Trash2, Edit2, ListFilter, ArrowUpDown, ChevronDown, Group } from 'lucide-react';
+import { X, Search, ChevronLeft, ChevronRight, Upload, FileDown, RefreshCw, Filter, Eye, Calendar, CheckCircle, XCircle, FileText, Database, Info, Plus, Trash2, SquarePen, ListFilter, ArrowUpDown, ChevronDown, Group } from 'lucide-react';
 import { useState } from 'react';
 
 interface DataDetailModalProps {
@@ -664,7 +664,7 @@ export function DataDetailModal({
                               className="p-1 hover:bg-blue-50 rounded text-blue-600 transition-colors"
                               title="Chỉnh sửa giá trị"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <SquarePen className="w-3.5 h-3.5" />
                             </button>
                           </div>
 

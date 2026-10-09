@@ -1,4 +1,4 @@
-import { Database, Plus, Edit2, Trash2, TestTube } from 'lucide-react';
+import { Database, Plus, SquarePen, Trash2, TestTube } from 'lucide-react';
 import { useState } from 'react';
 
 const connections = [
@@ -94,7 +94,7 @@ export function ConnectionConfig() {
                         <TestTube className="w-4 h-4 text-blue-600" />
                       </button>
                       <button title="Hành động" aria-label="Hành động" className="p-1 hover:bg-gray-100 rounded">
-                        <Edit2 className="w-4 h-4 text-gray-600" />
+                        <SquarePen className="w-4 h-4 text-gray-600" />
                       </button>
                       <button className="p-1 hover:bg-gray-100 rounded" title="Xóa" aria-label="Xóa">
                         <Trash2 className="w-4 h-4 text-red-600" />

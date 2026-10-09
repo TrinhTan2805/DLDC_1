@@ -1247,11 +1247,11 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         </div>
 
         {/* Stats (mục 5.6.1) */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* 3 thẻ chia đều, căn thẳng mép trái/phải với thanh tìm kiếm (PM bỏ thẻ "TB thành viên/nhóm") */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard icon={UsersRound} iconColor="blue" title="Tổng nhóm" value="45" />
           <StatCard icon={UsersRound} iconColor="green" title="Đang hoạt động" value="42" />
           <StatCard icon={Users} iconColor="purple" title="Tổng thành viên" value="348" />
-          <StatCard icon={Users} iconColor="orange" title="TB thành viên/nhóm" value="8" />
         </div>
 
         {/* Search and Actions (mục 5.19) */}

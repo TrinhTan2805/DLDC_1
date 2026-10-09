@@ -321,15 +321,17 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
 
             {/* Table List Items */}
             <div className="px-4 pb-4">
-              <div className="space-y-1">
+              {/* Mỗi bảng một khung viền bo 8px cho dễ phân biệt (PM yêu cầu) */}
+              <div className="space-y-2">
                 {filteredTables.map((table) => (
                   <button
                     key={table.name}
+                    type="button"
                     onClick={() => setSelectedTable(table.name)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg border transition-colors group outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 ${
                       selectedTable === table.name
-                        ? 'bg-blue-600 text-white'
-                        : 'text-[#020817] hover:bg-[#F1F5F9]'
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'bg-white border-[#E2E8F0] text-[#020817] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]'
                     }`}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">

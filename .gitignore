@@ -7,3 +7,6 @@ Tools/MD_to_DOCX/dist/
 *.pkg
 
 src_backup.zip
+
+# Firebase Hosting cache (thay đổi sau mỗi lần deploy)
+.firebase/

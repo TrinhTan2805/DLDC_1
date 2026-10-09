@@ -136,7 +136,7 @@
 - `[ ]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
 - `[ ]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
 - `[x]` Thiết lập danh mục (`category/CategorySetupPage.tsx`)
-- `[ ]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
+- `[x]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
 - `[x]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
 - `[ ]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
 - `[ ]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
@@ -408,6 +408,18 @@
 
 ### Thống kê
 - `[x]` Thống kê hệ thống (`admin/StatisticsPage.tsx`)
+
+### Thông báo & Hướng dẫn (PM mở khóa 07/10/2026)
+- `[x]` Quản lý thông báo (`pages/NotificationPage.tsx`)
+- `[x]` Quản lý thông báo hệ thống (`admin/SystemNotificationManagementPage.tsx`)
+- `[x]` Hướng dẫn sử dụng (`pages/UserGuidePage.tsx`)
+
+### Đồng bộ icon Chỉnh sửa → SquarePen (PM mở khóa 07/10/2026) — file chưa có trong danh sách
+- `[x]` `pages/CategoryManagementPage.tsx`, `pages/MasterDataPage.tsx`, `pages/OpenDataCategoryPage.tsx`
+- `[x]` `collection/APIMethodsList.tsx`, `collection/DataCollectionList.tsx`, `collection/ViewDataRecordsList.tsx`, `collection/ConnectionConfig.tsx`, `collection/ViewDataCollectionDetail.tsx`
+- `[x]` `masterdata/AttributeManagementModal.tsx`, `masterdata/MergeRuleModal.tsx`
+- `[x]` `processing/DataViewer.tsx`, `processing/WarningDataList.tsx`, `processing/DataClassificationModal.tsx`
+- `[x]` `user/ImportExcelModal.tsx`, `DataDetailModal.tsx`
 
 ---
 

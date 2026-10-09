@@ -1,26 +1,20 @@
 import { useState } from 'react';
-import { 
-  ScrollText, 
-  Search, 
-  Download, 
-  Calendar, 
-  Filter, 
-  Eye, 
+import {
+  ScrollText,
+  Search,
+  Download,
+  Filter,
+  Eye,
   X,
-  Clock,
-  User,
-  Monitor,
-  MapPin,
   Activity,
-  FileText,
-  Edit2,
-  Trash2,
-  Plus,
-  CheckCircle2,
-  AlertCircle
 } from 'lucide-react';
-import { StatsCard } from '../../common/StatsCard';
-import { StatusTag } from '../../common/StatusTag';
+import { toast } from 'sonner';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, DateInput,
+  BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, FIELD_LABEL, FIELD_VALUE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
+  TABLE_WRAP_CLS, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, normalizeSearch,
+} from '../collection/collectionUi';
 
 interface AccessLog {
   id: number;
@@ -321,15 +315,53 @@ const getSessionActions = (sessionId: string): ActionDetail[] => {
   return actionsBySession[sessionId] || [];
 };
 
+
+// Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
+const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-4';
+const SUB_TEXT = 'text-[12px] text-[#64748B]';
+
+// Thẻ thống kê nhỏ (mục 5.6.1)
+const STAT_TONES = {
+  blue: 'bg-blue-50 text-blue-600',
+  green: 'bg-green-50 text-green-600',
+  red: 'bg-red-50 text-red-600',
+  purple: 'bg-purple-50 text-purple-600',
+} as const;
+
+const StatCard = ({ icon: Icon, tone, title, value }: { icon: typeof ScrollText; tone: keyof typeof STAT_TONES; title: string; value: string }) => (
+  <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+    <div className="flex items-center gap-3">
+      <div className={`p-2 rounded-lg ${STAT_TONES[tone]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div>
+        <div className="text-[16px] text-[#64748B]">{title}</div>
+        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{value}</div>
+      </div>
+    </div>
+  </div>
+);
+
+// 'dd/mm/yyyy HH:mm:ss' → ngày và giờ để hiển thị 2 dòng trong bảng (mục 5.3.3)
+const splitTimestamp = (value: string) => {
+  const [date, time] = (value || '').split(' ');
+  return { date: date || '-', time: time || '' };
+};
+
 export function LoginLogPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  // Điều kiện đã áp dụng — chỉ cập nhật khi bấm Tìm kiếm / Enter (mục 5.19)
+  const [applied, setApplied] = useState({ searchTerm: '', filterStatus: 'all', startDate: '', endDate: '' });
   const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -341,38 +373,41 @@ export function LoginLogPage() {
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const runSearch = () => {
+    setApplied({ searchTerm, filterStatus, startDate, endDate });
     setCurrentPage(1);
   };
 
+  const appliedTerm = normalizeSearch(applied.searchTerm);
   const filteredLogs = accessLogs.filter(log => {
-    const matchesSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.module.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.ip.toLowerCase().includes(searchTerm.toLowerCase());
-                         
-    const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
-    
+    const matchesSearch = normalizeSearch(log.user).includes(appliedTerm) ||
+                         normalizeSearch(log.action).includes(appliedTerm) ||
+                         normalizeSearch(log.module).includes(appliedTerm) ||
+                         normalizeSearch(log.ip).includes(appliedTerm);
+
+    const matchesStatus = applied.filterStatus === 'all' || log.status === applied.filterStatus;
+
     let matchesDate = true;
-    if (startDate || endDate) {
+    if (applied.startDate || applied.endDate) {
       const logDate = parseDate(log.timestamp);
       if (logDate) {
-        if (startDate) {
-          const start = new Date(startDate);
+        if (applied.startDate) {
+          const start = new Date(applied.startDate);
           start.setHours(0, 0, 0, 0);
           if (logDate < start) matchesDate = false;
         }
-        if (endDate) {
-          const end = new Date(endDate);
+        if (applied.endDate) {
+          const end = new Date(applied.endDate);
           end.setHours(23, 59, 59, 999);
           if (logDate > end) matchesDate = false;
         }
       }
     }
-    
+
     return matchesSearch && matchesStatus && matchesDate;
   });
+
+  const paginatedLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleViewDetail = (log: AccessLog) => {
     setSelectedLog(log);
@@ -384,99 +419,70 @@ export function LoginLogPage() {
     setSelectedLog(null);
   };
 
-  const getActionIcon = (type: ActionDetail['type']) => {
-    switch (type) {
-      case 'create':
-        return <Plus className="w-4 h-4" />;
-      case 'update':
-        return <Edit2 className="w-4 h-4" />;
-      case 'delete':
-        return <Trash2 className="w-4 h-4" />;
-      case 'view':
-        return <Eye className="w-4 h-4" />;
-      case 'export':
-        return <Download className="w-4 h-4" />;
-    }
-  };
-
-  const getActionColor = (type: ActionDetail['type']) => {
-    switch (type) {
-      case 'create':
-        return 'bg-green-100 text-green-700';
-      case 'update':
-        return 'bg-blue-100 text-blue-700';
-      case 'delete':
-        return 'bg-red-100 text-red-700';
-      case 'view':
-        return 'bg-purple-100 text-purple-700';
-      case 'export':
-        return 'bg-orange-100 text-orange-700';
-    }
+  const handleExport = () => {
+    toast.info('Đang kết xuất nhật ký đăng nhập ra file Excel...');
   };
 
   const sessionActions = selectedLog ? getSessionActions(selectedLog.sessionId) : [];
 
   return (
-    <div className="space-y-6" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px' }}>
-      {/* Stats */}
+    <div className="space-y-4">
+      {/* Tiêu đề trang (H1 20px/700 #2A0F0F) */}
+      <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Nhật ký đăng nhập</h1>
+
+      {/* Thẻ thống kê nhỏ (mục 5.6.1) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard icon={ScrollText} iconColor="blue" title="Tổng truy cập (24h)" value="12,847" />
-        <StatsCard icon={ScrollText} iconColor="green" title="Thành công" value="12,654" />
-        <StatsCard icon={ScrollText} iconColor="red" title="Thất bại" value="193" />
-        <StatsCard icon={ScrollText} iconColor="purple" title="Người dùng hoạt động" value="847" />
+        <StatCard icon={ScrollText} tone="blue" title="Tổng truy cập (24h)" value="12,847" />
+        <StatCard icon={ScrollText} tone="green" title="Thành công" value="12,654" />
+        <StatCard icon={ScrollText} tone="red" title="Thất bại" value="193" />
+        <StatCard icon={ScrollText} tone="purple" title="Người dùng hoạt động" value="847" />
       </div>
 
-      {/* Filters and Actions */}
-      <div className="mb-6">
-        {/* Row 1: Search and Buttons */}
+      {/* Tìm kiếm & bộ lọc (mục 5.19) — chỉ áp dụng khi bấm Tìm kiếm / Enter */}
+      <div>
         <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 flex items-center gap-3">
-            <div className="relative flex-1">
-              <input aria-label="Input field"
-                type="text"
-                placeholder="Tìm kiếm người dùng, hành động..."
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-            </div>
-            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+          <div className="flex-1 flex items-center gap-1.5">
+            <input
+              type="text"
+              aria-label="Tìm kiếm nhật ký đăng nhập"
+              placeholder="Tìm kiếm theo người dùng, hành động, phân hệ, IP"
+              className={SEARCH_INPUT_CLS}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+            />
+            <button type="button" title="Tìm kiếm" aria-label="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
               <Search className="w-5 h-5" />
             </button>
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              aria-expanded={showFilters}
+              aria-label="Bộ lọc"
               title="Bộ lọc"
+              className={filterBtnClass(showFilters)}
             >
               {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => alert('Đang kết xuất nhật ký đăng nhập ra file Excel...')}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-            >
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={handleExport} className={BTN_OUTLINE}>
               <Download className="w-4 h-4" />
               Kết xuất
             </button>
           </div>
         </div>
 
-        {/* Row 2: Filters (Collapsible) */}
         {showFilters && (
-          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-3 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-            <div className="absolute -top-2 left-[50px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Trạng thái</label>
-              <select aria-label="Select box"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+          <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+            <div>
+              <label className={FILTER_LABEL}>Trạng thái</label>
+              <select
+                aria-label="Lọc theo trạng thái"
+                className={INPUT_CLS}
                 value={filterStatus}
-                onChange={(e) => {
-                  setFilterStatus(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => setFilterStatus(e.target.value)}
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="success">Thành công</option>
@@ -484,98 +490,79 @@ export function LoginLogPage() {
               </select>
             </div>
 
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Thời gian từ</label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Input field"
-                  type="date"
-                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
+            <div>
+              <label className={FILTER_LABEL}>Thời gian từ</label>
+              <DateInput value={startDate} onChange={setStartDate} ariaLabel="Thời gian từ" max={endDate || undefined} />
             </div>
 
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Thời gian đến</label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Input field"
-                  type="date"
-                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
+            <div>
+              <label className={FILTER_LABEL}>Thời gian đến</label>
+              <DateInput value={endDate} onChange={setEndDate} ariaLabel="Thời gian đến" min={startDate || undefined} />
             </div>
           </div>
         )}
       </div>
 
-      {/* Logs Table */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+      {/* Bảng nhật ký (mục 5.3) */}
+      <div className={TABLE_WRAP_CLS}>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse collection-table text-[13px]">
-            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
-              <tr>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Người dùng</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">IP</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Hành động</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Thiết bị</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
+          <table className="w-full border-collapse">
+            <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+              <tr className={TABLE_HEAD_ROW_CLS}>
+                <th className={`${TH} text-center w-14`}>STT</th>
+                <th className={`${TH} text-left`}>Thời gian</th>
+                <th className={`${TH} text-left`}>Người dùng</th>
+                <th className={`${TH} text-left`}>IP</th>
+                <th className={`${TH} text-left`}>Hành động</th>
+                <th className={`${TH} text-left`}>Thiết bị</th>
+                <th className={`${TH} text-left`}>Trạng thái</th>
+                <th className={`${TH} text-center w-20 sticky right-0 ${TABLE_HEAD_BG}`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredLogs
-                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                .map((log, index) => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">
+            <tbody>
+              {paginatedLogs.map((log, index) => {
+                const ts = splitTimestamp(log.timestamp);
+                return (
+                  <tr key={log.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <td className={`${TD} text-center tabular-nums`}>
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.timestamp}</td>
-                    <td className="px-4 py-3 text-center text-[13px]">
-                      <div className="font-medium text-slate-950 leading-snug text-[13px]">{log.user}</div>
+                    <td className={`${TD} text-left whitespace-nowrap leading-tight tabular-nums`}>
+                      <div>{ts.date}</div>
+                      {ts.time && <div>{ts.time}</div>}
                     </td>
-                    <td className="px-4 py-3 text-center text-slate-600 font-mono text-[13px]">{log.ip}</td>
-                    <td className="px-4 py-3 text-center text-slate-700 text-[13px]">{log.action}</td>
-                    <td className="px-4 py-3 text-center text-[13px]">
-                      <div className="font-medium text-slate-900 leading-snug text-[13px]">{log.device}</div>
-                      <div className="text-slate-500 mt-0.5 text-[11px]">{log.browser}</div>
+                    <td className={`${TD} text-left max-w-[240px] leading-[18px]`}>
+                      <TruncatedText text={log.user} />
+                      <TruncatedText text={log.userId} className={SUB_TEXT} />
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <StatusTag 
-                        label={log.status === 'success' ? 'Thành công' : 'Thất bại'} 
-                        variant={log.status === 'success' ? 'green' : 'red'} 
+                    <td className={`${TD} text-left whitespace-nowrap tabular-nums`}>{log.ip}</td>
+                    <td className={`${TD} text-left max-w-[280px]`}>
+                      <TruncatedText text={log.action} />
+                    </td>
+                    <td className={`${TD} text-left max-w-[240px]`}>
+                      <TruncatedText text={`${log.device} · ${log.browser}`} />
+                    </td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>
+                      <Badge
+                        label={log.status === 'success' ? 'Thành công' : 'Thất bại'}
+                        variant={log.status === 'success' ? 'green' : 'red'}
                       />
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center">
-                        <button
-                          onClick={() => handleViewDetail(log)}
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Xem chi tiết"
-                        >
+                    <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors`}>
+                      <div className="inline-flex items-center justify-center gap-1">
+                        <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(log)}>
                           <Eye className="w-4 h-4" />
-                        </button>
+                        </RowIconAction>
                       </div>
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               {filteredLogs.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-slate-500 text-[13px]">
-                    Không tìm thấy bản ghi nào phù hợp
+                  <td colSpan={8} className="px-3 py-10 text-center">
+                    <ScrollText className="w-8 h-8 text-[#94A3B8] mx-auto mb-2" />
+                    <p className="text-[13px] font-medium text-[#64748B]">Không tìm thấy bản ghi nào phù hợp</p>
                   </td>
                 </tr>
               )}
@@ -583,161 +570,84 @@ export function LoginLogPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600">Hiển thị</span>
-            <select aria-label="Select record count" 
-              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-              title="Số bản ghi trên trang"
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span className="text-slate-600">bản ghi/trang</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <span className="text-slate-600">
-              {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-              >
-                Trước
-              </button>
-              
-              {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                    currentPage === page
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                onClick={() => {
-                  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-                  if (currentPage < totalPages) {
-                    setCurrentPage(currentPage + 1);
-                  }
-                }}
-                disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-              >
-                Sau
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Phân trang (mục 5.14) */}
+        <Pagination
+          className="border-t border-[#E2E8F0]"
+          currentPage={currentPage}
+          totalItems={filteredLogs.length}
+          pageSize={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setItemsPerPage}
+        />
       </div>
 
-      {/* Detail Modal */}
+      {/* Modal Xem chi tiết — chiều cao cố định, thân tự cuộn (mục 5.4) */}
       {showDetailModal && selectedLog && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        <div
+          className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4"
           onClick={closeDetailModal}
         >
-          <div 
-            className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="login-session-title"
+            className="bg-white rounded-2xl shadow-2xl w-[1024px] max-w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-slate-900">Chi tiết phiên đăng nhập</h3>
-                  <p className="text-sm text-slate-600 mt-0.5">
-                    Session ID: <span className="font-mono">{selectedLog.sessionId}</span>
-                  </p>
-                </div>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h3 id="login-session-title" className={MODAL_TITLE}>Chi tiết phiên đăng nhập</h3>
+                <p className={`${SUB_TEXT} mt-0.5`}>
+                  Session ID: <span className="tabular-nums">{selectedLog.sessionId}</span>
+                </p>
               </div>
-              <button
-                onClick={closeDetailModal}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Đóng" aria-label="Đóng"
-              >
+              <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Session Info */}
-            <div className="p-6 border-b border-slate-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
-                    <User className="w-4 h-4" />
-                    <span className="text-xs">Người dùng</span>
+            {/* Thông tin phiên (mục 5.17) */}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4">
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Người dùng</div>
+                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.user || '-'}</div>
+                    <div className={SUB_TEXT}>{selectedLog.userId}</div>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.user}</div>
-                  <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.userId}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-xs">Thời gian đăng nhập</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Thời gian đăng nhập</div>
+                    <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp || '-'}</div>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.timestamp}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
-                    <Monitor className="w-4 h-4" />
-                    <span className="text-xs">Thiết bị</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Thiết bị</div>
+                    <div className={FIELD_VALUE}>{selectedLog.device || '-'}</div>
+                    <div className={SUB_TEXT}>{selectedLog.browser}</div>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.device}</div>
-                  <div className="text-xs text-slate-500 mt-1">{selectedLog.browser}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-slate-600 mb-2">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-xs">Vị trí</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Vị trí</div>
+                    <div className={FIELD_VALUE}>{selectedLog.location || '-'}</div>
+                    <div className={`${SUB_TEXT} tabular-nums`}>{selectedLog.ip}</div>
                   </div>
-                  <div className="text-sm text-slate-900">{selectedLog.location}</div>
-                  <div className="text-xs text-slate-500 font-mono mt-1">{selectedLog.ip}</div>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Activity className="w-4 h-4" />
-                  <span>
-                    Tổng thời gian hoạt động:{' '}
-                    <strong className="text-slate-900">
-                      {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
-                    </strong>
+            <div className={MODAL_FOOTER}>
+              <div className="flex items-center gap-2 text-[13px] text-[#020817]">
+                <Activity className="w-4 h-4 text-[#475569]" />
+                <span>
+                  Tổng thời gian hoạt động:{' '}
+                  <span className="font-medium">
+                    {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
                   </span>
-                </div>
-                <button
-                  onClick={closeDetailModal}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium text-[13px]"
-                >
-                  Đóng
-                </button>
+                </span>
               </div>
+              <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
+                Đóng
+              </button>
             </div>
           </div>
         </div>

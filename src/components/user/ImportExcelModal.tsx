@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Upload, Download, AlertCircle, CheckCircle, Edit2, Trash2 } from 'lucide-react';
+import { X, Upload, Download, AlertCircle, CheckCircle, SquarePen, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export interface ImportUser {
@@ -320,7 +320,7 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
                               className="text-blue-600 hover:text-blue-700"
                               title="Chỉnh sửa"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <SquarePen className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteUser(index)}

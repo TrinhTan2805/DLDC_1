@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react';
-import { Search, Plus, Edit2, Trash2, Download, Upload, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Search, Plus, SquarePen, Trash2, Download, Upload, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
 interface MasterDataDetailPageProps {
   categoryName: string;
@@ -243,7 +243,7 @@ export function MasterDataDetailPage({ categoryName, categoryId }: MasterDataDet
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Chỉnh sửa">
-                            <Edit2 className="w-4 h-4" />
+                            <SquarePen className="w-4 h-4" />
                           </button>
                           <button className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors" title="Xóa">
                             <Trash2 className="w-4 h-4" />

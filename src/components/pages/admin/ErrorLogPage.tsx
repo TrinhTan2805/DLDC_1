@@ -1,25 +1,24 @@
 import { useState } from 'react';
-import { 
-  AlertTriangle, 
-  Search, 
-  Download, 
-  Calendar, 
-  Filter, 
-  Eye, 
+import { toast } from 'sonner';
+import {
+  AlertTriangle,
+  Search,
+  Download,
+  Filter,
+  Eye,
   X,
-  Clock,
-  Code,
   AlertCircle,
   XCircle,
   AlertOctagon,
-  Info,
-  FileCode,
-  Server,
-  Database,
-  Layers
+  Info
 } from 'lucide-react';
-import { StatusTag } from '../../common/StatusTag';
-import { StatsCard } from '../../common/StatsCard';
+import {
+  Badge, TruncatedText, RowIconAction, Pagination, DateInput,
+  BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS,
+  FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
+  TABLE_WRAP_CLS, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, normalizeSearch,
+} from '../collection/collectionUi';
 
 interface ErrorLog {
   id: number;
@@ -30,6 +29,7 @@ interface ErrorLog {
   errorMessage: string;
   errorType: string;
   user?: string;
+  userAccount?: string;
   ip?: string;
   url?: string;
   method?: string;
@@ -65,6 +65,7 @@ const errorLogs: ErrorLog[] = [
     errorMessage: 'Dữ liệu không hợp lệ: Thiếu trường bắt buộc "citizenId"',
     errorType: 'ValidationException',
     user: 'Nguyễn Văn An',
+    userAccount: 'an.nv',
     ip: '192.168.1.105',
     url: '/api/data/process',
     method: 'POST',
@@ -99,6 +100,7 @@ const errorLogs: ErrorLog[] = [
     errorMessage: 'Không thể tải lên file: Dung lượng vượt quá 50MB',
     errorType: 'FileUploadException',
     user: 'Trần Thị Bình',
+    userAccount: 'binh.tt',
     ip: '192.168.1.108',
     url: '/api/files/upload',
     method: 'POST',
@@ -161,6 +163,7 @@ const errorLogs: ErrorLog[] = [
     errorMessage: 'Không thể tạo file Excel: Quá nhiều dòng dữ liệu (>1 triệu)',
     errorType: 'ExportException',
     user: 'Lê Văn Cường',
+    userAccount: 'cuong.lv',
     ip: '192.168.1.115',
     url: '/api/export/excel',
     method: 'POST',
@@ -172,12 +175,48 @@ const errorLogs: ErrorLog[] = [
   }
 ];
 
+// Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
+const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-3';
+
+// Thẻ thống kê nhỏ (mục 5.6.1)
+const STAT_TONES = {
+  red: 'bg-red-50 text-red-600',
+  orange: 'bg-orange-50 text-orange-600',
+  yellow: 'bg-yellow-50 text-yellow-600',
+  blue: 'bg-blue-50 text-blue-600',
+} as const;
+
+const StatCard = ({ icon: Icon, tone, title, value }: { icon: typeof AlertOctagon; tone: keyof typeof STAT_TONES; title: string; value: string }) => (
+  <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+    <div className="flex items-center gap-3">
+      <div className={`p-2 rounded-lg ${STAT_TONES[tone]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div>
+        <div className="text-[16px] text-[#64748B]">{title}</div>
+        <div className="text-[16px] font-semibold text-[#0F172A] tabular-nums">{value}</div>
+      </div>
+    </div>
+  </div>
+);
+
+// 'dd/mm/yyyy HH:mm:ss' → ngày và giờ (giờ xuống dòng thứ 2 trong bảng — mục 5.3.3)
+const splitTimestamp = (ts: string) => {
+  const [date, time] = (ts || '').split(' ');
+  return { date: date || '-', time: time || '' };
+};
+
 export function ErrorLogPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [filterModule, setFilterModule] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  // Điều kiện đang áp dụng — chỉ cập nhật khi bấm Tìm kiếm / Enter (compomennt.md 5.19)
+  const [applied, setApplied] = useState({ searchTerm: '', filterSeverity: 'all', filterModule: 'all', startDate: '', endDate: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -193,29 +232,30 @@ export function ErrorLogPage() {
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const runSearch = () => {
+    setApplied({ searchTerm, filterSeverity, filterModule, startDate, endDate });
     setCurrentPage(1);
   };
 
+  const appliedTerm = normalizeSearch(applied.searchTerm);
   const filteredLogs = errorLogs.filter(log => {
-    const matchesSearch = log.errorMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.errorCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.module.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSeverity = filterSeverity === 'all' || log.severity === filterSeverity;
-    const matchesModule = filterModule === 'all' || log.module === filterModule;
+    const matchesSearch = normalizeSearch(log.errorMessage).includes(appliedTerm) ||
+                         normalizeSearch(log.errorCode).includes(appliedTerm) ||
+                         normalizeSearch(log.module).includes(appliedTerm);
+    const matchesSeverity = applied.filterSeverity === 'all' || log.severity === applied.filterSeverity;
+    const matchesModule = applied.filterModule === 'all' || log.module === applied.filterModule;
 
     let matchesDate = true;
-    if (startDate || endDate) {
+    if (applied.startDate || applied.endDate) {
       const logDate = parseDate(log.timestamp);
       if (logDate) {
-        if (startDate) {
-          const start = new Date(startDate);
+        if (applied.startDate) {
+          const start = new Date(applied.startDate);
           start.setHours(0, 0, 0, 0);
           if (logDate < start) matchesDate = false;
         }
-        if (endDate) {
-          const end = new Date(endDate);
+        if (applied.endDate) {
+          const end = new Date(applied.endDate);
           end.setHours(23, 59, 59, 999);
           if (logDate > end) matchesDate = false;
         }
@@ -235,34 +275,8 @@ export function ErrorLogPage() {
   };
 
   const handleExportExcel = () => {
-    alert('Đang kết xuất nhật ký lỗi ra file Excel...');
+    toast.info('Đang kết xuất nhật ký lỗi ra file Excel...');
   };
-  const getSeverityIcon = (severity: ErrorLog['severity']) => {
-    switch (severity) {
-      case 'critical':
-        return <AlertOctagon className="w-4 h-4" />;
-      case 'error':
-        return <XCircle className="w-4 h-4" />;
-      case 'warning':
-        return <AlertTriangle className="w-4 h-4" />;
-      case 'info':
-        return <Info className="w-4 h-4" />;
-    }
-  };
-
-  const getSeverityColor = (severity: ErrorLog['severity']) => {
-    switch (severity) {
-      case 'critical':
-        return 'bg-red-100 text-red-700 border-red-200';
-      case 'error':
-        return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'warning':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'info':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
-    }
-  };
-
   const getSeverityLabel = (severity: ErrorLog['severity']) => {
     switch (severity) {
       case 'critical':
@@ -277,103 +291,67 @@ export function ErrorLogPage() {
   };
 
   const uniqueModules = Array.from(new Set(errorLogs.map(log => log.module)));
+  const pagedLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-6 error-log-container">
-      <style>{`
-        .error-log-container,
-        .error-log-container .text-sm,
-        .error-log-container .text-xs:not(th),
-        .error-log-container input,
-        .error-log-container select,
-        .error-log-container button,
-        .error-log-container td,
-        .error-log-container option,
-        .error-log-container div.text-slate-600,
-        .error-log-container div.text-slate-700,
-        .error-log-container div.text-slate-500,
-        .error-log-container div.text-slate-900:not(.text-2xl) {
-          font-size: 13px !important;
-        }
-      `}</style>
-      {/* Stats */}
+    <div className="space-y-4">
+      {/* Tiêu đề trang (H1 20px/700 #2A0F0F) */}
+      <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Nhật ký các lỗi phát sinh</h1>
+
+      {/* Thẻ thống kê nhỏ (compomennt.md 5.6.1) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard 
-          icon={AlertOctagon} 
-          iconColor="red" 
-          title="Nghiêm trọng (24h)" 
-          value={errorLogs.filter(l => l.severity === 'critical').length.toString()} 
-        />
-        <StatsCard 
-          icon={XCircle} 
-          iconColor="orange" 
-          title="Lỗi (24h)" 
-          value={errorLogs.filter(l => l.severity === 'error').length.toString()} 
-        />
-        <StatsCard 
-          icon={AlertTriangle} 
-          iconColor="yellow" 
-          title="Cảnh báo (24h)" 
-          value={errorLogs.filter(l => l.severity === 'warning').length.toString()} 
-        />
-        <StatsCard 
-          icon={AlertCircle} 
-          iconColor="blue" 
-          title="Chưa xử lý" 
-          value={errorLogs.filter(l => !l.resolved).length.toString()} 
-        />
+        <StatCard icon={AlertOctagon} tone="red" title="Nghiêm trọng (24h)" value={errorLogs.filter(l => l.severity === 'critical').length.toString()} />
+        <StatCard icon={XCircle} tone="orange" title="Lỗi (24h)" value={errorLogs.filter(l => l.severity === 'error').length.toString()} />
+        <StatCard icon={AlertTriangle} tone="yellow" title="Cảnh báo (24h)" value={errorLogs.filter(l => l.severity === 'warning').length.toString()} />
+        <StatCard icon={AlertCircle} tone="blue" title="Chưa xử lý" value={errorLogs.filter(l => !l.resolved).length.toString()} />
       </div>
 
-      {/* Filters & Search Row */}
-      <div className="mb-6">
+      {/* Tìm kiếm & bộ lọc (5.19) — chỉ áp dụng khi bấm Tìm kiếm / Enter */}
+      <div>
         <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 flex items-center gap-3">
-            <div className="relative flex-1">
-              <input aria-label="Input field"
-                type="text"
-                placeholder="Tìm kiếm mã lỗi, thông báo, module..."
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-            </div>
-            <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center">
+          <div className="flex-1 flex items-center gap-1.5">
+            <input
+              type="text"
+              aria-label="Tìm kiếm nhật ký lỗi"
+              placeholder="Tìm kiếm theo mã lỗi, thông báo, module..."
+              className={SEARCH_INPUT_CLS}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+            />
+            <button type="button" title="Tìm kiếm" aria-label="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
               <Search className="w-5 h-5" />
             </button>
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center border ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-[#e2e8f0] text-slate-600 hover:bg-slate-50'}`}
+              aria-expanded={showFilters}
+              aria-label="Bộ lọc"
               title="Bộ lọc"
+              className={filterBtnClass(showFilters)}
             >
               {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleExportExcel}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 text-[13px] shadow-sm font-medium"
-            >
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={handleExportExcel} className={BTN_OUTLINE}>
               <Download className="w-4 h-4" />
               Kết xuất
             </button>
           </div>
         </div>
 
-        {/* Collapsible Filters Row */}
+        {/* Vùng bộ lọc */}
         {showFilters && (
-          <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 grid grid-cols-4 gap-4 mt-4 animate-in slide-in-from-top-2 duration-200 shadow-sm relative">
-            <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
-
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Mức độ</label>
-              <select aria-label="Select box"
+          <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
+            <div>
+              <label className={FILTER_LABEL}>Mức độ</label>
+              <select
+                aria-label="Lọc theo mức độ"
                 value={filterSeverity}
-                onChange={(e) => {
-                  setFilterSeverity(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                onChange={(e) => setFilterSeverity(e.target.value)}
+                className={INPUT_CLS}
               >
                 <option value="all">Tất cả mức độ</option>
                 <option value="critical">Nghiêm trọng</option>
@@ -383,15 +361,13 @@ export function ErrorLogPage() {
               </select>
             </div>
 
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Phân hệ</label>
-              <select aria-label="Select box"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+            <div>
+              <label className={FILTER_LABEL}>Phân hệ</label>
+              <select
+                aria-label="Lọc theo phân hệ"
+                className={INPUT_CLS}
                 value={filterModule}
-                onChange={(e) => {
-                  setFilterModule(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => setFilterModule(e.target.value)}
               >
                 <option value="all">Tất cả module</option>
                 {uniqueModules.map(module => (
@@ -400,106 +376,90 @@ export function ErrorLogPage() {
               </select>
             </div>
 
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Thời gian từ</label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Input field"
-                  type="date"
-                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
+            <div>
+              <label className={FILTER_LABEL}>Thời gian từ</label>
+              <DateInput value={startDate} onChange={setStartDate} ariaLabel="Thời gian từ" max={endDate || undefined} />
             </div>
 
-            <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-semibold text-slate-700">Thời gian đến</label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
-                <input aria-label="Input field"
-                  type="date"
-                  className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-slate-700 p-0"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-                <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
+            <div>
+              <label className={FILTER_LABEL}>Thời gian đến</label>
+              <DateInput value={endDate} onChange={setEndDate} ariaLabel="Thời gian đến" min={startDate || undefined} />
             </div>
           </div>
         )}
       </div>
 
-      {/* Error Logs Table */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+      {/* Bảng nhật ký lỗi (5.3) */}
+      <div className={TABLE_WRAP_CLS}>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse collection-table text-[13px]">
-            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-[1]">
-              <tr>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-12 text-[13px]">STT</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thời gian</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mức độ</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Module</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Mã lỗi</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Thông báo lỗi</th>
-                <th className="px-4 py-3 text-left font-bold text-slate-500 whitespace-nowrap text-[13px]">Người dùng</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap text-[13px]">Trạng thái</th>
-                <th className="px-4 py-3 text-center font-bold text-slate-500 whitespace-nowrap w-24 text-[13px]">Thao tác</th>
+          <table className="w-full border-collapse">
+            <thead className={`${TABLE_HEAD_BG} sticky top-0 z-10`}>
+              <tr className={TABLE_HEAD_ROW_CLS}>
+                <th className={`${TH} text-center w-14`}>STT</th>
+                <th className={`${TH} text-left`}>Thời gian</th>
+                <th className={`${TH} text-left`}>Mức độ</th>
+                <th className={`${TH} text-left`}>Module</th>
+                <th className={`${TH} text-left`}>Mã lỗi</th>
+                <th className={`${TH} text-left`}>Thông báo lỗi</th>
+                <th className={`${TH} text-left`}>Người dùng</th>
+                <th className={`${TH} text-left`}>Trạng thái</th>
+                <th className={`${TH} text-center w-24 sticky right-0 ${TABLE_HEAD_BG} shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredLogs
-                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                .map((log, index) => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-all group border-b border-slate-100">
-                    <td className="px-4 py-3 text-center text-slate-500 font-medium text-[13px]">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                    <td className="px-4 py-3 text-left text-slate-700 whitespace-nowrap text-[13px]">{log.timestamp}</td>
-                    <td className="px-4 py-3 text-left text-[13px]">
-                      <StatusTag 
-                        label={getSeverityLabel(log.severity)} 
-                        variant={log.severity === 'critical' ? 'red' : log.severity === 'error' ? 'orange' : log.severity === 'warning' ? 'yellow' : 'blue'} 
-                        icon={getSeverityIcon(log.severity)}
+            <tbody>
+              {pagedLogs.map((log, index) => {
+                const ts = splitTimestamp(log.timestamp);
+                return (
+                  <tr key={log.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                    <td className={`${TD} text-center tabular-nums whitespace-nowrap`}>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                    <td className={`${TD} text-left whitespace-nowrap leading-[18px] tabular-nums`}>
+                      <div>{ts.date}</div>
+                      {ts.time && <div>{ts.time}</div>}
+                    </td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>
+                      {getSeverityLabel(log.severity)}
+                    </td>
+                    <td className={`${TD} text-left max-w-[200px]`}>
+                      <TruncatedText text={log.module} />
+                    </td>
+                    <td className={`${TD} text-left max-w-[240px]`}>
+                      <TruncatedText text={log.errorCode} className="font-mono" />
+                    </td>
+                    <td className={`${TD} text-left max-w-[360px]`}>
+                      <TruncatedText text={log.errorMessage} />
+                    </td>
+                    <td className={`${TD} text-left max-w-[240px] leading-[18px]`}>
+                      {log.userAccount ? (
+                        <>
+                          <TruncatedText text={log.user || ''} />
+                          <TruncatedText text={log.userAccount} className="text-[12px] text-[#64748B]" />
+                        </>
+                      ) : (
+                        <>
+                          <div>Hệ thống</div>
+                          <div className="text-[12px] text-[#64748B]">system</div>
+                        </>
+                      )}
+                    </td>
+                    <td className={`${TD} text-left whitespace-nowrap`}>
+                      <Badge
+                        label={log.resolved ? 'Đã xử lý' : 'Chưa xử lý'}
+                        variant={log.resolved ? 'green' : 'red'}
                       />
                     </td>
-                    <td className="px-4 py-3 text-left text-slate-700 text-[13px]">{log.module}</td>
-                    <td className="px-4 py-3 text-left text-[13px]">
-                      <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
-                        {log.errorCode}
-                      </code>
-                    </td>
-                    <td className="px-4 py-3 text-left text-slate-700 max-w-md truncate text-[13px]" title={log.errorMessage}>
-                      {log.errorMessage}
-                    </td>
-                    <td className="px-4 py-3 text-left text-slate-600 text-[13px]">
-                      {log.user || <span className="text-slate-400 italic">System</span>}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <StatusTag 
-                        label={log.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
-                        variant={log.resolved ? 'green' : 'red'} 
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center">
-                        <button
-                          onClick={() => handleViewDetail(log)}
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Xem chi tiết"
-                        >
+                    <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]`}>
+                      <div className="inline-flex items-center justify-center gap-1">
+                        <RowIconAction label="Xem chi tiết" onClick={() => handleViewDetail(log)}>
                           <Eye className="w-4 h-4" />
-                        </button>
+                        </RowIconAction>
                       </div>
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               {filteredLogs.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-slate-500 text-[13px]">
+                  <td colSpan={9} className="py-16 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy bản ghi nào phù hợp
                   </td>
                 </tr>
@@ -508,180 +468,102 @@ export function ErrorLogPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white sm:px-6 collection-pagination text-[13px]">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-600">Hiển thị</span>
-            <select aria-label="Select record count" 
-              className="px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-[13px]"
-              title="Số bản ghi trên trang"
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span className="text-slate-600">bản ghi/trang</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <span className="text-slate-600">
-              {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : currentPage)}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-              >
-                Trước
-              </button>
-              
-              {Array.from({ length: Math.ceil(filteredLogs.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 border rounded-lg font-medium text-[13px] transition-colors ${
-                    currentPage === page
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'border-[#e2e8f0] text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                onClick={() => {
-                  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-                  if (currentPage < totalPages) {
-                    setCurrentPage(currentPage + 1);
-                  }
-                }}
-                disabled={currentPage === Math.ceil(filteredLogs.length / itemsPerPage) || filteredLogs.length === 0}
-                className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-              >
-                Sau
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Phân trang (5.14) */}
+        <Pagination
+          className="border-t border-[#E2E8F0]"
+          currentPage={currentPage}
+          totalItems={filteredLogs.length}
+          pageSize={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setItemsPerPage}
+        />
       </div>
 
-      {/* Detail Modal */}
+      {/* Chi tiết lỗi — chiều cao cố định, thân tự cuộn (5.4) */}
       {showDetailModal && selectedLog && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={closeDetailModal}
-        >
-          <div 
-            className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+        <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={closeDetailModal}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="error-detail-title"
+            className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getSeverityColor(selectedLog.severity)}`}>
-                  {getSeverityIcon(selectedLog.severity)}
-                </div>
-                <div>
-                  <h3 className="text-slate-900 font-semibold">Chi tiết lỗi</h3>
-                  <p className="text-sm text-slate-600 mt-0.5">
-                    Mã lỗi: <code className="font-mono bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{selectedLog.errorCode}</code>
-                  </p>
-                </div>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h3 id="error-detail-title" className={MODAL_TITLE}>Chi tiết lỗi</h3>
+                <p className="text-[13px] text-[#64748B] mt-0.5 truncate">
+                  Mã lỗi: <span className="font-mono text-[#020817]">{selectedLog.errorCode}</span>
+                </p>
               </div>
-              <button
-                onClick={closeDetailModal}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" 
-                title="Đóng" 
-                aria-label="Đóng"
-              >
+              <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Error Info */}
-            <div className="p-6 space-y-6">
-              {/* Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-xs font-medium">Thời gian</span>
+            {/* Body */}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+              {/* Thông tin chung */}
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className={SECTION_TITLE}>
+                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                  Thông tin chung
+                </h4>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Thời gian</div>
+                    <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.timestamp}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <Layers className="w-4 h-4" />
-                    <span className="text-xs font-medium">Module</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Module</div>
+                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.module}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold">{selectedLog.module}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <Code className="w-4 h-4" />
-                    <span className="text-xs font-medium">Loại lỗi</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Loại lỗi</div>
+                    <div className={`${FIELD_VALUE} font-mono break-all`}>{selectedLog.errorType}</div>
                   </div>
-                  <div className="text-sm text-slate-900 font-semibold font-mono">{selectedLog.errorType}</div>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-2">
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="text-xs font-medium">Trạng thái</span>
+                  <div className="space-y-1">
+                    <div className={FIELD_LABEL}>Trạng thái</div>
+                    <Badge
+                      label={selectedLog.resolved ? 'Đã xử lý' : 'Chưa xử lý'}
+                      variant={selectedLog.resolved ? 'green' : 'red'}
+                    />
                   </div>
-                  <StatusTag 
-                    label={selectedLog.resolved ? 'Đã xử lý' : 'Chưa xử lý'} 
-                    variant={selectedLog.resolved ? 'green' : 'red'} 
-                  />
                 </div>
               </div>
 
               {/* Request Info */}
               {(selectedLog.url || selectedLog.method || selectedLog.ip) && (
-                <div className="border border-slate-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Server className="w-4 h-4 text-blue-600" />
-                    <h4 className="text-sm text-slate-900 font-semibold">Thông tin request</h4>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                  <h4 className={SECTION_TITLE}>
+                    <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                    Thông tin request
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
                     {selectedLog.method && (
-                      <div>
-                        <div className="text-xs text-slate-500 mb-1">Method</div>
-                        <code className="text-xs bg-blue-50 px-2 py-1 rounded text-blue-700 font-mono">
-                          {selectedLog.method}
-                        </code>
+                      <div className="space-y-1">
+                        <div className={FIELD_LABEL}>Method</div>
+                        <div className={`${FIELD_VALUE} font-mono`}>{selectedLog.method}</div>
                       </div>
                     )}
                     {selectedLog.url && (
-                      <div className="md:col-span-2">
-                        <div className="text-xs text-slate-500 mb-1">URL</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 block truncate font-mono">
-                          {selectedLog.url}
-                        </code>
+                      <div className="space-y-1 md:col-span-2">
+                        <div className={FIELD_LABEL}>URL</div>
+                        <div className={`${FIELD_VALUE} font-mono break-all`}>{selectedLog.url}</div>
                       </div>
                     )}
                     {selectedLog.ip && (
-                      <div>
-                        <div className="text-xs text-slate-500 mb-1">IP Address</div>
-                        <code className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700 font-mono">
-                          {selectedLog.ip}
-                        </code>
+                      <div className="space-y-1">
+                        <div className={FIELD_LABEL}>IP Address</div>
+                        <div className={`${FIELD_VALUE} font-mono tabular-nums`}>{selectedLog.ip}</div>
                       </div>
                     )}
                     {selectedLog.user && (
-                      <div className="md:col-span-2">
-                        <div className="text-xs text-slate-500 mb-1">Người dùng</div>
-                        <div className="text-sm text-slate-900">{selectedLog.user}</div>
+                      <div className="space-y-1 md:col-span-2">
+                        <div className={FIELD_LABEL}>Người dùng</div>
+                        <div className={`${FIELD_VALUE} break-words`}>{selectedLog.userAccount ? selectedLog.user : 'Hệ thống'}</div>
+                        <div className="text-[12px] text-[#64748B] break-words">{selectedLog.userAccount || 'system'}</div>
                       </div>
                     )}
                   </div>
@@ -689,52 +571,45 @@ export function ErrorLogPage() {
               )}
 
               {/* Error Message */}
-              <div className="border border-slate-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <FileCode className="w-4 h-4 text-orange-600" />
-                  <h4 className="text-sm text-slate-900 font-semibold">Thông báo lỗi</h4>
-                </div>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-sm text-red-900">{selectedLog.errorMessage}</p>
+              <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                <h4 className={SECTION_TITLE}>
+                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                  Thông báo lỗi
+                </h4>
+                <div className="bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg px-4 py-3">
+                  <p className="text-[13px] text-[#B91C1C] break-words">{selectedLog.errorMessage}</p>
                 </div>
               </div>
 
               {/* Stack Trace */}
               {selectedLog.stackTrace && (
-                <div className="border border-slate-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Database className="w-4 h-4 text-purple-600" />
-                    <h4 className="text-sm text-slate-900 font-semibold">Stack Trace</h4>
-                  </div>
-                  <div className="bg-slate-900 rounded-lg p-4 overflow-x-auto">
-                    <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap leading-relaxed">
-                      {selectedLog.stackTrace}
-                    </pre>
-                  </div>
+                <div className="rounded-2xl border border-[#E2E8F0] p-4">
+                  <h4 className={SECTION_TITLE}>
+                    <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                    Stack Trace
+                  </h4>
+                  <pre className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-4 py-3 text-[13px] text-[#020817] font-mono whitespace-pre-wrap break-words leading-relaxed">
+                    {selectedLog.stackTrace}
+                  </pre>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200">
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2">
-                  {!selectedLog.resolved && (
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                      Đánh dấu đã xử lý
-                    </button>
-                  )}
-                  <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium">
-                    Copy Stack Trace
+            <div className={MODAL_FOOTER}>
+              <div className="flex items-center gap-3">
+                {!selectedLog.resolved && (
+                  <button type="button" className={BTN_PRIMARY}>
+                    Đánh dấu đã xử lý
                   </button>
-                </div>
-                <button
-                  onClick={closeDetailModal}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
-                >
-                  Đóng
+                )}
+                <button type="button" className={BTN_OUTLINE}>
+                  Copy Stack Trace
                 </button>
               </div>
+              <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
+                Đóng
+              </button>
             </div>
           </div>
         </div>

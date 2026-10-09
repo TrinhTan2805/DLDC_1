@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit2, Trash2, Clock, CheckCircle } from 'lucide-react';
+import { X, Plus, SquarePen, Trash2, Clock, CheckCircle } from 'lucide-react';
 
 export interface ScheduleManagementModalProps {
   isOpen: boolean;
@@ -259,7 +259,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 title="Sửa"
                               >
-                                <Edit2 className="w-4 h-4" />
+                                <SquarePen className="w-4 h-4" />
                               </button>
                               <button 
                                 onClick={() => handleDelete(schedule.id)}

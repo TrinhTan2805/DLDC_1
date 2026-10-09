@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Download, Eye, Edit2, Trash2, Plus, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
+import { Search, Download, Eye, SquarePen, Trash2, Plus, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import { AddDataCollectionModal } from './AddDataCollectionModal';
@@ -427,7 +427,7 @@ export function DataCollectionList() {
                         onClick={() => { setSelectedItem(item); setShowEditModal(true); }}
                         className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <SquarePen className="w-4 h-4" />
                       </button>
                       <button 
                         title="Xóa" 

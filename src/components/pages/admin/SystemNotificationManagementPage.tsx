@@ -1,6 +1,23 @@
-import { useState } from 'react';
-import { Search, RefreshCw, Filter, Plus, Edit, Trash2, X, Send, ArrowUpDown, AlertTriangle } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { Search, RefreshCw, Plus, Edit, Trash2, X, Send, ArrowUpDown } from 'lucide-react';
+import { toast } from 'sonner';
 import { broadcastSystemNotification } from '../../../data/notificationCatalog';
+import { ConfirmModal } from '../../common/ConfirmModal';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import {
+  TruncatedText, RowIconAction, Pagination,
+  BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, BTN_FOCUS, BTN_DISABLED, TOOLTIP_CLS,
+  INPUT_CLS, LABEL_CLS, REQUIRED_MARK, SEARCH_INPUT_CLS, SEARCH_BTN_CLS,
+  TABLE_WRAP_CLS, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, normalizeSearch, formatDateVN,
+} from '../collection/collectionUi';
+
+// Giao diện theo tailieu/docs/compomennt.md (H1, tìm kiếm 5.19, bảng 5.3, phân trang 5.14, modal 5.4)
+const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
+const TD = 'px-3 py-1 text-[13px] text-black';
+const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const TEXTAREA_CLS = `${INPUT_CLS.replace('h-10 ', '')} py-2 resize-none`;
+// Nút icon nền trắng viền (Icon outline — mục 5.1)
+const ICON_OUTLINE_BTN = `w-10 h-10 shrink-0 rounded-lg border bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC] hover:text-[#020817] transition-colors flex items-center justify-center ${BTN_FOCUS} ${BTN_DISABLED}`;
 
 interface SystemNotificationLog {
   id: string;
@@ -12,7 +29,7 @@ interface SystemNotificationLog {
 const initialLogs: SystemNotificationLog[] = Array.from({ length: 8 }, (_, i) => ({
   id: `SN-${i + 1}`,
   title: 'Thông báo bảo trì hệ thống',
-  content: 'Hệ thống sẽ được bảo trì từ 22h00 đến 23h00.Trong thời gian này, một số chức năng có thể bị gián đoạn.',
+  content: 'Hệ thống sẽ được bảo trì từ 22h00 đến 23h00. Trong thời gian này, một số chức năng có thể bị gián đoạn.',
   updatedDate: '12/12/2025 09:30:45',
 }));
 
@@ -23,9 +40,23 @@ const parseDateTime = (s: string) => {
   return new Date(y, m - 1, d, hh, mm, ss).getTime();
 };
 
+// Nút icon trên thanh công cụ kèm tooltip chuẩn (5.3.1)
+const ToolbarIconButton = ({ label, onClick, className, children }: { label: string; onClick: () => void; className: string; children: ReactNode }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <button type="button" aria-label={label} onClick={onClick} className={className}>
+        {children}
+      </button>
+    </TooltipTrigger>
+    <TooltipContent side="top" sideOffset={4} className={TOOLTIP_CLS}>{label}</TooltipContent>
+  </Tooltip>
+);
+
 export function SystemNotificationManagementPage() {
   const [logs, setLogs] = useState<SystemNotificationLog[]>(initialLogs);
+  // Từ khóa chỉ áp dụng khi bấm Tìm kiếm hoặc Enter (5.19)
   const [searchTerm, setSearchTerm] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [sortAsc, setSortAsc] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -36,16 +67,22 @@ export function SystemNotificationManagementPage() {
   const [selectedLog, setSelectedLog] = useState<SystemNotificationLog | null>(null);
   const [formData, setFormData] = useState({ title: '', content: '' });
 
+  const runSearch = () => {
+    setAppliedSearch(searchTerm);
+    setCurrentPage(1);
+  };
+
+  const q = normalizeSearch(appliedSearch);
   const filteredLogs = logs
     .filter(l =>
-      l.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      l.content.toLowerCase().includes(searchTerm.toLowerCase())
+      !q ||
+      normalizeSearch(l.title).includes(q) ||
+      normalizeSearch(l.content).includes(q)
     )
     .sort((a, b) => sortAsc
       ? parseDateTime(a.updatedDate) - parseDateTime(b.updatedDate)
       : parseDateTime(b.updatedDate) - parseDateTime(a.updatedDate));
 
-  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
   const paginatedLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleAdd = () => {
@@ -55,7 +92,7 @@ export function SystemNotificationManagementPage() {
 
   const handleSend = () => {
     if (!formData.title.trim() || !formData.content.trim()) {
-      alert('Vui lòng nhập đầy đủ Tiêu đề và Nội dung!');
+      toast.error('Vui lòng nhập đầy đủ Tiêu đề và Nội dung!');
       return;
     }
     // Phát thông báo (loại "Thông báo") tới tất cả người dùng đang dùng hệ thống
@@ -65,12 +102,12 @@ export function SystemNotificationManagementPage() {
       id: `SN-${Date.now()}`,
       title: formData.title.trim(),
       content: formData.content.trim(),
-      updatedDate: new Date().toLocaleString('vi-VN'),
+      updatedDate: formatDateVN(new Date(), true),
     };
     setLogs(prev => [newLog, ...prev]);
     setShowAddModal(false);
     setCurrentPage(1);
-    alert('Đã gửi thông báo tới tất cả người dùng trên hệ thống thành công!');
+    toast.success('Đã gửi thông báo tới tất cả người dùng trên hệ thống thành công!');
   };
 
   const handleEdit = (log: SystemNotificationLog) => {
@@ -81,7 +118,7 @@ export function SystemNotificationManagementPage() {
 
   const confirmEdit = () => {
     if (!selectedLog || !formData.title.trim() || !formData.content.trim()) {
-      alert('Vui lòng nhập đầy đủ Tiêu đề và Nội dung!');
+      toast.error('Vui lòng nhập đầy đủ Tiêu đề và Nội dung!');
       return;
     }
     setLogs(prev => prev.map(l => l.id === selectedLog.id
@@ -103,110 +140,175 @@ export function SystemNotificationManagementPage() {
     setSelectedLog(null);
   };
 
+  // Form Thêm mới / Sửa dùng chung bố cục modal (5.4)
+  const renderFormModal = (mode: 'add' | 'edit') => {
+    const close = () => (mode === 'add' ? setShowAddModal(false) : setShowEditModal(false));
+    const titleId = `system-notification-${mode}-title`;
+    return (
+      <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={close}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+            <h3 id={titleId} className={MODAL_TITLE}>
+              {mode === 'add' ? 'Thêm mới thông báo hệ thống' : 'Sửa thông báo hệ thống'}
+            </h3>
+            <button type="button" onClick={close} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
+            <div>
+              <label htmlFor={`${titleId}-field-title`} className={LABEL_CLS}>
+                Tiêu đề <span className={REQUIRED_MARK}>*</span>
+              </label>
+              <input
+                id={`${titleId}-field-title`}
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder={mode === 'add' ? 'Nhập' : undefined}
+                className={INPUT_CLS}
+              />
+            </div>
+            <div>
+              <label htmlFor={`${titleId}-field-content`} className={LABEL_CLS}>
+                Nội dung <span className={REQUIRED_MARK}>*</span>
+              </label>
+              <textarea
+                id={`${titleId}-field-content`}
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                rows={5}
+                placeholder={mode === 'add' ? 'Nhập' : undefined}
+                className={TEXTAREA_CLS}
+              />
+            </div>
+          </div>
+          <div className="shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3">
+            <button type="button" onClick={close} className={BTN_OUTLINE}>
+              Hủy
+            </button>
+            {mode === 'add' ? (
+              <button type="button" onClick={handleSend} className={BTN_PRIMARY}>
+                <Send className="w-4 h-4" />
+                Gửi
+              </button>
+            ) : (
+              <button type="button" onClick={confirmEdit} className={BTN_PRIMARY}>
+                Lưu
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
-      <h1 className="text-[20px] font-bold text-slate-900">Quản lý thông báo hệ thống</h1>
+      <h1 className="text-[20px] font-bold text-[#2A0F0F] leading-8">Quản lý thông báo hệ thống</h1>
 
-      {/* Search & Actions */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[280px] max-w-xl">
+      {/* Tìm kiếm & thao tác (5.19) */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex-1 min-w-[280px] flex items-center gap-1.5">
           <input
             type="text"
-            placeholder="Tìm kiếm tiêu đề..."
+            aria-label="Tìm kiếm thông báo hệ thống"
+            placeholder="Tìm kiếm theo tiêu đề, nội dung"
             value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-            className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+            className={SEARCH_INPUT_CLS}
           />
-          <button
-            type="button"
-            onClick={() => setCurrentPage(1)}
-            className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors shrink-0"
-            title="Tìm kiếm"
+          <ToolbarIconButton label="Tìm kiếm" onClick={runSearch} className={SEARCH_BTN_CLS}>
+            <Search className="w-5 h-5" />
+          </ToolbarIconButton>
+          <ToolbarIconButton
+            label="Làm mới"
+            onClick={() => { setSearchTerm(''); setAppliedSearch(''); setCurrentPage(1); }}
+            className={ICON_OUTLINE_BTN}
           >
-            <Search className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
-            className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl transition-colors shrink-0"
-            title="Làm mới"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
+            <RefreshCw className="w-5 h-5" />
+          </ToolbarIconButton>
+          <ToolbarIconButton
+            label={sortAsc ? 'Đang sắp xếp: Cũ → Mới' : 'Đang sắp xếp: Mới → Cũ'}
             onClick={() => setSortAsc(s => !s)}
-            className="p-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-500 rounded-xl transition-colors shrink-0"
-            title={sortAsc ? 'Đang sắp xếp: Cũ → Mới' : 'Đang sắp xếp: Mới → Cũ'}
+            className={ICON_OUTLINE_BTN}
           >
-            <Filter className="w-4 h-4" />
-          </button>
+            <ArrowUpDown className="w-5 h-5" />
+          </ToolbarIconButton>
         </div>
 
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 text-[13px] font-medium shadow-sm shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm mới
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={handleAdd} className={BTN_PRIMARY}>
+            <Plus className="w-4 h-4" />
+            Thêm mới
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      {/* Bảng (5.3) */}
+      <div className={TABLE_WRAP_CLS}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3 text-[13px] font-semibold text-slate-700 text-center w-14">STT</th>
-                <th className="px-4 py-3 text-[13px] font-semibold text-slate-700 whitespace-nowrap">Tiêu đề</th>
-                <th className="px-4 py-3 text-[13px] font-semibold text-slate-700">Nội dung</th>
-                <th className="px-4 py-3 text-[13px] font-semibold text-slate-700 whitespace-nowrap">
+          <table className="w-full border-collapse text-[13px]">
+            <thead className={`${TABLE_HEAD_BG} sticky top-0 z-[1]`}>
+              <tr className={TABLE_HEAD_ROW_CLS}>
+                <th className={`${TH} text-center w-14`}>STT</th>
+                <th className={`${TH} text-left`}>Tiêu đề</th>
+                <th className={`${TH} text-left`}>Nội dung</th>
+                <th className={`${TH} text-left`}>
                   <button
                     type="button"
                     onClick={() => setSortAsc(s => !s)}
-                    className="inline-flex items-center gap-1 cursor-pointer"
+                    aria-label={`Ngày cập nhật — ${sortAsc ? 'Đang sắp xếp: Cũ → Mới' : 'Đang sắp xếp: Mới → Cũ'}`}
+                    className={`inline-flex items-center gap-1 rounded hover:text-blue-600 ${BTN_FOCUS}`}
                   >
                     Ngày cập nhật <ArrowUpDown className="w-3.5 h-3.5" />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-[13px] font-semibold text-slate-700 text-center w-24">Thao tác</th>
+                <th className={`${TH} text-center w-24 sticky right-0 ${TABLE_HEAD_BG} shadow-[-1px_0_0_#E2E8F0]`}>Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody>
               {paginatedLogs.length > 0 ? (
-                paginatedLogs.map((log, index) => (
-                  <tr key={log.id} className="hover:bg-slate-50/50 transition-all">
-                    <td className="px-4 py-3 text-[13px] text-slate-500 text-center">
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-slate-900 font-medium whitespace-nowrap">{log.title}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-700 max-w-lg">{log.content}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-600 whitespace-nowrap">{log.updatedDate}</td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          onClick={() => handleEdit(log)}
-                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Sửa"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(log)}
-                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                paginatedLogs.map((log, index) => {
+                  const [datePart, timePart] = log.updatedDate.split(' ');
+                  return (
+                    <tr key={log.id} className="group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                      <td className={`${TD} text-center whitespace-nowrap`}>
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
+                      <td className={`${TD} text-left max-w-[280px]`}>
+                        <TruncatedText text={log.title} />
+                      </td>
+                      <td className={`${TD} text-left max-w-[480px]`}>
+                        <TruncatedText text={log.content} />
+                      </td>
+                      <td className={`${TD} text-left whitespace-nowrap leading-[18px] tabular-nums`}>
+                        <div>{datePart}</div>
+                        {timePart && <div className="text-[#64748B]">{timePart}</div>}
+                      </td>
+                      <td className={`${TD} text-center sticky right-0 bg-white group-hover:bg-[#F8FAFC] transition-colors shadow-[-1px_0_0_#E2E8F0]`}>
+                        <div className="inline-flex items-center justify-center gap-1">
+                          <RowIconAction label="Sửa" onClick={() => handleEdit(log)}>
+                            <Edit className="w-4 h-4" />
+                          </RowIconAction>
+                          <RowIconAction label="Xóa" onClick={() => handleDelete(log)}>
+                            <Trash2 className="w-4 h-4 text-[#DC2626]" />
+                          </RowIconAction>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-[13px] text-slate-500">
+                  <td colSpan={5} className="py-16 text-center text-[13px] text-[#64748B]">
                     Không tìm thấy dữ liệu
                   </td>
                 </tr>
@@ -215,218 +317,37 @@ export function SystemNotificationManagementPage() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Phân trang (5.14) */}
         {filteredLogs.length > 0 && (
-          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between bg-white text-[13px] font-medium">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600 font-normal">Hiển thị</span>
-              <select
-                aria-label="Số bản ghi trên trang"
-                value={itemsPerPage}
-                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1.5 border border-slate-200 rounded-lg bg-white text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                title="Số bản ghi trên trang"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-slate-600 font-normal">bản ghi/trang</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-slate-600 font-normal">
-                {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredLogs.length)} / {filteredLogs.length}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                >
-                  Trước
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 border rounded-xl font-medium text-[13px] transition-colors ${
-                      currentPage === page
-                        ? 'bg-blue-600 border-blue-600 text-white'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 border border-slate-200 rounded-xl text-slate-600 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium"
-                >
-                  Sau
-                </button>
-              </div>
-            </div>
-          </div>
+          <Pagination
+            className="border-t border-[#E2E8F0]"
+            currentPage={currentPage}
+            totalItems={filteredLogs.length}
+            pageSize={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setItemsPerPage}
+            pageSizeOptions={[10, 20, 50]}
+          />
         )}
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowAddModal(false)}
-        >
-          <div className="bg-white rounded-xl max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h3 className="text-slate-900 font-bold text-[16px]">Thêm mới thông báo hệ thống</h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                title="Đóng"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 text-[13px]">
-              <div>
-                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                  Tiêu đề <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Nhập"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                  Nội dung <span className="text-red-600">*</span>
-                </label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={5}
-                  placeholder="Nhập"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-[13px] font-medium"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSend}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors text-[13px] font-medium"
-              >
-                <Send className="w-4 h-4" />
-                Gửi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showAddModal && renderFormModal('add')}
 
       {/* Edit Modal */}
-      {showEditModal && selectedLog && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowEditModal(false)}
-        >
-          <div className="bg-white rounded-xl max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h3 className="text-slate-900 font-bold text-[16px]">Sửa thông báo hệ thống</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                title="Đóng"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4 text-[13px]">
-              <div>
-                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                  Tiêu đề <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                  Nội dung <span className="text-red-600">*</span>
-                </label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={5}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-[13px] font-medium"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={confirmEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-[13px] font-medium"
-              >
-                Lưu
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showEditModal && selectedLog && renderFormModal('edit')}
 
-      {/* Delete Confirmation */}
-      {showDeleteConfirm && selectedLog && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => { setShowDeleteConfirm(false); setSelectedLog(null); }}
-        >
-          <div className="bg-white rounded-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-center text-slate-900 font-bold text-[15px] mb-2">Xác nhận xóa</h3>
-              <p className="text-center text-slate-600 text-[13px] mb-6">
-                Bạn có chắc chắn muốn xóa thông báo "{selectedLog.title}"?
-                <br />Hành động này không thể hoàn tác.
-              </p>
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={() => { setShowDeleteConfirm(false); setSelectedLog(null); }}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-[13px] font-medium"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 transition-colors text-[13px] font-medium"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Xóa
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation (5.4 — ConfirmModal dùng chung) */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm && !!selectedLog}
+        onClose={() => { setShowDeleteConfirm(false); setSelectedLog(null); }}
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        subtitle="Hành động này không thể hoàn tác."
+        message={<>Bạn có chắc chắn muốn xóa thông báo "{selectedLog?.title}"?</>}
+        confirmText="Xóa"
+        type="delete"
+      />
     </div>
   );
 }

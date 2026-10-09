@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Plus, Edit2, Trash2, Save, Settings } from 'lucide-react';
+import { X, Plus, SquarePen, Trash2, Save, Settings } from 'lucide-react';
 
 interface Attribute {
   id: string;
@@ -275,7 +275,7 @@ export function AttributeManagementModal({ onClose, entityName = 'Dữ liệu ch
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           title="Sửa"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <SquarePen className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(attr.id)}

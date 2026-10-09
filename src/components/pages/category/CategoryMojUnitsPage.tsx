@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Plus,
   Search,
-  Edit2,
+  SquarePen,
   Trash2,
   X,
   Save,
@@ -265,7 +265,7 @@ export function CategoryMojUnitsPage() {
                       {/* Cột thao tác (mục 5.3.2): 2 thao tác => hiện hết */}
                       <div className="inline-flex items-center justify-center gap-1">
                         <RowIconAction label="Chỉnh sửa" onClick={() => handleOpenEditModal(unit)}>
-                          <Edit2 className="w-4 h-4" />
+                          <SquarePen className="w-4 h-4" />
                         </RowIconAction>
                         <RowIconAction label="Xóa" onClick={() => handleDeleteUnitClick(unit)}>
                           <Trash2 className="w-4 h-4" />

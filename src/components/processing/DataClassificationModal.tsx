@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Eye, Lock, AlertTriangle, Shield, Edit2, Save } from 'lucide-react';
+import { X, Eye, Lock, AlertTriangle, Shield, SquarePen, Save } from 'lucide-react';
 
 interface FieldClassification {
   fieldName: string;
@@ -197,7 +197,7 @@ export function DataClassificationModal({ config, onClose }: DataClassificationM
                     onClick={() => setIsEditMode(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-purple-700 bg-purple-50 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <SquarePen className="w-3.5 h-3.5" />
                     Chỉnh sửa
                   </button>
                 )}
