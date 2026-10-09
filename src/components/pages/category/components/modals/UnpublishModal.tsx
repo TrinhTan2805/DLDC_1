@@ -146,7 +146,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
               onChange={(e) => setReason(e.target.value)}
               disabled={isScanning}
               rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:bg-slate-50"
+              className="w-full px-4 py-2 border border-slate-300 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed"
               placeholder="Nhập lý do chi tiết..."
             />
           </div>

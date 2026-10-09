@@ -273,7 +273,7 @@ export function SetupCategoryList() {
                   type="text"
                   value={formData.code}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, code: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:cursor-not-allowed"
                   placeholder="VD: DM_DVHC"
                   disabled={!!selectedCategory}
                   required

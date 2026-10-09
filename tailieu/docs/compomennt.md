@@ -225,7 +225,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 - Viền: 1px `#E2E8F0` — *đề xuất, chưa xác nhận từ trang chuẩn*.
 - Trạng thái Focus: ring 2px màu primary `#155DFC`.
 - **Nhãn trường:** 13px / **Semibold (600)** / `#020817` (đen), cách ô nhập 4px — **dùng chung một kiểu với tên trường ở màn Xem chi tiết** (mục 5.17).
-- **Disabled (Vô hiệu hóa):** Nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`** (cùng quy tắc với nút, mục 5.1).
+- **Disabled (Vô hiệu hóa) ở form Thêm mới/Chỉnh sửa** *(cập nhật 09/10/2026)*: Nền **`#F0F0F0`** (thống nhất với màn Xem chi tiết — dùng chung một màu nền cho mọi ô bị khóa), viền `#E2E8F0`, chữ `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`** (cùng quy tắc với nút, mục 5.1). *Trước 09/10/2026 dùng nền `#F1F5F9`.*
 - **Ô bị khóa ở màn Xem chi tiết** *(07/10/2026)*: **giá trị đã có hiển thị chữ đen `#000000`**; ô trống hiển thị **placeholder xám `#94A3B8`**, 13px / 400; nền `#F0F0F0` (như trang BTP hiển thị); viền `rgba(0,0,0,0.26)`. Code: ghép `VIEW_FIELD_CLS` (trong `collectionUi.tsx`) sau `INPUT_CLS` — `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Màn xem chi tiết mà ô không bị khóa sẵn → bọc form bằng `<fieldset disabled={isViewMode}>` để mọi ô nhận kiểu này. Ô giả lập bằng `div` (VD ô tệp đính kèm) theo cùng quy tắc: có giá trị → chữ đen, trống → chữ xám.
 - **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ `*` màu `#DC2626`. Khi có lỗi (validation), viền chuyển `#DC2626` và hiển thị thông báo lỗi 12px `#DC2626` bên dưới.
 - **Cỡ chữ:** Nhãn và nội dung ô nhập đều 13px (theo bảng Typography mục 1).
@@ -240,7 +240,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 </label>
 <input className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white
   focus:outline-none focus:ring-2 focus:ring-blue-600
-  disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] disabled:cursor-not-allowed" />
+  disabled:bg-[#F0F0F0] disabled:border-[#E2E8F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed" />
 {/* Khi lỗi: thay border-[#E2E8F0] bằng border-[#DC2626] và hiển thị: */}
 <p className="mt-1 text-[12px] text-[#DC2626]">Tên dịch vụ không được để trống</p>
 ```
@@ -255,7 +255,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
   </div>
   <div>
     <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #64748b;">Mã định danh (Disabled)</label>
-    <input type="text" value="ID_00123" disabled style="width: 100%; max-width: 350px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; background: #f1f5f9; color: #64748b; cursor: not-allowed; opacity: 0.8;" />
+    <input type="text" value="ID_00123" disabled style="width: 100%; max-width: 350px; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; background: #f0f0f0; color: #64748b; cursor: not-allowed; opacity: 0.8;" />
   </div>
   <div>
     <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #dc2626;">Email <span style="color: #dc2626;">*</span></label>

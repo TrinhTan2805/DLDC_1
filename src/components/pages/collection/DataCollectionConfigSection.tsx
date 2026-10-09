@@ -184,7 +184,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
                   value={monthDate}
                   onChange={e => setMonthDate(e.target.value)}
                   disabled={monthOption !== 'date'}
-                  className="w-20 px-3 py-1.5 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
+                  className="w-20 px-3 py-1.5 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400 shadow-sm"
                 />
               </label>
 
@@ -199,7 +199,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
                   value={monthWeek}
                   onChange={e => setMonthWeek(e.target.value)}
                   disabled={monthOption !== 'day'}
-                  className="px-3 py-1.5 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
+                  className="px-3 py-1.5 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400 shadow-sm"
                 >
                   <option value="Đầu tiên">Đầu tiên</option>
                   <option value="Thứ hai">Thứ hai</option>
@@ -211,7 +211,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
                   value={monthDay}
                   onChange={e => setMonthDay(e.target.value)}
                   disabled={monthOption !== 'day'}
-                  className="px-3 py-1.5 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
+                  className="px-3 py-1.5 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#F0F0F0] disabled:text-slate-400 shadow-sm"
                 >
                   <option value="Thứ hai">Thứ hai</option>
                   <option value="Thứ ba">Thứ ba</option>

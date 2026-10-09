@@ -404,6 +404,7 @@ export function RelationshipsTab({
               }}
               placeholder="-- Chọn danh mục --"
               disabled={!!currentEntityId}
+              viewOnly={isViewOnly}
             />
           </div>
 
@@ -837,9 +838,11 @@ interface SearchableSelectProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  // Chế độ Xem chi tiết: ô disabled dùng nền #F0F0F0, chữ đen (đồng bộ VIEW_FIELD_CLS)
+  viewOnly?: boolean;
 }
 
-function SearchableSelect({ label, placeholder, options, value, onChange, disabled = false }: SearchableSelectProps) {
+function SearchableSelect({ label, placeholder, options, value, onChange, disabled = false, viewOnly = false }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -866,11 +869,13 @@ function SearchableSelect({ label, placeholder, options, value, onChange, disabl
       )}
       <div
         className={`w-full h-10 px-3 border rounded-lg flex items-center justify-between gap-2 text-[13px] transition-colors
-          ${disabled ? 'cursor-not-allowed bg-[#F1F5F9] border-[#E2E8F0] text-[#94A3B8]' : 'cursor-pointer bg-white hover:border-[#94A3B8]'}
+          ${disabled
+            ? (viewOnly ? 'cursor-not-allowed bg-[#F0F0F0] !border-[rgba(0,0,0,0.26)] text-[#000000]' : 'cursor-not-allowed bg-[#F0F0F0] border-[#E2E8F0] text-[#94A3B8]')
+            : 'cursor-pointer bg-white hover:border-[#94A3B8]'}
           ${isOpen && !disabled ? 'border-[#E2E8F0] ring-2 ring-blue-600' : 'border-[#E2E8F0]'}`}
         onClick={() => { if (!disabled) { setIsOpen(!isOpen); setSearchTerm(''); } }}
       >
-        <span className={`truncate ${selectedOption ? (disabled ? 'text-[#94A3B8]' : 'text-[#020817]') : 'text-[#94A3B8]'}`}>
+        <span className={`truncate ${selectedOption ? (disabled ? (viewOnly ? 'text-[#000000]' : 'text-[#94A3B8]') : 'text-[#020817]') : 'text-[#94A3B8]'}`}>
           {selectedOption ? selectedOption.label : (placeholder || '-- Chọn --')}
         </span>
         <ChevronDown className="w-4 h-4 text-[#64748B] shrink-0" />

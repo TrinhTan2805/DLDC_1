@@ -128,7 +128,7 @@ export function SendDataForm() {
                 type="text"
                 value="https://api.moj.gov.vn/kdldc/v1/collect"
                 readOnly
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-[#F0F0F0]"
               />
             </div>
 

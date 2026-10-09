@@ -842,7 +842,7 @@ export function ProcessingRuleSetupPage() {
                   placeholder="Sẽ tự động điền khi chọn nguồn dữ liệu"
                   value={selectedTotalRecords > 0 ? selectedTotalRecords.toLocaleString() : ''}
                   readOnly
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-[#F0F0F0] cursor-not-allowed"
                 />
               </div>
               

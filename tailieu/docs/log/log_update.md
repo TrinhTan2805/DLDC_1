@@ -1,5 +1,178 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Gộp nhánh feature/chuan-hoa-o-disabled-typography-20261009 vào main (Ngày thực hiện: 09/10/2026) — 190
+
+**Nội dung (PM yêu cầu):** đối chiếu và gộp nhánh (commit `50e7e917`: nền ô disabled #F0F0F0, wizard Dữ liệu chủ, modal Thông tin cá nhân, báo cáo rà soát typography — log 179–189) vào `main`, xử lý xung đột.
+
+**Sao lưu trước khi gộp:** nhánh `backup/main-truoc-merge-disabled-20261009`.
+
+**Xử lý xung đột:**
+- `master-data/MasterDataWizard.tsx`: lấy bản của nhánh (tiêu đề động Tạo mới/Chỉnh sửa, khóa "Tên CSDL/Hệ thống" tới khi chọn Đơn vị chủ quản, ô chọn có mũi tên) + áp lại quy định của main: tiêu đề 16px/600, dòng gợi ý `disabled hidden`, chữ thường "-- Chọn đơn vị chủ quản trước --".
+- `orchestration/AddProvisionServiceModal.tsx`: giữ dòng gợi ý dạng mới (ẩn) của main + class ô khóa của nhánh (nền #F0F0F0, viền rgba(0,0,0,0.26), chữ đen).
+- `compomennt.md` mục 5.2: giữ cả nhãn trường 600 (main) và quy định nền ô disabled #F0F0F0 (nhánh).
+- `stauts.md`: mục nào một trong hai bên đã mở `[x]` thì giữ `[x]` (Cấu hình kết nối, Nạp cấu trúc, Quản lý/Chi tiết CSDL đích, Phê duyệt danh mục…).
+- `log_update.md`: 11 mục của nhánh (chưa đánh số, ghi ở cuối file) chuyển lên đầu, đánh số 179–189.
+
+**Áp lại quy định sau khi gộp:** modal Thông tin cá nhân (`modals/UserProfileModal.tsx`, file nhánh viết lại) tiêu đề 16px/500 → 600. Đã quét toàn bộ: không còn tiêu đề modal/nhãn 500, không còn dòng gợi ý ô chọn hiện trong danh sách.
+
+**Lưu ý:** báo cáo `tailieu/docs/ra_soat_typography_09102026.md` lập trên code trước các thay đổi đậm 600 / placeholder ô chọn (log 168–178) — số liệu trong báo cáo chưa phản ánh các thay đổi đó.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công.
+
+## Modal Thông tin cá nhân — chiều cao theo nội dung (Ngày cập nhật: 09/10/2026) — 189
+
+**Nội dung thay đổi:** bỏ chiều cao cố định `h-[90vh] max-h-[800px]` → `max-h-[90vh]` (modal ít trường, áp dụng ngoại lệ "modal nhỏ chỉ có vài trường" mục 5.4) để bỏ khoảng trắng dưới khối Thông tin cơ bản; nội dung vượt 90vh thì thân modal tự cuộn.
+
+**Các file bị ảnh hưởng:**
+- `src/components/modals/UserProfileModal.tsx`
+
+## Modal Thông tin cá nhân — bỏ khối Nhóm người dùng (Ngày cập nhật: 09/10/2026) — 188
+
+**Nội dung thay đổi:** bỏ khối "Nhóm người dùng" theo yêu cầu PM; modal chỉ còn khối "Thông tin cơ bản".
+
+**Các file bị ảnh hưởng:**
+- `src/components/modals/UserProfileModal.tsx`
+
+## Modal Thông tin cá nhân — chuẩn hóa theo component chung và trường dữ liệu người dùng (Ngày cập nhật: 09/10/2026) — 187
+
+**Nội dung thay đổi:**
+1. **Dữ liệu:** tạo `CURRENT_USER` (`user/currentUser.ts`) cùng cấu trúc trường với `User` ở Quản lý người dùng (Họ và tên, Tên đăng nhập, Email, Số điện thoại, Đơn vị, Vai trò, Nhóm người dùng, Trạng thái, Ngày tạo, Đăng nhập gần nhất). Giá trị khớp TopBar (Nguyễn Văn A / Quản trị viên / admin@moj.gov.vn) — trước đây modal hiển thị email `nguyenvana@moj.gov.vn` khác TopBar.
+2. **Bỏ trường không có trong dữ liệu người dùng:** Mã nhân viên, Phòng ban, Chức vụ, Ngày tham gia (giá trị gán cứng).
+3. **Giao diện theo `compomennt.md`, đồng bộ "Chi tiết người dùng":**
+   - Modal xem chi tiết chiều cao cố định `h-[90vh] max-h-[800px]`, thân tự cuộn, bo `rounded-2xl`, header/footer cố định, footer nền `#F8FAFC` (mục 5.4); render qua `Portal`, `z-[110]`, bấm nền để đóng.
+   - Tiêu đề 16px / 500 `#020817`; nút X dùng `BTN_GHOST_ICON`; nút Đóng dùng `BTN_OUTLINE`.
+   - Cặp Nhãn – Giá trị dùng `FIELD_LABEL` / `FIELD_VALUE` 13px (mục 5.17); khối "Thông tin cơ bản", "Nhóm người dùng" dùng `SECTION_TITLE` có vạch xanh.
+   - Vai trò, Trạng thái, Nhóm người dùng hiển thị bằng `Badge` (mục 5.8).
+   - Bỏ khối avatar chữ "NV" (không có trong mẫu Chi tiết người dùng).
+
+**Các file bị ảnh hưởng:**
+- `src/components/modals/UserProfileModal.tsx`
+- `src/components/user/currentUser.ts` (mới)
+- `tailieu/docs/stauts.md`
+
+## Wizard Tạo mới/Chỉnh sửa dữ liệu chủ — chuẩn hóa theo compomennt.md (Ngày cập nhật: 09/10/2026) — 186
+
+**Nội dung thay đổi:**
+1. **Chiều cao modal cố định** (mục 5.4): `max-h-[90vh]` → `h-[90vh] max-h-[800px]`, thân modal thêm `min-h-0` để tự cuộn; header/stepper/footer không co giãn khi đổi bước.
+2. **Báo lỗi trùng Mã thực thể / Tên dữ liệu chủ** (mục 5.2): chữ thông báo 13px → 12px; viền ô chuyển đỏ `#DC2626` khi trùng (thêm `aria-invalid`).
+3. **Select ở Bước 1** (mục 5.7): Loại thực thể, Phạm vi sử dụng, Đơn vị chủ quản, Tên CSDL/Hệ thống dùng icon `ChevronDown` tự vẽ thay mũi tên mặc định trình duyệt (đồng bộ màn Thiết lập danh mục).
+4. **Ngày hiệu lực**: thay `input type="date"` bằng component chung `DateInput` (luôn hiển thị dd/mm/yyyy, giá trị vẫn ISO yyyy-mm-dd; vẫn khóa khi chỉnh sửa thực thể đã có).
+5. **Tiêu đề modal**: hiển thị "Chỉnh sửa dữ liệu chủ" khi đang chỉnh sửa (trước luôn là "Tạo mới dữ liệu chủ").
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+## Wizard Tạo mới dữ liệu chủ — khóa "Tên cơ sở dữ liệu / Hệ thống" cho tới khi chọn Đơn vị chủ quản (Ngày cập nhật: 09/10/2026) — 185
+
+**Nội dung thay đổi (Bước 1 — Khởi tạo dữ liệu chủ):**
+1. Trường **Tên cơ sở dữ liệu / Hệ thống** bị vô hiệu hóa (nền `#F0F0F0`, theo `INPUT_CLS`) khi chưa chọn **Đơn vị chủ quản**; mở khi đã chọn. Lựa chọn rỗng hiển thị "-- Chọn Đơn vị chủ quản trước --" khi đang khóa.
+2. Khi bỏ chọn Đơn vị chủ quản (về "-- Chọn đơn vị chủ quản --"), giá trị Tên CSDL/Hệ thống đã chọn được xóa.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+
+## Hoàn tất đồng bộ nền #F0F0F0 cho ô disabled/readOnly toàn hệ thống (Ngày cập nhật: 09/10/2026) — 184
+
+**PM mở khóa** (cập nhật `stauts.md`): `DataCollectionConfigSection`, `StructureLoadingConfig`, `ProcessingRuleSetupPage`, `ScheduleManagementModal`, `RelationshipsTab` (danh mục), `MasterDataWizard`, `OpenDataSetupPage`, `OpenDataCategoryPage`; thêm mục "Đồng bộ nền ô disabled #F0F0F0" cho các file chưa có trong danh sách.
+
+**Nội dung thay đổi:** đổi nền ô bị khóa (`slate-50`, `slate-100`, `gray-50`, `white`, `#F1F5F9`, hoặc chưa đặt nền) sang `#F0F0F0`:
+- Thu thập: `DataCollectionConfigSection` (3 ô), `StructureLoadingConfig` (3), `AddDataCollectionForm` (2), `SendDataForm` (1).
+- Xử lý: `ScheduleManagementModal` (3), `ProcessingRuleSetupPage` (1), `DataViewer` (1).
+- Danh mục: `SetupCategoryList` (1), `SetupCategoryStructure` (1), `CategoryManagementPage` (1 — ô Mã khi sửa), `RelationshipsTab` (ô chọn danh mục dạng `div`).
+- Dữ liệu mở: `OpenDataCategoryPage` (`READONLY_INPUT`, `READONLY_TEXTAREA`), `OpenDataSetupPage` (`TEXTAREA_CLS`, `READONLY_BOX`).
+- Master Data: `MasterDataWizard` (`TEXTAREA_CLS`).
+- Khác: `APIConfigModal` (1), `ProcessRequestModal` (1), `ResetPasswordModal` (1).
+
+**Cố ý không đổi:** ô tìm kiếm `CategoryManagementPage` (readOnly nhưng bấm để mở tìm kiếm nâng cao); nút bấm disabled (theo mục 5.1); dòng checkbox bị khóa trong `ProvisionAccessControlModal`; công tắc (toggle) trong `ProvisionServiceModal`.
+
+**Các file bị ảnh hưởng:**
+- `tailieu/docs/stauts.md`
+- `src/components/category/SetupCategoryList.tsx`, `src/components/category/SetupCategoryStructure.tsx`
+- `src/components/collection/AddDataCollectionForm.tsx`, `src/components/collection/SendDataForm.tsx`
+- `src/components/modals/APIConfigModal.tsx`, `src/components/modals/ProcessRequestModal.tsx`
+- `src/components/pages/CategoryManagementPage.tsx`
+- `src/components/pages/collection/DataCollectionConfigSection.tsx`, `src/components/pages/collection/StructureLoadingConfig.tsx`
+- `src/components/pages/processing/ScheduleManagementModal.tsx`, `src/components/pages/processing/ProcessingRuleSetupPage.tsx`
+- `src/components/processing/DataViewer.tsx`, `src/components/user/ResetPasswordModal.tsx`
+- `src/components/pages/open-data-category/OpenDataCategoryPage.tsx`, `src/components/pages/open-data/OpenDataSetupPage.tsx`
+- `src/components/pages/master-data/MasterDataWizard.tsx`
+- `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
+
+## Đổi nền ô disabled trong file dùng chung collectionUi.tsx sang #F0F0F0 (Ngày cập nhật: 09/10/2026) — 183
+
+**Nội dung thay đổi (PM xác nhận đổi file dùng chung, áp dụng cả màn đang khóa):**
+1. `INPUT_CLS`: `disabled:bg-[#F1F5F9]` → `disabled:bg-[#F0F0F0]`. Áp dụng cho mọi ô nhập/select dùng `INPUT_CLS` (34 file, gồm các màn Quản trị, Master Data, Dữ liệu mở, Cấu hình kết nối, Cung cấp dữ liệu, Danh mục...).
+2. `DateInput` (ô chọn ngày): khi disabled nền `!bg-[#F1F5F9]` → `!bg-[#F0F0F0]`.
+
+**Còn tồn (file đang khóa, có class riêng đè lên INPUT_CLS — chưa sửa):**
+- `open-data-category/OpenDataCategoryPage.tsx` (`READONLY_INPUT`, `READONLY_TEXTAREA`)
+- `master-data/MasterDataWizard.tsx` (`TEXTAREA_CLS`)
+- `open-data/OpenDataSetupPage.tsx` (`TEXTAREA_CLS`)
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/collection/collectionUi.tsx`
+
+## Chốt dùng nền #F0F0F0 cho mọi ô disabled (Thêm mới / Chỉnh sửa / Xem chi tiết) (Ngày cập nhật: 09/10/2026) — 182
+
+**Nội dung thay đổi:**
+1. **Quy định (`compomennt.md` mục 5.2):** ô disabled ở form Thêm mới/Chỉnh sửa đổi nền `#F1F5F9` → `#F0F0F0`, thống nhất với ô bị khóa ở màn Xem chi tiết. Cập nhật class Tailwind chuẩn (bổ sung `disabled:border-[#E2E8F0]`) và ví dụ hiển thị.
+2. **Code (file đang mở, màu viết trực tiếp):** 35 ô đổi nền `#F1F5F9` → `#F0F0F0`.
+   - Xử lý chung (template): 26 ô.
+   - Modal Thêm dịch vụ cung cấp: 7 ô.
+   - Modal Hủy công bố: 1 ô.
+   - Modal Trường tính toán: 1 ô.
+3. **Chưa đổi:** `INPUT_CLS` / `DateInput` trong `collectionUi.tsx` (dùng chung cho nhiều màn đang khóa) — chờ PM xác nhận.
+
+**Các file bị ảnh hưởng:**
+- `tailieu/docs/compomennt.md`
+- `src/components/pages/processing/GenericProcessingPage.tsx`
+- `src/components/pages/orchestration/AddProvisionServiceModal.tsx`
+- `src/components/pages/category/components/modals/UnpublishModal.tsx`
+- `src/components/pages/provisioning/modals/CalculatedFieldModal.tsx`
+
+## Chuẩn hóa ô disabled trong form Thêm mới/Chỉnh sửa theo #F1F5F9 (Ngày cập nhật: 09/10/2026) — 181
+
+**Nội dung thay đổi:**
+1. Ô bị vô hiệu hóa trong form (không phải màn Xem chi tiết) dùng đúng quy định `compomennt.md` mục 5.2: nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8`, `cursor-not-allowed`, không dùng `opacity`. Thay cho `bg-slate-100` / `bg-slate-50` / `opacity-70` trước đây.
+   - Xử lý chung (template): 26 ô của quy tắc đã lưu (`rule.isSaved`) và ô "Cột căn cứ sắp xếp"; bổ sung viền 1px (trước đây ô đã lưu không có viền).
+   - Modal Thêm dịch vụ cung cấp: 6 ô Alias/Điều kiện lọc của trường không chọn được, ô "Bảng gốc" (popup liên kết bảng).
+   - Modal Hủy công bố: ô "Lý do" khi đang quét.
+   - Modal Trường tính toán: ô "Kiểu dữ liệu đầu ra" ở tab Mẫu có sẵn (bỏ `opacity-70`).
+2. Không sửa các file đang khóa 🔒 hoặc không có trong `stauts.md`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/processing/GenericProcessingPage.tsx`
+- `src/components/pages/orchestration/AddProvisionServiceModal.tsx`
+- `src/components/pages/category/components/modals/UnpublishModal.tsx`
+- `src/components/pages/provisioning/modals/CalculatedFieldModal.tsx`
+
+## Đồng bộ nền ô bị khóa ở màn Xem chi tiết sang #F0F0F0 (Ngày cập nhật: 09/10/2026) — 180
+
+**Nội dung thay đổi:**
+1. **Ô disabled ở chế độ xem dùng nền `#F0F0F0`** theo `compomennt.md` mục 5.2 ("Ô bị khóa ở màn Xem chi tiết"): nền `#F0F0F0`, chữ `#000000`, viền `rgba(0,0,0,0.26)`, placeholder `#94A3B8`. Thay cho nền `slate-50` (#F8FAFC) / chữ `slate-600` trước đây.
+   - Modal Xem dịch vụ cung cấp (`mode = view/approve`): 17 ô.
+   - Modal Xem kết nối API (phân hệ Xử lý — tab Kết nối API): 23 ô.
+   - Modal kết nối API (`APIConnectionModal`): 8 ô.
+   - Modal Chỉnh sửa/Xem danh mục (`EditCategoryModal`, chế độ `isViewOnly`): 6 ô; bỏ `opacity-80` (quy định không dùng opacity cho ô disabled).
+2. Ô disabled trong form Thêm mới/Chỉnh sửa **không thay đổi** (vẫn theo quy định nền `#F1F5F9`).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/orchestration/AddProvisionServiceModal.tsx`
+- `src/components/common/APIConnectionFormModal.tsx`
+- `src/components/common/APIConnectionModal.tsx`
+- `src/components/pages/category/components/modals/EditCategoryModal.tsx`
+
+## Màn Xem chi tiết danh mục dùng chung — ô disabled nền #F0F0F0 (Ngày cập nhật: 09/10/2026) — 179
+
+**Nội dung thay đổi:**
+1. **Đồng bộ màu ô disabled ở chế độ Xem chi tiết (bước 3 — Quan hệ thực thể):**
+   - Ô chọn danh mục (`SearchableSelect`) ở đầu bước Quan hệ trong `CategoryWizardModal` (chế độ xem) đổi từ nền `#F1F5F9` / chữ `#94A3B8` sang nền `#F0F0F0` / viền `rgba(0,0,0,0.26)` / chữ `#000000`, đồng bộ với `VIEW_FIELD_CLS` đã dùng ở bước Thông tin chung.
+   - Thêm prop `viewOnly` cho `SearchableSelect`; chỉ áp dụng khi `isViewOnly = true`. Form Thêm mới/Chỉnh sửa giữ nguyên kiểu disabled cũ.
+   - Không sửa bước 2 (`AttributesTab.tsx` — đang khóa 🔒).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/category/components/tabs/RelationshipsTab.tsx`
+
 ## Ô "Lặp lại" cùng màu các ô khác (Ngày thực hiện: 09/10/2026) — 178
 
 **Nội dung (PM yêu cầu):** modal Thêm mới / Chỉnh sửa dịch vụ thu thập › tab Cấu hình thu thập › ô **Lặp lại** đang viền xanh + nền xanh nhạt, khác các ô khác trong modal.
@@ -6217,10 +6390,3 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 **Các file bị ảnh hưởng:**
 - `src/components/civil-legal-center/CivilLegalCenterInfoTable.tsx`
 - `src/components/civil-legal-center/CivilLegalCenterInfoModal.tsx`
-
-
-
-
-
-
-

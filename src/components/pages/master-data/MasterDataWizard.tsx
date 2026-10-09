@@ -6,13 +6,16 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
 import {
   Badge, TruncatedText, RowIconAction, Pagination, tabClass, normalizeSearch,
   BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRED_MARK,
-  TOOLTIP_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS,
+  TOOLTIP_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, DateInput,
 } from '../collection/collectionUi';
 
 // Lớp dùng chung theo quy chuẩn (tailieu/docs/compomennt.md) — chỉ dùng nội bộ file này
 const SELECT_CLS = `${INPUT_CLS} cursor-pointer`;
+// Select có icon ChevronDown tự vẽ thay mũi tên mặc định trình duyệt (mục 5.7) — bọc trong div relative
+const SELECT_ARROW_CLS = `${SELECT_CLS} pr-8 appearance-none`;
+const SELECT_ICON_CLS = 'absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none';
 const INPUT_BOX = INPUT_CLS.replace('w-full ', '');
-const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F1F5F9] disabled:text-[#94A3B8] disabled:cursor-not-allowed';
+const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-[#F0F0F0] disabled:text-[#94A3B8] disabled:cursor-not-allowed';
 const INFO_BANNER = 'bg-[#EAF3FF] border border-[#BFDBFE] rounded-lg p-4';
 const TH_CLS = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
 const TR_CLS = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
@@ -1062,11 +1065,12 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
   return (
     <Portal>
       <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out">
+        {/* Modal nhiều bước: chiều cao cố định, thân tự cuộn (mục 5.4) */}
+        <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] max-h-[800px] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 ease-out">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] shrink-0">
           <div>
-            <h2 className="text-[16px] font-semibold text-[#020817]">Tạo mới dữ liệu chủ</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">{isEditingEntity ? 'Chỉnh sửa dữ liệu chủ' : 'Tạo mới dữ liệu chủ'}</h2>
             <p className="text-[13px] text-[#64748B] mt-0.5">Quy trình 7 bước</p>
           </div>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
@@ -1105,7 +1109,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 custom-scrollbar">
           {/* Step 1: Khởi tạo dữ liệu chủ */}
           {currentStep === 1 && (
             <div className="space-y-4">
@@ -1126,15 +1130,16 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   value={wizardData.code || ''}
                   onChange={(e) => setWizardData({ ...wizardData, code: e.target.value })}
                   placeholder="VD: MD-CITIZEN-001"
-                  className={INPUT_CLS}
+                  aria-invalid={codeDuplicate}
+                  className={`${INPUT_CLS} ${codeDuplicate ? '!border-[#DC2626] focus:!ring-[#DC2626]' : ''}`}
                 />
                 {codeTrim.length > 0 && (
                   codeDuplicate ? (
-                    <p className="flex items-center gap-1 mt-1 text-[13px] text-[#DC2626]">
+                    <p className="flex items-center gap-1 mt-1 text-[12px] text-[#DC2626]">
                       <AlertCircle className="w-3.5 h-3.5" /> Đã tồn tại, vui lòng nhập giá trị khác
                     </p>
                   ) : (
-                    <p className="flex items-center gap-1 mt-1 text-[13px] text-[#16A34A]">
+                    <p className="flex items-center gap-1 mt-1 text-[12px] text-[#16A34A]">
                       <Check className="w-3.5 h-3.5" /> Hợp lệ, chưa trùng
                     </p>
                   )
@@ -1151,15 +1156,16 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   value={wizardData.name}
                   onChange={(e) => setWizardData({ ...wizardData, name: e.target.value })}
                   placeholder="VD: Bộ dữ liệu chủ Công dân"
-                  className={INPUT_CLS}
+                  aria-invalid={nameDuplicate}
+                  className={`${INPUT_CLS} ${nameDuplicate ? '!border-[#DC2626] focus:!ring-[#DC2626]' : ''}`}
                 />
                 {nameTrim.length > 0 && (
                   nameDuplicate ? (
-                    <p className="flex items-center gap-1 mt-1 text-[13px] text-[#DC2626]">
+                    <p className="flex items-center gap-1 mt-1 text-[12px] text-[#DC2626]">
                       <AlertCircle className="w-3.5 h-3.5" /> Đã tồn tại, vui lòng nhập giá trị khác
                     </p>
                   ) : (
-                    <p className="flex items-center gap-1 mt-1 text-[13px] text-[#16A34A]">
+                    <p className="flex items-center gap-1 mt-1 text-[12px] text-[#16A34A]">
                       <Check className="w-3.5 h-3.5" /> Hợp lệ, chưa trùng
                     </p>
                   )
@@ -1172,31 +1178,37 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   <label className={LABEL_CLS}>
                     Loại thực thể <span className={REQUIRED_MARK}>*</span>
                   </label>
-                  <select
-                    value={wizardData.dataType}
-                    onChange={(e) => setWizardData({ ...wizardData, dataType: e.target.value as DataType })}
-                    className={SELECT_CLS}
-                  >
-                    <option value="individual">Thực thể Cá nhân</option>
-                    <option value="organization">Thực thể Tổ chức</option>
-                    <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
-                    <option value="asset">Thực thể Tài sản</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={wizardData.dataType}
+                      onChange={(e) => setWizardData({ ...wizardData, dataType: e.target.value as DataType })}
+                      className={SELECT_ARROW_CLS}
+                    >
+                      <option value="individual">Thực thể Cá nhân</option>
+                      <option value="organization">Thực thể Tổ chức</option>
+                      <option value="legal">Thực thể Văn bản/Sự kiện pháp lý</option>
+                      <option value="asset">Thực thể Tài sản</option>
+                    </select>
+                    <ChevronDown className={SELECT_ICON_CLS} />
+                  </div>
                 </div>
                 <div>
                   <label className={LABEL_CLS}>
                     Phạm vi sử dụng <span className={REQUIRED_MARK}>*</span>
                   </label>
-                  <select
-                    value={wizardData.scope}
-                    onChange={(e) => setWizardData({ ...wizardData, scope: e.target.value as ScopeType })}
-                    className={SELECT_CLS}
-                  >
-                    <option value="national">Cấp quốc gia</option>
-                    <option value="ministry">Cấp bộ</option>
-                    <option value="provincial">Cấp tỉnh/thành</option>
-                    <option value="internal">Nội bộ</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={wizardData.scope}
+                      onChange={(e) => setWizardData({ ...wizardData, scope: e.target.value as ScopeType })}
+                      className={SELECT_ARROW_CLS}
+                    >
+                      <option value="national">Cấp quốc gia</option>
+                      <option value="ministry">Cấp bộ</option>
+                      <option value="provincial">Cấp tỉnh/thành</option>
+                      <option value="internal">Nội bộ</option>
+                    </select>
+                    <ChevronDown className={SELECT_ICON_CLS} />
+                  </div>
                 </div>
               </div>
 
@@ -1205,16 +1217,24 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 <label className={LABEL_CLS}>
                   Đơn vị chủ quản <span className={REQUIRED_MARK}>*</span>
                 </label>
-                <select
-                  value={wizardData.managingAgency}
-                  onChange={(e) => setWizardData({ ...wizardData, managingAgency: e.target.value })}
-                  className={SELECT_CLS}
-                >
-                  <option value="" disabled hidden>-- Chọn đơn vị chủ quản --</option>
-                  {MANAGING_UNITS.map(u => (
-                    <option key={u} value={u}>{u}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={wizardData.managingAgency}
+                    // Bỏ chọn Đơn vị chủ quản → xóa luôn Tên CSDL/Hệ thống (trường này phụ thuộc đơn vị)
+                    onChange={(e) => setWizardData({
+                      ...wizardData,
+                      managingAgency: e.target.value,
+                      ...(e.target.value ? {} : { systemName: '' }),
+                    })}
+                    className={SELECT_ARROW_CLS}
+                  >
+                    <option value="" disabled hidden>-- Chọn đơn vị chủ quản --</option>
+                    {MANAGING_UNITS.map(u => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className={SELECT_ICON_CLS} />
+                </div>
               </div>
 
               {/* Mô tả đối tượng */}
@@ -1229,21 +1249,25 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 />
               </div>
 
-              {/* Tên cơ sở dữ liệu / Hệ thống */}
+              {/* Tên cơ sở dữ liệu / Hệ thống — khóa cho tới khi chọn Đơn vị chủ quản */}
               <div>
                 <label className={LABEL_CLS}>
                   Tên cơ sở dữ liệu / Hệ thống
                 </label>
-                <select
-                  value={wizardData.systemName || ''}
-                  onChange={(e) => setWizardData({ ...wizardData, systemName: e.target.value })}
-                  className={SELECT_CLS}
-                >
-                  <option value="" disabled hidden>-- Chọn hệ thống --</option>
-                  {SYSTEM_OPTIONS.map(sys => (
-                    <option key={sys} value={sys}>{sys}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={wizardData.systemName || ''}
+                    onChange={(e) => setWizardData({ ...wizardData, systemName: e.target.value })}
+                    disabled={!wizardData.managingAgency}
+                    className={SELECT_ARROW_CLS}
+                  >
+                    <option value="" disabled hidden>{wizardData.managingAgency ? '-- Chọn hệ thống --' : '-- Chọn đơn vị chủ quản trước --'}</option>
+                    {SYSTEM_OPTIONS.map(sys => (
+                      <option key={sys} value={sys}>{sys}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className={SELECT_ICON_CLS} />
+                </div>
               </div>
 
               {/* Ngày hiệu lực — không cho đổi khi đang chỉnh sửa thực thể đã có */}
@@ -1252,12 +1276,13 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   Ngày hiệu lực
                 </label>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="date"
+                  {/* Ô ngày dùng chung (luôn dd/mm/yyyy), giá trị vẫn là ISO yyyy-mm-dd */}
+                  <DateInput
+                    ariaLabel="Ngày hiệu lực"
                     value={wizardData.effectiveDate || ''}
-                    onChange={(e) => setWizardData({ ...wizardData, effectiveDate: e.target.value })}
+                    onChange={(v) => setWizardData({ ...wizardData, effectiveDate: v })}
                     disabled={isEditingEntity}
-                    className={INPUT_CLS}
+                    className="flex-1"
                   />
                   <Tooltip>
                     <TooltipTrigger asChild>

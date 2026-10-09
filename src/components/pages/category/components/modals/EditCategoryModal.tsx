@@ -91,7 +91,7 @@ export function EditCategoryModal({
                   disabled={isViewOnly}
                   value={formData.name || ''}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none ${isViewOnly ? 'cursor-not-allowed opacity-80' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none ${isViewOnly ? 'cursor-not-allowed !bg-[#F0F0F0] !text-[#000000] !border-[rgba(0,0,0,0.26)]' : ''}`}
                 />
               </div>
 
@@ -101,7 +101,7 @@ export function EditCategoryModal({
                   disabled={isViewOnly}
                   value={formData.dataType || 'standard'}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => handleInputChange('dataType', e.target.value as DataType)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none h-[44px] ${isViewOnly ? 'cursor-not-allowed opacity-80' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none h-[44px] ${isViewOnly ? 'cursor-not-allowed !bg-[#F0F0F0] !text-[#000000] !border-[rgba(0,0,0,0.26)]' : ''}`}
                 >
                   <option value="standard">Dữ liệu chuẩn</option>
                   <option value="reference">Dữ liệu tham chiếu</option>
@@ -116,7 +116,7 @@ export function EditCategoryModal({
                   disabled={isViewOnly}
                   value={formData.managingAgency || ''}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('managingAgency', e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none ${isViewOnly ? 'cursor-not-allowed opacity-80' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none ${isViewOnly ? 'cursor-not-allowed !bg-[#F0F0F0] !text-[#000000] !border-[rgba(0,0,0,0.26)]' : ''}`}
                 />
               </div>
 
@@ -126,7 +126,7 @@ export function EditCategoryModal({
                   disabled={isViewOnly}
                   value={formData.scope || 'national'}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => handleInputChange('scope', e.target.value as ScopeType)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none h-[44px] ${isViewOnly ? 'cursor-not-allowed opacity-80' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none h-[44px] ${isViewOnly ? 'cursor-not-allowed !bg-[#F0F0F0] !text-[#000000] !border-[rgba(0,0,0,0.26)]' : ''}`}
                 >
                   <option value="national">Toàn quốc</option>
                   <option value="ministry">Cấp bộ</option>
@@ -141,7 +141,7 @@ export function EditCategoryModal({
                   type="text"
                   disabled
                   value={formData.code || ''}
-                  className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-[13px] font-bold text-slate-500 cursor-not-allowed"
+                  className={`w-full px-4 py-2.5 border rounded-xl text-[13px] font-bold cursor-not-allowed ${isViewOnly ? 'bg-[#F0F0F0] border-[rgba(0,0,0,0.26)] text-[#000000]' : 'bg-slate-100 border-slate-200 text-slate-500'}`}
                 />
               </div>
 
@@ -152,7 +152,7 @@ export function EditCategoryModal({
                   rows={3}
                   value={formData.description || ''}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none resize-none ${isViewOnly ? 'cursor-not-allowed opacity-80' : ''}`}
+                  className={`w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-[13px] font-medium outline-none resize-none ${isViewOnly ? 'cursor-not-allowed !bg-[#F0F0F0] !text-[#000000] !border-[rgba(0,0,0,0.26)]' : ''}`}
                 />
               </div>
             </div>
