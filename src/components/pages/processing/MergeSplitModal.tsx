@@ -192,7 +192,7 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
                 value={splitSource}
                 onChange={e => setSplitSource(e.target.value)}
               >
-                <option value="">-- Chọn cột --</option>
+                <option value="" disabled hidden>-- Chọn cột --</option>
                 {sourceFields.map((f, i) => <option key={i} value={f.name}>{f.name}</option>)}
               </select>
             </div>

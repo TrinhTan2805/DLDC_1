@@ -576,7 +576,7 @@ export function DataProvisionMonitoringPage() {
                 onChange={(e) => { setDraftDatabase(e.target.value); setDraftApi(''); }}
                 className={`${INPUT_CLS} cursor-pointer`}
               >
-                <option value="">{draftLoai === 'mo' ? '-- Chọn tệp dữ liệu mở (Đã công bố) --' : 'Tất cả CSDL'}</option>
+                <option value="" disabled={draftLoai === 'mo'} hidden={draftLoai === 'mo'}>{draftLoai === 'mo' ? '-- Chọn tệp dữ liệu mở (đã công bố) --' : 'Tất cả CSDL'}</option>
                 {draftDatabaseOptions.map(db => (<option key={db} value={db}>{db}</option>))}
               </select>
             </div>

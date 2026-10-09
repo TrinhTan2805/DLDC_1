@@ -856,7 +856,7 @@ export function UserManagementPage() {
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn đơn vị --</option>
+                    <option value="" disabled hidden>-- Chọn đơn vị --</option>
                     <option value="Vụ Pháp luật Dân sự">Vụ Pháp luật Dân sự</option>
                     <option value="Cục Đăng ký Quốc gia">Cục Đăng ký Quốc gia</option>
                     <option value="Cục Công chứng">Cục Công chứng</option>

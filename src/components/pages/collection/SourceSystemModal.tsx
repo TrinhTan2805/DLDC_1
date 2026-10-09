@@ -146,7 +146,7 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
                   onChange={(e) => handleUnitChange(e.target.value)}
                   className={INPUT_CLS}
                 >
-                  <option value="">Chọn đơn vị</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị --</option>
                   {dropdownOptions.map(unit => (
                     <option key={unit.id} value={unit.name}>
                       {unit.name} ({unit.code})
@@ -166,7 +166,7 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
                   onChange={(e) => setFormData({ ...formData, sourceType: e.target.value })}
                   className={INPUT_CLS}
                 >
-                  <option value="">Chọn loại nguồn</option>
+                  <option value="" disabled hidden>-- Chọn loại nguồn --</option>
                   <option value="Trong ngành">Trong ngành</option>
                   <option value="Ngoài ngành">Ngoài ngành</option>
                 </select>

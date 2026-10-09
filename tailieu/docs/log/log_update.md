@@ -1,5 +1,51 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Ô "Lặp lại" cùng màu các ô khác (Ngày thực hiện: 09/10/2026) — 178
+
+**Nội dung (PM yêu cầu):** modal Thêm mới / Chỉnh sửa dịch vụ thu thập › tab Cấu hình thu thập › ô **Lặp lại** đang viền xanh + nền xanh nhạt, khác các ô khác trong modal.
+
+**File sửa:** `pages/collection/DataCollectionConfigSection.tsx` — ô chọn "Lặp lại": `border-blue-300 bg-blue-50/30` → `border-slate-300 bg-white`, trùng kiểu ô "Loại tần suất" phía trên (focus vẫn viền xanh như mọi ô).
+
+**Kiểm tra:** `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Dòng gợi ý ô chọn chỉ là placeholder, không nằm trong danh sách (Ngày thực hiện: 09/10/2026) — 177
+
+**Nội dung (PM yêu cầu):** bỏ hẳn giá trị `-- Chọn <tên trường> --` khỏi danh sách thả xuống, chỉ để làm placeholder hiển thị trong ô.
+
+**Đã sửa:**
+- 239 dòng gợi ý `<option value="">-- Chọn … --</option>` ở 94 file → `<option value="" disabled hidden>…` : hiện trong ô khi chưa chọn, **không hiện trong danh sách khi mở**, không chọn lại được.
+- 2 dòng dùng biểu thức: "-- Chọn đơn vị --" (Nhóm người dùng) ẩn luôn; "-- Chọn tệp dữ liệu mở --" (Kiểm soát & giám sát cung cấp) chỉ ẩn khi là placeholder, còn "Tất cả CSDL" vẫn là lựa chọn bình thường.
+- 28 ô `<select>` không gắn `value` (16 file) thêm `defaultValue=""` — nếu không, trình duyệt tự chọn lựa chọn thật đầu tiên và placeholder không hiện.
+- **Sửa lỗi màu:** quy tắc màu ô chọn đang ở dòng gợi ý (`src/index.css`) thiếu `!important` nên bị class màu chữ của từng ô ghi đè (ô vẫn chữ đen) → thêm `!important`; danh sách khi mở vẫn chữ đen.
+
+**Lưu ý hành vi:** sau khi đã chọn một giá trị, người dùng không chọn lại về "trống" từ danh sách được nữa (trừ ô có lựa chọn "-- Không chọn --" / "Tất cả …").
+
+**Tài liệu:** `compomennt.md` mục 5.7 — dòng gợi ý `value="" disabled hidden`, `defaultValue=""` cho ô không gắn giá trị.
+
+**Kiểm tra:** thử trên CSS build: ô chưa chọn hiện "-- Chọn trạm kết nối --" màu #94A3B8, dòng gợi ý ẩn khỏi danh sách; tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng CSS mới.
+
+## Thống nhất placeholder ô chọn "-- Chọn … --" (Ngày thực hiện: 09/10/2026) — 176
+
+**Nội dung (PM yêu cầu):** mọi ô chọn (dropdown list) có dòng gợi ý dạng **`-- Chọn <tên trường> --`** (thay "danh mục" bằng tên tương ứng từng ô), đúng màu placeholder chung.
+
+**Hiện trạng trước khi sửa:** nhiều kiểu lẫn lộn — `Chọn trường dữ liệu` (không gạch, 27 chỗ), `- Chọn trường -`, `— Chọn nhóm tham số —`, `👤 Vui lòng chọn người phê duyệt...`, chỉ `--` / `—`, `Điều kiện hiển thị`, `-- Nối với cột --`; một số dòng không có `value=""` nên không nhận màu placeholder.
+
+**Đã sửa (60 file trong `src`):**
+- Chuẩn hóa mọi dòng gợi ý "Chọn …" / "Vui lòng chọn …" → `-- Chọn … --` (giữ nguyên tên trường), kể cả thuộc tính `placeholder` của ô chọn tự dựng.
+- Dòng gợi ý không có `value` (VD `<option>Chọn danh mục</option>`) → thêm `value=""` để nhận màu `#94A3B8`.
+- Dòng chỉ có gạch đặt tên theo ngữ cảnh: Thuộc tính danh mục (`-- Chọn bảng --`, `-- Chọn trường --`), Thuộc tính dữ liệu chủ (`-- Chọn trường --`, `-- Chọn cột thời gian --`), Wizard dữ liệu chủ (`-- Chọn cột --`); `Điều kiện hiển thị` → `-- Chọn điều kiện hiển thị --` (Nhóm người dùng); `-- Nối với cột --` → `-- Chọn cột nối --` (3 modal JOIN).
+- **Chữ thường sau "Chọn"** (PM chốt): mọi tên trường sau "Chọn" viết thường, giữ nguyên từ viết tắt (API, CSDL, IP, CTS…) — VD `-- Chọn máy chủ thực thi --`, `-- Chọn trường đích --`, `-- Chọn tệp dữ liệu mở (đã công bố) --`. Dòng `-- Chọn --` (cột ánh xạ ở Wizard dữ liệu chủ) → `-- Chọn trường --`.
+- `components/ui/select.tsx` (Radix Select dùng chung): chữ gợi ý dùng `var(--color-placeholder)` thay `muted-foreground`.
+- **Giữ nguyên** (giá trị thật, không phải placeholder): `Tất cả …` ở bộ lọc, `-- Không chọn --`, `Chưa phân công`, `Không xác thực`, các dòng có biểu thức động.
+
+**Màu:** dùng quy tắc chung đã có trong `src/index.css` — `select` đang ở lựa chọn `value=""` hiện màu `--color-placeholder` (#94A3B8); khi mở danh sách các lựa chọn vẫn chữ đen.
+
+**Tài liệu:** `compomennt.md` mục 5.7 — quy định dạng `-- Chọn <tên trường> --`, `value=""`, các trường hợp không phải placeholder.
+
+**stauts.md:** tự mở khóa `[x]` 5 mục bị ảnh hưởng: ProcessingRuleSetupPage, CategoryPage, AttributesTab (danh mục), AddProvisionServiceModal, FunctionListPage.
+
+**Kiểm tra:** chỉ đổi chữ gợi ý/thuộc tính `value=""`; tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
 ## Modal Chi tiết nhật ký quản lý tài khoản theo thiết kế PM (Ngày thực hiện: 09/10/2026) — 175
 
 **Nội dung (PM yêu cầu):** Quản trị & vận hành › Nhật ký quản lý tài khoản › modal Xem chi tiết sửa theo ảnh PM gửi (cùng phong cách modal phiên đăng nhập / phiên truy cập — mục 173, 174).

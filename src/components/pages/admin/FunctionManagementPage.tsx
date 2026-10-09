@@ -417,7 +417,7 @@ export function FunctionManagementPage() {
                 onChange={(e) => setFormData({ ...formData, parentId: e.target.value || null })}
                 className={INPUT_CLS}
               >
-                <option value="">Chọn chức năng cha</option>
+                <option value="" disabled hidden>-- Chọn chức năng cha --</option>
                 {localMenuItems
                   .filter(item => {
                     const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
@@ -456,7 +456,7 @@ export function FunctionManagementPage() {
                 onChange={(e) => setFormData({ ...formData, path: e.target.value })}
                 className={INPUT_CLS}
               >
-                <option value="">Chọn chức năng</option>
+                <option value="" disabled hidden>-- Chọn chức năng --</option>
                 {localMenuItems.map(item => (
                   <option key={item.id} value={`/admin/${item.code}`}>{item.name}</option>
                 ))}
@@ -520,7 +520,7 @@ export function FunctionManagementPage() {
                 onChange={(e) => setFormData({ ...formData, linkedFeature: e.target.value })}
                 className={INPUT_CLS}
               >
-                <option value="">-- Chọn tính năng liên kết --</option>
+                <option value="" disabled hidden>-- Chọn tính năng liên kết --</option>
                 {localMenuItems
                   .filter(item => {
                     const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
@@ -561,7 +561,7 @@ export function FunctionManagementPage() {
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   className={`${INPUT_CLS} flex-1`}
                 >
-                  <option value="">-- Chọn icon --</option>
+                  <option value="" disabled hidden>-- Chọn icon --</option>
                   {systemIcons.map(icon => (
                     <option key={icon.value} value={icon.value}>{icon.label}</option>
                   ))}
@@ -646,7 +646,7 @@ export function FunctionManagementPage() {
                     onChange={(e) => handleParentIdChange(e.target.value || null)}
                     className={INPUT_CLS}
                   >
-                    <option value="">Chọn chức năng cha</option>
+                    <option value="" disabled hidden>-- Chọn chức năng cha --</option>
                     {localMenuItems
                   .filter(item => {
                     const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
@@ -683,7 +683,7 @@ export function FunctionManagementPage() {
                     onChange={(e) => setAddFormData({ ...addFormData, path: e.target.value })}
                     className={INPUT_CLS}
                   >
-                    <option value="">Chọn chức năng</option>
+                    <option value="" disabled hidden>-- Chọn chức năng --</option>
                     {localMenuItems.map(item => (
                       <option key={item.id} value={`/admin/${item.code}`}>{item.name}</option>
                     ))}
@@ -742,7 +742,7 @@ export function FunctionManagementPage() {
                     onChange={(e) => setAddFormData({ ...addFormData, linkedFeature: e.target.value })}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn tính năng liên kết --</option>
+                    <option value="" disabled hidden>-- Chọn tính năng liên kết --</option>
                     {localMenuItems
                   .filter(item => {
                     const nameNormalized = removeVietnameseTones(item.name || '').toLowerCase().trim();
@@ -781,7 +781,7 @@ export function FunctionManagementPage() {
                       onChange={(e) => setAddFormData({ ...addFormData, icon: e.target.value })}
                       className={`${INPUT_CLS} flex-1`}
                     >
-                      <option value="">-- Chọn icon --</option>
+                      <option value="" disabled hidden>-- Chọn icon --</option>
                       {systemIcons.map(icon => (
                         <option key={icon.value} value={icon.value}>{icon.label}</option>
                       ))}

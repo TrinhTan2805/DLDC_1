@@ -1897,7 +1897,7 @@ export function ServiceSetupPage() {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   >
-                    <option value="">-- Chọn API --</option>
+                    <option value="" disabled hidden>-- Chọn API --</option>
                     {services.map(service => (
                       <option key={service.id} value={service.code}>
                         {service.code} - {service.name}
@@ -2608,8 +2608,8 @@ export function ServiceSetupPage() {
                     <User className="w-4 h-4" />
                     Chọn người duyệt *
                   </label>
-                  <select id="approver-selection" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <option value="">-- Chọn người duyệt --</option>
+                  <select defaultValue="" id="approver-selection" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="" disabled hidden>-- Chọn người duyệt --</option>
                     <option value="user1">Nguyễn Văn A - Trưởng phòng Kỹ thuật</option>
                     <option value="user2">Trần Thị B - Phó Giám đốc CNTT</option>
                     <option value="user3">Lê Văn C - Trưởng phòng Nghiệp vụ</option>

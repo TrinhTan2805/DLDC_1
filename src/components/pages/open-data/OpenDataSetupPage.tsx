@@ -2414,7 +2414,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   aria-label="Chọn danh mục"
                   title="Chọn danh mục"
                 >
-                  <option value="">-- Chọn danh mục --</option>
+                  <option value="" disabled hidden>-- Chọn danh mục --</option>
                   {Object.entries(categories.filter(cat => cat.status === 'approved' || cat.approvalStatus === 'approved').reduce<Record<string, OpenDataCategory[]>>((groups, cat) => {
                     if (!groups[cat.dataField]) {
                       groups[cat.dataField] = [];
@@ -2533,7 +2533,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                     className={INPUT_CLS}
                     aria-label="Cơ sở dữ liệu đích"
                   >
-                    <option value="">-- Chọn cơ sở dữ liệu --</option>
+                    <option value="" disabled hidden>-- Chọn cơ sở dữ liệu --</option>
                     {MOCK_DATABASES.map(db => (
                       <option key={db.id} value={db.value}>{db.name}</option>
                     ))}
@@ -2552,7 +2552,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                       className={INPUT_CLS}
                       aria-label="Bảng dữ liệu chính"
                     >
-                      <option value="">-- Chọn bảng chính --</option>
+                      <option value="" disabled hidden>-- Chọn bảng chính --</option>
                       {(MOCK_TABLES[dataSourceConfig.database] || []).map(t => (
                         <option key={t} value={t}>{t}</option>
                       ))}
@@ -2635,7 +2635,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                               className={INPUT_CLS}
                               aria-label={`Bảng dữ liệu bổ sung ${i + 1}`}
                             >
-                              <option value="">-- Chọn bảng bổ sung --</option>
+                              <option value="" disabled hidden>-- Chọn bảng bổ sung --</option>
                               {(MOCK_TABLES[dataSourceConfig.database] || [])
                                 .filter(t => t !== dataSourceConfig.primaryTable)
                                 .map(t => <option key={t} value={t}>{t}</option>)}
@@ -2977,7 +2977,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   aria-label="Đơn vị chủ trì cung cấp"
                   title="Đơn vị chủ trì cung cấp"
                 >
-                  <option value="">-- Chọn đơn vị --</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị --</option>
                   {units.map((unit) => (
                     <option key={unit.id} value={unit.name}>
                       {unit.name}
@@ -3260,7 +3260,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   aria-label="Đơn vị chủ trì cung cấp"
                   title="Đơn vị chủ trì cung cấp"
                 >
-                  <option value="">-- Chọn đơn vị --</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị --</option>
                   {units.map((unit) => (
                     <option key={unit.id} value={unit.name}>
                       {unit.name}
@@ -3696,7 +3696,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
                   aria-label="Chọn người phê duyệt"
                   title="Chọn người phê duyệt"
                 >
-                  <option value="">-- Chọn người phê duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                   {approvers.map(approver => (
                     <option key={approver.id} value={approver.id}>
                       {approver.name} - {approver.position}

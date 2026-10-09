@@ -223,7 +223,7 @@ export function ApprovalModal({ isOpen, onClose, record, onApprove, onReject }: 
                 onChange={(e) => setSelectedApprover(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">-- Chọn người phê duyệt --</option>
+                <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                 {mockApprovers.map((approver) => (
                   <option key={approver.id} value={approver.id}>
                     {approver.name} - {approver.role} ({approver.department})

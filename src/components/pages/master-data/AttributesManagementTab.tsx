@@ -830,7 +830,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
             onChange={e => setSelectedApprover(e.target.value)}
             className={SELECT_CLS}
           >
-            <option value="">-- Chọn người duyệt --</option>
+            <option value="" disabled hidden>-- Chọn người duyệt --</option>
             {MOCK_APPROVERS.map(u => (
               <option key={u.id} value={u.id}>
                 {u.name} - {u.position} ({u.department})
@@ -1239,7 +1239,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
                               onChange={(e) => setFormFieldMapping(prev => ({ ...prev, [src.id]: e.target.value }))}
                               className={`${INPUT_CLS} min-w-0 cursor-pointer`}
                             >
-                              <option value="">—</option>
+                              <option value="" disabled hidden>-- Chọn trường --</option>
                               {options.map(c => <option key={c.fieldName} value={c.fieldName}>{c.fieldName}</option>)}
                             </select>
                           </td>
@@ -1295,7 +1295,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
                             onChange={(e) => setFormFieldGroupRules(prev => ({ ...prev, [src.id]: { ...rule, timeColumn: e.target.value } }))}
                             className={SELECT_CLS}
                           >
-                            <option value="">—</option>
+                            <option value="" disabled hidden>-- Chọn cột thời gian --</option>
                             {colOptions.map(c => <option key={c.fieldName} value={c.fieldName}>{c.fieldName}</option>)}
                           </select>
                           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
@@ -1563,7 +1563,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcMappingChange(row.columnName, src.id, e.target.value)}
                                     className={`${INPUT_CLS} min-w-0 cursor-pointer`}
                                   >
-                                    <option value="">—</option>
+                                    <option value="" disabled hidden>-- Chọn trường --</option>
                                     {options.map(c => <option key={c.fieldName} value={c.fieldName}>{c.fieldName}</option>)}
                                   </select>
                                 </td>
@@ -1636,7 +1636,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
                                             onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcGroupRuleChange(src.id, row.columnName, { timeColumn: e.target.value })}
                                             className={`${INPUT_CLS} min-w-0 cursor-pointer`}
                                           >
-                                            <option value="">—</option>
+                                            <option value="" disabled hidden>-- Chọn cột thời gian --</option>
                                             {colOptions.map(c => <option key={c.fieldName} value={c.fieldName}>{c.fieldName}</option>)}
                                           </select>
                                         </td>

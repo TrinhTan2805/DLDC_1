@@ -483,7 +483,7 @@ export function OpenDataUpdateRulesPage({ onNavigate }: OpenDataUpdateRulesPageP
                         onChange={(e) => setFormData({ ...formData, catalogId: e.target.value })}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
                       >
-                        <option value="">-- Chọn danh mục --</option>
+                        <option value="" disabled hidden>-- Chọn danh mục --</option>
                         {approvedCatalogs.map((cat) => (
                           <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
@@ -506,7 +506,7 @@ export function OpenDataUpdateRulesPage({ onNavigate }: OpenDataUpdateRulesPageP
                         onChange={(e) => setFormData({ ...formData, sourceTable: e.target.value, selectedFields: [] })}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
                       >
-                        <option value="">-- Chọn bảng dữ liệu --</option>
+                        <option value="" disabled hidden>-- Chọn bảng dữ liệu --</option>
                         {mockTables.map((table) => (
                           <option key={table.id} value={table.id}>
                             {table.displayName} ({table.name})
@@ -1089,7 +1089,7 @@ export function OpenDataUpdateRulesPage({ onNavigate }: OpenDataUpdateRulesPageP
                           onChange={(e) => setFormData({ ...formData, approverId: e.target.value })}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
                         >
-                          <option value="">-- Chọn người phê duyệt --</option>
+                          <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                           {mockApprovers.map((approver) => (
                             <option key={approver.id} value={approver.id}>
                               {approver.name} - {approver.position}

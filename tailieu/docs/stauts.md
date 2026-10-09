@@ -63,7 +63,7 @@
 ## 3. PHÂN HỆ XỬ LÝ & CHUẨN HÓA DỮ LIỆU
 
 ### Quản lý quy tắc & CSDL đích
-- `[ ]` Thiết lập quy tắc xử lý (`processing/ProcessingRuleSetupPage.tsx`)
+- `[x]` Thiết lập quy tắc xử lý (`processing/ProcessingRuleSetupPage.tsx`)
 - `[x]` Quản lý cơ sở dữ liệu đích (`processing/TargetDatabaseManagementPage.tsx`)
 - `[x]` Chi tiết cơ sở dữ liệu đích (`processing/TargetDatabaseDetailPage.tsx`)
 - `[ ]` Modal cấu hình CSDL đích (`processing/TargetDatabaseConfigModal.tsx`)
@@ -133,7 +133,7 @@
 
 ### Trang chính
 - `[ ]` Dashboard danh mục (`category/CategoryDashboardPage.tsx`)
-- `[ ]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
+- `[x]` Trang danh mục tổng hợp (toàn bộ nghiệp vụ) (`category/CategoryPage.tsx`)
 - `[ ]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
 - `[x]` Thiết lập danh mục (`category/CategorySetupPage.tsx`)
 - `[x]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
@@ -146,7 +146,7 @@
 
 ### Sub-tabs trong trang danh mục
 - `[x]` Tab Phê duyệt (`category/components/tabs/ApprovalTab.tsx`)
-- `[ ]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
+- `[x]` Tab Thuộc tính (`category/components/tabs/AttributesTab.tsx`)
 - `[x]` Tab Quan hệ thực thể (`category/components/tabs/RelationshipsTab.tsx`)
 - `[ ]` Tab Thiết lập (`category/components/tabs/SetupTab.tsx`)
 - `[ ]` Tab Lịch sử phiên bản (`category/components/tabs/VersionHistoryTab.tsx`)
@@ -334,7 +334,7 @@
 - `[ ]` Quản lý API (`orchestration/APIManagementPage.tsx`)
 - `[ ]` Modal Test API (`orchestration/APITestModal.tsx`)
 - `[ ]` Form các trường API (`orchestration/APIFormFields.tsx`)
-- `[ ]` Modal Thêm dịch vụ cung cấp (`orchestration/AddProvisionServiceModal.tsx`)
+- `[x]` Modal Thêm dịch vụ cung cấp (`orchestration/AddProvisionServiceModal.tsx`)
 - `[ ]` Modal Review phê duyệt (`orchestration/ApprovalReviewModal.tsx`)
 - `[ ]` Thiết lập dịch vụ (phiên bản cập nhật) (`orchestration/ServiceSetupPageUpdated.tsx`)
 - `[ ]` Danh mục dịch vụ (`orchestration/ServiceCategoryPage.tsx`)
@@ -389,7 +389,7 @@
 - `[x]` Quản lý nhóm & phân quyền (`admin/GroupManagementPage.tsx`)
 - `[x]` Quản lý vai trò (`admin/RoleManagementPage.tsx`)
 - `[x]` Quản lý chức năng hệ thống (`admin/FunctionManagementPage.tsx`)
-- `[ ]` Danh sách chức năng (`admin/FunctionListPage.tsx`)
+- `[x]` Danh sách chức năng (`admin/FunctionListPage.tsx`)
 
 ### Cấu hình hệ thống
 - `[ ]` Cấu hình hệ thống (`admin/SystemConfigPage.tsx`)

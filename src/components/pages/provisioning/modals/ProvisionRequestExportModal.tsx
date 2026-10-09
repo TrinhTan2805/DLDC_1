@@ -231,7 +231,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                         value={dateColumn}
                         onChange={(e) => setDateColumn(e.target.value)}
                       >
-                        <option value="">-- Chọn mốc thời gian --</option>
+                        <option value="" disabled hidden>-- Chọn mốc thời gian --</option>
                         <optgroup label={`Bảng chính: ${primaryTable}`}>
                           {mockSchema[primaryTable]?.map(col => (
                             <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>
@@ -310,7 +310,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                                   setConditions(newConds);
                                 }}
                               >
-                                <option value="">-- Chọn trường --</option>
+                                <option value="" disabled hidden>-- Chọn trường --</option>
                                 <optgroup label={`Bảng chính: ${primaryTable}`}>
                                   {mockSchema[primaryTable]?.map(col => (
                                     <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>
@@ -462,7 +462,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                                     value={table.name}
                                     onChange={(e) => handleUpdateJoinTable(table.id, 'name', e.target.value)}
                                   >
-                                    <option value="">-- Chọn bảng bổ sung --</option>
+                                    <option value="" disabled hidden>-- Chọn bảng bổ sung --</option>
                                     {tableNames.filter(name => name !== primaryTable).map(name => (
                                       <option key={name} value={name}>{name}</option>
                                     ))}
@@ -495,7 +495,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                                         value={table.joinColB}
                                         onChange={(e) => handleUpdateJoinTable(table.id, 'joinColB', e.target.value)}
                                       >
-                                        <option value="">-- Nối với cột --</option>
+                                        <option value="" disabled hidden>-- Chọn cột nối --</option>
                                         <optgroup label={`Bảng chính: ${primaryTable}`}>
                                           {mockSchema[primaryTable]?.map(col => (
                                             <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>
@@ -580,7 +580,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                                     value={field.sourceColumn || ''}
                                     onChange={(e) => handleUpdateFieldProperty(field.id, 'sourceColumn', e.target.value)}
                                   >
-                                    <option value="">-- Chọn trường gốc --</option>
+                                    <option value="" disabled hidden>-- Chọn trường gốc --</option>
                                     {mockSchema[field.sourceTable || primaryTable]?.map(col => (
                                       <option key={col} value={col}>{col}</option>
                                     ))}

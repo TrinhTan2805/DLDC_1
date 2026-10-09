@@ -124,7 +124,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
           <div>
             <label className={LABEL_CLS}>Phân loại dữ liệu <span className={REQUIRED_MARK}>*</span></label>
             <select value={dataType} onChange={(e) => setDataType(e.target.value)} disabled={viewOnly} className={`${INPUT_CLS} cursor-pointer`}>
-              <option value="">Chọn loại dữ liệu</option>
+              <option value="" disabled hidden>-- Chọn loại dữ liệu --</option>
               <option value="Dữ liệu Hộ tịch điện tử">Dữ liệu Hộ tịch điện tử</option>
               <option value="Dữ liệu Thi hành án">Dữ liệu Thi hành án</option>
               <option value="Dữ liệu Lý lịch tư pháp">Dữ liệu Lý lịch tư pháp</option>
@@ -135,7 +135,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
           <div>
             <label className={LABEL_CLS}>Người chủ quản dữ liệu <span className={REQUIRED_MARK}>*</span></label>
             <select value={dataOwner} onChange={(e) => setDataOwner(e.target.value)} disabled={viewOnly} className={`${INPUT_CLS} cursor-pointer`}>
-              <option value="">Chọn người chủ quản dữ liệu</option>
+              <option value="" disabled hidden>-- Chọn người chủ quản dữ liệu --</option>
               <option value="Đ/c Trần Văn Lãnh Đạo (Trưởng phòng Dữ liệu)">Đ/c Trần Văn Lãnh Đạo (Trưởng phòng Dữ liệu)</option>
               <option value="Đ/c Nguyễn Thị B (Phó Cục trưởng)">Đ/c Nguyễn Thị B (Phó Cục trưởng)</option>
               <option value="Đ/c Lê Văn C (Chuyên viên chính)">Đ/c Lê Văn C (Chuyên viên chính)</option>

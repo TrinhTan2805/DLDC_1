@@ -893,7 +893,7 @@ export function AttributesTab({
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcDatabaseChange(e.target.value)}
                         className={SELECT_CLS}
                       >
-                        <option value="">-- Chọn cơ sở dữ liệu --</option>
+                        <option value="" disabled hidden>-- Chọn cơ sở dữ liệu --</option>
                         {DLDC_DATABASES.map(db => (
                           <option key={db.id} value={db.id}>{db.label}</option>
                         ))}
@@ -916,7 +916,7 @@ export function AttributesTab({
                           onChange={(e: ChangeEvent<HTMLSelectElement>) => handleDldcTableChange(e.target.value)}
                           className={SELECT_CLS}
                         >
-                          <option value="">-- Chọn bảng dữ liệu --</option>
+                          <option value="" disabled hidden>-- Chọn bảng dữ liệu --</option>
                           {(DLDC_TABLES[dldcDatabase] || []).map(t => (
                             <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
                           ))}
@@ -1008,7 +1008,7 @@ export function AttributesTab({
                                     }}
                                     className={SELECT_CLS}
                                   >
-                                    <option value="">-- Chọn bảng --</option>
+                                    <option value="" disabled hidden>-- Chọn bảng --</option>
                                     {dldcDatabase && (DLDC_TABLES[dldcDatabase] || [])
                                       .filter(t => t.id !== wizardConfig?.dldcTable)
                                       .map(t => <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>)}
@@ -1143,7 +1143,7 @@ export function AttributesTab({
                                     }
                                     className={`${INPUT_CLS} min-w-0`}
                                   >
-                                    <option value="">--</option>
+                                    <option value="" disabled hidden>-- Chọn bảng --</option>
                                     {allTablesForDb.map(t => <option key={t.id} value={t.id}>{t.id}</option>)}
                                   </select>
                                 </td>
@@ -1155,7 +1155,7 @@ export function AttributesTab({
                                     }}
                                     className={`${INPUT_CLS} min-w-0`}
                                   >
-                                    <option value="">--</option>
+                                    <option value="" disabled hidden>-- Chọn trường --</option>
                                     {tableFieldsForRow.map(f => <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>)}
                                   </select>
                                 </td>
@@ -1701,7 +1701,7 @@ export function AttributesTab({
                         value={modalDldcDatabase}
                         className={SELECT_CLS}
                       >
-                        <option value="">-- Chọn cơ sở dữ liệu --</option>
+                        <option value="" disabled hidden>-- Chọn cơ sở dữ liệu --</option>
                         {DLDC_DATABASES.map(db => (
                           <option key={db.id} value={db.id}>{db.label}</option>
                         ))}
@@ -1720,7 +1720,7 @@ export function AttributesTab({
                         value={modalDldcTable}
                         className={SELECT_CLS}
                       >
-                        <option value="">-- Chọn bảng dữ liệu --</option>
+                        <option value="" disabled hidden>-- Chọn bảng dữ liệu --</option>
                         {modalDldcDatabase && (DLDC_TABLES[modalDldcDatabase] || []).map(t => (
                           <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
                         ))}
@@ -1787,7 +1787,7 @@ export function AttributesTab({
                                   onChange={(e) => handleModalJoinTableChange(join.id, e.target.value)}
                                   className={SELECT_CLS}
                                 >
-                                  <option value="">-- Chọn bảng --</option>
+                                  <option value="" disabled hidden>-- Chọn bảng --</option>
                                   {modalDldcDatabase && (DLDC_TABLES[modalDldcDatabase] || [])
                                     .filter(t => t.id !== modalDldcTable)
                                     .map(t => <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>)}
@@ -1931,7 +1931,7 @@ export function AttributesTab({
                                 }
                                 className={`${INPUT_CLS} min-w-0`}
                               >
-                                <option value="">--</option>
+                                <option value="" disabled hidden>-- Chọn bảng --</option>
                                 <option value={modalDldcTable}>{modalDldcTable}</option>
                                 {modalDldcJoins.filter(j => j.tableId).map(j => (
                                   <option key={j.id} value={j.tableId}>{j.tableId} ({j.alias})</option>
@@ -1955,7 +1955,7 @@ export function AttributesTab({
                                 }}
                                 className={`${INPUT_CLS} min-w-0`}
                               >
-                                <option value="">--</option>
+                                <option value="" disabled hidden>-- Chọn trường --</option>
                                 {tableFieldsForRow.map(f => (
                                   <option key={f.fieldName} value={f.fieldName}>{f.fieldName}</option>
                                 ))}

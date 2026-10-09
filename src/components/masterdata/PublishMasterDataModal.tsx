@@ -265,7 +265,7 @@ export function PublishMasterDataModal({ onClose, onConfirm, entityName, entityC
                       : 'border-slate-300 focus:ring-emerald-500'
                   }`}
                 >
-                  <option value="">-- Chọn đơn vị --</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị --</option>
                   {departments.map((dept) => (
                     <option key={dept} value={dept}>
                       {dept}

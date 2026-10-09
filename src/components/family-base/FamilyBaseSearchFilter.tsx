@@ -92,7 +92,7 @@ export function FamilyBaseSearchFilter({
                 </div>
 
                 <select aria-label="Trường dữ liệu" className={`${INPUT_CLS} !w-auto flex-1`} value={condition.field} onChange={(e) => updateCondition(index, 'field', e.target.value)}>
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="name">Họ tên/Tên tổ chức</option>
                   <option value="address">Địa chỉ/Địa bàn</option>
                   <option value="date">Ngày thực hiện</option>

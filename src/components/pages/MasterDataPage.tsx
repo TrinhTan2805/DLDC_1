@@ -1389,7 +1389,7 @@ export function MasterDataPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   >
-                    <option value="">-- Chọn loại --</option>
+                    <option value="" disabled hidden>-- Chọn loại --</option>
                     <option value="Người">Người</option>
                     <option value="Tổ chức">Tổ chức</option>
                     <option value="Địa điểm">Địa điểm</option>

@@ -409,16 +409,16 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
                   <div className="grid grid-cols-2 gap-6 col-span-2">
                     <div>
                       <label className="block text-base font-medium text-slate-700 mb-2">Tên service <span className="text-red-500">*</span></label>
-                      <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
-                        <option value="">Chọn service</option>
+                      <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
+                        <option value="" disabled hidden>-- Chọn service --</option>
                         <option value="CitizenService">CitizenService</option>
                         <option value="EnterpriseService">EnterpriseService</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-base font-medium text-slate-700 mb-2">Phương thức gọi <span className="text-red-500">*</span></label>
-                      <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
-                        <option value="">Chọn phương thức</option>
+                      <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-base">
+                        <option value="" disabled hidden>-- Chọn phương thức --</option>
                         <option value="GetCitizenInfo">GetCitizenInfo</option>
                         <option value="UpdateCitizenInfo">UpdateCitizenInfo</option>
                       </select>

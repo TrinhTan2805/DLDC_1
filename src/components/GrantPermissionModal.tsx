@@ -736,7 +736,7 @@ export function GrantPermissionModal({
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                     required
                   >
-                    <option value="">Chọn đơn vị cấp trên</option>
+                    <option value="" disabled hidden>-- Chọn đơn vị cấp trên --</option>
                     <option value="Không có">Không có (Đơn vị cấp cao nhất)</option>
                     <option value="Bộ Tư pháp">Bộ Tư pháp</option>
                     <option value="Ủy ban nhân dân TP Hà Nội">Ủy ban nhân dân TP Hà Nội</option>

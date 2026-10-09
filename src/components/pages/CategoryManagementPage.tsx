@@ -1208,7 +1208,7 @@ export function CategoryManagementPage() {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">-- Chọn loại dữ liệu --</option>
+                  <option value="" disabled hidden>-- Chọn loại dữ liệu --</option>
                   <option value="Chuẩn">Chuẩn</option>
                   <option value="Tham chiếu">Tham chiếu</option>
                   <option value="Nội bộ">Nội bộ</option>
@@ -1226,7 +1226,7 @@ export function CategoryManagementPage() {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">-- Chọn đơn vị quản lý --</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị quản lý --</option>
                   <option value="Đơn vị A">Đơn vị A</option>
                   <option value="Đơn vị B">Đơn vị B</option>
                   <option value="Đơn vị C">Đơn vị C</option>
@@ -1557,7 +1557,7 @@ export function CategoryManagementPage() {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">-- Chọn người phê duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                   {approvers.map(approver => (
                     <option key={approver.id} value={approver.id}>
                       {approver.name} ({approver.position})

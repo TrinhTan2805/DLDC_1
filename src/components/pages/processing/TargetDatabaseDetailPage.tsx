@@ -655,7 +655,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                     }}
                                     className={`px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white ${i === 0 ? 'flex-1 max-w-xs' : 'flex-1 max-w-[216px]'}`}
                                   >
-                                    {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="">- Chọn trường -</option>}
+                                    {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="" disabled hidden>-- Chọn trường --</option>}
                                   </select>
                                   <select
                                     value={f.operator}
@@ -762,7 +762,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                           }}
                                           className="flex-1 max-w-[216px] px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white"
                                         >
-                                          {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="">- Chọn trường -</option>}
+                                          {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="" disabled hidden>-- Chọn trường --</option>}
                                         </select>
                                         <select
                                           value={c.operator}
@@ -870,7 +870,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                                 }}
                                 className="flex-1 px-3 py-1.5 border border-slate-300 rounded text-[13px] focus:outline-none focus:border-blue-500 bg-white"
                               >
-                                {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="">- Chọn trường -</option>}
+                                {dataItems.length > 0 ? Object.keys(dataItems[0]).map(k => <option key={k} value={k}>{k}</option>) : <option value="" disabled hidden>-- Chọn trường --</option>}
                               </select>
                               <button
                                 onClick={() => {

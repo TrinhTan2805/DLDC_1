@@ -79,7 +79,7 @@ export function AddServiceConfigModal({ isOpen, onClose, isEdit, initialData, on
                   onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
                   className={INPUT_CLS}
                 >
-                  <option value="">-- Chọn hệ thống --</option>
+                  <option value="" disabled hidden>-- Chọn hệ thống --</option>
                   <option value="Hệ thống Hộ tịch điện tử">Hệ thống Hộ tịch điện tử</option>
                   <option value="Hệ thống Đăng ký kinh doanh">Hệ thống Đăng ký kinh doanh</option>
                   <option value="Hệ thống Công chứng">Hệ thống Công chứng</option>

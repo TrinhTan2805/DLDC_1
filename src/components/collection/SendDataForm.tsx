@@ -113,8 +113,8 @@ export function SendDataForm() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Nguồn dữ liệu</label>
-              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                <option value="">Chọn nguồn dữ liệu</option>
+              <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="" disabled hidden>-- Chọn nguồn dữ liệu --</option>
                 <option value="hotich">Hộ tịch điện tử</option>
                 <option value="quoctich">Hộ sơ quốc tịch</option>
                 <option value="thads">Thi hành án dân sự</option>
@@ -181,8 +181,8 @@ export function SendDataForm() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Nguồn dữ liệu</label>
-              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                <option value="">Chọn nguồn dữ liệu</option>
+              <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="" disabled hidden>-- Chọn nguồn dữ liệu --</option>
                 <option value="hotich">Hộ tịch điện tử</option>
                 <option value="quoctich">Hộ sơ quốc tịch</option>
                 <option value="thads">Thi hành án dân sự</option>
@@ -226,8 +226,8 @@ export function SendDataForm() {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">Nguồn dữ liệu</label>
-              <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                <option value="">Chọn nguồn dữ liệu</option>
+              <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="" disabled hidden>-- Chọn nguồn dữ liệu --</option>
                 <option value="hotich">Hộ tịch điện tử</option>
                 <option value="quoctich">Hộ sơ quốc tịch</option>
                 <option value="thads">Thi hành án dân sự</option>

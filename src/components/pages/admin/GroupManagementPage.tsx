@@ -590,7 +590,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 onChange={(e) => handleSelectField(e.target.value)}
                                 className={INPUT_CLS}
                               >
-                                <option value="">-- Chọn trường bảo mật --</option>
+                                <option value="" disabled hidden>-- Chọn trường bảo mật --</option>
                                 {availableFields.map(f => (
                                   <option key={f} value={f}>{f}</option>
                                 ))}
@@ -603,7 +603,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 value=""
                                 className={INPUT_CLS}
                               >
-                                <option value="">Chọn cấu hình bảo mật</option>
+                                <option value="" disabled hidden>-- Chọn cấu hình bảo mật --</option>
                               </select>
                             </td>
                             <td className={`${TD} text-center`}>
@@ -1453,7 +1453,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     disabled={true}
                     className={INPUT_CLS}
                   >
-                    <option value="">{currentUnit ? '-- Chọn đơn vị --' : '-- Vui lòng chọn một đơn vị ở menu trái --'}</option>
+                    <option value="" disabled hidden>{currentUnit ? '-- Chọn đơn vị --' : '-- Vui lòng chọn một đơn vị ở menu trái --'}</option>
                     {unitsList.map(unit => (
                       <option key={unit.id} value={unit.name}>{unit.name}</option>
                     ))}
@@ -1470,7 +1470,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn vai trò --</option>
+                    <option value="" disabled hidden>-- Chọn vai trò --</option>
                     {getRoles().map(role => (
                       <option key={role.id} value={role.name}>{role.name}</option>
                     ))}
@@ -1707,7 +1707,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                       onChange={(e) => setSelectedDataScopeCategory(e.target.value)}
                       className={INPUT_CLS}
                     >
-                      <option value="">-- Chọn phạm vi dữ liệu --</option>
+                      <option value="" disabled hidden>-- Chọn phạm vi dữ liệu --</option>
                       <option value="Dữ liệu thu thập">Dữ liệu thu thập</option>
                       <option value="Dữ liệu tại CSDL đích (Dữ liệu đã xử lý)">Dữ liệu tại CSDL đích (Dữ liệu đã xử lý)</option>
                       <option value="Dữ liệu chia sẻ">Dữ liệu chia sẻ</option>
@@ -1742,8 +1742,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 <span className="text-[13px] font-medium text-[#020817]">Bảng: Thông tin khai sinh</span>
                               </label>
 
-                              <select aria-label="Điều kiện hiển thị" title="Điều kiện hiển thị" className={`${INPUT_CLS} !w-auto min-w-[180px]`}>
-                                <option value="">Điều kiện hiển thị</option>
+                              <select defaultValue="" aria-label="Điều kiện hiển thị" title="Điều kiện hiển thị" className={`${INPUT_CLS} !w-auto min-w-[180px]`}>
+                                <option value="" disabled hidden>-- Chọn điều kiện hiển thị --</option>
                                 <option value="stt">STT</option>
                                 <option value="province">Tỉnh/Thành phố</option>
                                 <option value="dob">Ngày sinh</option>
@@ -1764,8 +1764,8 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                                 <span className="text-[13px] font-medium text-[#020817]">Bảng: Thông tin kết hôn</span>
                               </label>
 
-                              <select aria-label="Điều kiện hiển thị" title="Điều kiện hiển thị" className={`${INPUT_CLS} !w-auto min-w-[180px]`}>
-                                <option value="">Điều kiện hiển thị</option>
+                              <select defaultValue="" aria-label="Điều kiện hiển thị" title="Điều kiện hiển thị" className={`${INPUT_CLS} !w-auto min-w-[180px]`}>
+                                <option value="" disabled hidden>-- Chọn điều kiện hiển thị --</option>
                                 <option value="stt">STT</option>
                                 <option value="province">Tỉnh/Thành phố</option>
                                 <option value="date">Ngày đăng ký</option>

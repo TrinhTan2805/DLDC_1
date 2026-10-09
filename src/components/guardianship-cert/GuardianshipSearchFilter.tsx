@@ -105,7 +105,7 @@ export function GuardianshipSearchFilter({
                     setFilterConditions(newConditions);
                   }}
                 >
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="wardName">Người được giám hộ</option>
                   <option value="recordCode">Mã hồ sơ</option>
                 </select>

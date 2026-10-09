@@ -105,7 +105,7 @@ export function MaritalStatusSearchFilter({
                     setFilterConditions(newConditions);
                   }}
                 >
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="grantedPersonName">Họ tên người được cấp</option>
                   <option value="grantedPersonPersonalId">Số định danh</option>
                   <option value="certIssueDate">Ngày cấp</option>

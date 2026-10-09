@@ -2381,7 +2381,7 @@ export function OpenDataPublishedListPage() {
                     }}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn danh mục dữ liệu mở --</option>
+                    <option value="" disabled hidden>-- Chọn danh mục dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(cat => (
                       <option key={cat.code} value={cat.code}>{cat.name}</option>
                     ))}
@@ -2550,7 +2550,7 @@ export function OpenDataPublishedListPage() {
                     onChange={(e) => setRequestTopic(e.target.value)}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn chủ đề --</option>
+                    <option value="" disabled hidden>-- Chọn chủ đề --</option>
                     <option value="Trợ giúp pháp lý">Trợ giúp pháp lý</option>
                     <option value="Luật sư">Luật sư</option>
                     <option value="Tư vấn pháp luật">Tư vấn pháp luật</option>
@@ -2573,7 +2573,7 @@ export function OpenDataPublishedListPage() {
                     onChange={(e) => setRequestFrequency(e.target.value)}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn tần suất --</option>
+                    <option value="" disabled hidden>-- Chọn tần suất --</option>
                     <option value="daily">Theo ngày</option>
                     <option value="weekly">Theo tuần</option>
                     <option value="monthly">Theo tháng</option>
@@ -2684,7 +2684,7 @@ export function OpenDataPublishedListPage() {
                             setDataFields(sourceDbId ? buildAllDataFields(sourceDbId, newMain, joinNames) : []);
                           }}
                         >
-                          <option value="">-- Chọn bảng chính --</option>
+                          <option value="" disabled hidden>-- Chọn bảng chính --</option>
                           {(SOURCE_DB_TABLES[sourceDbId] || []).map(t => (
                             <option key={t.name} value={t.name}>{t.name}</option>
                           ))}
@@ -2768,7 +2768,7 @@ export function OpenDataPublishedListPage() {
                                       }
                                     }}
                                   >
-                                    <option value="">-- Chọn bảng bổ sung --</option>
+                                    <option value="" disabled hidden>-- Chọn bảng bổ sung --</option>
                                     {(SOURCE_DB_TABLES[sourceDbId] || [])
                                       .filter(t => t.name !== mainTable)
                                       .map(t => (
@@ -2804,7 +2804,7 @@ export function OpenDataPublishedListPage() {
                                         value={jt.joinColB}
                                         onChange={(e) => setJoinTables(joinTables.map(j => j.id === jt.id ? { ...j, joinColB: e.target.value } : j))}
                                       >
-                                        <option value="">-- Nối với cột --</option>
+                                        <option value="" disabled hidden>-- Chọn cột nối --</option>
                                         <optgroup label={`Bảng chính: ${mainTable}`}>
                                           {(SOURCE_DB_TABLES[sourceDbId] || []).find(t => t.name === mainTable)?.columns.map(col => (
                                             <option key={`${mainTable}.${col}`} value={`${mainTable}.${col}`}>{mainTable}.{col}</option>
@@ -2914,7 +2914,7 @@ export function OpenDataPublishedListPage() {
                                     value={df.column || ''}
                                     onChange={(e) => setDataFields(dataFields.map(f => f.id === df.id ? { ...f, column: e.target.value, apiField: e.target.value } : f))}
                                   >
-                                    <option value="">-- Chọn trường gốc --</option>
+                                    <option value="" disabled hidden>-- Chọn trường gốc --</option>
                                     {((SOURCE_DB_TABLES[sourceDbId] || []).find(t => t.name === (df.tableId || mainTable))?.columns || []).map(col => (
                                       <option key={col} value={col}>{col}</option>
                                     ))}
@@ -3558,7 +3558,7 @@ export function OpenDataPublishedListPage() {
                     }}
                     className={INPUT_CLS}
                   >
-                    <option value="">-- Chọn tập dữ liệu mở --</option>
+                    <option value="" disabled hidden>-- Chọn tập dữ liệu mở --</option>
                     {APPROVED_CATEGORIES.map(c => (
                       <option key={c.code} value={c.code}>{c.name}</option>
                     ))}
@@ -3828,7 +3828,7 @@ export function OpenDataPublishedListPage() {
                   className={INPUT_CLS}
                   title="Chọn người phê duyệt"
                 >
-                  <option value="">-- Chọn người phê duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                   {approvers.map(approver => (
                     <option key={approver.id} value={approver.id}>
                       {approver.name} - {approver.position}

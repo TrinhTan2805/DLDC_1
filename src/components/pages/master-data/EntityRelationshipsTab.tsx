@@ -465,7 +465,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                   onChange={(e) => setFormData({ ...formData, sourceEntityId: e.target.value })}
                   className={`${INPUT_CLS} cursor-pointer`}
                 >
-                  <option value="">-- Chọn thực thể nguồn --</option>
+                  <option value="" disabled hidden>-- Chọn thực thể nguồn --</option>
                   {mockEntities.map(entity => (
                     <option key={entity.id} value={entity.id}>
                       {entity.code} - {entity.name}
@@ -484,7 +484,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                   onChange={(e) => setFormData({ ...formData, targetEntityId: e.target.value })}
                   className={`${INPUT_CLS} cursor-pointer`}
                 >
-                  <option value="">-- Chọn thực thể đích --</option>
+                  <option value="" disabled hidden>-- Chọn thực thể đích --</option>
                   {mockEntities
                     .filter(entity => entity.id !== formData.sourceEntityId)
                     .map(entity => (
@@ -576,7 +576,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                         onChange={(e) => setFormData({ ...formData, junctionSourceKey: e.target.value })}
                         className={`${INPUT_CLS} cursor-pointer`}
                       >
-                        <option value="">-- Chọn trường Nguồn --</option>
+                        <option value="" disabled hidden>-- Chọn trường nguồn --</option>
                         {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
                           <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
                         ))}
@@ -593,7 +593,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                         onChange={(e) => setFormData({ ...formData, junctionTargetKey: e.target.value })}
                         className={`${INPUT_CLS} cursor-pointer`}
                       >
-                        <option value="">-- Chọn trường Đích --</option>
+                        <option value="" disabled hidden>-- Chọn trường đích --</option>
                         {BASE_TARGET_FIELDS.map(f => (
                           <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
                         ))}
@@ -620,7 +620,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                         onChange={(e) => setFormData({ ...formData, foreignKey: e.target.value })}
                         className={`${INPUT_CLS} cursor-pointer`}
                       >
-                        <option value="">-- Chọn trường Nguồn --</option>
+                        <option value="" disabled hidden>-- Chọn trường nguồn --</option>
                         {(ENTITY_FIELDS[formData.sourceEntityId || ''] ?? BASE_TARGET_FIELDS).map(f => (
                           <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
                         ))}
@@ -638,7 +638,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                         onChange={(e) => setFormData({ ...formData, referencedKey: e.target.value })}
                         className={`${INPUT_CLS} cursor-pointer`}
                       >
-                        <option value="">-- Chọn trường Đích --</option>
+                        <option value="" disabled hidden>-- Chọn trường đích --</option>
                         {BASE_TARGET_FIELDS.map(f => (
                           <option key={f.name} value={f.name}>{f.name} ({f.label})</option>
                         ))}
@@ -749,7 +749,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
                 onChange={e => setSelectedApprover(e.target.value)}
                 className={`${INPUT_CLS} cursor-pointer`}
               >
-                <option value="">-- Chọn người duyệt --</option>
+                <option value="" disabled hidden>-- Chọn người duyệt --</option>
                 {MOCK_APPROVERS.map(u => (
                   <option key={u.id} value={u.id}>
                     {u.name} - {u.position} ({u.department})

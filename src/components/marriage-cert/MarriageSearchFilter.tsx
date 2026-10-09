@@ -105,7 +105,7 @@ export function MarriageSearchFilter({
                     setFilterConditions(newConditions);
                   }}
                 >
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="husbandName">Họ tên chồng</option>
                   <option value="wifeName">Họ tên vợ</option>
                   <option value="marriageDate">Ngày kết hôn</option>

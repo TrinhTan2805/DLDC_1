@@ -1453,7 +1453,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
                   onChange={(e) => setSendApprovalApprover(e.target.value)}
                   className={`${INPUT_CLS} cursor-pointer`}
                 >
-                  <option value="">-- Chọn người duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người duyệt --</option>
                   {MOCK_APPROVERS.map(u => (
                     <option key={u.id} value={u.id}>{u.name} - {u.position} ({u.department})</option>
                   ))}

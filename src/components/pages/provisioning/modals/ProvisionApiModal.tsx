@@ -262,7 +262,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
               value={selectedServiceCode}
               onChange={(e) => handleServiceChange(e.target.value)}
             >
-              <option value="">-- Chọn dịch vụ API --</option>
+              <option value="" disabled hidden>-- Chọn dịch vụ API --</option>
               <option value="SVC-HOTICH-001">API cung cấp dữ liệu Hộ tịch điện tử</option>
               <option value="SVC-THADS-002">API đồng bộ dữ liệu thi hành án dân sự</option>
               <option value="SVC-BPBD-003">API đọc thông tin Biện pháp bảo đảm</option>

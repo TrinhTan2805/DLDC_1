@@ -68,7 +68,7 @@ export function CreateLGSPReconciliationModal({ isOpen, onClose, onSave }: Creat
                       onChange={(e) => setSourceSystem(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                     >
-                      <option value="">-- Chọn hệ thống --</option>
+                      <option value="" disabled hidden>-- Chọn hệ thống --</option>
                       <option value="DLDC">Kho DLDC</option>
                       <option value="HOTICH">Hệ thống Hộ tịch</option>
                       <option value="DKKD">Hệ thống ĐKKD</option>
@@ -82,7 +82,7 @@ export function CreateLGSPReconciliationModal({ isOpen, onClose, onSave }: Creat
                       onChange={(e) => setReceiverSystem(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                     >
-                      <option value="">-- Chọn hệ thống --</option>
+                      <option value="" disabled hidden>-- Chọn hệ thống --</option>
                       <option value="HOTICH">Hệ thống Hộ tịch</option>
                       <option value="DKKD">Hệ thống ĐKKD</option>
                       <option value="CONGCHUNG">Hệ thống Công chứng</option>
@@ -245,7 +245,7 @@ export function CreateLGSPReconciliationModal({ isOpen, onClose, onSave }: Creat
                       onChange={(e) => setCertificate(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
                     >
-                      <option value="">-- Chọn CTS --</option>
+                      <option value="" disabled hidden>-- Chọn CTS --</option>
                       <option value="CTS_DLDC_2024">CTS DLDC 2024</option>
                       <option value="CTS_BTP_2024">CTS Bộ Tư pháp 2024</option>
                     </select>

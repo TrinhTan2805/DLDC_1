@@ -5654,9 +5654,9 @@ table.master-data-consumption-table tbody td {
     opacity: 1 !important;
   }
   select:has(> option[value=""]:checked) {
-    color: var(--color-placeholder);
+    color: var(--color-placeholder) !important;
   }
   select:has(> option[value=""]:checked) option {
-    color: #020817;
+    color: #020817 !important;
   }
 }

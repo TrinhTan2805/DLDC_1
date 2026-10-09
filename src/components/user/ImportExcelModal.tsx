@@ -456,7 +456,7 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
                     onChange={(e) => setEditData({ ...editData, department: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">-- Chọn đơn vị --</option>
+                    <option value="" disabled hidden>-- Chọn đơn vị --</option>
                     {departments.map(dept => (
                       <option key={dept} value={dept}>{dept}</option>
                     ))}
@@ -471,7 +471,7 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
                     onChange={(e) => setEditData({ ...editData, role: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">-- Chọn vai trò --</option>
+                    <option value="" disabled hidden>-- Chọn vai trò --</option>
                     {roles.map(role => (
                       <option key={role} value={role}>{role}</option>
                     ))}

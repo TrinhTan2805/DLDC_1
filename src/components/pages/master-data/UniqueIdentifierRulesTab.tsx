@@ -670,7 +670,7 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
                 onChange={e => setSelectedApprover(e.target.value)}
                 className={`${INPUT_CLS} cursor-pointer`}
               >
-                <option value="">-- Chọn người duyệt --</option>
+                <option value="" disabled hidden>-- Chọn người duyệt --</option>
                 {MOCK_APPROVERS.map(u => (
                   <option key={u.id} value={u.id}>
                     {u.name} - {u.position} ({u.department})

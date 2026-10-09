@@ -152,7 +152,7 @@ export function MergeRuleModal({ onClose, entityName = 'Dữ liệu chủ' }: Me
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   >
-                    <option value="">-- Chọn trường --</option>
+                    <option value="" disabled hidden>-- Chọn trường --</option>
                     <option value="CCCD">CCCD</option>
                     <option value="Họ tên">Họ tên</option>
                     <option value="Ngày sinh">Ngày sinh</option>

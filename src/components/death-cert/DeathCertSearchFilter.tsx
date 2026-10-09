@@ -105,7 +105,7 @@ export function DeathCertSearchFilter({
                     setFilterConditions(newConditions);
                   }}
                 >
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="deceasedName">Họ tên người chết</option>
                   <option value="deathNoticeNumber">Số giấy báo tử</option>
                   <option value="deathDate">Ngày chết</option>

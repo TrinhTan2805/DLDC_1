@@ -724,7 +724,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         aria-label="Chọn người phê duyệt"
                         title="Chọn người phê duyệt"
                       >
-                        <option value="">-- Chọn người phê duyệt --</option>
+                        <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                         <option value="1">Lãnh đạo Cục CNTT</option>
                         <option value="2">Trưởng phòng Dữ liệu</option>
                       </select>
@@ -1103,7 +1103,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     value={formData.licenseId}
                     onChange={(e) => setFormData({ ...formData, licenseId: e.target.value })}
                   >
-                    <option value="">-- Chọn giấy phép --</option>
+                    <option value="" disabled hidden>-- Chọn giấy phép --</option>
                     {sampleLicenses.map(l => (
                       <option key={l.id} value={l.id}>{l.name}</option>
                     ))}

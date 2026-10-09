@@ -343,8 +343,8 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
         Áp dụng cho trường (trường hợp để trống sẽ áp dụng cho tất cả):
       </label>
-      <select title="Field Selector" multiple={multiple} className={`w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 ${multiple ? 'min-h-[100px]' : ''}`}>
-        {!multiple && <option>-- Chọn trường dữ liệu --</option>}
+      <select defaultValue="" title="Field Selector" multiple={multiple} className={`w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 ${multiple ? 'min-h-[100px]' : ''}`}>
+        {!multiple && <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>}
         <option>Họ và tên</option>
         <option>Ngày sinh</option>
         <option>Số CCCD/CMND</option>
@@ -651,7 +651,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn trường --</option>
+                                <option value="" disabled hidden>-- Chọn trường --</option>
                                 <option value="Họ và tên">Họ và tên</option>
                                 <option value="Số CCCD/CMND">Số CCCD/CMND</option>
                                 <option value="Ngày sinh">Ngày sinh</option>
@@ -668,7 +668,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Quy tắc định dạng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn quy tắc --</option>
+                                <option value="" disabled hidden>-- Chọn quy tắc --</option>
 
                                 <option value="Đúng định dạng CCCD">Đúng định dạng CCCD</option>
                                 <option value="Đúng định dạng Email">Đúng định dạng Email</option>
@@ -686,7 +686,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   title="Xử lý ngoại lệ"
                                   className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                 >
-                                  <option value="">-- Chọn xử lý --</option>
+                                  <option value="" disabled hidden>-- Chọn xử lý --</option>
                                   <option value="Loại bỏ bản ghi lỗi">Loại bỏ bản ghi lỗi</option>
                                 </select>
                               </div>
@@ -758,7 +758,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                       title="Trường áp dụng"
                                       className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                     >
-                                      <option value="">-- Chọn trường --</option>
+                                      <option value="" disabled hidden>-- Chọn trường --</option>
                                       <option value="Họ và tên">Họ và tên</option>
                                       <option value="Số CCCD/CMND">Số CCCD/CMND</option>
                                       <option value="Ngày sinh">Ngày sinh</option>
@@ -776,7 +776,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                         title="Điều kiện hợp lệ"
                                         className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                       >
-                                        <option value="">-- Chọn điều kiện --</option>
+                                        <option value="" disabled hidden>-- Chọn điều kiện --</option>
                                         <option value="=">Bằng (=)</option>
                                         <option value="!=">Khác (!=)</option>
                                         <option value=">">Lớn hơn (&gt;)</option>
@@ -906,7 +906,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                           className={`flex-1 px-3 py-2 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 text-slate-500' : 'bg-white border-slate-300 border text-slate-700'}`}
                                           title="Trường"
                                         >
-                                          <option value="">-- Chọn trường --</option>
+                                          <option value="" disabled hidden>-- Chọn trường --</option>
                                           <option value="DIP_RefId">DIP_RefId</option>
                                           <option value="Họ và tên">Họ và tên</option>
                                           <option value="Số CCCD/CMND">Số CCCD/CMND</option>
@@ -971,7 +971,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                     title="Xử lý ngoại lệ"
                                     className={`flex-1 px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                                   >
-                                    <option value="">-- Chọn xử lý --</option>
+                                    <option value="" disabled hidden>-- Chọn xử lý --</option>
                                     <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
                                   </select>
                                 </div>
@@ -1018,7 +1018,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn trường --</option>
+                                <option value="" disabled hidden>-- Chọn trường --</option>
                                 <option value="Họ và tên">Họ và tên</option>
                                 <option value="Số CCCD/CMND">Số CCCD/CMND</option>
                                 <option value="Ngày sinh">Ngày sinh</option>
@@ -1035,7 +1035,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Chọn điều kiện"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn điều kiện --</option>
+                                <option value="" disabled hidden>-- Chọn điều kiện --</option>
                                 <option value="Bằng với">Bằng với</option>
                                 <option value="Bắt đầu bằng">Bắt đầu bằng</option>
                                 <option value="Kết thúc bằng">Kết thúc bằng</option>
@@ -1127,7 +1127,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           title="Trường làm khóa đối sánh"
                           className="w-full px-3.5 py-2.5 rounded-lg text-[13px] bg-white border border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all focus:outline-none"
                         >
-                          <option value="">-- Chọn trường --</option>
+                          <option value="" disabled hidden>-- Chọn trường --</option>
                           <option value="so_cccd">Số CCCD</option>
                           <option value="ma_so_thue">Mã số thuế</option>
                           <option value="so_dien_thoai">Số điện thoại</option>
@@ -1143,7 +1143,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           title="Xử lý ngoại lệ"
                           className="w-full px-3.5 py-2.5 rounded-lg text-[13px] bg-white border border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all focus:outline-none"
                         >
-                          <option value="">-- Chọn xử lý --</option>
+                          <option value="" disabled hidden>-- Chọn xử lý --</option>
                           <option value="Giữ bản ghi mới nhất">Giữ bản ghi mới nhất</option>
                           <option value="Giữ bản ghi cũ nhất">Giữ bản ghi cũ nhất</option>
                           <option value="Từ chối toàn bộ các bản ghi trùng">Từ chối toàn bộ các bản ghi trùng</option>
@@ -1159,7 +1159,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                           title="Cột căn cứ sắp xếp"
                           className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${!(matchingConfig.action === 'Giữ bản ghi mới nhất' || matchingConfig.action === 'Giữ bản ghi cũ nhất') ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                         >
-                          <option value="">-- Chọn trường --</option>
+                          <option value="" disabled hidden>-- Chọn trường --</option>
                           <option value="ngay_tao">Ngày tạo</option>
                           <option value="ngay_cap_nhat">Ngày cập nhật</option>
                           <option value="thoi_gian_gui">Thời gian gửi</option>
@@ -1205,7 +1205,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   title="Trường áp dụng"
                                   className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
-                                  <option value="">-- Chọn trường --</option>
+                                  <option value="" disabled hidden>-- Chọn trường --</option>
                                   <option value="ma_tinh_thanh">Mã Tỉnh/Thành</option>
                                   <option value="ma_quan_huyen">Mã Quận/Huyện</option>
                                   <option value="ma_phuong_xa">Mã Phường/Xã</option>
@@ -1224,7 +1224,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   title="Chọn CSDL tham chiếu"
                                   className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
-                                  <option value="">-- Chọn CSDL --</option>
+                                  <option value="" disabled hidden>-- Chọn CSDL --</option>
                                   {REFERENCE_CSDL_OPTIONS.map((o) => (
                                     <option key={o.value} value={o.value}>{o.label}</option>
                                   ))}
@@ -1241,7 +1241,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   title="Bảng tham chiếu"
                                   className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.csdl) ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
-                                  <option value="">-- Chọn bảng --</option>
+                                  <option value="" disabled hidden>-- Chọn bảng --</option>
                                   {(REFERENCE_TABLES_BY_CSDL[rule.csdl] || []).map((o) => (
                                     <option key={o.value} value={o.value}>{o.label}</option>
                                   ))}
@@ -1258,7 +1258,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   title="Trường tham chiếu"
                                   className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${(rule.isSaved || !rule.refTable) ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
-                                  <option value="">-- Chọn trường --</option>
+                                  <option value="" disabled hidden>-- Chọn trường --</option>
                                   <option value="ma_danh_muc">Mã danh mục</option>
                                   <option value="ten_danh_muc">Tên danh mục</option>
                                   <option value="ma_code">Mã Code</option>
@@ -1275,7 +1275,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                   title="Hành động"
                                   className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none border ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                                 >
-                                  <option value="">-- Chọn hành động --</option>
+                                  <option value="" disabled hidden>-- Chọn hành động --</option>
                                   <option value="Từ chối bản ghi vi phạm">Từ chối bản ghi vi phạm</option>
                                   <option value="Gán giá trị rỗng (NULL)">Gán giá trị rỗng (NULL)</option>
                                   <option value="Gán giá trị mặc định">Gán giá trị mặc định</option>
@@ -1342,7 +1342,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Trường áp dụng"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn trường --</option>
+                                <option value="" disabled hidden>-- Chọn trường --</option>
                                 <option value="Họ và tên">Họ và tên</option>
                                 <option value="Số CCCD/CMND">Số CCCD/CMND</option>
                                 <option value="Ngày sinh">Ngày sinh</option>
@@ -1359,7 +1359,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Kiểu dữ liệu"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn kiểu --</option>
+                                <option value="" disabled hidden>-- Chọn kiểu --</option>
                                 <option value="Số thập phân">Số thập phân</option>
                                 <option value="Số nguyên">Số nguyên</option>
                                 <option value="Chuyển đôi từ unix timestamp">Chuyển đôi từ unix timestamp</option>
@@ -1378,7 +1378,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                                 title="Thông tin chuyển đổi"
                                 className={`w-full px-3.5 py-2.5 rounded-lg text-[13px] transition-all focus:outline-none ${rule.isSaved ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-white border-slate-300 text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 border'}`}
                               >
-                                <option value="">-- Chọn thông tin --</option>
+                                <option value="" disabled hidden>-- Chọn thông tin --</option>
                                 <option value="dd/mm/yyyy">dd/mm/yyyy</option>
                                 <option value="yyyy-mm-dd">yyyy-mm-dd</option>
                                 <option value="0,000">0,000</option>

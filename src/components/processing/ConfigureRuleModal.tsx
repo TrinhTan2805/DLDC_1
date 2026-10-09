@@ -269,7 +269,7 @@ export function ConfigureRuleModal({ rule, onClose, onSave }: ConfigureRuleModal
           onChange={(e) => updateConfig(config.id, { condition: e.target.value })}
           className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="">Chọn điều kiện</option>
+          <option value="" disabled hidden>-- Chọn điều kiện --</option>
           {getConditionsForField(config.field, selectedType).map(cond => (
             <option key={cond} value={cond}>{cond}</option>
           ))}
@@ -340,7 +340,7 @@ export function ConfigureRuleModal({ rule, onClose, onSave }: ConfigureRuleModal
             onChange={(e) => updateConfig(config.id, { referenceTable: e.target.value })}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="">Chọn bảng tham chiếu</option>
+            <option value="" disabled hidden>-- Chọn bảng tham chiếu --</option>
             {referenceTableOptions.map(table => (
               <option key={table} value={table}>{table}</option>
             ))}

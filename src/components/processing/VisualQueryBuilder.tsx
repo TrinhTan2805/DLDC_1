@@ -384,8 +384,8 @@ export function VisualQueryBuilder() {
 
                   {activeTab === 'filter' && (
                     <div>
-                      <select className="w-full px-4 py-2 border border-slate-200 rounded-lg">
-                        <option>Chọn giá trị từ danh sách...</option>
+                      <select defaultValue="" className="w-full px-4 py-2 border border-slate-200 rounded-lg">
+                        <option value="" disabled hidden>-- Chọn giá trị từ danh sách --</option>
                       </select>
                     </div>
                   )}
@@ -397,7 +397,7 @@ export function VisualQueryBuilder() {
                         value={currentCondition.value || ''}
                         onChange={(e) => setCurrentCondition({ ...currentCondition, value: e.target.value })}
                       >
-                        <option value="">Chọn trường để so sánh...</option>
+                        <option value="" disabled hidden>-- Chọn trường để so sánh --</option>
                         {selectedSource.fields.map(field => (
                           <option key={field} value={field}>{field}</option>
                         ))}

@@ -388,7 +388,7 @@ export function HistoryTab({ records }: HistoryTabProps) {
                 onChange={(e) => setSelectedRecordCode(e.target.value)}
                 className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100 bg-white"
               >
-                <option value="">-- Chọn bản ghi --</option>
+                <option value="" disabled hidden>-- Chọn bản ghi --</option>
                 {records.map((record) => (
                   <option key={record.id} value={record.recordCode}>
                     {record.recordCode} - {record.fullName}

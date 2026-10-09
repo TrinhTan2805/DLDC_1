@@ -105,7 +105,7 @@ export function BirthCertSearchFilter({
                     setFilterConditions(newConditions);
                   }}
                 >
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="name">Họ tên</option>
                   <option value="birthDate">Ngày sinh</option>
                   <option value="personalId">Số định danh</option>

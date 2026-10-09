@@ -87,7 +87,7 @@ export function CivilLegalInfoSearchFilter({
                 </div>
 
                 <select aria-label="Trường dữ liệu" className={`${INPUT_CLS} !w-auto flex-1`} value={condition.field} onChange={(e) => updateCondition(index, 'field', e.target.value)}>
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="name">Tên tổ chức/Cá nhân</option>
                   <option value="type">Loại hình</option>
                   <option value="address">Địa chỉ</option>

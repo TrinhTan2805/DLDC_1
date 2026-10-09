@@ -677,7 +677,7 @@ export function RelationshipsTab({
                     <div>
                       <label className={LABEL_CLS}>Khóa nguồn <span className={REQUIRED_MARK}>*</span></label>
                       <select title="Chọn trường nguồn" value={formData.sourceKey || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, sourceKey: e.target.value })} className={`${INPUT_CLS} cursor-pointer`}>
-                        <option value="">-- Chọn trường Nguồn --</option>
+                        <option value="" disabled hidden>-- Chọn trường nguồn --</option>
                         {sourceAttributes.map(attr => <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName})</option>)}
                       </select>
                       <p className={HELP_TEXT}>Trường trong danh mục Nguồn</p>
@@ -685,7 +685,7 @@ export function RelationshipsTab({
                     <div>
                       <label className={LABEL_CLS}>Khóa đích <span className={REQUIRED_MARK}>*</span></label>
                       <select title="Chọn trường đích" value={formData.targetKey || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, targetKey: e.target.value })} className={`${INPUT_CLS} cursor-pointer`}>
-                        <option value="">-- Chọn trường Đích --</option>
+                        <option value="" disabled hidden>-- Chọn trường đích --</option>
                         {targetAttributes.map(attr => <option key={attr.id} value={attr.name}>{attr.name} ({attr.displayName})</option>)}
                       </select>
                       <p className={HELP_TEXT}>Trường dùng để join (thường là ID/Code)</p>

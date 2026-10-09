@@ -530,11 +530,11 @@ export function CategorySetupPageNew() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-slate-700 mb-1">Loại danh mục *</label>
-                  <select
+                  <select defaultValue=""
                     title="Loại danh mục"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Chọn loại</option>
+                    <option value="" disabled hidden>-- Chọn loại --</option>
                     <option value="standard">Tiêu chuẩn</option>
                     <option value="reference">Tham chiếu</option>
                     <option value="system">Hệ thống</option>
@@ -1003,7 +1003,7 @@ export function CategorySetupPageNew() {
                         }}
                         className={`w-full px-3 py-2 border ${fieldErrors.referenceTable ? 'border-red-500' : 'border-slate-300'} rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       >
-                        <option value="">Chọn bảng</option>
+                        <option value="" disabled hidden>-- Chọn bảng --</option>
                         <option value="danh_muc_a">Biên tập danh mục A</option>
                         <option value="danh_muc_b">Danh mục B</option>
                         <option value="danh_muc_c">Danh mục C</option>
@@ -1025,7 +1025,7 @@ export function CategorySetupPageNew() {
                         }}
                         className={`w-full px-3 py-2 border ${fieldErrors.referenceField ? 'border-red-500' : 'border-slate-300'} rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       >
-                        <option value="">Chọn trường</option>
+                        <option value="" disabled hidden>-- Chọn trường --</option>
                         <option value="id">ID</option>
                         <option value="ma_code">Mã Code</option>
                         <option value="ten">Tên</option>

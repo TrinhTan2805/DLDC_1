@@ -356,8 +356,8 @@ export function MasterDataApprovalPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Danh mục <span className="text-red-500">*</span></label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <option>Chọn danh mục</option>
+                  <select defaultValue="" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="" disabled hidden>-- Chọn danh mục --</option>
                     <option>Biên tập danh mục A</option>
                     <option>Danh mục B</option>
                     <option>Danh mục C</option>
@@ -439,7 +439,7 @@ export function MasterDataApprovalPage() {
                   onChange={(e) => setSelectedRecipient(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
-                  <option value="">-- Chọn người duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người duyệt --</option>
                   {mockUsers.map(user => (
                     <option key={user.id} value={user.id}>
                       {user.name} - {user.position} ({user.department})

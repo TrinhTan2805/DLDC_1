@@ -336,8 +336,8 @@ function AddServiceModalContent({ isOpen, onClose }: ServiceModalProps) {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
                       <label htmlFor="add-security" className={LABEL_CLS}>Mức độ bảo mật dữ liệu</label>
-                      <select aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className={INPUT_CLS}>
-                        <option value="">Chọn mức độ bảo mật</option>
+                      <select defaultValue="" aria-label="Select box" id="add-security" title="Mức độ bảo mật dữ liệu" className={INPUT_CLS}>
+                        <option value="" disabled hidden>-- Chọn mức độ bảo mật --</option>
                         <option value="Dữ liệu mở">Dữ liệu mở</option>
                         <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
                         <option value="Dữ liệu hạn chế">Dữ liệu hạn chế</option>
@@ -359,7 +359,7 @@ function AddServiceModalContent({ isOpen, onClose }: ServiceModalProps) {
                         value={collectionDataType}
                         onChange={(e) => setCollectionDataType(e.target.value)}
                       >
-                        <option value="">Chọn loại dữ liệu thu thập</option>
+                        <option value="" disabled hidden>-- Chọn loại dữ liệu thu thập --</option>
                         <option value="Dữ liệu danh mục">Dữ liệu danh mục</option>
                         <option value="Dữ liệu nghiệp vụ">Dữ liệu nghiệp vụ</option>
                       </select>
@@ -599,8 +599,8 @@ function EditServiceModalContent({ isOpen, onClose, service, initialTab }: Servi
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label htmlFor="edit-security" className={LABEL_CLS}>Mức độ bảo mật dữ liệu</label>
-                    <select aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className={INPUT_CLS}>
-                      <option value="">Chọn mức độ bảo mật</option>
+                    <select defaultValue="" aria-label="Select box" id="edit-security" title="Mức độ bảo mật dữ liệu" className={INPUT_CLS}>
+                      <option value="" disabled hidden>-- Chọn mức độ bảo mật --</option>
                       <option value="Dữ liệu mở">Dữ liệu mở</option>
                       <option value="Dữ liệu nội bộ">Dữ liệu nội bộ</option>
                       <option value="Dữ liệu hạn chế">Dữ liệu hạn chế</option>
@@ -621,7 +621,7 @@ function EditServiceModalContent({ isOpen, onClose, service, initialTab }: Servi
                       className={INPUT_CLS}
                       defaultValue={service.dataType || ''}
                     >
-                      <option value="">Chọn loại dữ liệu thu thập</option>
+                      <option value="" disabled hidden>-- Chọn loại dữ liệu thu thập --</option>
                       <option value="Dữ liệu danh mục">Dữ liệu danh mục</option>
                       <option value="Dữ liệu nghiệp vụ">Dữ liệu nghiệp vụ</option>
                     </select>

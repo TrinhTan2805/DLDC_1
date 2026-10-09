@@ -547,7 +547,7 @@ export function CategoryApprovalPage() {
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedRecipient(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="">-- Chọn người duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người duyệt --</option>
                   {mockUsers.map(user => (
                     <option key={user.id} value={user.id}>
                       {user.name} - {user.position} ({user.department})

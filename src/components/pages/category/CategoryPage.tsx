@@ -2188,7 +2188,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setArchiveRequestData({ ...archiveRequestData, approver: e.target.value })}
                   className={INPUT_CLS}
                 >
-                  <option value="">Chọn người phê duyệt</option>
+                  <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                   {approvers.map((approver) => (
                     <option key={approver.id} value={approver.id}>
                       {approver.name} - {approver.role}
@@ -2690,7 +2690,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                         }}
                         className={`${INPUT_CLS} ${fieldErrors.referenceTable ? '!border-[#DC2626]' : ''}`}
                       >
-                        <option value="">Chọn bảng</option>
+                        <option value="" disabled hidden>-- Chọn bảng --</option>
                         <option value="danh_muc_a">Biên tập danh mục A</option>
                         <option value="danh_muc_b">Danh mục B</option>
                         <option value="danh_muc_c">Danh mục C</option>
@@ -2712,7 +2712,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                         }}
                         className={`${INPUT_CLS} ${fieldErrors.referenceField ? '!border-[#DC2626]' : ''}`}
                       >
-                        <option value="">Chọn trường</option>
+                        <option value="" disabled hidden>-- Chọn trường --</option>
                         <option value="id">ID</option>
                         <option value="ma_code">Mã Code</option>
                         <option value="ten">Tên</option>

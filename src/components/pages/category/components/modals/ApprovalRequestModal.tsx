@@ -111,7 +111,7 @@ export function CategoryApprovalModal({
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setForm({ ...form, reviewer: e.target.value })}
               className={`${INPUT_CLS} ${errors.reviewer ? ERROR_BORDER : ''}`}
             >
-              <option value="">-- Chọn người phê duyệt --</option>
+              <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
               {approvers.map(a => (
                 <option key={a.id} value={a.id}>
                   {a.name} - {a.position} {a.department ? `(${a.department})` : ''}
@@ -246,7 +246,7 @@ export function VersionApprovalModal({
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setForm({ ...form, reviewer: e.target.value })}
               className={`${INPUT_CLS} ${errors.reviewer ? ERROR_BORDER : ''}`}
             >
-              <option value="">-- Chọn người phê duyệt --</option>
+              <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
               {approvers.map(a => (
                 <option key={a.id} value={a.id}>
                   {a.name} - {a.position} {a.department ? `(${a.department})` : ''}

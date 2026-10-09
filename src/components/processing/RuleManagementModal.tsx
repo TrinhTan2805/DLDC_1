@@ -186,7 +186,7 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
                   value={rule.config?.condition || ''}
                   onChange={(e) => updateRuleConfig(rule.id, 'condition', e.target.value)}
                 >
-                  <option value="">-- Chọn điều kiện --</option>
+                  <option value="" disabled hidden>-- Chọn điều kiện --</option>
                   <option value="=">Bằng (=)</option>
                   <option value="!=">Khác (!=)</option>
                   <option value=">">Lớn hơn (&gt;)</option>
@@ -272,7 +272,7 @@ export function RuleManagementModal({ config, onClose }: RuleManagementModalProp
                   value={rule.config?.action || ''}
                   onChange={(e) => updateRuleConfig(rule.id, 'action', e.target.value)}
                 >
-                  <option value="">-- Chọn xử lý --</option>
+                  <option value="" disabled hidden>-- Chọn xử lý --</option>
                   <option value="Loại bỏ bản ghi">Loại bỏ bản ghi</option>
                 </select>
               </div>

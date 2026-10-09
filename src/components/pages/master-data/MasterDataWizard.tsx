@@ -1210,7 +1210,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   onChange={(e) => setWizardData({ ...wizardData, managingAgency: e.target.value })}
                   className={SELECT_CLS}
                 >
-                  <option value="">-- Chọn đơn vị chủ quản --</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị chủ quản --</option>
                   {MANAGING_UNITS.map(u => (
                     <option key={u} value={u}>{u}</option>
                   ))}
@@ -1239,7 +1239,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   onChange={(e) => setWizardData({ ...wizardData, systemName: e.target.value })}
                   className={SELECT_CLS}
                 >
-                  <option value="">-- Chọn hệ thống --</option>
+                  <option value="" disabled hidden>-- Chọn hệ thống --</option>
                   {SYSTEM_OPTIONS.map(sys => (
                     <option key={sys} value={sys}>{sys}</option>
                   ))}
@@ -1312,7 +1312,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => { setSourceForm(prev => ({ ...prev, table: e.target.value, grainKey: '' })); setSourceGroupRules([]); }}
                         className={SELECT_CLS}
                       >
-                        <option value="">-- Chọn bảng --</option>
+                        <option value="" disabled hidden>-- Chọn bảng --</option>
                         {(DLDC_TABLES[SOURCE_NAME_TO_DB_ID[sourceForm.name] || ''] || []).map(t => (
                           <option key={t.id} value={t.id}>{t.displayName} ({t.id})</option>
                         ))}
@@ -1326,7 +1326,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceForm(prev => ({ ...prev, grainKey: e.target.value }))}
                         className={SELECT_CLS}
                       >
-                        <option value="">-- Chọn trường --</option>
+                        <option value="" disabled hidden>-- Chọn trường --</option>
                         {getSourceFieldOptions(sourceForm.name, sourceForm.table).map(f => (
                           <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
                         ))}
@@ -1365,7 +1365,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                             onChange={(e: ChangeEvent<HTMLSelectElement>) => setSourceGroupRuleDraft(prev => ({ ...prev, fieldName: e.target.value }))}
                             className={SELECT_CLS}
                           >
-                            <option value="">-- Chọn trường --</option>
+                            <option value="" disabled hidden>-- Chọn trường --</option>
                             {getSourceFieldOptions(sourceForm.name, sourceForm.table).map(f => (
                               <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
                             ))}
@@ -1780,7 +1780,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                       }}
                                       className={INPUT_CLS}
                                     >
-                                      <option value="">-- Chọn nguồn --</option>
+                                      <option value="" disabled hidden>-- Chọn nguồn --</option>
                                       {registeredSources.map(s => (
                                         <option key={s.id} value={s.id}>{s.name}</option>
                                       ))}
@@ -1808,7 +1808,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                           }}
                                           className={SELECT_CLS}
                                         >
-                                          <option value="">-- Chọn --</option>
+                                          <option value="" disabled hidden>-- Chọn trường --</option>
                                           {fieldOptions.map(f => (
                                             <option key={f.fieldName} value={f.fieldName}>{f.displayName} ({f.fieldName})</option>
                                           ))}
@@ -2055,7 +2055,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => handleMappingChange(attr.fieldName, src.id, e.target.value)}
                                     className={`w-full h-10 px-3 border rounded-lg text-[13px] text-[#020817] bg-white cursor-pointer focus:outline-none focus:ring-2 ${mismatch ? 'border-[#D97706] focus:ring-[#D97706]' : 'border-[#E2E8F0] focus:ring-blue-600'}`}
                                   >
-                                    <option value="">—</option>
+                                    <option value="" disabled hidden>-- Chọn cột --</option>
                                     {MOCK_SOURCE_COLUMNS.map(col => <option key={col.name} value={col.name}>{col.name}</option>)}
                                   </select>
                                   {mismatch && (
@@ -2186,7 +2186,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
                                     className={SELECT_CLS}
                                   >
-                                    <option value="">-- Chọn trường --</option>
+                                    <option value="" disabled hidden>-- Chọn trường --</option>
                                     {availableFields.map(f => (
                                       <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>
                                     ))}
@@ -2316,7 +2316,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setHardBlockInput(e.target.value)}
                         className={`${INPUT_BOX} flex-1 max-w-xs cursor-pointer`}
                       >
-                        <option value="">-- Chọn trường để thêm --</option>
+                        <option value="" disabled hidden>-- Chọn trường để thêm --</option>
                         {availableFields
                           .filter(f => !mergeConfig.hardBlockFields.includes(f.fieldName))
                           .map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>)}
@@ -2381,7 +2381,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                       onChange={(e: ChangeEvent<HTMLSelectElement>) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, primarySource: e.target.value } : r))}
                                       className={SELECT_CLS}
                                     >
-                                      <option value="">-- Chọn nguồn --</option>
+                                      <option value="" disabled hidden>-- Chọn nguồn --</option>
                                       {registeredSources.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
                                   ) : (
@@ -2441,7 +2441,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => { setTestSample(e.target.value); setTestRun(false); }}
                         className={`${INPUT_BOX} w-80 cursor-pointer`}
                       >
-                        <option value="">-- Chọn số lượng bản ghi --</option>
+                        <option value="" disabled hidden>-- Chọn số lượng bản ghi --</option>
                         {WIZARD_MOCK_SAMPLES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                       </select>
                     </div>
@@ -2618,7 +2618,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                             }}
                             className={SELECT_CLS}
                           >
-                            <option value="">-- Chọn thực thể đích --</option>
+                            <option value="" disabled hidden>-- Chọn thực thể đích --</option>
                             {WIZARD_MOCK_ENTITIES.map(e => <option key={e.id} value={e.id}>{e.code} - {e.name}</option>)}
                           </select>
                         </div>
@@ -2680,7 +2680,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                 <label className={LABEL_CLS}>Khoá ngoại Nguồn <span className={REQUIRED_MARK}>*</span></label>
                                 <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
                                   className={SELECT_CLS}>
-                                  <option value="">-- Chọn trường Nguồn --</option>
+                                  <option value="" disabled hidden>-- Chọn trường nguồn --</option>
                                   {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
                               </div>
@@ -2688,7 +2688,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                 <label className={LABEL_CLS}>Khoá ngoại Đích <span className={REQUIRED_MARK}>*</span></label>
                                 <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
                                   className={SELECT_CLS}>
-                                  <option value="">-- Chọn trường Đích --</option>
+                                  <option value="" disabled hidden>-- Chọn trường đích --</option>
                                   {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
                               </div>
@@ -2705,7 +2705,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                 <label className={LABEL_CLS}>Khóa nguồn <span className={REQUIRED_MARK}>*</span></label>
                                 <select value={relFormData.sourceKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, sourceKey: e.target.value }))}
                                   className={SELECT_CLS}>
-                                  <option value="">-- Chọn trường Nguồn --</option>
+                                  <option value="" disabled hidden>-- Chọn trường nguồn --</option>
                                   {(sourceEntityFields.length > 0 ? sourceEntityFields : [{ name: 'id', label: 'ID định danh' }, { name: 'code', label: 'Mã định danh' }]).map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
                                 <p className="text-[13px] text-[#64748B] mt-1">Trường trong thực thể đang tạo</p>
@@ -2714,7 +2714,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                                 <label className={LABEL_CLS}>Khóa đích <span className={REQUIRED_MARK}>*</span></label>
                                 <select value={relFormData.targetKey} onChange={(e: ChangeEvent<HTMLSelectElement>) => setRelFormData(prev => ({ ...prev, targetKey: e.target.value }))}
                                   className={SELECT_CLS}>
-                                  <option value="">-- Chọn trường Đích --</option>
+                                  <option value="" disabled hidden>-- Chọn trường đích --</option>
                                   {BASE_TARGET_FIELDS.map(f => <option key={f.name} value={f.name}>{f.name} ({f.label})</option>)}
                                 </select>
                                 <p className="text-[13px] text-[#64748B] mt-1">Trường dùng để join (thường là ID/Code)</p>
@@ -3019,7 +3019,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                       onChange={(e) => setWizardData({ ...wizardData, approvalReviewer: e.target.value })}
                       className={SELECT_CLS}
                     >
-                      <option value="">-- Chọn người trình duyệt --</option>
+                      <option value="" disabled hidden>-- Chọn người trình duyệt --</option>
                       {MOCK_REVIEWERS.map(r => (
                         <option key={r.id} value={r.id}>{r.name} — {r.title}</option>
                       ))}

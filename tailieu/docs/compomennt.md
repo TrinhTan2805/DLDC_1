@@ -600,6 +600,8 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
 ### 5.7. Chọn giá trị (Select / Dropdown)
 - Dùng cho các bộ lọc tìm kiếm hoặc form nhập liệu có danh sách cố định.
 - Hiển thị icon chevron ở góc phải để nhận diện dễ dàng.
+- **Dòng gợi ý (placeholder) của ô chọn** *(PM chốt 09/10/2026)*: thống nhất dạng **`-- Chọn <tên trường> --`** (VD `-- Chọn đơn vị --`, `-- Chọn trạm kết nối --`, `-- Chọn trường dữ liệu --`); tên trường sau "Chọn" **viết thường** (giữ nguyên từ viết tắt như API, CSDL, IP); là lựa chọn đầu tiên với **`value="" disabled hidden`** — chỉ hiển thị trong ô khi chưa chọn, **không xuất hiện trong danh sách** khi mở ra (PM chốt 09/10/2026); ô `<select>` không gắn `value` phải có `defaultValue=""` để dòng gợi ý hiện ban đầu. Dòng gợi ý tự nhận màu placeholder chung `#94A3B8` (mục 5.2, biến `--color-placeholder`). Không dùng kiểu khác (`Chọn …` không gạch, `- … -`, `— … —`, chỉ `--`/`—`, emoji, `…`). Ô chọn tự dựng (Combobox, Radix Select) dùng cùng chữ và cùng màu `text-[var(--color-placeholder)]`.
+- **Không phải placeholder:** lựa chọn mang giá trị thật ở bộ lọc (`Tất cả …`), `-- Không chọn --`, `Chưa phân công`, `Không xác thực` — hiển thị chữ đen như giá trị thường.
 
 **Ví dụ hiển thị:**
 <div style="margin-top: 8px;">

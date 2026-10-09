@@ -62,8 +62,8 @@ export function AddConnectionForm({ onClose, onSave }: AddConnectionFormProps) {
               <label className="block text-base text-slate-700 mb-2">
                 Loại kết nối
               </label>
-              <select aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Chọn loại kết nối</option>
+              <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="" disabled hidden>-- Chọn loại kết nối --</option>
                 <option value="api">API REST</option>
                 <option value="database">Database</option>
                 <option value="sftp">SFTP</option>

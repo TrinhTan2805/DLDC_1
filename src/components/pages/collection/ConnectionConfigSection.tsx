@@ -325,7 +325,7 @@ const ApiConnectionForm = () => {
         <FieldLabel htmlFor="conn-param-group">Nhóm tham số</FieldLabel>
         <div className="flex gap-2">
           <select id="conn-param-group" value={paramGroup} onChange={(e) => setParamGroup(e.target.value)} className={`${INPUT_CLS} ${paramGroup ? '' : '!text-[#94A3B8]'}`}>
-            <option value="">— Chọn nhóm tham số —</option>
+            <option value="" disabled hidden>-- Chọn nhóm tham số --</option>
             <option value="sync-date" className="text-[#020817]">Nhóm tham số ngày đồng bộ</option>
             <option value="auth" className="text-[#020817]">Nhóm tham số xác thực</option>
           </select>
@@ -634,16 +634,16 @@ export function ConnectionConfigSection({ resetTestState, isEdit = false, connec
           </div>
           <div>
             <FieldLabel htmlFor="conn-db-agent" required>Trạm kết nối</FieldLabel>
-            <select id="conn-db-agent" className={INPUT_CLS}>
-              <option value="">Chọn Trạm kết nối</option>
+            <select defaultValue="" id="conn-db-agent" className={INPUT_CLS}>
+              <option value="" disabled hidden>-- Chọn trạm kết nối --</option>
               <option value="agent1">Trạm kết nối 1</option>
               <option value="agent2">Trạm kết nối 2</option>
             </select>
           </div>
           <div>
             <FieldLabel htmlFor="conn-db-worker" required>Máy chủ thực thi</FieldLabel>
-            <select id="conn-db-worker" className={INPUT_CLS}>
-              <option value="">Chọn Máy chủ thực thi</option>
+            <select defaultValue="" id="conn-db-worker" className={INPUT_CLS}>
+              <option value="" disabled hidden>-- Chọn máy chủ thực thi --</option>
               <option value="worker1">Máy chủ thực thi 1</option>
               <option value="worker2">Máy chủ thực thi 2</option>
             </select>

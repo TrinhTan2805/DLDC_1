@@ -137,7 +137,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
-                <option value="">Chọn cơ quan</option>
+                <option value="" disabled hidden>-- Chọn cơ quan --</option>
                 <option value="Tòa án nhân dân tối cao">Tòa án nhân dân tối cao</option>
                 <option value="Cục Thống kê Trung ương">Cục Thống kê Trung ương</option>
                 <option value="Bộ Kế hoạch & Đầu tư">Bộ Kế hoạch & Đầu tư</option>
@@ -151,7 +151,7 @@ export function AddDataCollectionModal({ isOpen, onClose, onSave }: AddDataColle
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
               >
-                <option value="">Chọn Cục/Vụ</option>
+                <option value="" disabled hidden>-- Chọn cục/vụ --</option>
                 <option value="Cục Công nghệ Thông tin">Cục Công nghệ Thông tin</option>
                 <option value="Cục Hành chính Tư pháp">Cục Hành chính Tư pháp</option>
               </select>

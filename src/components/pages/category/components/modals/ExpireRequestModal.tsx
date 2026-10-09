@@ -95,7 +95,7 @@ export function ExpireRequestModal({
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, reason: e.target.value })}
               className={INPUT_CLS}
             >
-              <option value="">-- Chọn lý do --</option>
+              <option value="" disabled hidden>-- Chọn lý do --</option>
               <option value="Tích hợp vào danh mục khác">Tích hợp vào danh mục khác</option>
               <option value="Quy định pháp luật thay đổi">Pháp luật, Quyết định bổ sung thay đổi</option>
               <option value="Dữ liệu lỗi, cấu trúc cũ">Cấu trúc dữ liệu cũ, không còn phù hợp</option>
@@ -113,7 +113,7 @@ export function ExpireRequestModal({
               onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, approver: e.target.value })}
               className={INPUT_CLS}
             >
-              <option value="">-- Chọn lãnh đạo trình duyệt --</option>
+              <option value="" disabled hidden>-- Chọn lãnh đạo trình duyệt --</option>
               {approvers.map(a => (
                 <option key={a.id} value={a.id}>{a.name} - {a.position} ({a.department})</option>
               ))}

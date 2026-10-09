@@ -968,7 +968,7 @@ export function MasterDataAPage() {
                     onChange={(e) => setSelectedApprover(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 bg-white text-slate-900 transition-all"
                   >
-                    <option value="">👤 Vui lòng chọn người phê duyệt...</option>
+                    <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                     <optgroup label="🏢 Lãnh đạo Bộ">
                       <option value="1">Nguyễn Văn A - Thứ trưởng Bộ Tư pháp</option>
                       <option value="2">Trần Thị B - Vụ trưởng Vụ CNTT</option>

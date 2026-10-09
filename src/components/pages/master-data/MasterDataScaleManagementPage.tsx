@@ -831,7 +831,7 @@ export function MasterDataScaleManagementPage() {
                             onChange={(e) => setFormData({ ...formData, managingAgency: e.target.value })}
                             className={INPUT_CLS}
                           >
-                            <option value="">-- Chọn đơn vị chủ quản --</option>
+                            <option value="" disabled hidden>-- Chọn đơn vị chủ quản --</option>
                             {MANAGING_UNITS.map(u => (
                               <option key={u} value={u}>{u}</option>
                             ))}
@@ -1823,7 +1823,7 @@ export function MasterDataScaleManagementPage() {
                       onChange={e => setSelectedApprover(e.target.value)}
                       className={INPUT_CLS}
                     >
-                      <option value="">-- Chọn người trình duyệt --</option>
+                      <option value="" disabled hidden>-- Chọn người trình duyệt --</option>
                       {MOCK_APPROVERS.map(u => (
                         <option key={u.id} value={u.id}>
                           {u.name} - {u.position} ({u.department})

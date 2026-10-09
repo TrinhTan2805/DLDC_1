@@ -610,7 +610,7 @@ export function RoleManagementPage() {
                         setUserDropdownSearch('');
                       }}
                     >
-                      <option value="">-- Chọn đơn vị --</option>
+                      <option value="" disabled hidden>-- Chọn đơn vị --</option>
                       {mockUnits.map(unit => (
                         <option key={unit} value={unit}>{unit}</option>
                       ))}

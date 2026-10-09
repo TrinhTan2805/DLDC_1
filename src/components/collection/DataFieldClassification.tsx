@@ -238,7 +238,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
                     onChange={(e) => handleFieldChange(index, 'publicLevel', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${publicLevelColors[field.publicLevel] || 'bg-white text-slate-700 border-slate-300'}`}
                   >
-                    <option value="">Chọn mức độ</option>
+                    <option value="" disabled hidden>-- Chọn mức độ --</option>
                     <option value="cong-khai-toan-bo">Công khai toàn bộ</option>
                     <option value="cong-khai-han-che">Công khai hạn chế</option>
                     <option value="noi-bo">Nội bộ</option>
@@ -251,7 +251,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
                     onChange={(e) => handleFieldChange(index, 'sensitivityLevel', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 ${sensitivityLevelColors[field.sensitivityLevel] || 'bg-white text-slate-700 border-slate-300'}`}
                   >
-                    <option value="">Chọn mức độ</option>
+                    <option value="" disabled hidden>-- Chọn mức độ --</option>
                     <option value="thap">Thấp</option>
                     <option value="trung-binh">Trung bình</option>
                     <option value="cao">Cao</option>

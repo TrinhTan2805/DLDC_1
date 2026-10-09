@@ -127,8 +127,8 @@ export function ConnectionConfig() {
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Loại kết nối</label>
-                  <select aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <option value="">Chọn loại kết nối</option>
+                  <select defaultValue="" aria-label="Select box" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <option value="" disabled hidden>-- Chọn loại kết nối --</option>
                     <option value="api">API REST</option>
                     <option value="sftp">SFTP/FTP</option>
                     <option value="database">Database Link</option>

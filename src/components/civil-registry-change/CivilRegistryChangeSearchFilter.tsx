@@ -105,7 +105,7 @@ export function CivilRegistryChangeSearchFilter({
                     setFilterConditions(newConditions);
                   }}
                 >
-                  <option value="">Chọn trường dữ liệu</option>
+                  <option value="" disabled hidden>-- Chọn trường dữ liệu --</option>
                   <option value="changedPersonName">Người được thay đổi</option>
                   <option value="recordCode">Mã hồ sơ</option>
                   <option value="personalId">SĐD cá nhân</option>

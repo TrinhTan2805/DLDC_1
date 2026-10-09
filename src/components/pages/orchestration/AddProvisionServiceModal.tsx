@@ -455,7 +455,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                         onChange={(e) => setSelectedTable(e.target.value)}
                         disabled={isView}
                       >
-                        <option value="">-- Chọn danh mục chia sẻ --</option>
+                        <option value="" disabled hidden>-- Chọn danh mục chia sẻ --</option>
                         <option value="dkkd">Cơ sở dữ liệu Đăng ký kinh doanh</option>
                         <option value="congchung">Cơ sở dữ liệu Công chung</option>
                       </select>
@@ -807,8 +807,8 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div>
                       <label htmlFor="sharing-method" className="block text-sm text-slate-700 mb-1">Phương thức chia sẻ <span className="text-red-500">*</span></label>
-                      <select id="sharing-method" title="Chọn phương thức chia sẻ" aria-label="Chọn phương thức chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
-                        <option value="">Chọn phương thức</option>
+                      <select defaultValue="" id="sharing-method" title="Chọn phương thức chia sẻ" aria-label="Chọn phương thức chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
+                        <option value="" disabled hidden>-- Chọn phương thức --</option>
                         <option value="api-push">Đẩy dữ liệu chủ động (Push API)</option>
                         <option value="db-sync">Đồng bộ Database định kỳ</option>
                         <option value="file-batch">Gửi File Batch (CSV/XML)</option>
@@ -816,8 +816,8 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                     </div>
                     <div>
                       <label htmlFor="sharing-frequency" className="block text-sm text-slate-700 mb-1">Tần suất chia sẻ</label>
-                      <select id="sharing-frequency" title="Chọn tần suất chia sẻ" aria-label="Chọn tần suất chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
-                        <option value="">Chọn tần suất</option>
+                      <select defaultValue="" id="sharing-frequency" title="Chọn tần suất chia sẻ" aria-label="Chọn tần suất chia sẻ" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
+                        <option value="" disabled hidden>-- Chọn tần suất --</option>
                         <option value="realtime">Tức thời (Real-time)</option>
                         <option value="hourly">Mỗi giờ (Hourly)</option>
                         <option value="daily">Hàng ngày (Daily - 00:00)</option>
@@ -855,8 +855,8 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
                     <div className="grid grid-cols-1 gap-4">
                       <div>
                         <label htmlFor="approver-select" className="block text-sm font-medium text-slate-700 mb-1">Người phê duyệt <span className="text-red-500">*</span></label>
-                        <select id="approver-select" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
-                          <option value="">-- Chọn người phê duyệt --</option>
+                        <select defaultValue="" id="approver-select" title="Chọn người phê duyệt" aria-label="Chọn người phê duyệt" disabled={isView} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50">
+                          <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                           <option value="gd">Nguyễn Văn A (Giám đốc)</option>
                           <option value="pgd">Trần Thị B (Phó giám đốc)</option>
                           <option value="tp">Lê Văn C (Trưởng phòng CNTT)</option>
@@ -1139,8 +1139,8 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
               </div>
               <div>
                 <label htmlFor="target-table-select" className="block text-sm font-medium text-slate-700 mb-1">Bảng liên kết đến <span className="text-red-500">*</span></label>
-                <select id="target-table-select" title="Chọn bảng liên kết đến" aria-label="Chọn bảng liên kết đến" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="">Chọn bảng liên kết...</option>
+                <select defaultValue="" id="target-table-select" title="Chọn bảng liên kết đến" aria-label="Chọn bảng liên kết đến" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="" disabled hidden>-- Chọn bảng liên kết --</option>
                   <option value="nganh_nghe">b_nganh_nghe (Ngành nghề kinh doanh)</option>
                   <option value="thue">b_nop_thue (Lịch sử nộp thuế)</option>
                 </select>

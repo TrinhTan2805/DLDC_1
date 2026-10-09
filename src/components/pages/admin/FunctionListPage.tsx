@@ -155,7 +155,7 @@ export function FunctionListPage() {
                 onChange={(e) => setFilterUserGroup(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none pr-8"
               >
-                <option value="">Chọn nhóm...</option>
+                <option value="" disabled hidden>-- Chọn nhóm --</option>
                 {userGroups.map(group => (
                   <option key={group} value={group}>{group}</option>
                 ))}

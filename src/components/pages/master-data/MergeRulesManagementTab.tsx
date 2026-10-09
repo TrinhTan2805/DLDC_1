@@ -824,7 +824,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                               onChange={(e) => setMatchingRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
                               className={`${INPUT_CLS} cursor-pointer`}
                             >
-                              <option value="">-- Chọn trường --</option>
+                              <option value="" disabled hidden>-- Chọn trường --</option>
                               {formFields.map(f => (
                                 <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>
                               ))}
@@ -952,7 +952,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   onChange={(e) => setHardBlockInput(e.target.value)}
                   className={`${INPUT_CLS} cursor-pointer`}
                 >
-                  <option value="">-- Chọn trường để thêm --</option>
+                  <option value="" disabled hidden>-- Chọn trường để thêm --</option>
                   {formFields
                     .filter(f => !hardBlockFields.includes(f.fieldName))
                     .map(f => <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>)}
@@ -1015,7 +1015,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                               onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, fieldName: e.target.value } : r))}
                               className={`${INPUT_CLS} cursor-pointer`}
                             >
-                              <option value="">-- Chọn trường --</option>
+                              <option value="" disabled hidden>-- Chọn trường --</option>
                               {formFields.map(f => (
                                 <option key={f.fieldName} value={f.fieldName}>{f.displayName}</option>
                               ))}
@@ -1038,7 +1038,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                                 onChange={(e) => setExtractionRules(prev => prev.map(r => r.id === rule.id ? { ...r, primarySource: e.target.value } : r))}
                                 className={`${INPUT_CLS} cursor-pointer`}
                               >
-                                <option value="">-- Chọn nguồn --</option>
+                                <option value="" disabled hidden>-- Chọn nguồn --</option>
                                 {formSources.map(s => <option key={s.sourceName} value={s.sourceName}>{s.sourceName}</option>)}
                               </select>
                             ) : rule.priorityOrder.length === 0 ? (
@@ -1116,7 +1116,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                     onChange={(e) => { setTestSample(e.target.value); setTestRun(false); }}
                     className={`${INPUT_CLS} cursor-pointer`}
                   >
-                    <option value="">-- Chọn số lượng bản ghi --</option>
+                    <option value="" disabled hidden>-- Chọn số lượng bản ghi --</option>
                     {TEST_SAMPLE_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                   </select>
                 </div>
@@ -1254,7 +1254,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
                   onChange={e => setSelectedApprover(e.target.value)}
                   className={`${INPUT_CLS} cursor-pointer`}
                 >
-                  <option value="">-- Chọn người duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người duyệt --</option>
                   {MOCK_APPROVERS.map(u => (
                     <option key={u.id} value={u.id}>
                       {u.name} - {u.position} ({u.department})

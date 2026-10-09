@@ -141,7 +141,7 @@ export function EditServiceModal({ isOpen, service, onClose, onSave }: EditServi
                 onChange={(e) => setFormData({...formData, department: e.target.value})}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="">Chọn đơn vị</option>
+                <option value="" disabled hidden>-- Chọn đơn vị --</option>
                 <option value="Cục Hành chính tư pháp">Cục Hành chính tư pháp</option>
                 <option value="Cục Quản lý thi hành án dân sự">Cục Quản lý thi hành án dân sự</option>
                 <option value="Cục Đăng ký giao dịch bảo đảm và BTNN">Cục Đăng ký giao dịch bảo đảm và BTNN</option>

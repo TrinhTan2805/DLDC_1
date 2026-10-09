@@ -623,7 +623,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                             onChange={(e) => handleSelectOpenData(e.target.value)}
                             className={`${INPUT_CLS} cursor-pointer truncate`}
                           >
-                            <option value="">-- Chọn tệp dữ liệu mở (Đã công bố) --</option>
+                            <option value="" disabled hidden>-- Chọn tệp dữ liệu mở (đã công bố) --</option>
                             {openDataList.map((item) => (
                               <option key={item.id} value={item.id}>
                                 {item.fileName} ({item.category})
@@ -696,7 +696,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                       onChange={(e) => setDataType(e.target.value)}
                       className={`${INPUT_CLS} cursor-pointer`}
                     >
-                      <option value="">-- Chọn phân loại --</option>
+                      <option value="" disabled hidden>-- Chọn phân loại --</option>
                       <option value="Dữ liệu Hộ tịch">Dữ liệu Hộ tịch</option>
                       <option value="Dữ liệu khai sinh">Dữ liệu khai sinh</option>
                       <option value="Dữ liệu kết hôn">Dữ liệu kết hôn</option>
@@ -887,7 +887,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                     value={table.name}
                                     onChange={(e) => handleUpdateJoinTable(table.id, 'name', e.target.value)}
                                   >
-                                    <option value="">-- Chọn bảng bổ sung --</option>
+                                    <option value="" disabled hidden>-- Chọn bảng bổ sung --</option>
                                     {tableNames.filter(name => name !== primaryTable).map(name => (
                                       <option key={name} value={name}>{name}</option>
                                     ))}
@@ -920,7 +920,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                                         value={table.joinColB}
                                         onChange={(e) => handleUpdateJoinTable(table.id, 'joinColB', e.target.value)}
                                       >
-                                        <option value="">-- Nối với cột --</option>
+                                        <option value="" disabled hidden>-- Chọn cột nối --</option>
                                         <optgroup label={`Bảng chính: ${primaryTable}`}>
                                           {mockSchema[primaryTable]?.map(col => (
                                             <option key={`${primaryTable}.${col}`} value={`${primaryTable}.${col}`}>{primaryTable}.{col}</option>

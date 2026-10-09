@@ -61,7 +61,7 @@ export function RestoreVersionModal({
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelectedApprover(e.target.value)}
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-[13px] focus:ring-2 focus:ring-blue-500"
                 >
-                   <option value="">-- Chọn người phê duyệt --</option>
+                   <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                    {approvers.map(a => <option key={a.id} value={a.id}>{a.name} - {a.position}</option>)}
                 </select>
              </div>

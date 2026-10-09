@@ -237,7 +237,7 @@ export function CategoryWizardModal({
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, categoryType: e.target.value as CategoryType })}
                         className={selectCls}
                       >
-                        <option value="">-- Chọn loại danh mục --</option>
+                        <option value="" disabled hidden>-- Chọn loại danh mục --</option>
                         {(Object.keys(categoryTypeLabels) as CategoryType[]).map(type => (
                           <option key={type} value={type}>{categoryTypeLabels[type]}</option>
                         ))}
@@ -255,7 +255,7 @@ export function CategoryWizardModal({
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, databaseSystem: e.target.value })}
                         className={selectCls}
                       >
-                        <option value="">-- Chọn hệ thống nguồn --</option>
+                        <option value="" disabled hidden>-- Chọn hệ thống nguồn --</option>
                         {SOURCE_TREND_LIST.map(system => (
                           <option key={system} value={system}>{system}</option>
                         ))}
@@ -273,7 +273,7 @@ export function CategoryWizardModal({
                         onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, managingAgency: e.target.value })}
                         className={selectCls}
                       >
-                        <option value="">-- Chọn đơn vị chủ quản --</option>
+                        <option value="" disabled hidden>-- Chọn đơn vị chủ quản --</option>
                         {[
                           'Bộ Tư pháp',
                           'Cục Công nghệ thông tin',
@@ -357,11 +357,11 @@ export function CategoryWizardModal({
                       <div>
                         <label className={LABEL_CLS}>Lấy từ mục (Chủ đề)</label>
                         <div className="relative">
-                          <select
+                          <select defaultValue=""
                             disabled={isViewOnly}
                             className={selectCls}
                           >
-                            <option value="">-- Chọn mục --</option>
+                            <option value="" disabled hidden>-- Chọn mục --</option>
                             <option value="hotich">Hộ tịch</option>
                             <option value="lltp">Lý lịch tư pháp</option>
                             <option value="btdp">Bổ trợ tư pháp</option>
@@ -372,11 +372,11 @@ export function CategoryWizardModal({
                       <div>
                         <label className={LABEL_CLS}>Bảng dữ liệu</label>
                         <div className="relative">
-                          <select 
+                          <select defaultValue="" 
                             disabled={isViewOnly}
                             className={selectCls}
                           >
-                            <option value="">-- Chọn bảng --</option>
+                            <option value="" disabled hidden>-- Chọn bảng --</option>
                             <option value="tbl_khaisinh">tbl_khaisinh</option>
                             <option value="tbl_kethon">tbl_kethon</option>
                             <option value="tbl_khaiduong">tbl_khaiduong</option>
@@ -387,11 +387,11 @@ export function CategoryWizardModal({
                       <div>
                         <label className={LABEL_CLS}>Trường dữ liệu</label>
                         <div className="relative">
-                          <select 
+                          <select defaultValue="" 
                             disabled={isViewOnly}
                             className={selectCls}
                           >
-                            <option value="">-- Chọn trường --</option>
+                            <option value="" disabled hidden>-- Chọn trường --</option>
                             <option value="ma_dinh_danh">Mã định danh</option>
                             <option value="ho_ten">Họ tên</option>
                             <option value="ngay_sinh">Ngày sinh</option>

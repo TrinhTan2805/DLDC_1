@@ -1066,7 +1066,7 @@ export function OpenDataCategoryPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     required
                   >
-                    <option value="">-- Chọn loại --</option>
+                    <option value="" disabled hidden>-- Chọn loại --</option>
                     <option value="Chuẩn">Chuẩn</option>
                     <option value="Tham chiếu">Tham chiếu</option>
                     <option value="Nội bộ">Nội bộ</option>
@@ -1111,7 +1111,7 @@ export function OpenDataCategoryPage() {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                 >
-                  <option value="">-- Chọn đơn vị --</option>
+                  <option value="" disabled hidden>-- Chọn đơn vị --</option>
                   <option value="Đơn vị A">Đơn vị A</option>
                   <option value="Đơn vị B">Đơn vị B</option>
                   <option value="Đơn vị C">Đơn vị C</option>
@@ -1126,7 +1126,7 @@ export function OpenDataCategoryPage() {
                     onChange={(e) => setFormData({ ...formData, updateFrequency: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="">-- Chọn tần suất --</option>
+                    <option value="" disabled hidden>-- Chọn tần suất --</option>
                     <option value="Hằng ngày">Hằng ngày</option>
                     <option value="Hằng tuần">Hằng tuần</option>
                     <option value="Hằng tháng">Hằng tháng</option>
@@ -1306,7 +1306,7 @@ export function OpenDataCategoryPage() {
                   onChange={(e) => setSelectedApprover(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
-                  <option value="">-- Chọn người phê duyệt --</option>
+                  <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
                   {approvers.map(approver => (
                     <option key={approver.id} value={approver.id}>
                       {approver.name} - {approver.position} ({approver.department})

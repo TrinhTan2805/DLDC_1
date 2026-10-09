@@ -126,7 +126,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
             setRepeatInterval('1');
             setRepeatDays([]);
           }}
-          className="flex-1 max-w-2xl px-4 py-2 text-[13px] border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50/30 shadow-sm"
+          className="flex-1 max-w-2xl px-4 py-2 text-[13px] border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
         >
           <option value="Hàng phút">Hàng phút</option>
           <option value="Hàng giờ">Hàng giờ</option>

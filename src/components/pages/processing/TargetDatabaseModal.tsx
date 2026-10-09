@@ -112,7 +112,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className={INPUT_CLS}
                 >
-                  <option value="">-- Chọn loại CSDL --</option>
+                  <option value="" disabled hidden>-- Chọn loại CSDL --</option>
                   <option value="Oracle">Oracle Database</option>
                   <option value="PostgreSQL">PostgreSQL</option>
                   <option value="MySQL">MySQL</option>

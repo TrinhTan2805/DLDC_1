@@ -65,7 +65,7 @@ export function UpdateApprovalModal({ isOpen, onClose, approvers, onSubmit }: Up
             onChange={(e: ChangeEvent<HTMLSelectElement>) => { setReviewer(e.target.value); setErrors({}); }}
             className={`${INPUT_CLS} ${errors.reviewer ? '!border-[#DC2626]' : ''}`}
           >
-            <option value="">-- Chọn người phê duyệt --</option>
+            <option value="" disabled hidden>-- Chọn người phê duyệt --</option>
             {approvers.map(a => (
               <option key={a.id} value={a.id}>
                 {a.name} - {a.position}{a.department ? ` (${a.department})` : ''}

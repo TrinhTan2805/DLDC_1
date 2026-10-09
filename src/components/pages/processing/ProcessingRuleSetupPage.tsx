@@ -785,8 +785,8 @@ export function ProcessingRuleSetupPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-slate-600 mb-1">Người xử lý</label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <option value="">Chọn người xử lý</option>
+                  <select defaultValue="" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="" disabled hidden>-- Chọn người xử lý --</option>
                     <option value="user1">Nguyễn Văn A</option>
                     <option value="user2">Trần Thị B</option>
                     <option value="user3">Lê Văn C</option>
@@ -794,8 +794,8 @@ export function ProcessingRuleSetupPage() {
                 </div>
                 <div>
                   <label className="block text-xs text-slate-600 mb-1">Phân loại dữ liệu</label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <option value="">Chọn phân loại</option>
+                  <select defaultValue="" className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="" disabled hidden>-- Chọn phân loại --</option>
                     <option value="internal">Dữ liệu trong ngành</option>
                     <option value="external">Dữ liệu ngoài ngành</option>
                   </select>
@@ -807,7 +807,7 @@ export function ProcessingRuleSetupPage() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Chọn nguồn dữ liệu"
+                    placeholder="-- Chọn nguồn dữ liệu --"
                     value={dataSourceSearch}
                     onChange={(e) => setDataSourceSearch(e.target.value)}
                     onFocus={() => setShowDataSourceDropdown(true)}

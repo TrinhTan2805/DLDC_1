@@ -171,7 +171,7 @@ export function RelationshipModal({ onClose }: RelationshipModalProps) {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">-- Chọn thực thể --</option>
+                    <option value="" disabled hidden>-- Chọn thực thể --</option>
                     {entities.map(entity => (
                       <option key={entity.code} value={entity.code}>
                         {entity.name} ({entity.code})
@@ -190,7 +190,7 @@ export function RelationshipModal({ onClose }: RelationshipModalProps) {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">-- Chọn thực thể --</option>
+                    <option value="" disabled hidden>-- Chọn thực thể --</option>
                     {entities.map(entity => (
                       <option key={entity.code} value={entity.code}>
                         {entity.name} ({entity.code})
