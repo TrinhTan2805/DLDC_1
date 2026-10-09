@@ -5636,3 +5636,27 @@ table.master-data-consumption-table tbody td {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #94a3b8;
 }
+
+/* ==========================================================================
+   PLACEHOLDER — quy định chung một mã màu (compomennt.md mục 5.2, PM chốt 09/10/2026)
+   Đổi màu cho TOÀN HỆ THỐNG chỉ cần sửa biến --color-placeholder dưới đây.
+   - Áp cho mọi ô input / textarea (form Thêm mới, Chỉnh sửa, ô tìm kiếm, bộ lọc, modal).
+   - !important để thắng các class placeholder:text-* còn sót trong từng màn.
+   - <select> đang ở lựa chọn rỗng (value="", VD "-- Chọn ... --") cũng hiện màu placeholder;
+     danh sách lựa chọn khi mở ra vẫn màu chữ thường.
+   ========================================================================== */
+@layer base {
+  :root {
+    --color-placeholder: #94A3B8;
+  }
+  ::placeholder {
+    color: var(--color-placeholder) !important;
+    opacity: 1 !important;
+  }
+  select:has(> option[value=""]:checked) {
+    color: var(--color-placeholder);
+  }
+  select:has(> option[value=""]:checked) option {
+    color: #020817;
+  }
+}

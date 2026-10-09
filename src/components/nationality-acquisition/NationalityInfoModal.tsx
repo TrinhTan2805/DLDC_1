@@ -82,7 +82,7 @@ export function NationalityInfoModal({
           {!isInline && (
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0 bg-white sticky top-0 z-20 rounded-t-2xl">
               <div>
-                <h2 className="text-[16px] font-medium text-[#020817]">{title}</h2>
+                <h2 className="text-[16px] font-semibold text-[#020817]">{title}</h2>
                 <p className="text-[13px] text-[#64748B] mt-1 leading-5">
                   Tích hợp: <span className="font-semibold text-[#020817]">{title}</span>
                   <br />
@@ -137,7 +137,7 @@ export function NationalityInfoModal({
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedRecord(null)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0 bg-white">
-              <h3 className="text-[16px] font-medium text-[#020817]">Chi tiết hồ sơ quốc tịch</h3>
+              <h3 className="text-[16px] font-semibold text-[#020817]">Chi tiết hồ sơ quốc tịch</h3>
               <button onClick={() => setSelectedRecord(null)} aria-label="Đóng chi tiết" title="Đóng chi tiết" className={BTN_GHOST_ICON}>
                 <X className="w-5 h-5" />
               </button>

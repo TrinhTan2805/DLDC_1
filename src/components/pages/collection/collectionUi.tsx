@@ -123,7 +123,7 @@ export const INPUT_CLS = 'w-full h-10 px-3 border border-[#E2E8F0] rounded-lg te
 export const VIEW_FIELD_CLS = 'disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8] disabled:placeholder:font-normal';
 
 // Nhãn trường — MỘT kiểu chung cho form Thêm mới/Chỉnh sửa và tên trường ở Xem chi tiết (mục 5.2, 5.17)
-export const FIELD_LABEL = 'text-[13px] font-medium text-[#020817]';
+export const FIELD_LABEL = 'text-[13px] font-semibold text-[#020817]';
 export const LABEL_CLS = `block ${FIELD_LABEL} mb-1`;
 // Giá trị trường ở Xem chi tiết: 13px/400 #020817
 export const FIELD_VALUE = 'text-[13px] text-[#020817]';
@@ -564,7 +564,7 @@ export function SearchableSelect({ value, onChange, options, ariaLabel, searchPl
           disabled={disabled}
           className={`${INPUT_CLS} flex items-center justify-between gap-2 text-left ${open ? 'ring-2 ring-blue-600' : ''}`}
         >
-          <span className={`truncate ${selected ? '' : 'text-[#94A3B8]'}`}>{selected?.label ?? placeholder}</span>
+          <span className={`truncate ${selected ? '' : 'text-[var(--color-placeholder)]'}`}>{selected?.label ?? placeholder}</span>
           <ChevronDown className={`w-4 h-4 shrink-0 text-[#475569] transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
       </PopoverTrigger>

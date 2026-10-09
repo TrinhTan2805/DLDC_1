@@ -51,7 +51,7 @@ export function ProvisionReconciliationDetailsModal({ isOpen, onClose, entry }: 
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
           <div>
-            <h2 className="text-[16px] font-medium text-[#020817]">Chi tiết kết quả đối soát</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">Chi tiết kết quả đối soát</h2>
             <p className="text-[13px] text-[#64748B] mt-1 leading-5">Mã phiên: {entry.id.toUpperCase()}</p>
           </div>
           <button

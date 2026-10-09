@@ -104,7 +104,7 @@ export function ProvisionAccessControlModal({
         <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-blue-600" />
-            <h2 className="text-[16px] font-medium text-[#020817]">
+            <h2 className="text-[16px] font-semibold text-[#020817]">
               Cấp quyền truy cập API
             </h2>
           </div>
@@ -137,7 +137,7 @@ export function ProvisionAccessControlModal({
               {/* Partner Organization - Multi-select with Search & Toggle All */}
               <div className="md:col-span-2 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-[13px] font-medium text-[#020817]">
+                  <label className="block text-[13px] font-semibold text-[#020817]">
                     Đơn vị / Tổ chức thụ hưởng <span className={REQUIRED_MARK}>*</span>
                   </label>
                   {(availableOrganizations.length > 0 || preConfiguredOrganizations.length > 0) && (

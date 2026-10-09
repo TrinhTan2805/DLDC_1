@@ -11,6 +11,20 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
   const [repeatInterval, setRepeatInterval] = useState('1');
   const [repeatDays, setRepeatDays] = useState<string[]>([]);
   const [executeTime, setExecuteTime] = useState('12:00');
+  // Ô "Thực hiện lúc": người dùng gõ giờ trực tiếp, tự chèn ":"; chỉ cập nhật executeTime khi đủ HH:mm hợp lệ
+  const [timeText, setTimeText] = useState('12:00');
+  const [timeInvalid, setTimeInvalid] = useState(false);
+  const isValidTime = (t: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
+  const handleTimeType = (raw: string) => {
+    const digits = raw.replace(/\D/g, '').slice(0, 4);
+    const masked = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+    setTimeText(masked);
+    setTimeInvalid(false);
+    if (!masked) setExecuteTime('');
+    else if (masked.length === 5) {
+      if (isValidTime(masked)) setExecuteTime(masked); else setTimeInvalid(true);
+    }
+  };
   const [description, setDescription] = useState('');
   const [isManualDesc, setIsManualDesc] = useState(false);
 
@@ -79,7 +93,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
       
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-6">
-          <label className="w-32 text-[13px] font-medium shrink-0">Loại tần suất</label>
+          <label className="w-32 text-[13px] font-semibold shrink-0">Loại tần suất</label>
           <select 
             value={frequencyType}
             onChange={e => setFrequencyType(e.target.value)}
@@ -104,7 +118,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
 
       {/* Lặp lại */}
       <div className="flex items-center gap-6">
-        <label className="w-32 text-[13px] font-medium shrink-0">Lặp lại</label>
+        <label className="w-32 text-[13px] font-semibold shrink-0">Lặp lại</label>
         <select 
           value={repeatMode}
           onChange={e => {
@@ -124,7 +138,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
 
       {/* Lặp lại trong */}
       <div className="flex items-start gap-6">
-        <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0 pt-2">Lặp lại trong</label>
+        <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0 pt-2">Lặp lại trong</label>
         <div className="flex-1 max-w-2xl flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <input 
@@ -222,17 +236,27 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
           </div>
 
           <div className="flex items-center gap-6">
-            <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Thực hiện lúc</label>
-            <div className="flex items-center max-w-[200px] border border-slate-300 rounded-lg overflow-hidden shadow-sm">
-              <input 
-                type="time" 
-                value={executeTime}
-                onChange={e => setExecuteTime(e.target.value)}
-                className="flex-1 px-4 py-2 text-[13px] focus:outline-none bg-white"
-              />
-              <div className="px-4 py-2 bg-slate-100 border-l border-slate-300 text-slate-500 shrink-0">
-                <Clock className="w-5 h-5" />
+            <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0">Thực hiện lúc</label>
+            {/* Nhập giờ trực tiếp dạng HH:mm (24 giờ) — không mở bộ chọn giờ của trình duyệt, chỉ 1 icon đồng hồ (PM 09/10/2026) */}
+            <div>
+              <div className={`flex items-center w-[200px] h-10 border rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-600 ${timeInvalid ? 'border-[#DC2626]' : 'border-[#E2E8F0]'}`}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  aria-label="Thực hiện lúc"
+                  aria-invalid={timeInvalid || undefined}
+                  placeholder="HH:mm"
+                  maxLength={5}
+                  value={timeText}
+                  onChange={e => handleTimeType(e.target.value)}
+                  onBlur={() => setTimeInvalid(!!timeText && !isValidTime(timeText))}
+                  className="flex-1 min-w-0 h-full px-3 text-[13px] text-[#020817] bg-transparent focus:outline-none tabular-nums"
+                />
+                <div className="h-full px-3 flex items-center bg-[#F8FAFC] border-l border-[#E2E8F0] text-[#475569] shrink-0" aria-hidden="true">
+                  <Clock className="w-4 h-4" />
+                </div>
               </div>
+              {timeInvalid && <p className="mt-1 text-[12px] text-[#DC2626]">Giờ không hợp lệ (HH:mm, 00:00 – 23:59)</p>}
             </div>
           </div>
         </>
@@ -245,7 +269,7 @@ export function DataCollectionConfigSection({ resetTestState }: DataCollectionCo
       </div>
 
       <div className="flex items-start gap-6">
-        <label className="w-32 text-[13px] font-medium shrink-0 pt-2">Mô Tả</label>
+        <label className="w-32 text-[13px] font-semibold shrink-0 pt-2">Mô Tả</label>
         <textarea 
           value={description}
           onChange={e => {

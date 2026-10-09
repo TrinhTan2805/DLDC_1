@@ -340,7 +340,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
   const FieldSelector = ({ multiple, selectedFields }: { multiple?: boolean, selectedFields?: string[] }) => (
     <div className="mb-4">
-      <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
+      <label className="block text-[13px] font-semibold text-slate-700 mb-1.5">
         Áp dụng cho trường (trường hợp để trống sẽ áp dụng cho tất cả):
       </label>
       <select title="Field Selector" multiple={multiple} className={`w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-[13px] text-slate-700 focus:outline-none focus:border-blue-500 ${multiple ? 'min-h-[100px]' : ''}`}>

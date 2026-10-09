@@ -1,5 +1,58 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Tăng độ đậm nhãn trường và tiêu đề modal lên 600 (Ngày thực hiện: 09/10/2026) — 158
+
+**Nội dung (PM yêu cầu):** tăng độ đậm của nhãn và tiêu đề modal lên 600 (trước 500).
+
+**Sửa tập trung (áp cho mọi nơi dùng chung):**
+- `pages/collection/collectionUi.tsx`: `FIELD_LABEL` (và `LABEL_CLS` dựa trên nó) 13px **font-semibold (600)** — nhãn form Thêm mới/Chỉnh sửa và tên trường ở màn Xem chi tiết.
+- `common/BaseModal.tsx`, `common/ConfirmModal.tsx` (dùng chung): tiêu đề modal 16px **600**.
+- Quét toàn bộ `src`: tiêu đề `<h1–h6>` 16px/500 → 600 và `<label>` 13px/500 → 600 viết trực tiếp trong từng màn — **71 file** (bỏ qua `*_Old.tsx` và `layout/ErrorBoundary.tsx` do mã hóa UTF-16, không có nhãn/tiêu đề liên quan).
+- Không đổi: nhãn trong vùng bộ lọc (`FILTER_LABEL`, đã là 600), tiêu đề khối/nhóm 14px/500, nút 13px/500.
+
+**Tài liệu:** `compomennt.md` mục 1 (Tiêu đề modal, Nhãn trường → Semibold 600), 5.2, 5.17 (tên trường 600, phân biệt với giá trị 400) và class mẫu.
+
+**stauts.md:** tự mở khóa `[x]` 9 mục bị ảnh hưởng: ViewServiceModal, ScheduleManagementModal, AddServiceConfigModal, DeleteConfirmModal (đối soát), CategoryMojUnitsPage, UnpublishModal, CreateVersionModal, ArchiveRecordModal, MojUnitDeleteConfirmModal.
+
+**Kiểm tra:** chỉ đổi class chữ, không đổi logic; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Ô "Thực hiện lúc" — nhập giờ trực tiếp (Ngày thực hiện: 09/10/2026) — 157
+
+**Nội dung (PM yêu cầu):** modal Thêm mới / Chỉnh sửa dịch vụ thu thập › tab Cấu hình thu thập › "Thực hiện lúc": bỏ icon đồng hồ nằm trong ô (của bộ chọn giờ trình duyệt), không mở bộ chọn giờ, cho phép gõ giờ trực tiếp.
+
+**File sửa:** `pages/collection/DataCollectionConfigSection.tsx` (tự mở khóa `[x]` trong `stauts.md`).
+- `<input type="time">` (có icon + bộ chọn giờ, hiển thị 12:00 PM theo ngôn ngữ trình duyệt) → ô chữ **HH:mm (24 giờ)**: gõ số tự chèn ":", tối đa 5 ký tự, gợi ý "HH:mm".
+- Giữ **một** icon đồng hồ ở khối bên phải (chỉ trang trí, không bấm).
+- Kiểm tra hợp lệ 00:00 – 23:59: sai → viền đỏ + dòng lỗi "Giờ không hợp lệ (HH:mm, 00:00 – 23:59)". Giờ chỉ được ghi nhận (và cập nhật Mô tả "Lặp lại … lúc HH:mm") khi đủ và hợp lệ; xóa trắng → bỏ giờ như trước.
+- Ô theo chuẩn 5.2: cao 40px, viền #E2E8F0, bo 8px, focus viền xanh.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (lỗi cũ ở `ServiceModals_Old.tsx`); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Màu chữ menu sidebar đậm hơn (Ngày thực hiện: 09/10/2026) — 156
+
+**Nội dung (PM yêu cầu):** chữ menu sidebar đổi sang màu đậm hơn — màu đen.
+
+**File sửa:** `src/components/layout/Sidebar.tsx` — chữ (và icon theo màu chữ) của mọi cấp menu: mục cấp 1 có menu con trước `#475569` (xám), mục không có menu con / menu con / tiêu đề nhóm trước `#475569`/`#020817` → **`#000000`**; di chuột vẫn nền `#F1F5F9`. Mục đang chọn giữ nền `#EAF3FF` chữ xanh `#155DFC`. Logo, ô tìm menu, phiên bản không đổi.
+
+**Tài liệu:** `compomennt.md` mục 1 (bảng Typography) — Menu sidebar màu `#000000`.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Quy định chung một mã màu placeholder (Ngày thực hiện: 09/10/2026) — 155
+
+**Nội dung (PM yêu cầu):** thống nhất một màu placeholder cho mọi ô (modal tìm kiếm, form Thêm mới / Chỉnh sửa…), sửa một file áp dụng cho tất cả.
+
+**Hiện trạng trước khi sửa:** placeholder lấy mặc định "50% màu chữ của ô" nên mỗi ô một màu; thêm ~26 chỗ tự đặt màu riêng (slate-300, slate-400, #94A3B8, muted-foreground) ở 19 file.
+
+**Cách làm (một nguồn duy nhất):**
+- `src/index.css` (cuối file): biến **`--color-placeholder: #94A3B8`** + quy tắc `::placeholder { color: var(--color-placeholder) !important; opacity: 1 }` — `!important` để thắng các màu riêng còn sót ở từng màn, kể cả màn đang khóa, không cần sửa từng file. `<select>` đang ở lựa chọn rỗng (`value=""`, VD "-- Chọn ... --") cũng hiện màu placeholder; danh sách khi mở vẫn chữ đen.
+- `pages/collection/collectionUi.tsx`: ô chọn có tìm kiếm (`SearchableSelect`) dùng `text-[var(--color-placeholder)]` cho chữ gợi ý.
+- `tailieu/docs/compomennt.md` mục 5.2: thêm quy định placeholder `#94A3B8` 13px/400 + cách áp dụng (không đặt `placeholder:text-…` trong từng màn; đổi màu chỉ sửa biến).
+
+**Đổi màu sau này:** chỉ sửa giá trị `--color-placeholder` trong `src/index.css`.
+
+**Kiểm tra:** `npm run build` thành công, quy tắc có trong CSS build; đã xác nhận server port 3000 trả đúng CSS mới.
+
 ## Chuẩn hóa giao diện — Quản trị & vận hành › Quản trị người dùng (Ngày thực hiện: 07/10/2026) — 154
 
 **Nội dung (PM yêu cầu):** sửa giao diện mục Quản trị người dùng theo `compomennt.md`; giữ nội dung, dữ liệu, logic.

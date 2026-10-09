@@ -35,7 +35,7 @@ export function ApiVersionCompareModal({ isOpen, onClose, apiName, versionA, ver
               <GitCompare className="w-5 h-5 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-[16px] font-medium text-[#020817] leading-6">
+              <h2 className="text-[16px] font-semibold text-[#020817] leading-6">
                 So sánh cấu trúc phiên bản API
               </h2>
               <p className="text-[13px] text-[#64748B] truncate">Dịch vụ: {apiName}</p>

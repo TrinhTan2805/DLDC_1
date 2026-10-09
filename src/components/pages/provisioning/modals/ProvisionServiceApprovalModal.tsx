@@ -61,7 +61,7 @@ export function ProvisionServiceApprovalModal({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header (mục 5.4) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] shrink-0">
-          <h2 className="text-[16px] font-medium text-[#020817]">
+          <h2 className="text-[16px] font-semibold text-[#020817]">
             {isReadOnly ? 'Chi tiết thông tin kiểm tra' : 'Phê duyệt dịch vụ cung cấp'}
           </h2>
           <button type="button" aria-label="Đóng" onClick={onClose} className={BTN_GHOST_ICON}>

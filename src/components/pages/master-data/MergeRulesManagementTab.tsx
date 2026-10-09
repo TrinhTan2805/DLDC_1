@@ -1228,7 +1228,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <h3 className="text-[16px] font-medium text-[#020817] leading-6">Gửi trình duyệt</h3>
+                <h3 className="text-[16px] font-semibold text-[#020817] leading-6">Gửi trình duyệt</h3>
                 <p className="text-[13px] text-[#64748B] mt-0.5">
                   Quy tắc hợp nhất: <span className="text-[#020817]">{approvalRule.name}</span>
                 </p>

@@ -191,7 +191,7 @@ export function UnitManagementPage({ units, onUnitsChange }: UnitManagementPageP
           <div role="dialog" aria-modal="true" aria-labelledby="unit-modal-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <h2 id="unit-modal-title" className="text-[16px] font-medium text-[#020817]">
+              <h2 id="unit-modal-title" className="text-[16px] font-semibold text-[#020817]">
                 {editingItem ? 'Sửa thông tin đơn vị' : 'Thêm mới đơn vị'}
               </h2>
               <button type="button" onClick={() => setIsModalOpen(false)} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">

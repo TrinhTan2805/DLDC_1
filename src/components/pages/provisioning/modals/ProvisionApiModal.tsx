@@ -241,7 +241,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
 
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center gap-4">
-          <h2 className="text-[16px] font-medium text-[#020817]">
+          <h2 className="text-[16px] font-semibold text-[#020817]">
             {isViewMode ? 'Chi tiết API cung cấp' : (apiData ? 'Cập nhật cấu hình API cung cấp' : 'Tạo mới API cung cấp')}
           </h2>
           <button type="button" title="Đóng" aria-label="Đóng" onClick={onClose} className={BTN_GHOST_ICON}>

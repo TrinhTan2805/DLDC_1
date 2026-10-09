@@ -76,7 +76,7 @@ export function BaseModal({
             <div className="flex items-center min-w-0">
               {customHeaderIcon}
               <div className="min-w-0">
-                <h3 className="text-[16px] font-medium text-[#020817] leading-6">{title}</h3>
+                <h3 className="text-[16px] font-semibold text-[#020817] leading-6">{title}</h3>
                 {subtitle && <p className="text-[13px] text-[#64748B] mt-0.5 leading-5">{subtitle}</p>}
               </div>
             </div>

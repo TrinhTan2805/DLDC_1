@@ -532,7 +532,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
               <div className="w-10 h-10 rounded-lg bg-[#EAF3FF] text-[#155DFC] flex items-center justify-center mb-3">
                 <Plug className="w-5 h-5" />
               </div>
-              <h2 id="provision-service-title" className="text-[16px] font-medium text-[#020817] break-words">
+              <h2 id="provision-service-title" className="text-[16px] font-semibold text-[#020817] break-words">
                 {isViewMode ? 'Xem chi tiết Dịch vụ' : (service ? 'Cấu hình Dịch vụ' : 'Dịch vụ Mới')}
               </h2>
               <p className="text-[13px] text-[#64748B] mt-0.5">Điều phối dữ liệu</p>
@@ -609,7 +609,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                           }}
                           className={CHECKBOX_CLS}
                         />
-                        <label htmlFor="isOpenDataShared" className="text-[13px] font-medium text-[#020817] cursor-pointer select-none whitespace-nowrap">
+                        <label htmlFor="isOpenDataShared" className="text-[13px] font-semibold text-[#020817] cursor-pointer select-none whitespace-nowrap">
                           Thiết lập gói tin chia sẻ dữ liệu mở
                         </label>
                       </div>

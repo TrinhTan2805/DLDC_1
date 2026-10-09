@@ -778,7 +778,7 @@ export function MasterDataScaleManagementPage() {
                   <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
                       <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
-                        <h3 className="text-[16px] font-medium text-[#020817]">
+                        <h3 className="text-[16px] font-semibold text-[#020817]">
                           {editingEntity ? 'Chỉnh sửa thực thể dữ liệu chủ' : 'Thêm mới thực thể dữ liệu chủ'}
                         </h3>
                         <button type="button" aria-label="Đóng" onClick={handleCloseForm} className={BTN_GHOST_ICON}>
@@ -1113,7 +1113,7 @@ export function MasterDataScaleManagementPage() {
           <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
               <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
-                <h3 className="text-[16px] font-medium text-[#020817]">Xem chi tiết thực thể dữ liệu chủ</h3>
+                <h3 className="text-[16px] font-semibold text-[#020817]">Xem chi tiết thực thể dữ liệu chủ</h3>
                 <button type="button" aria-label="Đóng" onClick={() => setViewingEntity(null)} className={BTN_GHOST_ICON}>
                   <X className="w-5 h-5" />
                 </button>
@@ -1741,7 +1741,7 @@ export function MasterDataScaleManagementPage() {
           <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
               <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
-                <h3 className="text-[16px] font-medium text-[#020817]">Xác nhận xóa</h3>
+                <h3 className="text-[16px] font-semibold text-[#020817]">Xác nhận xóa</h3>
                 <button type="button" aria-label="Đóng" onClick={() => setDeleteConfirmId(null)} className={BTN_GHOST_ICON}>
                   <X className="w-5 h-5" />
                 </button>
@@ -1771,7 +1771,7 @@ export function MasterDataScaleManagementPage() {
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
               <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 shrink-0">
                 <div className="min-w-0">
-                  <h3 className="text-[16px] font-medium text-[#020817]">Gửi trình duyệt</h3>
+                  <h3 className="text-[16px] font-semibold text-[#020817]">Gửi trình duyệt</h3>
                   <p className="text-[13px] text-[#64748B] mt-0.5">
                     Bản ghi: <span className="text-[#020817] font-medium">{approvalEntity.name}</span>
                   </p>

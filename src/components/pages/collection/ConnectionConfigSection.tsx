@@ -433,7 +433,7 @@ const ApiConnectionForm = () => {
               <div className="pt-3 border-t border-[#E2E8F0]">
                 <p className={`${GROUP_TITLE} mb-2`}>Hiệu năng & điều tiết</p>
                 <div className="grid grid-cols-[160px_1fr_1fr] items-center gap-3">
-                  <label htmlFor="conn-pull-mode" className="text-[13px] font-medium text-[#020817]">Chế độ kéo / Số luồng</label>
+                  <label htmlFor="conn-pull-mode" className="text-[13px] font-semibold text-[#020817]">Chế độ kéo / Số luồng</label>
                   <select id="conn-pull-mode" value={pullMode} onChange={(e) => setPullMode(e.target.value)} className={INPUT_CLS}>
                     <option value="SEQUENTIAL">SEQUENTIAL</option>
                     <option value="PARALLEL">PARALLEL</option>
@@ -497,7 +497,7 @@ const FileDropzone = ({ id, accept, title, hint }: { id: string; accept: string;
 /** Checkbox (5.12) + nhãn, tùy chọn icon (i) */
 const CheckRow = ({ label, tip, checked, onChange }: { label: string; tip?: string; checked: boolean; onChange: (v: boolean) => void }) => (
   <div className="flex items-center gap-2">
-    <label className="inline-flex items-center gap-2 text-[13px] font-medium text-[#020817] cursor-pointer select-none">
+    <label className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#020817] cursor-pointer select-none">
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4 rounded accent-blue-600 cursor-pointer" />
       {label}
     </label>

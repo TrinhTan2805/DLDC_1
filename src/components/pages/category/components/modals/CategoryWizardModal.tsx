@@ -129,7 +129,7 @@ export function CategoryWizardModal({
           {/* Wizard Header */}
           <div className="flex flex-col border-b border-[#E2E8F0] bg-white shrink-0">
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center bg-white">
-              <h3 className="text-[16px] font-medium text-[#020817]">
+              <h3 className="text-[16px] font-semibold text-[#020817]">
                 {isViewOnly ? 'Chi tiết danh mục dùng chung' : isEditMode ? 'Chỉnh sửa danh mục dùng chung' : 'Thiết lập danh mục dùng chung'}
               </h3>
               <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">

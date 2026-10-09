@@ -24,7 +24,7 @@ export function AgentDeleteConfirmModal({
           <div className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-[#FEF2F2] text-[#DC2626]">
             <AlertTriangle className="w-5 h-5" />
           </div>
-          <h2 id="delete-confirm-title" className="flex-1 min-w-0 text-[16px] font-medium text-[#020817]">Xác nhận xóa</h2>
+          <h2 id="delete-confirm-title" className="flex-1 min-w-0 text-[16px] font-semibold text-[#020817]">Xác nhận xóa</h2>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
             <X className="w-5 h-5" />
           </button>

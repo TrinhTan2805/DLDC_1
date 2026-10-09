@@ -405,7 +405,7 @@ export function LogManagement({ initialOpenLogId }: { initialOpenLogId?: number 
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] bg-white shrink-0">
-              <h2 className="text-[16px] font-medium text-[#020817]">Chi tiết nhật ký</h2>
+              <h2 className="text-[16px] font-semibold text-[#020817]">Chi tiết nhật ký</h2>
               <button onClick={closeDetail} aria-label="Đóng" title="Đóng" className={BTN_GHOST_ICON}>
                 <X className="w-5 h-5" />
               </button>

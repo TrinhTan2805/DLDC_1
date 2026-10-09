@@ -513,7 +513,7 @@ export function LogRetentionConfigPage() {
 
             <div className="p-6 space-y-4 text-[13px]">
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Tên loại nhật ký <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -526,7 +526,7 @@ export function LogRetentionConfigPage() {
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Thời gian lưu trữ (ngày) <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -540,7 +540,7 @@ export function LogRetentionConfigPage() {
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">Mô tả</label>
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">Mô tả</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -558,7 +558,7 @@ export function LogRetentionConfigPage() {
                   onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 bg-white"
                 />
-                <label htmlFor="isActive" className="text-[13px] font-medium text-slate-700 cursor-pointer">Kích hoạt</label>
+                <label htmlFor="isActive" className="text-[13px] font-semibold text-slate-700 cursor-pointer">Kích hoạt</label>
               </div>
             </div>
 
@@ -604,7 +604,7 @@ export function LogRetentionConfigPage() {
 
             <div className="p-6 space-y-4 text-[13px]">
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Tên loại nhật ký <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -617,7 +617,7 @@ export function LogRetentionConfigPage() {
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Thời gian lưu trữ (ngày) <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -631,7 +631,7 @@ export function LogRetentionConfigPage() {
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">Mô tả</label>
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">Mô tả</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -649,7 +649,7 @@ export function LogRetentionConfigPage() {
                   onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 bg-white"
                 />
-                <label htmlFor="isActiveEdit" className="text-[13px] font-medium text-slate-700 cursor-pointer">Kích hoạt</label>
+                <label htmlFor="isActiveEdit" className="text-[13px] font-semibold text-slate-700 cursor-pointer">Kích hoạt</label>
               </div>
             </div>
 

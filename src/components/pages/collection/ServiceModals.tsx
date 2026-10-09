@@ -37,7 +37,7 @@ const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boole
             <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
               <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
-            <h3 className="text-[16px] font-medium text-[#020817] mb-1">Kết nối thành công</h3>
+            <h3 className="text-[16px] font-semibold text-[#020817] mb-1">Kết nối thành công</h3>
             <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
           </div>
           <div className="px-6 py-4 flex justify-center gap-3 bg-[#F8FAFC] border-t border-[#E2E8F0] w-full">
@@ -70,7 +70,7 @@ const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
             <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-3">
               <AlertCircle className="w-6 h-6" strokeWidth={2.5} />
             </div>
-            <h3 className="text-[16px] font-medium text-[#020817] mb-1">Kết nối thất bại</h3>
+            <h3 className="text-[16px] font-semibold text-[#020817] mb-1">Kết nối thất bại</h3>
             <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Không thể kết nối đến Hệ thống đích (Destination API).</p>
             
             <div className="w-full text-left px-5">
@@ -116,7 +116,7 @@ const DataErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mb-3">
               <FileX className="w-6 h-6" strokeWidth={2} />
             </div>
-            <h3 className="text-[16px] font-medium text-[#020817] mb-1">Không có dữ liệu</h3>
+            <h3 className="text-[16px] font-semibold text-[#020817] mb-1">Không có dữ liệu</h3>
             <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, nhưng không nhận được dữ liệu trả về.</p>
             
             <div className="w-full text-left px-5">
@@ -148,7 +148,7 @@ const DataMappingModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () =>
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-slate-50 rounded-xl shadow-2xl w-full max-w-[1000px] h-full max-h-[90vh] overflow-hidden flex flex-col relative border border-slate-200">
         <div className="px-6 py-4 border-b border-slate-200 bg-white flex justify-between items-center z-10 shrink-0">
-          <h2 className="text-[16px] font-medium text-[#020817]">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
+          <h2 className="text-[16px] font-semibold text-[#020817]">Cấu hình ánh xạ dữ liệu đích (Data Mapping)</h2>
           <button onClick={onClose} aria-label="Đóng" className={BTN_GHOST_ICON}><X className="w-5 h-5" /></button>
         </div>
         <div className="flex-1 flex flex-col overflow-hidden bg-[#fafafa]">
@@ -262,7 +262,7 @@ function AddServiceModalContent({ isOpen, onClose }: ServiceModalProps) {
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
         <div className="bg-white rounded-2xl shadow-2xl w-2/3 h-[90vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-            <h2 className="text-[16px] font-medium text-[#020817]">Thông tin kết nối</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">Thông tin kết nối</h2>
             <button onClick={onClose} title="Đóng" aria-label="Đóng" className={BTN_GHOST_ICON}>
               <X className="w-5 h-5" />
             </button>
@@ -525,7 +525,7 @@ function EditServiceModalContent({ isOpen, onClose, service, initialTab }: Servi
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-2xl shadow-2xl w-2/3 h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-[16px] font-medium text-[#020817] truncate">Chỉnh sửa kết nối API - {service.name}</h2>
+          <h2 className="text-[16px] font-semibold text-[#020817] truncate">Chỉnh sửa kết nối API - {service.name}</h2>
           <button onClick={onClose} title="Đóng" aria-label="Đóng" className={BTN_GHOST_ICON}>
             <X className="w-5 h-5" />
           </button>

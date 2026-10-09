@@ -1167,7 +1167,7 @@ export function DataProvisionMonitoringPage() {
             <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0]">
               <div className="flex items-center gap-2">
                 <AlertCircle className={`w-5 h-5 ${selectedLog.type === 'ERROR' ? 'text-[#DC2626]' : selectedLog.type === 'WARN' ? 'text-[#D97706]' : 'text-[#155DFC]'}`} />
-                <h3 className="text-[16px] font-medium text-[#020817]">Chi tiết nhật ký sự cố</h3>
+                <h3 className="text-[16px] font-semibold text-[#020817]">Chi tiết nhật ký sự cố</h3>
               </div>
               <button
                 type="button"

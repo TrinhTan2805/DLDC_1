@@ -21,7 +21,7 @@ export function DeleteConfirmModal({ isOpen, onClose, onConfirm, itemName }: Del
               <AlertTriangle className="w-5 h-5 text-[#DC2626]" />
             </div>
             <div>
-              <h2 className="text-[16px] font-medium text-[#020817]">Xác nhận xóa</h2>
+              <h2 className="text-[16px] font-semibold text-[#020817]">Xác nhận xóa</h2>
               <p className="text-[13px] text-[#64748B] mt-1 leading-5">Xóa cấu hình API</p>
             </div>
           </div>

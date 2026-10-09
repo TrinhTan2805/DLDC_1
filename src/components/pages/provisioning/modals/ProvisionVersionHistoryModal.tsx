@@ -79,7 +79,7 @@ export function ProvisionVersionHistoryModal({ isOpen, onClose, apiData }: Provi
               <History className="w-5 h-5 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-[16px] font-medium text-[#020817] leading-6">
+              <h2 className="text-[16px] font-semibold text-[#020817] leading-6">
                 Lịch sử phiên bản
               </h2>
               <p className="text-[13px] text-[#64748B] truncate">API: {apiData?.name}</p>

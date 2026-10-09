@@ -44,7 +44,7 @@ export function SourceSystemDetailModal({ isOpen, onClose, data }: SourceSystemD
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 id="source-system-detail-title" className="text-[16px] font-medium text-[#020817]">
+            <h2 id="source-system-detail-title" className="text-[16px] font-semibold text-[#020817]">
               {data.systemName || 'Thông tin hệ thống'}
             </h2>
             <div className="flex items-center gap-1 text-[13px] text-[#64748B] mt-0.5">

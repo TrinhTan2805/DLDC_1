@@ -373,7 +373,7 @@ export function ReconciliationTemplate({
           <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full overflow-hidden flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0">
               <div>
-                <h2 className="text-[16px] font-medium text-[#020817]">Lịch sử đối soát thu thập</h2>
+                <h2 className="text-[16px] font-semibold text-[#020817]">Lịch sử đối soát thu thập</h2>
                 <p className="text-[13px] text-[#64748B] mt-1 leading-5">Bộ dữ liệu: <span className="font-semibold text-[#020817]">{historySearchTerm}</span></p>
               </div>
               <button type="button" onClick={() => setHistoryModalOpen(false)} className={BTN_GHOST_ICON} aria-label="Đóng lịch sử đối soát" title="Đóng">

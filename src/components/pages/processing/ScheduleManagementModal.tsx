@@ -283,7 +283,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                 
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-6">
-                    <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Loại tần suất</label>
+                    <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0">Loại tần suất</label>
                     <select 
                       value={frequencyType}
                       onChange={e => setFrequencyType(e.target.value)}
@@ -307,7 +307,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
 
                 {/* Lặp lại */}
                 <div className="flex items-center gap-6">
-                  <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Lặp lại</label>
+                  <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0">Lặp lại</label>
                   <select 
                     value={repeatMode}
                     onChange={e => {
@@ -327,7 +327,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
 
                 {/* Lặp lại trong */}
                 <div className="flex items-start gap-6">
-                  <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0 pt-1.5">Lặp lại trong</label>
+                  <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0 pt-1.5">Lặp lại trong</label>
                   <div className="flex-1 max-w-2xl flex flex-col gap-3">
                     <div className="flex items-center gap-3">
                       <input 
@@ -425,7 +425,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                     </div>
 
                     <div className="flex items-center gap-6">
-                      <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0">Thực hiện lúc</label>
+                      <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0">Thực hiện lúc</label>
                       <div className="flex items-center max-w-[200px] border border-slate-300 rounded overflow-hidden">
                         <input 
                           type="text" 
@@ -449,7 +449,7 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
                 </div>
 
                 <div className="flex items-start gap-6">
-                  <label className="w-32 text-[13px] text-slate-700 font-medium shrink-0 pt-1.5">Mô Tả</label>
+                  <label className="w-32 text-[13px] text-slate-700 font-semibold shrink-0 pt-1.5">Mô Tả</label>
                   <textarea 
                     value={description}
                     onChange={e => {

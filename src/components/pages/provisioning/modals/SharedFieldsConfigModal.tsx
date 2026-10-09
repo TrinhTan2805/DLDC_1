@@ -118,7 +118,7 @@ export function SharedFieldsConfigModal({
           {/* Header */}
           <div className="flex items-start justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
             <div>
-              <h3 className="text-[16px] font-medium text-[#020817]">
+              <h3 className="text-[16px] font-semibold text-[#020817]">
                 {readOnly ? 'Xem chi tiết cấu trúc trường dữ liệu chia sẻ' : 'Điều chỉnh các trường dữ liệu chia sẻ'}
               </h3>
               <p className="text-[13px] text-[#64748B] mt-1 leading-5">

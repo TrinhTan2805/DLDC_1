@@ -830,7 +830,7 @@ export function Sidebar({
                   title={isCollapsed ? item.label : ""}
                   className={`w-full h-[35px] flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-2'} rounded-[10px] transition-all ${isActive
                     ? "bg-[#EAF3FF] text-blue-600 font-medium"
-                    : `${hasSubItems ? "text-[#475569]" : "text-[#020817]"} hover:bg-[#F1F5F9] hover:text-[#020817]`
+                    : `text-[#000000] hover:bg-[#F1F5F9] hover:text-[#000000]`
                     }`}
                 >
                   <Icon
@@ -882,10 +882,10 @@ export function Sidebar({
                             title={subItem.label}
                             aria-label={subItem.label}
                             className={`w-full h-[30px] flex items-center gap-2 px-2 rounded-[10px] transition-all text-xs ${isGroupHeader
-                              ? "text-[#475569] font-medium hover:bg-[#F1F5F9]"
+                              ? "text-[#000000] font-medium hover:bg-[#F1F5F9]"
                               : isSubActive
                                 ? "bg-[#EAF3FF] text-blue-600 font-medium"
-                                : "text-[#020817] hover:bg-[#F1F5F9]"
+                                : "text-[#000000] hover:bg-[#F1F5F9]"
                               }`}
                           >
                             {SubIcon && <SubIcon className="w-3.5 h-3.5 flex-shrink-0" />}
@@ -939,7 +939,7 @@ export function Sidebar({
                                         aria-label={nestedItem.label}
                                         className={`w-full h-[30px] flex items-center gap-2 px-2 rounded-[10px] transition-all ${isNestedActive
                                           ? "bg-[#EAF3FF] text-blue-600 font-medium"
-                                          : "text-[#020817] hover:bg-[#F1F5F9]"
+                                          : "text-[#000000] hover:bg-[#F1F5F9]"
                                           }`}
                                       >
                                         {NestedIcon && (
@@ -981,7 +981,7 @@ export function Sidebar({
                                                     aria-label={level4Item.label}
                                                     className={`w-full h-[30px] flex items-center gap-2 px-2 rounded-[10px] transition-all ${isLevel4Active
                                                       ? "bg-[#EAF3FF] text-blue-600 font-medium"
-                                                      : "text-[#020817] hover:bg-[#F1F5F9]"
+                                                      : "text-[#000000] hover:bg-[#F1F5F9]"
                                                       }`}
                                                   >
                                                     {Level4Icon && <Level4Icon className="w-3 h-3 flex-shrink-0" />}

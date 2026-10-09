@@ -50,11 +50,11 @@
 
 ### Components dùng chung trong thu thập
 - `[x]` Cấu hình kết nối (`collection/ConnectionConfigSection.tsx`)
-- `[ ]` Cấu hình thu thập dữ liệu (`collection/DataCollectionConfigSection.tsx`)
+- `[x]` Cấu hình thu thập dữ liệu (`collection/DataCollectionConfigSection.tsx`)
 - `[ ]` Nạp cấu trúc (`collection/StructureLoadingConfig.tsx`)
 - `[ ]` Mapping dữ liệu nâng cao (`collection/AdvancedDataMapping.tsx`)
 - `[ ]` Modal xem chi tiết dịch vụ (`collection/ServiceDetailModal.tsx`)
-- `[ ]` Modal xem dịch vụ (`collection/ViewServiceModal.tsx`)
+- `[x]` Modal xem dịch vụ (`collection/ViewServiceModal.tsx`)
 - `[ ]` Template trang CSDL (`collection/DatabasePageTemplate.tsx`)
 - `[ ]` Sidebar phụ (`collection/InnerSidebar.tsx`)
 
@@ -73,7 +73,7 @@
 - `[ ]` Xem dữ liệu đã xử lý (`processing/ProcessedDataPage.tsx`)
 - `[ ]` Modal Mapping dữ liệu (`processing/DataMappingModal.tsx`)
 - `[ ]` Modal gộp/tách bản ghi (`processing/MergeSplitModal.tsx`)
-- `[ ]` Quản lý lịch xử lý (`processing/ScheduleManagementModal.tsx`)
+- `[x]` Quản lý lịch xử lý (`processing/ScheduleManagementModal.tsx`)
 
 ### Trang xử lý từng lĩnh vực nghiệp vụ
 - `[x]` Xử lý chung (template) (`processing/GenericProcessingPage.tsx`)
@@ -119,8 +119,8 @@
 ### Modals đối soát
 - `[x]` Modal chi tiết bản ghi đối soát (`reconciliation/ReconciliationDetailModal.tsx`)
 - `[ ]` Modal tiến trình đồng bộ thủ công (`reconciliation/ManualSyncProgressModal.tsx`)
-- `[ ]` Modal thêm / sửa cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
-- `[ ]` Modal xác nhận xóa cấu hình (`reconciliation/DeleteConfirmModal.tsx`)
+- `[x]` Modal thêm / sửa cấu hình dịch vụ (`reconciliation/AddServiceConfigModal.tsx`)
+- `[x]` Modal xác nhận xóa cấu hình (`reconciliation/DeleteConfirmModal.tsx`)
 - `[ ]` Modal chi tiết lỗi đối soát (`reconciliation/ErrorDetailsModal.tsx`)
 - `[ ]` Modal tạo gói đối soát LGSP (`modals/CreateLGSPReconciliationModal.tsx`)
 
@@ -137,7 +137,7 @@
 - `[ ]` Phê duyệt danh mục (`category/CategoryApprovalPage.tsx`)
 - `[x]` Thiết lập danh mục (`category/CategorySetupPage.tsx`)
 - `[ ]` Thiết lập danh mục (phiên bản mới) (`category/CategorySetupPageNew.tsx`)
-- `[ ]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
+- `[x]` Đơn vị Bộ Tư pháp (`category/CategoryMojUnitsPage.tsx`)
 - `[ ]` Công bố danh mục (`category/CategoryPublishPage.tsx`)
 - `[ ]` Danh sách đã công bố (`category/CategoryPublishedListPage.tsx`)
 - `[ ]` Báo cáo danh mục (`category/CategoryReportPage.tsx`)
@@ -163,13 +163,13 @@
 - `[x]` Modal Phê duyệt hết hạn (`category/components/modals/ExpireApproveModal.tsx`)
 - `[ ]` Modal Công bố (`category/components/modals/PublishModal.tsx`)
 - `[ ]` Modal Cấu hình công bố (`category/components/modals/PublishConfigModal.tsx`)
-- `[ ]` Modal Hủy công bố (`category/components/modals/UnpublishModal.tsx`)
-- `[ ]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
+- `[x]` Modal Hủy công bố (`category/components/modals/UnpublishModal.tsx`)
+- `[x]` Modal Tạo phiên bản mới (`category/components/modals/CreateVersionModal.tsx`)
 - `[ ]` Modal Khôi phục phiên bản (`category/components/modals/RestoreVersionModal.tsx`)
-- `[ ]` Modal Lưu trữ bản ghi (`category/components/modals/ArchiveRecordModal.tsx`)
+- `[x]` Modal Lưu trữ bản ghi (`category/components/modals/ArchiveRecordModal.tsx`)
 - `[ ]` Modal Form thuộc tính (`category/components/modals/AttributeFormModal.tsx`)
 - `[ ]` Modal Form bản ghi (`category/components/modals/RecordFormModal.tsx`)
-- `[ ]` Modal Xóa đơn vị BTP (`category/components/modals/MojUnitDeleteConfirmModal.tsx`)
+- `[x]` Modal Xóa đơn vị BTP (`category/components/modals/MojUnitDeleteConfirmModal.tsx`)
 
 ### Báo cáo danh mục
 - `[x]` Báo cáo danh sách (`category/reports/CategoryReportListPage.tsx`)

@@ -64,7 +64,7 @@ export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: Ta
         {/* Header (compomennt.md 5.4) */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-3 bg-white">
           <div className="min-w-0">
-            <h2 id="target-db-modal-title" className="text-[16px] font-medium text-[#020817] leading-6">
+            <h2 id="target-db-modal-title" className="text-[16px] font-semibold text-[#020817] leading-6">
               {editingData ? 'Cập nhật kết nối CSDL' : 'Thêm kết nối CSDL mới'}
             </h2>
             <p className="text-[13px] text-[#64748B] mt-0.5">Thông tin kết nối hệ thống</p>

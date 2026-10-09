@@ -29,7 +29,7 @@ export function SubmitApprovalModal({ isOpen, onClose, onSubmit, service }: Subm
         {/* Header (mục 5.4) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] shrink-0">
           <div>
-            <h2 className="text-[16px] font-medium text-[#020817]">Trình duyệt Dịch vụ</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">Trình duyệt Dịch vụ</h2>
             <p className="text-[13px] text-[#64748B]">Gửi yêu cầu phê duyệt để công khai</p>
           </div>
           <button

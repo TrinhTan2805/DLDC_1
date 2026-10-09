@@ -58,7 +58,7 @@ export function AddServiceConfigModal({ isOpen, onClose, isEdit, initialData, on
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-3 flex-shrink-0">
           <div>
-            <h2 className="text-[16px] font-medium text-[#020817]">{isEdit ? 'Chỉnh sửa cấu hình đối soát' : 'Tạo gói tin đối soát qua LGSP'}</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">{isEdit ? 'Chỉnh sửa cấu hình đối soát' : 'Tạo gói tin đối soát qua LGSP'}</h2>
             <p className="text-[13px] text-[#64748B] mt-1 leading-5">Cấu hình gói tin gửi tin đối soát qua Cổng LGSP</p>
           </div>
           <button type="button" onClick={onClose} title="Đóng" aria-label="Đóng" className={BTN_GHOST_ICON}>

@@ -1039,7 +1039,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] shrink-0">
           <div>
-            <h2 className="text-[16px] font-medium text-[#020817]">Tạo mới dữ liệu chủ</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">Tạo mới dữ liệu chủ</h2>
             <p className="text-[13px] text-[#64748B] mt-0.5">Quy trình 7 bước</p>
           </div>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
@@ -2905,7 +2905,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                             ] as { value: SemverIncrementPart; label: string }[]).map(opt => (
                               <label
                                 key={opt.value}
-                                className={`flex-1 text-center px-3 py-2 border rounded-lg text-[13px] font-medium cursor-pointer transition-colors ${
+                                className={`flex-1 text-center px-3 py-2 border rounded-lg text-[13px] font-semibold cursor-pointer transition-colors ${
                                   versioningConfig.semverIncrementPart === opt.value ? 'border-[#BFDBFE] bg-[#EAF3FF] text-[#155DFC]' : 'border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]'
                                 }`}
                               >

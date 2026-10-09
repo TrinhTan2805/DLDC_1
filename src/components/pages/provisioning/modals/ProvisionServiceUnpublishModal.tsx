@@ -26,7 +26,7 @@ export function ProvisionServiceUnpublishModal({ isOpen, onClose, requestData, o
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
-          <h2 className="text-[16px] font-medium text-[#020817]">Hủy công khai dịch vụ</h2>
+          <h2 className="text-[16px] font-semibold text-[#020817]">Hủy công khai dịch vụ</h2>
           <button type="button" aria-label="Đóng" onClick={onClose} className={BTN_GHOST_ICON}>
             <X className="w-5 h-5" />
           </button>

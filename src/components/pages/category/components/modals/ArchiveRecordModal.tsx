@@ -43,7 +43,7 @@ export function ArchiveRecordModal({ isOpen, onClose, onConfirm, recordName }: A
             <div className="w-10 h-10 rounded-full bg-[#FEF2F2] flex items-center justify-center text-[#DC2626]">
               <AlertTriangle className="w-5 h-5" />
             </div>
-            <h3 className="text-[16px] font-medium text-[#020817]">Ngừng áp dụng</h3>
+            <h3 className="text-[16px] font-semibold text-[#020817]">Ngừng áp dụng</h3>
           </div>
           <button
             onClick={onClose}

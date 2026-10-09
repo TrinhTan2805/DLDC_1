@@ -27,7 +27,7 @@ export function ProvisionHandoverDetailModal({ isOpen, onClose, requestData }: P
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header (mục 5.4) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
-          <h2 className="text-[16px] font-medium text-[#020817]">Chi tiết Bàn giao dữ liệu</h2>
+          <h2 className="text-[16px] font-semibold text-[#020817]">Chi tiết Bàn giao dữ liệu</h2>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
             <X className="w-5 h-5" />
           </button>

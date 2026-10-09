@@ -69,7 +69,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
         <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-600" />
-            <h2 className="text-[16px] font-medium text-[#020817]">
+            <h2 className="text-[16px] font-semibold text-[#020817]">
               {accountData ? 'Cập nhật tài khoản API' : 'Tạo tài khoản API mới'}
             </h2>
           </div>

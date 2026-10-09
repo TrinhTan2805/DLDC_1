@@ -578,7 +578,7 @@ export function FunctionManagementPage() {
           {/* Row 4: Trạng thái */}
           <div className="flex gap-8 border-t border-[#E2E8F0] pt-4">
             <div className="flex items-center gap-3">
-              <label className="text-[13px] font-medium text-[#020817]">
+              <label className="text-[13px] font-semibold text-[#020817]">
                 Trạng thái hoạt động
               </label>
               <button
@@ -626,7 +626,7 @@ export function FunctionManagementPage() {
         <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4">
           <div role="dialog" aria-modal="true" aria-labelledby="add-function-modal-title" className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <h3 id="add-function-modal-title" className="text-[16px] font-medium text-[#020817]">Thêm mới chức năng</h3>
+              <h3 id="add-function-modal-title" className="text-[16px] font-semibold text-[#020817]">Thêm mới chức năng</h3>
               <button
                 type="button"
                 onClick={() => setModalType(null)}
@@ -798,7 +798,7 @@ export function FunctionManagementPage() {
               {/* Row 4: Trạng thái */}
               <div className="flex gap-8 border-t border-[#E2E8F0] pt-4">
                 <div className="flex items-center gap-3">
-                  <label className="text-[13px] font-medium text-[#020817]">Trạng thái hoạt động</label>
+                  <label className="text-[13px] font-semibold text-[#020817]">Trạng thái hoạt động</label>
                   <button
                     type="button"
                     role="switch"

@@ -87,7 +87,7 @@ export function ConfirmModal({
               <Icon className="w-5 h-5" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0 pt-0.5">
-              <h3 id="confirm-modal-title" className="text-[16px] font-medium text-[#020817] leading-6">
+              <h3 id="confirm-modal-title" className="text-[16px] font-semibold text-[#020817] leading-6">
                 {title}
               </h3>
               {subtitle && (

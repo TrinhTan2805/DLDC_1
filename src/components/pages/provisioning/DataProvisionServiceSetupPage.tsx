@@ -817,7 +817,7 @@ export function DataProvisionServiceSetupPage() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Header (mục 5.4) */}
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between shrink-0">
-              <h3 className="text-[16px] font-medium text-[#020817]">Xác nhận xóa dịch vụ</h3>
+              <h3 className="text-[16px] font-semibold text-[#020817]">Xác nhận xóa dịch vụ</h3>
               <button
                 type="button"
                 aria-label="Đóng"

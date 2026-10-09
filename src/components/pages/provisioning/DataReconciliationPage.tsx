@@ -101,7 +101,7 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-[#64748B]">
         <GitCompare className="w-16 h-16 text-[#CBD5E1] mb-4" />
-        <h2 className="text-[16px] font-medium text-[#020817]">Không tìm thấy tiến trình đối soát</h2>
+        <h2 className="text-[16px] font-semibold text-[#020817]">Không tìm thấy tiến trình đối soát</h2>
         <p className="mt-2 text-[13px]">Vui lòng chọn một tiến trình từ menu bên trái.</p>
       </div>
     );

@@ -42,7 +42,7 @@ export function AgentDetailModal({ isOpen, onClose, data }: AgentDetailModalProp
       <div role="dialog" aria-modal="true" aria-labelledby="agent-detail-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4 shrink-0">
-          <h2 id="agent-detail-title" className="text-[16px] font-medium text-[#020817]">
+          <h2 id="agent-detail-title" className="text-[16px] font-semibold text-[#020817]">
             Thông tin Trạm kết nối
           </h2>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">

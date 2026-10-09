@@ -809,7 +809,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
             {/* Header */}
             <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-white">
               <div>
-                <h3 className="text-[16px] font-medium text-slate-950">
+                <h3 className="text-[16px] font-semibold text-slate-950">
                   Chi tiết kiểm tra cấu trúc - {selectedService.statusText}
                 </h3>
                 <p className="text-[13px] mt-0.5 text-slate-600">
@@ -943,7 +943,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
           >
             <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
               <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-md">
-                <h3 className="text-[16px] font-medium text-slate-950 flex items-center gap-3">
+                <h3 className="text-[16px] font-semibold text-slate-950 flex items-center gap-3">
                   <div className="p-2 bg-amber-100 rounded-lg">
                     <Power className="w-5 h-5 text-amber-600" />
                   </div>
@@ -967,7 +967,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                 </div>
 
                 <div className="space-y-3">
-                  <label className="block text-[13px] font-medium text-slate-700 ml-1">
+                  <label className="block text-[13px] font-semibold text-slate-700 ml-1">
                     Lý do ngừng hoạt động <span className="text-red-500 font-black">*</span>
                   </label>
                   <textarea

@@ -391,7 +391,7 @@ export function AccountManagementLogPage() {
             <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Tác vụ</label>
+              <label className="text-[13px] font-semibold text-slate-700">Tác vụ</label>
               <select aria-label="Select box"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={filterAction}
@@ -415,7 +415,7 @@ export function AccountManagementLogPage() {
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+              <label className="text-[13px] font-semibold text-slate-700">Trạng thái</label>
               <select aria-label="Select box"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 value={filterStatus}
@@ -431,7 +431,7 @@ export function AccountManagementLogPage() {
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+              <label className="text-[13px] font-semibold text-slate-700">Thời gian từ</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                 <input aria-label="Input field"
                   type="date"
@@ -447,7 +447,7 @@ export function AccountManagementLogPage() {
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+              <label className="text-[13px] font-semibold text-slate-700">Thời gian đến</label>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                 <input aria-label="Input field"
                   type="date"

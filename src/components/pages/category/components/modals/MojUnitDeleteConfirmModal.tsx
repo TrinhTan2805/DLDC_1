@@ -28,7 +28,7 @@ export function MojUnitDeleteConfirmModal({
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
-          <h2 className="text-[16px] font-medium text-[#020817]">Xác nhận xóa</h2>
+          <h2 className="text-[16px] font-semibold text-[#020817]">Xác nhận xóa</h2>
           <button
             type="button"
             onClick={onClose}

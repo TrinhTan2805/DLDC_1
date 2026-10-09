@@ -647,7 +647,7 @@ export function AccessLogPage() {
                 <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
 
                 <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Trạng thái</label>
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
@@ -660,7 +660,7 @@ export function AccessLogPage() {
                 </div>
 
                 <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Thời gian từ</label>
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                     <input
                       type="date"
@@ -673,7 +673,7 @@ export function AccessLogPage() {
                 </div>
 
                 <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Thời gian đến</label>
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                     <input
                       type="date"
@@ -852,7 +852,7 @@ export function AccessLogPage() {
                 <div className="absolute -top-2 right-[200px] w-4 h-4 bg-slate-50 border-t border-l border-slate-200 transform rotate-45"></div>
 
                 <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Trạng thái</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Trạng thái</label>
                   <select
                     value={loginFilterStatus}
                     onChange={(e) => setLoginFilterStatus(e.target.value)}
@@ -865,7 +865,7 @@ export function AccessLogPage() {
                 </div>
 
                 <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian từ</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Thời gian từ</label>
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                     <input
                       type="date"
@@ -878,7 +878,7 @@ export function AccessLogPage() {
                 </div>
 
                 <div className="space-y-1.5 relative z-10">
-                  <label className="text-[13px] font-medium text-slate-700">Thời gian đến</label>
+                  <label className="text-[13px] font-semibold text-slate-700">Thời gian đến</label>
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm">
                     <input
                       type="date"

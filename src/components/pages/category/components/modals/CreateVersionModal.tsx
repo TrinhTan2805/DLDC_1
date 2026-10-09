@@ -35,7 +35,7 @@ export function CreateVersionModal({ isOpen, onClose, onSave, currentVersion }: 
             <div className="w-10 h-10 rounded-full bg-[#EAF3FF] flex items-center justify-center text-[#155DFC]">
               <Copy className="w-5 h-5" />
             </div>
-            <h3 className="text-[16px] font-medium text-[#020817]">Tạo phiên bản mới</h3>
+            <h3 className="text-[16px] font-semibold text-[#020817]">Tạo phiên bản mới</h3>
           </div>
           <button
             onClick={onClose}

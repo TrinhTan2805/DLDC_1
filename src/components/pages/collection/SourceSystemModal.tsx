@@ -109,7 +109,7 @@ export function SourceSystemModal({ isOpen, onClose, onSave, editingData, units 
       <div role="dialog" aria-modal="true" aria-labelledby="source-system-modal-title" className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-          <h2 id="source-system-modal-title" className="text-[16px] font-medium text-[#020817]">
+          <h2 id="source-system-modal-title" className="text-[16px] font-semibold text-[#020817]">
             {editingData ? 'Sửa thông tin hệ thống nguồn' : 'Thêm mới hệ thống nguồn'}
           </h2>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">

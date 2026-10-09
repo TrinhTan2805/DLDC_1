@@ -58,7 +58,7 @@ export function ProvisionServicePublicDetailsModal({ isOpen, onClose, service }:
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header (mục 5.4) */}
         <div className="px-6 py-4 flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
-          <h3 className="text-[16px] font-medium text-[#020817]">Thông tin chi tiết API</h3>
+          <h3 className="text-[16px] font-semibold text-[#020817]">Thông tin chi tiết API</h3>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
             <X className="w-5 h-5" />
           </button>

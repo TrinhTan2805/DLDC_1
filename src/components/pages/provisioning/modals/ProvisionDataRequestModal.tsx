@@ -77,7 +77,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header (mục 5.4) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
-          <h2 className="text-[16px] font-medium text-[#020817]">{viewOnly ? 'Chi tiết yêu cầu kết xuất dữ liệu' : requestData ? 'Cập nhật yêu cầu kết xuất dữ liệu' : 'Tạo yêu cầu kết xuất dữ liệu'}</h2>
+          <h2 className="text-[16px] font-semibold text-[#020817]">{viewOnly ? 'Chi tiết yêu cầu kết xuất dữ liệu' : requestData ? 'Cập nhật yêu cầu kết xuất dữ liệu' : 'Tạo yêu cầu kết xuất dữ liệu'}</h2>
           <button type="button" onClick={onClose} className={BTN_GHOST_ICON} aria-label="Đóng" title="Đóng">
             <X className="w-5 h-5" />
           </button>
@@ -86,7 +86,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
         <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
           {viewOnly && requestData?.status === 'TU_CHOI' && requestData?.rejectReason && (
             <div className="border border-[#FEE2E2] bg-[#FEF2F2] rounded-lg p-4">
-              <label className="block text-[13px] font-medium text-[#B91C1C] mb-1">Lý do từ chối từ người phê duyệt</label>
+              <label className="block text-[13px] font-semibold text-[#B91C1C] mb-1">Lý do từ chối từ người phê duyệt</label>
               <p className="text-[13px] text-[#020817]">{requestData.rejectReason}</p>
             </div>
           )}

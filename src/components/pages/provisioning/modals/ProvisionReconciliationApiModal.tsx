@@ -38,7 +38,7 @@ export function ProvisionReconciliationApiModal({ isOpen, onClose, apiData, onSa
         
         {/* Header */}
         <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[#E2E8F0]">
-          <h2 className="text-[16px] font-medium text-[#020817]">
+          <h2 className="text-[16px] font-semibold text-[#020817]">
             {apiData ? 'Cập nhật API Đối soát' : 'Thêm mới API Đối soát'}
           </h2>
           <button

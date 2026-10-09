@@ -290,7 +290,7 @@ export function SystemNotificationManagementPage() {
             </div>
             <div className="p-6 space-y-4 text-[13px]">
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Tiêu đề <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -302,7 +302,7 @@ export function SystemNotificationManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Nội dung <span className="text-red-600">*</span>
                 </label>
                 <textarea
@@ -352,7 +352,7 @@ export function SystemNotificationManagementPage() {
             </div>
             <div className="p-6 space-y-4 text-[13px]">
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Tiêu đề <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -363,7 +363,7 @@ export function SystemNotificationManagementPage() {
                 />
               </div>
               <div>
-                <label className="block text-[13px] font-medium text-slate-700 mb-2">
+                <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                   Nội dung <span className="text-red-600">*</span>
                 </label>
                 <textarea

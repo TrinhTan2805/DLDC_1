@@ -144,7 +144,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
         {/* Header (mục 5.4) */}
         <div className="flex justify-between items-start px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
           <div className="min-w-0">
-            <h2 className="text-[16px] font-medium text-[#020817] flex items-center gap-2">
+            <h2 className="text-[16px] font-semibold text-[#020817] flex items-center gap-2">
               <FileDown className="w-5 h-5 text-[#16A34A]" />
               Kết xuất dữ liệu theo yêu cầu
             </h2>

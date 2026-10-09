@@ -109,7 +109,7 @@ export function CivilRegistryVersionHistoryModal({ record, columns, onClose }: {
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-4 flex-shrink-0">
           <div className="min-w-0">
-            <h3 id="version-history-title" className="text-[16px] font-medium text-[#020817]">Lịch sử phiên bản</h3>
+            <h3 id="version-history-title" className="text-[16px] font-semibold text-[#020817]">Lịch sử phiên bản</h3>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-[#64748B]">
               <span>Mỗi dòng là một lần dữ liệu thay đổi, mới nhất ở trên cùng</span>
               <span className="inline-flex items-center gap-1.5">

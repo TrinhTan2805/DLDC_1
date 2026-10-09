@@ -19,12 +19,12 @@ Hệ thống sử dụng bộ font **Inter** cho **mọi phần tử**. Cỡ ch�
 | Thành phần | Cỡ chữ (Size) | Trọng số (Weight) | Màu sắc | Ghi chú |
 | :--- | :--- | :--- | :--- | :--- |
 | **Tiêu đề trang (H1)** | **20px**, cao dòng 32px | **Bold (700)** | **`#2A0F0F`** | Tiêu đề trang / tiêu đề khối nội dung chính (PM chốt 06/10/2026) |
-| **Tiêu đề modal** | 16px | Medium (500) | `#020817` | Tiêu đề header của modal / dialog — giữ 16px |
+| **Tiêu đề modal** | 16px | **Semibold (600)** | `#020817` | Tiêu đề header của modal / dialog — giữ 16px; độ đậm 600 (PM chốt 09/10/2026) |
 | **Tiêu đề phụ (H2)** | 14px | Medium (500) | `#020817` | Tiêu đề khối/section **và tiêu đề nhóm** trong khối (PM chốt 07/10/2026: bỏ H3 13px). Tiêu đề khối có vạch xanh `#155DFC` bên trái (`SECTION_TITLE`); tiêu đề nhóm không có vạch (`GROUP_TITLE`) |
 | **Văn bản nội dung (P)** | 13px | Regular (400) | `#020817` | Cỡ chữ mặc định |
 | **Tên hệ thống (logo)** | 13px | Semibold (600) | `#020817` | Sidebar |
 | **Dòng phụ dưới logo** | 12px | Regular (400) | `#64748B` | Sidebar |
-| **Menu sidebar** | 12px | 400 (đang chọn: **500**) | `#020817` (đang chọn: **`#155DFC`**) | Mục 5.18 |
+| **Menu sidebar** | 12px | 400 (đang chọn: **500**) | **`#000000`** (đen — PM chốt 09/10/2026; đang chọn: **`#155DFC`**) | Mục 5.18 |
 | **Breadcrumb** | 12px | Regular (400) | `#020817` | Mục 5.15 |
 | **Tab nội dung** | 14px | Semibold (600) | Đang chọn `#155DFC`, thường `#64748B` | Mục 5.9 |
 | **Nhãn thẻ thống kê** | 16px | Regular (400) | `#64748B` | Mục 5.6.1 |
@@ -33,7 +33,7 @@ Hệ thống sử dụng bộ font **Inter** cho **mọi phần tử**. Cỡ ch�
 | **Tiêu đề cột bảng (`th`)** | 13px | **Bold (700)** | `#000000` | Mục 5.3 |
 | **Ô bảng (`td`)** | 13px | Regular (400) | `#000000` | Mục 5.3 |
 | **Badge** | 13px | Regular (400) | Theo loại badge | Mục 5.8 |
-| **Nhãn trường** (form Thêm mới/Chỉnh sửa **và** tên trường ở Xem chi tiết) | 13px | Medium (500) | `#020817` | Một kiểu chung — mục 5.2, 5.17 |
+| **Nhãn trường** (form Thêm mới/Chỉnh sửa **và** tên trường ở Xem chi tiết) | 13px | **Semibold (600)** | `#020817` | Một kiểu chung — mục 5.2, 5.17; độ đậm 600 (PM chốt 09/10/2026) |
 | **Ô nhập liệu / Giá trị trường** | 13px | Regular (400) | `#020817` | Mục 5.2, 5.17 |
 | **Nhãn trong vùng bộ lọc** | 13px | Semibold (600) | `#0E0D0D` | Theo trang chuẩn BTP — mục 5.19 |
 | **Chú thích (Small)** | 12px | Regular (400) | `#64748B` | Mô tả nhỏ |
@@ -56,10 +56,10 @@ Màn hình mới **chỉ dùng các màu trong bảng dưới**, không dùng m�
 | **Primary (xanh chính)** | `#155DFC` | <img src="https://placehold.co/24x24/155dfc/155dfc.png" alt="Primary" style="border-radius:4px" /> | `blue-600` | Nút chính, menu đang chọn, tab đang chọn, liên kết, focus |
 | **Nền menu đang chọn** | `#EAF3FF` | <img src="https://placehold.co/24x24/eaf3ff/eaf3ff.png" alt="Active bg" style="border-radius:4px; border: 1px solid #e2e8f0" /> | `[#EAF3FF]` | Hàng menu đang chọn |
 | **Tiêu đề trang** | `#2A0F0F` | <img src="https://placehold.co/24x24/2a0f0f/2a0f0f.png" alt="Page title" style="border-radius:4px" /> | `[#2A0F0F]` | Tiêu đề trang H1 (mục 1) |
-| **Chữ chính (Foreground)** | `#020817` | <img src="https://placehold.co/24x24/020817/020817.png" alt="Foreground" style="border-radius:4px" /> | `[#020817]` | Menu, breadcrumb, input, nội dung |
+| **Chữ chính (Foreground)** | `#020817` | <img src="https://placehold.co/24x24/020817/020817.png" alt="Foreground" style="border-radius:4px" /> | `[#020817]` | Breadcrumb, input, nội dung (chữ menu sidebar dùng `#000000` — mục 1) |
 | **Chữ đậm** | `#0F172A` | <img src="https://placehold.co/24x24/0f172a/0f172a.png" alt="Strong" style="border-radius:4px" /> | `[#0F172A]` | Số thống kê, tiêu đề |
 | **Chữ nút viền** | `#334155` | <img src="https://placehold.co/24x24/334155/334155.png" alt="Outline text" style="border-radius:4px" /> | `[#334155]` | Nút outline |
-| **Chữ cấp cha / icon** | `#475569` | <img src="https://placehold.co/24x24/475569/475569.png" alt="Secondary text" style="border-radius:4px" /> | `[#475569]` | Hàng menu cha, icon chuông, icon nút trắng |
+| **Chữ cấp cha / icon** | `#475569` | <img src="https://placehold.co/24x24/475569/475569.png" alt="Secondary text" style="border-radius:4px" /> | `[#475569]` | Icon chuông, icon nút trắng (hàng menu cha nay dùng `#000000` — mục 1) |
 | **Chữ phụ (Muted)** | `#64748B` | <img src="https://placehold.co/24x24/64748b/64748b.png" alt="Muted" style="border-radius:4px" /> | `[#64748B]` | Nhãn thẻ, dòng phụ, tab thường |
 | **Chữ bảng** | `#000000` | <img src="https://placehold.co/24x24/000000/000000.png" alt="Table text" style="border-radius:4px" /> | `black` | `th`, `td` |
 | **Nền trắng** | `#FFFFFF` | <img src="https://placehold.co/24x24/ffffff/ffffff.png" alt="White" style="border-radius:4px; border: 1px solid #e2e8f0" /> | `white` | Sidebar, header, thẻ, hàng bảng |
@@ -225,16 +225,18 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 - Bo góc: **8px** — *đề xuất, chưa xác nhận từ trang chuẩn*.
 - Viền: 1px `#E2E8F0` — *đề xuất, chưa xác nhận từ trang chuẩn*.
 - Trạng thái Focus: ring 2px màu primary `#155DFC`.
-- **Nhãn trường:** 13px / Medium (500) / `#020817` (đen), cách ô nhập 4px — **dùng chung một kiểu với tên trường ở màn Xem chi tiết** (mục 5.17).
+- **Nhãn trường:** 13px / **Semibold (600)** / `#020817` (đen), cách ô nhập 4px — **dùng chung một kiểu với tên trường ở màn Xem chi tiết** (mục 5.17).
 - **Disabled (Vô hiệu hóa):** Nền `#F1F5F9`, viền `#E2E8F0`, chữ `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`** (cùng quy tắc với nút, mục 5.1).
 - **Ô bị khóa ở màn Xem chi tiết** *(PM chốt 07/10/2026 — áp dụng module Cung cấp dữ liệu; chỉ cho ô `disabled` ở màn xem chi tiết, không áp cho ô nhập bình thường)*: **giá trị đã có hiển thị chữ đen `#000000`**; ô trống hiển thị **placeholder xám `#94A3B8`**, 13px / 400; nền `#F0F0F0` (như trang BTP hiển thị); viền `rgba(0,0,0,0.26)`. Code: ghép `VIEW_FIELD_CLS` (trong `collectionUi.tsx`) sau `INPUT_CLS` — `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Màn xem chi tiết mà ô không bị khóa sẵn → bọc form bằng `<fieldset disabled={isViewMode}>` để mọi ô nhận kiểu này. Ô giả lập bằng `div` (VD ô tệp đính kèm) theo cùng quy tắc: có giá trị → chữ đen, trống → chữ xám.
 - **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ `*` màu `#DC2626`. Khi có lỗi (validation), viền chuyển `#DC2626` và hiển thị thông báo lỗi 12px `#DC2626` bên dưới.
 - **Cỡ chữ:** Nhãn và nội dung ô nhập đều 13px (theo bảng Typography mục 1).
-- Placeholder, trạng thái lỗi/disabled **chưa đo** ở trang chuẩn — dùng quy định trên cho tới khi đo đủ.
+- **Placeholder (chữ gợi ý) — một mã màu chung cho toàn hệ thống** *(PM chốt 09/10/2026)*: **`#94A3B8`**, 13px / Regular (400), áp cho mọi ô nhập / ô tìm kiếm / bộ lọc / form Thêm mới – Chỉnh sửa / modal và cả ô bị khóa ở màn Xem chi tiết. `<select>` đang ở lựa chọn rỗng (VD "-- Chọn ... --") hiển thị cùng màu placeholder.
+  - **Cách áp dụng:** quy định đặt **một chỗ duy nhất** trong `src/index.css` (biến `--color-placeholder` + quy tắc `::placeholder`). **Không** đặt màu placeholder riêng trong từng màn (`placeholder:text-…`); muốn đổi màu toàn hệ thống chỉ sửa biến `--color-placeholder`. Phần tử tự dựng giả placeholder (VD ô chọn có tìm kiếm) dùng `text-[var(--color-placeholder)]`.
+- Trạng thái lỗi/disabled **chưa đo** ở trang chuẩn — dùng quy định trên cho tới khi đo đủ.
 
 **Class Tailwind chuẩn:**
 ```tsx
-<label className="block text-[13px] font-medium text-[#020817] mb-1">
+<label className="block text-[13px] font-semibold text-[#020817] mb-1">
   Tên dịch vụ <span className="text-[#DC2626]">*</span>
 </label>
 <input className="w-full h-10 px-3 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white
@@ -814,18 +816,18 @@ Quy định chung — theo mẫu PM cung cấp 06/10/2026 (MUI `Pagination`: var
 
 ### 5.17. Trường thông tin chỉ đọc (Label – Value)
 - Dùng cho màn hình **Xem chi tiết** (modal/trang read-only) hiển thị cặp Nhãn – Giá trị.
-- **Tên trường:** 13px / Medium (500) / `#020817` (đen) — **cùng một kiểu với nhãn ở form Thêm mới/Chỉnh sửa** (mục 5.2). Viết hoa chữ đầu, **không dùng** `uppercase`.
+- **Tên trường:** 13px / **Semibold (600)** / `#020817` (đen) — **cùng một kiểu với nhãn ở form Thêm mới/Chỉnh sửa** (mục 5.2). Viết hoa chữ đầu, **không dùng** `uppercase`.
 - **Giá trị:** 13px / Regular (400) / `#020817`. **Không dùng** in nghiêng (`italic`) hay in đậm.
 - **Giá trị trống:** Hiển thị dấu `-`.
 - Khoảng cách nhãn – giá trị: 4px (`space-y-1`). Bố cục lưới 2 cột: `grid grid-cols-2 gap-x-6 gap-y-4`; trường dài (Mô tả, Ghi chú) chiếm 2 cột (`col-span-2`).
 - Giá trị dạng trạng thái dùng Badge (mục 5.8); giá trị dạng liên kết dùng màu `primary`.
-- Tên trường và giá trị cùng màu đen, phân biệt bằng độ đậm (500 so với 400). Chế độ chỉ đọc phân biệt với form nhờ **giá trị không có khung ô nhập**.
+- Tên trường và giá trị cùng màu đen, phân biệt bằng độ đậm (600 so với 400). Chế độ chỉ đọc phân biệt với form nhờ **giá trị không có khung ô nhập**.
 
 **Class Tailwind chuẩn:**
 ```tsx
 <div className="grid grid-cols-2 gap-x-6 gap-y-4">
   <div className="space-y-1">
-    <div className="text-[13px] font-medium text-[#020817]">Tên dịch vụ</div>
+    <div className="text-[13px] font-semibold text-[#020817]">Tên dịch vụ</div>
     <div className="text-[13px] text-[#020817] break-words">{value || '-'}</div>
   </div>
   <div className="space-y-1 col-span-2">
@@ -847,7 +849,7 @@ Quy định chung — theo mẫu PM cung cấp 06/10/2026 (MUI `Pagination`: var
 | :--- | :--- |
 | **Sidebar** | Rộng **250px** (thu gọn 80px), nền `#FFFFFF`, cố định bên trái, đường kẻ phải 1px `#E2E8F0`. Nút thu gọn/mở rộng tròn 24px nằm đè mép phải |
 | **Logo** | Tên hệ thống "Kho Dữ liệu dùng chung" 13px/600 `#020817`; dòng "Thuộc quản lý của Bộ Tư pháp" 12px/400 `#64748B`; chữ cách mép trái 54px |
-| **Menu cấp 1** | Chữ 12px/400 `#020817` (hàng cha có thể dùng `#475569`), cao **35px**, bo 10px, cách mép trái 6px |
+| **Menu cấp 1** | Chữ 12px/400 **`#000000`** (mọi hàng, kể cả hàng cha — PM chốt 09/10/2026), cao **35px**, bo 10px, cách mép trái 6px |
 | **Menu cấp 2** | Chữ 12px/400, cao **30px**, bo 10px, thụt vào 16px so với cấp 1 |
 | **Menu đang chọn** | Nền **`#EAF3FF`**, chữ **`#155DFC`**, đậm **500**, bo **10px** |
 | **Header** | Cao **64px**, nền trắng, viền dưới 1px `#E2E8F0`; bên phải nút chuông 40×40 tròn, icon `#475569`, kèm số đếm (VD "99+") |

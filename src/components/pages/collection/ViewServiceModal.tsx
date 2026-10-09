@@ -83,7 +83,7 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
 
             <div className="flex flex-col gap-4">
               <div>
-                <h1 className="text-[16px] font-medium text-[#020817] mb-3 leading-tight">
+                <h1 className="text-[16px] font-semibold text-[#020817] mb-3 leading-tight">
                   {service.name || 'Dịch vụ chưa đặt tên'}
                 </h1>
 
@@ -168,7 +168,7 @@ export function ViewServiceModal({ isOpen, onClose, service, initialTab }: ViewS
           <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
               <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
-                <h3 className="text-[16px] font-medium text-[#020817] flex items-center gap-3">
+                <h3 className="text-[16px] font-semibold text-[#020817] flex items-center gap-3">
                   <div className="p-2 bg-amber-100 rounded-lg">
                     <Power className="w-5 h-5 text-amber-600" />
                   </div>

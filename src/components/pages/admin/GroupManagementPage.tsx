@@ -504,7 +504,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
 
     return (
       <div className="mt-4 space-y-3">
-        <label className="flex items-center gap-2 cursor-pointer text-[13px] font-medium text-[#020817] select-none">
+        <label className="flex items-center gap-2 cursor-pointer text-[13px] font-semibold text-[#020817] select-none">
           <input
             type="checkbox"
             checked={isEnabled}
@@ -1139,7 +1139,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
             <div className="my-2 pl-4 border-l-2 border-[#E2E8F0] space-y-2" style={{ marginLeft: `${level * 12 + 40}px` }}>
               {item.functions!.map(func => (
                 <div key={func.id} className="flex flex-wrap gap-x-6 gap-y-2 items-center bg-white p-3 rounded-lg border border-[#E2E8F0]">
-                  <label className="flex items-center gap-2 text-[13px] text-blue-600 font-medium cursor-pointer shrink-0">
+                  <label className="flex items-center gap-2 text-[13px] text-blue-600 font-semibold cursor-pointer shrink-0">
                     <input
                       type="checkbox"
                       checked={isAllPermissionsSelectedForFunction(func.id, func.actions)}
@@ -1395,7 +1395,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={handleCloseModal}>
           <div role="dialog" aria-modal="true" aria-labelledby="group-form-title" className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <h3 id="group-form-title" className="text-[16px] font-medium text-[#020817]">
+              <h3 id="group-form-title" className="text-[16px] font-semibold text-[#020817]">
                 {modalType === 'add' ? 'Thêm nhóm người dùng mới' : 'Chỉnh sửa nhóm người dùng'}
               </h3>
               <button type="button" title="Đóng" aria-label="Đóng" onClick={handleCloseModal} className={BTN_GHOST_ICON}>
@@ -1517,7 +1517,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
           <div role="dialog" aria-modal="true" aria-labelledby="group-detail-title" className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <h3 id="group-detail-title" className="text-[16px] font-medium text-[#020817]">
+                <h3 id="group-detail-title" className="text-[16px] font-semibold text-[#020817]">
                   {activeDetailTab === 'function' || activeDetailTab === 'data' || activeDetailTab === 'data-scope' ? 'Phân quyền nhóm người dùng' : 'Chi tiết nhóm'}: {selectedGroup.name}
                 </h3>
                 <p className="text-[13px] text-[#64748B]">Mã nhóm: {selectedGroup.code}</p>
@@ -1888,7 +1888,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
           <div role="dialog" aria-modal="true" aria-labelledby="group-members-title" className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <h3 id="group-members-title" className="text-[16px] font-medium text-[#020817]">Thêm thành viên vào nhóm</h3>
+                <h3 id="group-members-title" className="text-[16px] font-semibold text-[#020817]">Thêm thành viên vào nhóm</h3>
                 <p className="text-[13px] text-[#64748B]">Nhóm: {selectedGroup.name}</p>
               </div>
               <button type="button" title="Đóng" aria-label="Đóng" onClick={handleCloseModal} className={BTN_GHOST_ICON}>
@@ -2006,7 +2006,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={handleCloseModal}>
           <div role="alertdialog" aria-modal="true" aria-labelledby="group-delete-title" className="bg-white rounded-2xl shadow-2xl max-w-md w-full flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <h3 id="group-delete-title" className="text-[16px] font-medium text-[#020817]">Xác nhận xóa nhóm</h3>
+              <h3 id="group-delete-title" className="text-[16px] font-semibold text-[#020817]">Xác nhận xóa nhóm</h3>
               <button type="button" title="Đóng" aria-label="Đóng" onClick={handleCloseModal} className={BTN_GHOST_ICON}>
                 <X className="w-5 h-5" />
               </button>

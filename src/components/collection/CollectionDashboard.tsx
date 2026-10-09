@@ -639,9 +639,9 @@ export function CollectionDashboard() {
             chartType="line"
             headerRight={
               <div className="flex items-center gap-2">
-                <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap">Từ ngày</label>
+                <label className="text-[13px] text-slate-500 font-semibold whitespace-nowrap">Từ ngày</label>
                 <DateInput ariaLabel="Từ ngày" max={toDate || today} value={fromDate} onChange={handleFromDateChange} className="w-40" />
-                <label className="text-[13px] text-slate-500 font-medium whitespace-nowrap ml-2">Đến ngày</label>
+                <label className="text-[13px] text-slate-500 font-semibold whitespace-nowrap ml-2">Đến ngày</label>
                 <DateInput ariaLabel="Đến ngày" max={today} min={fromDate} value={toDate} onChange={handleToDateChange} className="w-40" />
               </div>
             }

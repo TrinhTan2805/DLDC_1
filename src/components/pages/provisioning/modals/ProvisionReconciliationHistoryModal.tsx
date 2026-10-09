@@ -51,7 +51,7 @@ export function ProvisionReconciliationHistoryModal({ isOpen, onClose, process, 
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
           <div className="flex flex-col">
-            <h2 className="text-[16px] font-medium text-[#020817]">
+            <h2 className="text-[16px] font-semibold text-[#020817]">
               Lịch sử đối soát dữ liệu cung cấp
             </h2>
             <p className="text-[13px] text-[#64748B] mt-1 leading-5">

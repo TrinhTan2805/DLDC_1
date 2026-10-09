@@ -140,7 +140,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
           </div>
 
           <div>
-            <label className="block text-[13px] font-medium text-slate-700 mb-1">Lý do hủy công khai *</label>
+            <label className="block text-[13px] font-semibold text-slate-700 mb-1">Lý do hủy công khai *</label>
             <textarea title="Mô tả"
               value={reason}
               onChange={(e) => setReason(e.target.value)}

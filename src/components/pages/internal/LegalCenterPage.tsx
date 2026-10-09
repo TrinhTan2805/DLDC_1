@@ -562,7 +562,7 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedRecord(null)}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between flex-shrink-0">
-              <h3 className="text-[16px] font-medium text-[#020817]">Chi tiết bản ghi</h3>
+              <h3 className="text-[16px] font-semibold text-[#020817]">Chi tiết bản ghi</h3>
               <button type="button" onClick={() => setSelectedRecord(null)} className={BTN_GHOST_ICON} aria-label="Đóng chi tiết" title="Đóng">
                 <X className="w-5 h-5" />
               </button>
