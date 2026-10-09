@@ -7,6 +7,10 @@ import {
   Eye,
   X,
   Activity,
+  User,
+  Clock,
+  Monitor,
+  MapPin,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -319,7 +323,7 @@ const getSessionActions = (sessionId: string): ActionDetail[] => {
 // Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
 const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
 const TD = 'px-3 py-1 text-[13px] text-black';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-4';
 const SUB_TEXT = 'text-[12px] text-[#64748B]';
 
@@ -587,64 +591,55 @@ export function LoginLogPage() {
           className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4"
           onClick={closeDetailModal}
         >
+          {/* Chi tiết phiên đăng nhập — thiết kế PM 09/10/2026: 4 thẻ thông tin trên một hàng, modal gọn theo nội dung */}
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="login-session-title"
-            className="bg-white rounded-2xl shadow-2xl w-[1024px] max-w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl w-[880px] max-w-full max-h-[90vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h3 id="login-session-title" className={MODAL_TITLE}>Chi tiết phiên đăng nhập</h3>
-                <p className={`${SUB_TEXT} mt-0.5`}>
-                  Session ID: <span className="tabular-nums">{selectedLog.sessionId}</span>
-                </p>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 shrink-0 rounded-lg bg-[#EAF3FF] text-blue-600 flex items-center justify-center">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 id="login-session-title" className={MODAL_TITLE}>Chi tiết phiên đăng nhập</h3>
+                  <p className={`${SUB_TEXT} mt-0.5 truncate`}>
+                    Session ID: <span className="tabular-nums">{selectedLog.sessionId}</span>
+                  </p>
+                </div>
               </div>
               <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Thông tin phiên (mục 5.17) */}
+            {/* 4 thẻ thông tin phiên */}
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4">
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Người dùng</div>
-                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.user || '-'}</div>
-                    <div className={SUB_TEXT}>{selectedLog.userId}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  { icon: <User className="w-4 h-4" />, label: 'Người dùng', value: selectedLog.user, sub: selectedLog.userId, num: false },
+                  { icon: <Clock className="w-4 h-4" />, label: 'Thời gian đăng nhập', value: selectedLog.timestamp, sub: '', num: true },
+                  { icon: <Monitor className="w-4 h-4" />, label: 'Thiết bị', value: selectedLog.device, sub: selectedLog.browser, num: false },
+                  { icon: <MapPin className="w-4 h-4" />, label: 'Vị trí', value: selectedLog.location, sub: selectedLog.ip, num: false },
+                ].map((card) => (
+                  <div key={card.label} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 min-w-0">
+                    <div className="flex items-center gap-1.5 text-[13px] text-[#64748B]">
+                      <span className="shrink-0">{card.icon}</span>
+                      <span className="truncate">{card.label}</span>
+                    </div>
+                    <div className={`mt-2 text-[14px] font-semibold text-[#020817] break-words ${card.num ? 'tabular-nums' : ''}`}>{card.value || '-'}</div>
+                    {card.sub && <div className={`${SUB_TEXT} mt-0.5 break-words tabular-nums`}>{card.sub}</div>}
                   </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Thời gian đăng nhập</div>
-                    <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp || '-'}</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Thiết bị</div>
-                    <div className={FIELD_VALUE}>{selectedLog.device || '-'}</div>
-                    <div className={SUB_TEXT}>{selectedLog.browser}</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Vị trí</div>
-                    <div className={FIELD_VALUE}>{selectedLog.location || '-'}</div>
-                    <div className={`${SUB_TEXT} tabular-nums`}>{selectedLog.ip}</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
             {/* Footer */}
-            <div className={MODAL_FOOTER}>
-              <div className="flex items-center gap-2 text-[13px] text-[#020817]">
-                <Activity className="w-4 h-4 text-[#475569]" />
-                <span>
-                  Tổng thời gian hoạt động:{' '}
-                  <span className="font-medium">
-                    {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
-                  </span>
-                </span>
-              </div>
+            <div className="shrink-0 px-6 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end">
               <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
                 Đóng
               </button>

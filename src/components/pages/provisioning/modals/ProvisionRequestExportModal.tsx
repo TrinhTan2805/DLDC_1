@@ -191,7 +191,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
             <div className="mt-auto bg-[#EAF3FF] p-4 rounded-lg border border-[#BFDBFE]">
               <div className="flex items-start gap-2 mb-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
-                <span className="text-[13px] font-medium text-[#020817]">Mục đích yêu cầu</span>
+                <span className="text-[13px] font-semibold text-[#020817]">Mục đích yêu cầu</span>
               </div>
               <p className="text-[13px] text-[#020817] leading-5 break-words">
                 "{requestData.purpose}"
@@ -709,7 +709,7 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[13px] font-medium text-[#020817] whitespace-nowrap">Định dạng file:</span>
+                    <span className="text-[13px] font-semibold text-[#020817] whitespace-nowrap">Định dạng file:</span>
                     <select
                       aria-label="Định dạng file"
                       value={exportFormat}

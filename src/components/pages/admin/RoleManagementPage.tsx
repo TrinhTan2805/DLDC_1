@@ -124,7 +124,7 @@ type ModalType = 'add' | 'edit' | 'delete' | 'assign-users' | 'history' | null;
 // Modal (5.4): nền mờ 50%, khung bo 16px, header 16px/500 + nút X, chân nền #F8FAFC nút căn phải
 const MODAL_OVERLAY = 'fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4';
 const MODAL_HEADER = 'shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_SUBTITLE = 'text-[13px] text-[#64748B]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 // Checkbox (5.12): màu primary

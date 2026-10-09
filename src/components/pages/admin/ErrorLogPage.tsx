@@ -178,7 +178,7 @@ const errorLogs: ErrorLog[] = [
 // Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
 const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
 const TD = 'px-3 py-1 text-[13px] text-black';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-3';
 
 // Thẻ thống kê nhỏ (mục 5.6.1)

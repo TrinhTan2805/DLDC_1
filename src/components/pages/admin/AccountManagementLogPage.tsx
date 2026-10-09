@@ -10,7 +10,9 @@ import {
   UserX,
   CheckCircle2,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  User,
 } from 'lucide-react';
 import {
   Badge, TruncatedText, RowIconAction, Pagination, DateInput,
@@ -210,7 +212,7 @@ const accountLogs: AccountLog[] = [
 // Bảng dữ liệu (compomennt.md 5.3): tiêu đề 42px chữ 13px/700 đen, ô 13px/400 đen, hàng 48px kẻ #E0E0E0
 const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
 const TD = 'px-3 py-1 text-[13px] text-black';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 
 // Thẻ thống kê nhỏ (mục 5.6.1)
@@ -508,23 +510,30 @@ export function AccountManagementLogPage() {
         />
       </div>
 
-      {/* Chi tiết nhật ký — chiều cao cố định, thân tự cuộn (5.4) */}
-      {showDetailModal && selectedLog && (
+      {/* Chi tiết nhật ký quản lý tài khoản — thiết kế PM 09/10/2026: thẻ Thời gian / Trạng thái + khối Tài khoản đích / Người thực hiện; modal gọn theo nội dung */}
+      {showDetailModal && selectedLog && (() => {
+        const isDeactivate = selectedLog.action === 'deactivate';
+        const NAME_LABEL = 'text-[13px] text-[#64748B]';
+        const NAME_VALUE = 'text-[13px] text-[#020817] break-words';
+        return (
         <div className="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4" onClick={closeDetailModal}>
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="account-log-detail-title"
-            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl w-[880px] max-w-full max-h-[90vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h3 id="account-log-detail-title" className={MODAL_TITLE}>Chi tiết nhật ký quản lý tài khoản</h3>
-                <p className="text-[13px] text-[#64748B] mt-0.5">
-                  Tác vụ: <span className="text-[#020817]">{getActionLabel(selectedLog.action)}</span>
-                </p>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`w-10 h-10 shrink-0 rounded-lg flex items-center justify-center ${isDeactivate ? 'bg-[#FEF2F2] text-[#DC2626]' : 'bg-[#EAF3FF] text-blue-600'}`}>
+                  {isDeactivate ? <UserX className="w-5 h-5" /> : <RefreshCw className="w-5 h-5" />}
+                </div>
+                <div className="min-w-0">
+                  <h3 id="account-log-detail-title" className={MODAL_TITLE}>Chi tiết nhật ký quản lý tài khoản</h3>
+                  <p className="text-[12px] text-[#64748B] mt-0.5">Tác vụ: {getActionLabel(selectedLog.action)}</p>
+                </div>
               </div>
               <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
@@ -532,112 +541,71 @@ export function AccountManagementLogPage() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
-              {/* Thông tin chung */}
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <h4 className={SECTION_TITLE}>
-                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
-                  Thông tin chung
-                </h4>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Thời gian</div>
-                    <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp}</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Trạng thái</div>
-                    {statusBadge(selectedLog.status)}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-3">
+              {/* Thẻ Thời gian / Trạng thái */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                  <div className="flex items-center gap-1.5 text-[13px] text-[#64748B]"><Clock className="w-4 h-4" /> Thời gian</div>
+                  <div className="mt-2 text-[14px] font-semibold text-[#020817] tabular-nums">{selectedLog.timestamp || '-'}</div>
+                </div>
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+                  <div className="flex items-center gap-1.5 text-[13px] text-[#64748B]"><CheckCircle2 className="w-4 h-4" /> Trạng thái</div>
+                  <div className="mt-2">
+                    <Badge label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} variant={selectedLog.status === 'success' ? 'green' : 'red'} />
                   </div>
                 </div>
               </div>
 
-              {/* Target User */}
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <h4 className={SECTION_TITLE}>
-                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
-                  Tài khoản đích
+              {/* Tài khoản đích */}
+              <div className="rounded-xl border border-[#E2E8F0] p-3">
+                <h4 className="flex items-center gap-1.5 text-[14px] font-semibold text-[#020817] mb-3">
+                  <UserCog className="w-4 h-4 text-blue-600" /> Tài khoản đích
                 </h4>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                   <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Họ tên</div>
-                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.targetUser}</div>
+                    <div className={NAME_LABEL}>Họ tên</div>
+                    <div className={NAME_VALUE}>{selectedLog.targetUser || '-'}</div>
                   </div>
                   <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Username</div>
-                    <div className={`${FIELD_VALUE} font-mono break-all`}>{selectedLog.targetUserId}</div>
+                    <div className={NAME_LABEL}>Username</div>
+                    <div className={`${NAME_VALUE} break-all`}>{selectedLog.targetUserId || '-'}</div>
                   </div>
                 </div>
               </div>
 
-              {/* Performed By */}
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <h4 className={SECTION_TITLE}>
-                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
-                  Người thực hiện
+              {/* Người thực hiện */}
+              <div className="rounded-xl border border-[#E2E8F0] p-3">
+                <h4 className="flex items-center gap-1.5 text-[14px] font-semibold text-[#020817] mb-3">
+                  <User className="w-4 h-4 text-[#16A34A]" /> Người thực hiện
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-3">
                   <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Họ tên</div>
-                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.performedBy}</div>
+                    <div className={NAME_LABEL}>Họ tên</div>
+                    <div className={NAME_VALUE}>{selectedLog.performedBy || '-'}</div>
                   </div>
                   <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Username</div>
-                    <div className={`${FIELD_VALUE} font-mono break-all`}>{selectedLog.performedById}</div>
+                    <div className={NAME_LABEL}>Username</div>
+                    <div className={`${NAME_VALUE} break-all`}>{selectedLog.performedById || '-'}</div>
                   </div>
                   <div className="space-y-1">
-                    <div className={FIELD_LABEL}>IP Address</div>
-                    <div className={`${FIELD_VALUE} font-mono tabular-nums`}>{selectedLog.ip}</div>
+                    <div className={NAME_LABEL}>IP Address</div>
+                    <div><span className="inline-flex items-center h-[26px] px-2 rounded-md bg-[#F1F5F9] text-[13px] text-[#020817] tabular-nums">{selectedLog.ip || '-'}</span></div>
                   </div>
                 </div>
               </div>
 
-              {/* Details */}
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <h4 className={SECTION_TITLE}>
-                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
-                  Chi tiết thay đổi
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  <div className="md:col-span-2">
-                    <div className={`${FIELD_VALUE} whitespace-pre-line break-words`}>{selectedLog.details}</div>
-                  </div>
-
-                  {selectedLog.reason && (
-                    <div className="space-y-1 md:col-span-2">
-                      <div className={FIELD_LABEL}>Lý do</div>
-                      <div className={`${FIELD_VALUE} break-words`}>{selectedLog.reason}</div>
-                    </div>
-                  )}
-
-                  {selectedLog.oldValue && (
-                    <div className="space-y-1">
-                      <div className={FIELD_LABEL}>Giá trị cũ</div>
-                      <div className="bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg px-3 py-2 text-[13px] text-[#B91C1C] font-mono whitespace-pre-wrap break-all">
-                        {selectedLog.oldValue}
-                      </div>
-                    </div>
-                  )}
-                  {selectedLog.newValue && (
-                    <div className="space-y-1">
-                      <div className={FIELD_LABEL}>Giá trị mới</div>
-                      <div className="bg-[#ECFDF5] border border-[#D1FAE5] rounded-lg px-3 py-2 text-[13px] text-[#047857] font-mono whitespace-pre-wrap break-all">
-                        {selectedLog.newValue}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
 
             {/* Footer */}
-            <div className={MODAL_FOOTER}>
+            <div className="shrink-0 px-6 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end">
               <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
                 Đóng
               </button>
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

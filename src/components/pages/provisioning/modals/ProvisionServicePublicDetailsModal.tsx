@@ -11,7 +11,7 @@ interface ProvisionServicePublicDetailsModalProps {
 
 // Hàng nhãn–giá trị (mục 5.17): nhãn 25% nền #F8FAFC, giá trị 13px #020817
 const ROW_CLS = 'flex flex-col md:flex-row items-stretch bg-white w-full';
-const ROW_LABEL_CLS = 'px-4 py-3 bg-[#F8FAFC] md:border-r border-[#E2E8F0] text-[13px] font-medium text-[#020817] md:w-1/4 flex items-center shrink-0';
+const ROW_LABEL_CLS = 'px-4 py-3 bg-[#F8FAFC] md:border-r border-[#E2E8F0] text-[13px] font-semibold text-[#020817] md:w-1/4 flex items-center shrink-0';
 const ROW_VALUE_CLS = 'px-4 py-3 flex-1 text-[13px] text-[#020817] w-full flex items-center';
 // Nội dung code/endpoint: chữ thường 13px trong ô nền #F8FAFC viền #E2E8F0 bo 8px
 const CODE_BOX_CLS = 'text-[13px] text-[#020817] bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 break-all select-all flex-1 w-full';

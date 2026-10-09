@@ -13,7 +13,12 @@ import {
   Plus,
   CheckCircle2,
   AlertCircle,
-  LogIn
+  LogIn,
+  User,
+  Monitor,
+  MapPin,
+  ShieldCheck,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -445,7 +450,7 @@ const getSessionActions = (sessionId: string): ActionDetail[] => {
 const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
 const TD = 'px-3 py-1 text-[13px] text-black';
 const TR = 'group h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between gap-4';
 const SUB_TEXT = 'text-[12px] text-[#64748B]';
 
@@ -527,6 +532,10 @@ export function AccessLogPage() {
 
   // Modals
   const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null);
+  // Lịch sử thao tác trong phiên: phân trang + xem chi tiết 1 thao tác
+  const [actionPage, setActionPage] = useState(1);
+  const [actionPageSize, setActionPageSize] = useState(10);
+  const [selectedAction, setSelectedAction] = useState<ActionDetail | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Pagination states
@@ -580,6 +589,8 @@ export function AccessLogPage() {
   const closeDetailModal = () => {
     setShowDetailModal(false);
     setSelectedLog(null);
+    setSelectedAction(null);
+    setActionPage(1);
   };
 
   const getActionIcon = (type: ActionDetail['type']) => {
@@ -917,8 +928,18 @@ export function AccessLogPage() {
         </>
       )}
 
-      {/* Modal Xem chi tiết phiên truy cập — chiều cao cố định, thân tự cuộn (mục 5.4) */}
-      {showDetailModal && selectedLog && (
+      {/* Modal Xem chi tiết phiên truy cập — thiết kế PM 09/10/2026: 5 thẻ thông tin + bảng lịch sử thao tác (chiều cao cố định, thân tự cuộn — mục 5.4) */}
+      {showDetailModal && selectedLog && (() => {
+        const sessionDate = (selectedLog.timestamp || '').split(' ')[0];
+        const pagedActions = sessionActions.slice((actionPage - 1) * actionPageSize, actionPage * actionPageSize);
+        const cards = [
+          { icon: <User className="w-4 h-4" />, label: 'Người dùng', value: <span className="break-words">{selectedLog.user || '-'}</span>, sub: selectedLog.userId },
+          { icon: <Clock className="w-4 h-4" />, label: 'Thời gian bắt đầu', value: <span className="tabular-nums">{selectedLog.timestamp || '-'}</span>, sub: '' },
+          { icon: <Monitor className="w-4 h-4" />, label: 'Thiết bị', value: selectedLog.device || '-', sub: selectedLog.browser },
+          { icon: <MapPin className="w-4 h-4" />, label: 'Vị trí & IP', value: selectedLog.location || '-', sub: selectedLog.ip },
+          { icon: <ShieldCheck className="w-4 h-4" />, label: 'Trạng thái đăng nhập', value: <Badge label={selectedLog.status === 'success' ? 'Thành công' : 'Thất bại'} variant={selectedLog.status === 'success' ? 'green' : 'red'} />, sub: '' },
+        ];
+        return (
         <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 animate-fade-in">
           <div
             role="dialog"
@@ -927,12 +948,17 @@ export function AccessLogPage() {
             className="bg-white rounded-2xl shadow-2xl w-[1024px] max-w-full h-[90vh] max-h-[800px] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h3 id="access-session-title" className={MODAL_TITLE}>Chi tiết phiên truy cập</h3>
-                <p className={`${SUB_TEXT} mt-0.5`}>
-                  Session ID: <span className="tabular-nums">{selectedLog.sessionId}</span>
-                </p>
+            <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 shrink-0 rounded-lg bg-[#EAF3FF] text-blue-600 flex items-center justify-center">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 id="access-session-title" className={MODAL_TITLE}>Chi tiết phiên truy cập</h3>
+                  <p className={`${SUB_TEXT} mt-0.5 truncate`}>
+                    Session ID: <span className="tabular-nums">{selectedLog.sessionId}</span>
+                  </p>
+                </div>
               </div>
               <button type="button" onClick={closeDetailModal} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
                 <X className="w-5 h-5" />
@@ -940,109 +966,131 @@ export function AccessLogPage() {
             </div>
 
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4">
-              {/* Thông tin phiên (mục 5.17) */}
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Người dùng</div>
-                    <div className={`${FIELD_VALUE} break-words`}>{selectedLog.user || '-'}</div>
-                    <div className={SUB_TEXT}>{selectedLog.userId}</div>
+              {/* 5 thẻ thông tin phiên */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {cards.map((card) => (
+                  <div key={card.label} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 min-w-0">
+                    <div className="flex items-start gap-1.5 text-[13px] text-[#64748B]">
+                      <span className="shrink-0 mt-0.5">{card.icon}</span>
+                      <span>{card.label}</span>
+                    </div>
+                    <div className="mt-2 text-[14px] font-semibold text-[#020817]">{card.value}</div>
+                    {card.sub && <div className={`${SUB_TEXT} mt-0.5 break-words tabular-nums`}>{card.sub}</div>}
                   </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Thời gian bắt đầu</div>
-                    <div className={`${FIELD_VALUE} tabular-nums`}>{selectedLog.timestamp || '-'}</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Thiết bị</div>
-                    <div className={FIELD_VALUE}>{selectedLog.device || '-'}</div>
-                    <div className={SUB_TEXT}>{selectedLog.browser}</div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className={FIELD_LABEL}>Vị trí & IP</div>
-                    <div className={FIELD_VALUE}>{selectedLog.location || '-'}</div>
-                    <div className={`${SUB_TEXT} tabular-nums`}>{selectedLog.ip}</div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Lịch sử thao tác trong phiên */}
-              <div className="rounded-2xl border border-[#E2E8F0] p-4">
-                <h4 className={SECTION_TITLE}>
-                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+              <div>
+                <h4 className="flex items-center gap-2 text-[14px] font-semibold text-[#020817] mb-2">
+                  <FileText className="w-4 h-4 text-blue-600" />
                   Lịch sử thao tác trong phiên
                   <Badge label={`${sessionActions.length} hành động`} variant="blue" />
                 </h4>
-
-                {sessionActions.length === 0 ? (
-                  <div className="text-center py-8 text-[13px] text-[#64748B]">
-                    Không có thao tác nào trong phiên này
+                <div className={TABLE_WRAP_CLS}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-[13px]">
+                      <thead className={TABLE_HEAD_BG}>
+                        <tr className={TABLE_HEAD_ROW_CLS}>
+                          <th className="px-3 py-[13px] leading-4 font-bold text-black text-center w-14">STT</th>
+                          <th className="px-3 py-[13px] leading-4 font-bold text-black text-left">Hành động</th>
+                          <th className="px-3 py-[13px] leading-4 font-bold text-black text-left whitespace-nowrap">Thời gian</th>
+                          <th className="px-3 py-[13px] leading-4 font-bold text-black text-left whitespace-nowrap">Trạng thái</th>
+                          <th className="px-3 py-[13px] leading-4 font-bold text-black text-center w-20">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pagedActions.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-3 py-8 text-center text-[13px] text-[#64748B]">Không có thao tác nào trong phiên này</td>
+                          </tr>
+                        ) : pagedActions.map((action, i) => (
+                          <tr key={action.id} className="h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors">
+                            <td className="px-3 py-1 text-center text-black">{(actionPage - 1) * actionPageSize + i + 1}</td>
+                            <td className="px-3 py-1 text-black max-w-[420px]"><TruncatedText text={action.description} /></td>
+                            <td className="px-3 py-1 text-black whitespace-nowrap tabular-nums">{sessionDate} {action.time}</td>
+                            <td className="px-3 py-1 whitespace-nowrap">
+                              <Badge label={action.status === 'success' ? 'Thành công' : 'Thất bại'} variant={action.status === 'success' ? 'green' : 'red'} />
+                            </td>
+                            <td className="px-3 py-1 text-center">
+                              <RowIconAction label="Xem chi tiết" onClick={() => setSelectedAction(action)}>
+                                <Eye className="w-4 h-4" />
+                              </RowIconAction>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {sessionActions.map((action) => (
-                      <div
-                        key={action.id}
-                        className="rounded-lg border border-[#E2E8F0] bg-white p-4 hover:bg-[#F8FAFC] transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          {/* Icon */}
-                          <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${getActionColor(action.type)}`}>
-                            {getActionIcon(action.type)}
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0 space-y-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <Badge label={action.action} variant={ACTION_VARIANT[action.type]} />
-                                  <span className="text-[13px] font-medium text-[#020817]">{action.module}</span>
-                                  {action.status === 'success' ? (
-                                    <CheckCircle2 className="w-4 h-4 text-[#16A34A]" aria-label="Thành công" />
-                                  ) : (
-                                    <AlertCircle className="w-4 h-4 text-[#DC2626]" aria-label="Thất bại" />
-                                  )}
-                                </div>
-                                <div className={FIELD_VALUE}>{action.description}</div>
-                              </div>
-                              <div className={`flex items-center gap-1.5 shrink-0 tabular-nums ${SUB_TEXT}`}>
-                                <Clock className="w-4 h-4" />
-                                {action.time}
-                              </div>
-                            </div>
-
-                            {/* Target */}
-                            <div className="mt-2 flex items-center gap-2 flex-wrap text-[13px]">
-                              <span className={FIELD_LABEL}>Đối tượng tác động:</span>
-                              <span className="text-[#020817] bg-[#F8FAFC] px-2 py-0.5 rounded-lg border border-[#E2E8F0] break-all">{action.target}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  {sessionActions.length > 0 && (
+                    <Pagination
+                      className="border-t border-[#E2E8F0]"
+                      currentPage={actionPage}
+                      totalItems={sessionActions.length}
+                      pageSize={actionPageSize}
+                      onPageChange={setActionPage}
+                      onPageSizeChange={(n: number) => { setActionPageSize(n); setActionPage(1); }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className={MODAL_FOOTER}>
-              <div className="flex items-center gap-2 text-[13px] text-[#020817]">
-                <Activity className="w-4 h-4 text-[#475569]" />
-                <span>
-                  Tổng thời gian hoạt động:{' '}
-                  <span className="font-medium">
-                    {sessionActions.length > 0 ? '8 phút 42 giây' : '0 giây'}
-                  </span>
-                </span>
-              </div>
+            <div className="shrink-0 px-6 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end">
               <button type="button" onClick={closeDetailModal} className={BTN_OUTLINE}>
                 Đóng
               </button>
             </div>
           </div>
+
+          {/* Chi tiết một thao tác (modal nhỏ, chồng trên modal phiên) */}
+          {selectedAction && (
+            <div className="fixed inset-0 z-[120] bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedAction(null)}>
+              <div role="dialog" aria-modal="true" aria-labelledby="access-action-title" className="bg-white rounded-2xl shadow-2xl w-[560px] max-w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                <div className="shrink-0 px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between gap-4">
+                  <h3 id="access-action-title" className={MODAL_TITLE}>Chi tiết thao tác</h3>
+                  <button type="button" onClick={() => setSelectedAction(null)} className={BTN_GHOST_ICON} title="Đóng" aria-label="Đóng">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 py-4">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    <div className="space-y-1">
+                      <div className={FIELD_LABEL}>Hành động</div>
+                      <div><Badge label={selectedAction.action} variant={ACTION_VARIANT[selectedAction.type]} /></div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className={FIELD_LABEL}>Phân hệ</div>
+                      <div className={FIELD_VALUE}>{selectedAction.module || '-'}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className={FIELD_LABEL}>Thời gian</div>
+                      <div className={`${FIELD_VALUE} tabular-nums`}>{sessionDate} {selectedAction.time}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className={FIELD_LABEL}>Trạng thái</div>
+                      <div><Badge label={selectedAction.status === 'success' ? 'Thành công' : 'Thất bại'} variant={selectedAction.status === 'success' ? 'green' : 'red'} /></div>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <div className={FIELD_LABEL}>Mô tả</div>
+                      <div className={`${FIELD_VALUE} break-words`}>{selectedAction.description || '-'}</div>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <div className={FIELD_LABEL}>Đối tượng tác động</div>
+                      <div className={`${FIELD_VALUE} break-all`}>{selectedAction.target || '-'}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="shrink-0 px-6 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end">
+                  <button type="button" onClick={() => setSelectedAction(null)} className={BTN_OUTLINE}>Đóng</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

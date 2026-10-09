@@ -97,7 +97,7 @@ const INTEGRATION_METRIC_CONFIG: { key: 'integrated' | 'processed' | 'shared'; l
 const TH = 'h-[42px] px-3 py-[13px] text-[13px] font-bold text-black whitespace-nowrap';
 const TD = 'px-3 py-1 text-[13px] text-black';
 const TR = 'h-12 bg-white border-b border-[#E0E0E0] hover:bg-[#F8FAFC] transition-colors';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 // Trục / tooltip biểu đồ: chữ 12px, màu theo mục 2
 const AXIS_TICK = { fill: '#475569', fontSize: 12 };

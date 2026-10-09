@@ -160,7 +160,7 @@ const initialSyncUsersData: SyncUser[] = [
 // Lớp dùng chung cho bảng (compomennt.md 5.3) và modal (5.4)
 const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
 const TD = 'px-3 py-1 text-[13px] text-black';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const MODAL_FOOTER = 'shrink-0 px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 
 // lastLogin/createdDate là trường mock ngoài interface User — chỉ đọc để hiển thị

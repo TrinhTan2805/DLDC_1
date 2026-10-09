@@ -484,7 +484,7 @@ export function DataProvisionApiManagementPage() {
   const MODAL_OVERLAY = 'fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200';
   const MODAL_BOX = 'bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200';
   const MODAL_HEADER = 'px-6 py-4 border-b border-[#E2E8F0] flex items-start gap-3';
-  const MODAL_TITLE = 'flex-1 min-w-0 pt-2 text-[16px] font-medium text-[#020817] leading-6';
+  const MODAL_TITLE = 'flex-1 min-w-0 pt-2 text-[16px] font-semibold text-[#020817] leading-6';
   const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar text-[13px] text-[#020817] leading-5';
   const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 

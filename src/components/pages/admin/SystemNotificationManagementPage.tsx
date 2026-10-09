@@ -14,7 +14,7 @@ import {
 // Giao diện theo tailieu/docs/compomennt.md (H1, tìm kiếm 5.19, bảng 5.3, phân trang 5.14, modal 5.4)
 const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
 const TD = 'px-3 py-1 text-[13px] text-black';
-const MODAL_TITLE = 'text-[16px] font-medium text-[#020817]';
+const MODAL_TITLE = 'text-[16px] font-semibold text-[#020817]';
 const TEXTAREA_CLS = `${INPUT_CLS.replace('h-10 ', '')} py-2 resize-none`;
 // Nút icon nền trắng viền (Icon outline — mục 5.1)
 const ICON_OUTLINE_BTN = `w-10 h-10 shrink-0 rounded-lg border bg-white border-[#CBD5E1] text-[#475569] hover:bg-[#F8FAFC] hover:text-[#020817] transition-colors flex items-center justify-center ${BTN_FOCUS} ${BTN_DISABLED}`;

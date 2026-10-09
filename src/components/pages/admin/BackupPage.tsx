@@ -376,15 +376,15 @@ export function BackupPage() {
         message={selectedBackup && (
           <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-left">
             <div className="space-y-1 col-span-2">
-              <div className="text-[13px] font-medium text-[#020817]">Tên file sao lưu</div>
+              <div className="text-[13px] font-semibold text-[#020817]">Tên file sao lưu</div>
               <div className="text-[13px] text-[#020817] font-mono break-all">{selectedBackup.name}</div>
             </div>
             <div className="space-y-1">
-              <div className="text-[13px] font-medium text-[#020817]">Dung lượng</div>
+              <div className="text-[13px] font-semibold text-[#020817]">Dung lượng</div>
               <div className="text-[13px] text-[#020817]">{selectedBackup.size}</div>
             </div>
             <div className="space-y-1">
-              <div className="text-[13px] font-medium text-[#020817]">Ngày tạo</div>
+              <div className="text-[13px] font-semibold text-[#020817]">Ngày tạo</div>
               <div className="text-[13px] text-[#020817]">{isoToDisplayDate(selectedBackup.date)}</div>
             </div>
           </div>

@@ -67,7 +67,7 @@ const ToggleRow = ({ label, tip, checked, onChange }: { label: string; tip: stri
     >
       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${checked ? 'left-[18px]' : 'left-0.5'}`} />
     </button>
-    <span className="text-[13px] font-medium text-[#020817] select-none cursor-pointer" onClick={() => onChange(!checked)}>{label}</span>
+    <span className="text-[13px] font-semibold text-[#020817] select-none cursor-pointer" onClick={() => onChange(!checked)}>{label}</span>
     <InfoTip text={tip} />
   </div>
 );

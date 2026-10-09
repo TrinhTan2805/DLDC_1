@@ -236,7 +236,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-white">
           <div>
-            <h2 className="text-[16px] text-slate-900 font-medium">Chi tiết dữ liệu đã thu thập</h2>
+            <h2 className="text-[16px] font-semibold text-[#020817]">Chi tiết dữ liệu đã thu thập</h2>
             <p className="text-[13px] text-slate-600 mt-1">
               Dịch vụ: <span className="font-medium text-slate-900">{service.name}</span> ({service.code})
             </p>

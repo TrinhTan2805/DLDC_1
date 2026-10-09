@@ -1,5 +1,61 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Modal Chi tiết nhật ký quản lý tài khoản theo thiết kế PM (Ngày thực hiện: 09/10/2026) — 175
+
+**Nội dung (PM yêu cầu):** Quản trị & vận hành › Nhật ký quản lý tài khoản › modal Xem chi tiết sửa theo ảnh PM gửi (cùng phong cách modal phiên đăng nhập / phiên truy cập — mục 173, 174).
+
+**File sửa:** `pages/admin/AccountManagementLogPage.tsx`
+- Header: ô icon theo tác vụ (Ngừng hoạt động: nền đỏ nhạt, icon UserX đỏ; Đồng bộ: nền xanh nhạt, icon RefreshCw xanh) + "Chi tiết nhật ký quản lý tài khoản" + dòng "Tác vụ: …"; nút X.
+- **2 thẻ** (nền #F8FAFC): Thời gian (icon đồng hồ, giá trị 14px/600) và Trạng thái (Badge Thành công/Thất bại).
+- Khối **Tài khoản đích** (icon UserCog xanh): Họ tên, Username. Khối **Người thực hiện** (icon User xanh lá): Họ tên, Username, IP Address (dạng nhãn nền xám). Nhãn xám thường, giá trị đen — theo ảnh; bỏ chữ đơn cách (font-mono).
+- **Bỏ khối "Chi tiết thay đổi"** (mô tả, lý do, giá trị cũ/mới) khỏi modal theo ảnh — PM xác nhận bỏ hẳn (dữ liệu mock giữ nguyên).
+- Modal rộng 880px, cao theo nội dung; footer chỉ nút Đóng.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Modal Chi tiết phiên truy cập theo thiết kế PM (Ngày thực hiện: 09/10/2026) — 174
+
+**Nội dung (PM yêu cầu):** Quản trị & vận hành › Nhật ký truy cập › modal Xem chi tiết sửa theo ảnh PM gửi.
+
+**File sửa:** `pages/admin/AccessLogPage.tsx`
+- Header: ô icon nền #EAF3FF + "Chi tiết phiên truy cập" + "Session ID: …" + nút X.
+- **5 thẻ thông tin** (nền #F8FAFC, viền #E2E8F0, bo 12px; icon + nhãn xám, giá trị 14px/600, dòng phụ xám): Người dùng (+ tài khoản), Thời gian bắt đầu, Thiết bị (+ trình duyệt), Vị trí & IP (+ IP), **Trạng thái đăng nhập** (Badge Thành công/Thất bại — thẻ mới theo ảnh, lấy từ trạng thái phiên).
+- **Lịch sử thao tác trong phiên** (icon tài liệu + Badge "n hành động"): đổi từ danh sách thẻ sang **bảng** STT / Hành động (mô tả thao tác, cắt chữ + tooltip) / Thời gian (ngày phiên + giờ, dd/mm/yyyy HH:mm:ss) / Trạng thái (Badge) / Thao tác (nút 👁) + **phân trang** chuẩn (10/trang).
+- Nút 👁 mở modal nhỏ **"Chi tiết thao tác"** (chồng trên): Hành động (Badge), Phân hệ, Thời gian, Trạng thái, Mô tả, Đối tượng tác động — giữ đủ thông tin trước đây hiển thị trong thẻ.
+- Footer chỉ còn nút Đóng; **bỏ dòng "Tổng thời gian hoạt động"** (như modal Chi tiết phiên đăng nhập — mục 173).
+- Giữ chiều cao cố định, thân tự cuộn (5.4).
+
+**Chữ mới:** tiêu đề modal "Chi tiết thao tác", nhãn "Phân hệ", "Mô tả", "Thời gian", "Trạng thái", thẻ "Trạng thái đăng nhập" (theo ảnh).
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Modal Chi tiết phiên đăng nhập theo thiết kế PM (Ngày thực hiện: 09/10/2026) — 173
+
+**Nội dung (PM yêu cầu):** Quản trị & vận hành › Nhật ký đăng nhập › modal **Chi tiết phiên đăng nhập** sửa theo ảnh PM gửi.
+
+**File sửa:** `pages/admin/LoginLogPage.tsx`
+- Header: ô icon nền #EAF3FF (icon hoạt động) + tiêu đề "Chi tiết phiên đăng nhập" + dòng "Session ID: …"; nút X.
+- Thân: **4 thẻ trên một hàng** (nền #F8FAFC, viền #E2E8F0, bo 12px): **Người dùng** (tên + tài khoản), **Thời gian đăng nhập**, **Thiết bị** (thiết bị + trình duyệt), **Vị trí** (địa điểm + IP). Mỗi thẻ: icon + nhãn xám 13px, giá trị 14px/600 đen, dòng phụ 12px xám. Màn hẹp tự xuống 2 cột / 1 cột.
+- Modal rộng 880px, **cao theo nội dung** (modal nhỏ — ngoại lệ của quy định chiều cao cố định 5.4).
+- Footer chỉ còn nút **Đóng** căn phải; **bỏ dòng "Tổng thời gian hoạt động"** theo ảnh.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Rà soát bổ sung độ đậm 600 — nhãn và tiêu đề modal (Ngày thực hiện: 09/10/2026) — 172
+
+**Nội dung (PM yêu cầu):** kiểm tra lại nhãn và tiêu đề modal đã chuyển hết sang 600 chưa (sau mục 171 và lần gộp code mới từ `origin/main`).
+
+**Phát hiện sót:** 16 file tự khai báo hằng `MODAL_TITLE` riêng (16px/500) — lần quét trước chỉ tìm trong thẻ `<h1–h6>` nên bỏ sót; 1 tiêu đề modal viết tay; vài nhãn trường viết bằng `div`/`span`.
+
+**Đã sửa → 600:**
+- `MODAL_TITLE` ở: AccessLogPage, AccountManagementLogPage, ConfigChangeLogPage, ErrorLogPage, LoginLogPage, RoleManagementPage, StatisticsPage, SystemNotificationManagementPage, UserManagementPage (admin); CategoryPage; MasterDataReportsPage, MasterDataUpdateItemPage; OpenDataPublishedListPage, OpenDataSetupPage; OpenDataCategoryPage; DataProvisionApiManagementPage.
+- Tiêu đề modal "Chi tiết dữ liệu đã thu thập" (`collection/ServiceDataDetailPage.tsx`) — kèm màu #020817.
+- Nhãn trường: cột nhãn `ProvisionServicePublicDetailsModal`; "Mục đích yêu cầu", "Định dạng file:" (`ProvisionRequestExportModal`); "Tên file sao lưu", "Dung lượng", "Ngày tạo" (`admin/BackupPage`); nhãn công tắc ở tab Cấu hình kết nối (`ConnectionConfigSection`).
+
+**Giữ nguyên (không phải nhãn / tiêu đề modal):** chữ 13px/500 dùng cho giá trị, tên mục, tiêu đề lựa chọn, dòng thông báo trống…; tên API đang chọn ở tab Phân quyền truy cập (16px, nằm trong trang); tiêu đề trang/khối 16px đậm 700 ở các màn chưa chuẩn hóa (InnerSidebar, ViewCollectedDataPage, DataProvisionDashboard) và số liệu thẻ thống kê.
+
+**Kết quả:** không còn tiêu đề modal hay thẻ `<label>` 13px nào ở 500; tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
 ## Tăng độ đậm nhãn trường và tiêu đề modal lên 600 (Ngày thực hiện: 09/10/2026) — 171
 
 **Nội dung (PM yêu cầu):** tăng độ đậm của nhãn và tiêu đề modal lên 600 (trước 500).
