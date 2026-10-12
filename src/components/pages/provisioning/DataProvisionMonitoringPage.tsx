@@ -10,7 +10,7 @@ import { ProvisionServiceModal } from './modals/ProvisionServiceModal';
 import { AuditLogsTab } from './tabs/AuditLogsTab';
 import { ScrollText } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, Label, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Badge, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, FIELD_LABEL, FIELD_VALUE } from '../collection/collectionUi';
+import { Badge, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DateInput, FIELD_LABEL, FIELD_VALUE } from '../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
@@ -629,15 +629,11 @@ export function DataProvisionMonitoringPage() {
               <p className="col-span-full text-[13px] font-semibold text-[#0E0D0D] leading-5">Tìm kiếm nâng cao</p>
               <div>
                 <label className={FILTER_LABEL}>Từ ngày</label>
-                <div className={DATE_BOX_CLS}>
-                  <input aria-label="Từ ngày" type="date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0" />
-                </div>
+                <DateInput ariaLabel="Từ ngày" value={draftFrom} onChange={setDraftFrom} />
               </div>
               <div>
                 <label className={FILTER_LABEL}>Đến ngày</label>
-                <div className={DATE_BOX_CLS}>
-                  <input aria-label="Đến ngày" type="date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0" />
-                </div>
+                <DateInput ariaLabel="Đến ngày" value={draftTo} onChange={setDraftTo} />
               </div>
             </div>
           )}

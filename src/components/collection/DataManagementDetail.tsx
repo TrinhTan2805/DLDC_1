@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DateInput } from '../pages/collection/collectionUi';
 import { Database, Settings, History as HistoryIcon, Download, Upload, RefreshCw, Filter, Search, Calendar, CheckCircle, XCircle, Clock, Edit, Trash2, Eye, Plus, FileText, Info } from 'lucide-react';
 
 interface DataManagementDetailProps {
@@ -9,6 +10,8 @@ interface DataManagementDetailProps {
 export function DataManagementDetail({ dataName, dataId }: DataManagementDetailProps) {
   const [activeTab, setActiveTab] = useState<'list' | 'config' | 'history'>('list');
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [searchFromDate, setSearchFromDate] = useState('');
+  const [searchToDate, setSearchToDate] = useState('');
   const [showAddApiModal, setShowAddApiModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
@@ -239,8 +242,8 @@ export function DataManagementDetail({ dataName, dataId }: DataManagementDetailP
                     <div>
                       <label className="block text-base text-slate-600 mb-1">Từ ngày - Đến ngày</label>
                       <div className="flex gap-2">
-                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input aria-label="Input field" type="date" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <DateInput ariaLabel="Từ ngày" value={searchFromDate} onChange={setSearchFromDate} className="flex-1" />
+                        <DateInput ariaLabel="Đến ngày" value={searchToDate} onChange={setSearchToDate} className="flex-1" />
                       </div>
                     </div>
                   </div>

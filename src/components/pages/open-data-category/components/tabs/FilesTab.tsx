@@ -3,7 +3,7 @@ import { Search, Filter, X, Eye, History } from 'lucide-react';
 import { CategoryItem } from '../../OpenDataCategoryPage';
 import {
   Badge, TruncatedText, RowIconAction, Pagination,
-  INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL
+  INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DateInput
 } from '../../../collection/collectionUi';
 
 interface FilesTabProps {
@@ -136,27 +136,10 @@ export function FilesTab({
             </div>
             <div>
               <label className={FILTER_LABEL}>Ngày tạo</label>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="date"
-                  title="Từ ngày"
-                  aria-label="Từ ngày"
-                  value={startDateInput}
-                  onChange={(e) => setStartDateInput(e.target.value)}
-                  onKeyDown={onEnter}
-                  className={INPUT_CLS}
-                  placeholder="Từ ngày"
-                />
-                <input
-                  type="date"
-                  title="Đến ngày"
-                  aria-label="Đến ngày"
-                  value={endDateInput}
-                  onChange={(e) => setEndDateInput(e.target.value)}
-                  onKeyDown={onEnter}
-                  className={INPUT_CLS}
-                  placeholder="Đến ngày"
-                />
+              {/* Enter trong ô ngày vẫn chạy tìm kiếm (sự kiện phím nổi lên từ DateInput) */}
+              <div className="grid grid-cols-2 gap-2" onKeyDown={onEnter}>
+                <DateInput ariaLabel="Từ ngày" value={startDateInput} onChange={setStartDateInput} />
+                <DateInput ariaLabel="Đến ngày" value={endDateInput} onChange={setEndDateInput} />
               </div>
             </div>
           </div>

@@ -8,7 +8,7 @@ import {
   Badge, TruncatedText, RowIconAction, Pagination, tabClass,
   BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS,
   INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
-  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, formatDateVN
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, formatDateVN, DateInput
 } from '../collection/collectionUi';
 
 // --- Lớp giao diện dùng chung trong file (compomennt.md 5.3, 5.4) ---
@@ -1311,25 +1311,11 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
             </div>
             <div>
               <label className={FILTER_LABEL}>Ngày tạo từ</label>
-              <input
-                type="date"
-                value={licenseFromDate}
-                onChange={(e) => setLicenseFromDate(e.target.value)}
-                aria-label="Ngày tạo từ"
-                title="Ngày tạo từ"
-                className={INPUT_CLS}
-              />
+              <DateInput ariaLabel="Ngày tạo từ" value={licenseFromDate} onChange={setLicenseFromDate} />
             </div>
             <div>
               <label className={FILTER_LABEL}>Đến ngày</label>
-              <input
-                type="date"
-                value={licenseToDate}
-                onChange={(e) => setLicenseToDate(e.target.value)}
-                aria-label="Đến ngày"
-                title="Đến ngày"
-                className={INPUT_CLS}
-              />
+              <DateInput ariaLabel="Đến ngày" value={licenseToDate} onChange={setLicenseToDate} />
             </div>
           </div>
         )}

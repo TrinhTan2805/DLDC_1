@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Calendar, Filter, Download, Image as ImageIcon, X } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { DateInput } from '../pages/collection/collectionUi';
 
 interface FilterableChartWrapperProps {
   title: string;
@@ -115,12 +116,7 @@ export function FilterableChartWrapper({
                 <label className="block text-xs text-slate-600 mb-1.5">
                   Từ ngày
                 </label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <DateInput ariaLabel="Từ ngày" value={startDate} onChange={setStartDate} />
               </div>
 
               {/* End Date */}
@@ -128,12 +124,7 @@ export function FilterableChartWrapper({
                 <label className="block text-xs text-slate-600 mb-1.5">
                   Đến ngày
                 </label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <DateInput ariaLabel="Đến ngày" value={endDate} onChange={setEndDate} />
               </div>
 
               {/* Data Type */}

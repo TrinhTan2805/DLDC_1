@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DateInput } from '../pages/collection/collectionUi';
 import { X, Globe, Calendar, User, Building2, Link2, CheckCircle, AlertCircle, Copy, ExternalLink, Settings } from 'lucide-react';
 
 interface PublishMasterDataModalProps {
@@ -195,15 +196,11 @@ export function PublishMasterDataModal({ onClose, onConfirm, entityName, entityC
                     <Calendar className="w-4 h-4" />
                     Ngày công khai <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="date"
+                  <DateInput
+                    ariaLabel="Ngày công khai"
                     value={formData.publishDate}
-                    onChange={(e) => handleChange('publishDate', e.target.value)}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 ${
-                      errors.publishDate
-                        ? 'border-red-300 focus:ring-red-500'
-                        : 'border-slate-300 focus:ring-emerald-500'
-                    }`}
+                    onChange={(v) => handleChange('publishDate', v)}
+                    className={errors.publishDate ? '!border-red-300' : ''}
                   />
                   {errors.publishDate && (
                     <p className="text-sm text-red-600 mt-1">{errors.publishDate}</p>

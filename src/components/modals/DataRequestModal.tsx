@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DateInput } from '../pages/collection/collectionUi';
 import { X, FileText, Server, Calendar, AlertCircle, Download, Database, Table, Columns, Check, Search, ChevronRight, User, Building } from 'lucide-react';
 
 interface DataRequestModalProps {
@@ -780,16 +781,12 @@ export function DataRequestModal({ isOpen, onClose, onSubmit, services }: DataRe
                   <label className="block text-sm text-slate-700 mb-2">
                     Thời hạn cần có dữ liệu
                   </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="date"
-                      value={formData.deliveryDate}
-                      onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
+                  <DateInput
+                    ariaLabel="Thời hạn cần có dữ liệu"
+                    value={formData.deliveryDate}
+                    onChange={(v) => setFormData({ ...formData, deliveryDate: v })}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
 
                 {/* Summary */}

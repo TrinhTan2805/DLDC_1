@@ -1,5 +1,6 @@
 import { X, Search } from 'lucide-react';
 import { useState } from 'react';
+import { DateInput } from '../pages/collection/collectionUi';
 
 interface AdvancedSearchModalProps {
   onClose: () => void;
@@ -184,21 +185,11 @@ export function AdvancedSearchModal({ onClose, onSearch, currentFilters }: Advan
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-base text-slate-500 mb-1">Từ ngày</label>
-                <input aria-label="Input field"
-                  type="date"
-                  value={filters.dateFrom}
-                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <DateInput ariaLabel="Từ ngày" value={filters.dateFrom} onChange={(v) => setFilters({ ...filters, dateFrom: v })} />
               </div>
               <div>
                 <label className="block text-base text-slate-500 mb-1">Đến ngày</label>
-                <input aria-label="Input field"
-                  type="date"
-                  value={filters.dateTo}
-                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <DateInput ariaLabel="Đến ngày" value={filters.dateTo} onChange={(v) => setFilters({ ...filters, dateTo: v })} />
               </div>
             </div>
           </div>

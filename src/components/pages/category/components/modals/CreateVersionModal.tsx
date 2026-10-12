@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, Save, Copy } from 'lucide-react';
-import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRED_MARK } from '../../../collection/collectionUi';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, DateInput } from '../../../collection/collectionUi';
 
 const TEXTAREA_CLS = 'w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-[13px] text-[#020817] bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none';
 
@@ -69,12 +69,10 @@ export function CreateVersionModal({ isOpen, onClose, onSave, currentVersion }: 
             
             <div>
               <label className={LABEL_CLS}>Ngày dự kiến hiệu lực <span className={REQUIRED_MARK}>*</span></label>
-              <input
-                type="date"
-                title="Ngày hiệu lực"
+              <DateInput
+                ariaLabel="Ngày hiệu lực"
                 value={versionData.effectiveDate}
-                onChange={(e) => setVersionData({ ...versionData, effectiveDate: e.target.value })}
-                className={INPUT_CLS}
+                onChange={(v) => setVersionData({ ...versionData, effectiveDate: v })}
               />
             </div>
 

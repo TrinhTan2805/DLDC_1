@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DateInput } from './collection/collectionUi';
 import { Search, Database, FolderOpen, Lock, Download, Eye } from 'lucide-react';
 
 const searchResults = [
@@ -11,6 +12,7 @@ const searchResults = [
 export function DataSearchPage() {
   const [searchType, setSearchType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [birthDate, setBirthDate] = useState('');
 
   return (
     <div className="space-y-6">
@@ -113,10 +115,7 @@ export function DataSearchPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 mb-2 text-sm">Ngày sinh</label>
-              <input
-                type="date"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
+              <DateInput ariaLabel="Ngày sinh" value={birthDate} onChange={setBirthDate} />
             </div>
             <div>
               <label className="block text-gray-700 mb-2 text-sm">Danh mục</label>

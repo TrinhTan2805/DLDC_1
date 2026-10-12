@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Database, Hash, CheckCircle2, AlertTriangle, XCircle, FileEdit, FileText, Calendar, ChevronLeft, ChevronRight, ArrowUpDown, ChevronUp, ChevronDown, Settings2, Wand2, Shuffle, Layers, TrendingUp, TrendingDown, Zap, Send, Clock, Eye } from 'lucide-react';
+import { DateInput } from '../pages/collection/collectionUi';
 import { BarChart, Bar, LineChart, Line, RadialBarChart, RadialBar, PolarAngleAxis, ReferenceLine, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   KPI_SLUG_TO_LABEL,
@@ -1243,19 +1244,9 @@ export function DashboardReportPage({ kpiSlug }: DashboardReportPageProps) {
                 ))}
               </div>
               <div className="flex items-center gap-1.5 bg-slate-100 rounded-lg p-1.5">
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={e => setDateFrom(e.target.value)}
-                  className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
-                />
+                <DateInput ariaLabel="Từ ngày" value={dateFrom} onChange={setDateFrom} className="w-36" />
                 <span className="text-slate-400 text-[12px]">đến</span>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={e => setDateTo(e.target.value)}
-                  className="text-[12px] bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700"
-                />
+                <DateInput ariaLabel="Đến ngày" value={dateTo} onChange={setDateTo} className="w-36" />
                 {isDateRangeActive && (
                   <button
                     onClick={() => { setDateFrom(''); setDateTo(''); }}

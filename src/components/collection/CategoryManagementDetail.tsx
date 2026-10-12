@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DateInput } from '../pages/collection/collectionUi';
 import { Database, Settings, History as HistoryIcon, Download, Upload, RefreshCw, Filter, Search, Calendar, CheckCircle, XCircle, Clock, Edit, Trash2, Eye, Plus, FileText, Info } from 'lucide-react';
 
 interface CategoryManagementDetailProps {
@@ -8,6 +9,8 @@ interface CategoryManagementDetailProps {
 
 export function CategoryManagementDetail({ categoryName, categoryId }: CategoryManagementDetailProps) {
   const [activeTab, setActiveTab] = useState<'metadata' | 'list' | 'config' | 'history'>('metadata');
+  const [historyFromDate, setHistoryFromDate] = useState('');
+  const [historyToDate, setHistoryToDate] = useState('');
 
   // Mock data for category data tab
   const mockCategoryData = [
@@ -413,22 +416,8 @@ export function CategoryManagementDetail({ categoryName, categoryId }: CategoryM
             {/* Filter Bar */}
             <div className="p-4 border-b border-slate-200">
               <div className="flex gap-3">
-                <div className="flex-1 relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input aria-label="Input field"
-                    type="date"
-                    title="Từ ngày"
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex-1 relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input aria-label="Input field"
-                    type="date"
-                    title="Đến ngày"
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                <DateInput ariaLabel="Từ ngày" value={historyFromDate} onChange={setHistoryFromDate} className="flex-1" />
+                <DateInput ariaLabel="Đến ngày" value={historyToDate} onChange={setHistoryToDate} className="flex-1" />
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-base">
                   <Search className="w-4 h-4" />
                   Lọc

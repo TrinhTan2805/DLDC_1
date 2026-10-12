@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
-import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK } from '../../collection/collectionUi';
+import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK, DateInput } from '../../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
@@ -145,11 +145,11 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={LABEL_CLS}>Từ ngày</label>
-              <input value={fromDate} onChange={(e) => setFromDate(e.target.value)} type="date" disabled={viewOnly} className={`${INPUT_CLS} cursor-pointer`} />
+              <DateInput ariaLabel="Từ ngày" value={fromDate} onChange={setFromDate} disabled={viewOnly} />
             </div>
             <div>
               <label className={LABEL_CLS}>Đến ngày</label>
-              <input value={toDate} onChange={(e) => setToDate(e.target.value)} type="date" disabled={viewOnly} className={`${INPUT_CLS} cursor-pointer`} />
+              <DateInput ariaLabel="Đến ngày" value={toDate} onChange={setToDate} disabled={viewOnly} />
             </div>
           </div>
 
@@ -157,7 +157,7 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
             <label className={LABEL_CLS}>Định dạng file kết xuất</label>
             <div className="flex gap-4 text-[13px] text-[#020817] mt-2">
               {(['excel', 'csv', 'json', 'xml'] as const).map((f) => (
-                <label key={f} className={`flex items-center gap-2 ${viewOnly ? 'cursor-not-allowed text-[#94A3B8]' : 'cursor-pointer'}`}>
+                <label key={f} className={`flex items-center gap-2 ${viewOnly ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                   <input type="radio" className="accent-blue-600 w-4 h-4" checked={format === f} onChange={() => !viewOnly && setFormat(f)} disabled={viewOnly} />
                   {f.toUpperCase()}
                 </label>

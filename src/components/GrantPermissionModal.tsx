@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DateInput } from './pages/collection/collectionUi';
 import { X, ChevronRight, ChevronLeft, Check, AlertCircle, User, Shield, Settings, Key, Globe, Plus, Building2, Mail, Phone, Search, Filter } from 'lucide-react';
 
 interface Service {
@@ -598,13 +599,7 @@ export function GrantPermissionModal({
                 <label htmlFor="valid-until-date" className="block text-sm text-slate-700 mb-2">
                   Hiệu lực đến
                 </label>
-                <input
-                  id="valid-until-date"
-                  type="date"
-                  value={validUntil}
-                  onChange={(e) => setValidUntil(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <DateInput ariaLabel="Hiệu lực đến" value={validUntil} onChange={setValidUntil} />
               </div>
             </div>
           )}

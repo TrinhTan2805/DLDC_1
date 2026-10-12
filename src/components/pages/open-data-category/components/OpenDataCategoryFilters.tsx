@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
+import { DateInput } from '../../collection/collectionUi';
 
 interface OpenDataCategoryFiltersProps {
   searchTerm: string;
@@ -98,20 +99,8 @@ export function OpenDataCategoryFilterPanel({
         <div>
           <label className="block text-[13px] text-slate-600 mb-2 font-normal">Ngày tạo</label>
           <div className="grid grid-cols-2 gap-2">
-            <input
-              type="date"
-              value={startDateFilter}
-              onChange={(e) => setStartDateFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-750 font-medium"
-              placeholder="Từ ngày"
-            />
-            <input
-              type="date"
-              value={endDateFilter}
-              onChange={(e) => setEndDateFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-750 font-medium"
-              placeholder="Đến ngày"
-            />
+            <DateInput ariaLabel="Từ ngày" value={startDateFilter} onChange={setStartDateFilter} />
+            <DateInput ariaLabel="Đến ngày" value={endDateFilter} onChange={setEndDateFilter} />
           </div>
         </div>
       </div>

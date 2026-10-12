@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Settings, Search, Filter, Play, GitCompare, Calendar, History, CheckCircle2, AlertTriangle, XCircle, ArrowRight, Eye, X, Database, Percent, Clock, List } from 'lucide-react';
+import { Settings, Search, Filter, Play, GitCompare, History, CheckCircle2, AlertTriangle, XCircle, ArrowRight, Eye, X, Database, Percent, Clock, List } from 'lucide-react';
 import { reconciliationData, reconciliationHistoryData, ReconciliationHistoryEntry } from '../../../data/provisionReconciliationData';
 import { ProvisionReconciliationDetailsModal } from './modals/ProvisionReconciliationDetailsModal';
 import { ProvisionReconciliationHistoryModal } from './modals/ProvisionReconciliationHistoryModal';
-import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch } from '../collection/collectionUi';
+import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DateInput, normalizeSearch } from '../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 export function ProvisionReconciliationPage({ processId }: { processId?: string }) {
@@ -180,29 +180,11 @@ export function ProvisionReconciliationPage({ processId }: { processId?: string 
             <div className={`${FILTER_GRID_CLS} animate-in slide-in-from-top-2 duration-200`}>
               <div>
                 <label className={FILTER_LABEL}>Khoảng thời gian (Từ ngày)</label>
-                <div className={DATE_BOX_CLS}>
-                  <input
-                    type="date"
-                    aria-label="Khoảng thời gian (Từ ngày)"
-                    value={filterStartDate}
-                    onChange={(e) => setFilterStartDate(e.target.value)}
-                    className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
-                  />
-                  <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
-                </div>
+                <DateInput ariaLabel="Khoảng thời gian (Từ ngày)" value={filterStartDate} onChange={setFilterStartDate} />
               </div>
               <div>
                 <label className={FILTER_LABEL}>Khoảng thời gian (Đến ngày)</label>
-                <div className={DATE_BOX_CLS}>
-                  <input
-                    type="date"
-                    aria-label="Khoảng thời gian (Đến ngày)"
-                    value={filterEndDate}
-                    onChange={(e) => setFilterEndDate(e.target.value)}
-                    className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0"
-                  />
-                  <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
-                </div>
+                <DateInput ariaLabel="Khoảng thời gian (Đến ngày)" value={filterEndDate} onChange={setFilterEndDate} />
               </div>
               <div>
                 <label className={FILTER_LABEL}>Trạng thái xử lý / kết nối</label>

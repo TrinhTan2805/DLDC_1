@@ -1,5 +1,6 @@
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, Building2, User, RefreshCw, Calendar, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
+import { DateInput } from './pages/collection/collectionUi';
 
 export interface TerminationGuardianshipMonitoringModalProps {
   isOpen: boolean;
@@ -74,6 +75,8 @@ export function TerminationGuardianshipMonitoringModal({
   const [activeTab, setActiveTab] = useState('list');
   const [selectedRecord, setSelectedRecord] = useState<TerminationGuardianshipMonitoringRecord | null>(null);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [searchFromDate, setSearchFromDate] = useState('');
+  const [searchToDate, setSearchToDate] = useState('');
   
   if (!isOpen && !isInline) return null;
 
@@ -217,17 +220,11 @@ export function TerminationGuardianshipMonitoringModal({
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Từ ngày</label>
-                          <div className="relative">
-                            <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          </div>
+                          <DateInput ariaLabel="Từ ngày" value={searchFromDate} onChange={setSearchFromDate} />
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 ml-1">Đến ngày</label>
-                          <div className="relative">
-                            <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm appearance-none" />
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          </div>
+                          <DateInput ariaLabel="Đến ngày" value={searchToDate} onChange={setSearchToDate} />
                         </div>
                       </div>
 

@@ -1,8 +1,8 @@
 import React, { useMemo, useState, type ReactNode } from 'react';
-import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe, X, Clock, Calendar, MoreVertical } from 'lucide-react';
+import { FileText, Search, Share, Plus, Filter, Download, XCircle, UploadCloud, CheckCircle, Send, Settings, Eye, Edit, Globe, X, Clock, MoreVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
-import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, normalizeSearch } from '../collection/collectionUi';
+import { Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DateInput, normalizeSearch } from '../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 import { ProvisionDataRequestModal, CreateDataRequestPayload } from './modals/ProvisionDataRequestModal';
@@ -516,29 +516,11 @@ export function DataProvisionRequestPage() {
                   </div>
                   <div>
                     <label className={FILTER_LABEL}>Từ ngày</label>
-                    <div className={DATE_BOX_CLS}>
-                      <input
-                        type="date"
-                        aria-label="Từ ngày"
-                        value={filterFromDate}
-                        onChange={(e) => setFilterFromDate(e.target.value)}
-                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0 cursor-pointer"
-                      />
-                      <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
-                    </div>
+                    <DateInput ariaLabel="Từ ngày" value={filterFromDate} onChange={setFilterFromDate} />
                   </div>
                   <div>
                     <label className={FILTER_LABEL}>Đến ngày</label>
-                    <div className={DATE_BOX_CLS}>
-                      <input
-                        type="date"
-                        aria-label="Đến ngày"
-                        value={filterToDate}
-                        onChange={(e) => setFilterToDate(e.target.value)}
-                        className="w-full border-0 bg-transparent text-[13px] focus:outline-none text-[#020817] p-0 cursor-pointer"
-                      />
-                      <Calendar className="w-4 h-4 text-[#475569] shrink-0" />
-                    </div>
+                    <DateInput ariaLabel="Đến ngày" value={filterToDate} onChange={setFilterToDate} />
                   </div>
                 </div>
               )}

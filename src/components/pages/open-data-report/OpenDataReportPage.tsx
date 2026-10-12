@@ -7,7 +7,7 @@ import { mockPublishedCategories } from '../open-data-category/OpenDataCategoryS
 import { PUBLISH_STATUS_LABELS, type PublishStatus } from '../open-data/OpenDataPublishPage';
 import {
   Badge, TruncatedText, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, INPUT_CLS, FILTER_LABEL, FILTER_GRID_CLS,
-  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, normalizeSearch,
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, normalizeSearch, DateInput,
 } from '../collection/collectionUi';
 
 const XAxisAny = XAxis as any;
@@ -805,22 +805,11 @@ export function OpenDataReportPage({ onBack }: OpenDataReportPageProps) {
                   <>
                     <div>
                       <label className={FILTER_LABEL}>Từ ngày</label>
-                      <input
-                        type="date"
-                        value={statsFromDate}
-                        onChange={(e) => setStatsFromDate(e.target.value)}
-                        className={INPUT_CLS}
-                      />
+                      <DateInput ariaLabel="Từ ngày" value={statsFromDate} onChange={setStatsFromDate} />
                     </div>
                     <div>
                       <label className={FILTER_LABEL}>Đến ngày</label>
-                      <input
-                        type="date"
-                        value={statsToDate}
-                        min={statsFromDate}
-                        onChange={(e) => setStatsToDate(e.target.value)}
-                        className={INPUT_CLS}
-                      />
+                      <DateInput ariaLabel="Đến ngày" value={statsToDate} min={statsFromDate} onChange={setStatsToDate} />
                     </div>
                     <div className="flex items-end gap-2">
                       <button type="button" onClick={() => { setAppliedGroupBy(statsGroupBy); setAppliedFromDate(statsFromDate); setAppliedToDate(statsToDate); setStatsReportReady(true); setStatsPage(1); }} className={`${BTN_PRIMARY} whitespace-nowrap`}>

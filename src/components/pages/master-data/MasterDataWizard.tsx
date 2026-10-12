@@ -1180,8 +1180,11 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                   </label>
                   <div className="relative">
                     <select
+                      aria-label="Loại thực thể"
                       value={wizardData.dataType}
                       onChange={(e) => setWizardData({ ...wizardData, dataType: e.target.value as DataType })}
+                      disabled={isEditingEntity}
+                      title={isEditingEntity ? 'Không thay đổi loại thực thể khi chỉnh sửa' : undefined}
                       className={SELECT_ARROW_CLS}
                     >
                       <option value="individual">Thực thể Cá nhân</option>

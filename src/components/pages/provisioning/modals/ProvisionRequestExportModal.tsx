@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, FileDown, CheckCircle, Table as TableIcon, Filter, AlertCircle, RefreshCw, Layers, Database, LayoutTemplate, Key, Trash2, Plus, Copy, Code } from 'lucide-react';
-import { Badge, RowIconAction, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, SECTION_TITLE } from '../../collection/collectionUi';
+import { Badge, RowIconAction, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, SECTION_TITLE, DateInput } from '../../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
@@ -32,6 +32,15 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
 
   // States for query builder
   const [dateColumn, setDateColumn] = useState('');
+  const [fromDate, setFromDate] = useState<string>(requestData?.fromDate || '');
+  const [toDate, setToDate] = useState<string>(requestData?.toDate || '');
+  // Mỗi lần mở / đổi yêu cầu: lấy lại ngày mặc định từ yêu cầu (tương đương defaultValue cũ)
+  useEffect(() => {
+    if (isOpen) {
+      setFromDate(requestData?.fromDate || '');
+      setToDate(requestData?.toDate || '');
+    }
+  }, [isOpen, requestData]);
   const [conditions, setConditions] = useState<any[]>([]);
 
   // States for packet design
@@ -248,11 +257,11 @@ export function ProvisionRequestExportModal({ isOpen, onClose, requestData, onCo
                     </div>
                     <div>
                       <label className={LABEL_CLS}>Từ ngày</label>
-                      <input type="date" aria-label="Từ ngày" className={`${INPUT_CLS} cursor-pointer`} defaultValue={requestData.fromDate || ''} />
+                      <DateInput ariaLabel="Từ ngày" value={fromDate} onChange={setFromDate} />
                     </div>
                     <div>
                       <label className={LABEL_CLS}>Đến ngày</label>
-                      <input type="date" aria-label="Đến ngày" className={`${INPUT_CLS} cursor-pointer`} defaultValue={requestData.toDate || ''} />
+                      <DateInput ariaLabel="Đến ngày" value={toDate} onChange={setToDate} />
                     </div>
                   </div>
 

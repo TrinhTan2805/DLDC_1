@@ -1,5 +1,6 @@
 import { X, Bell, Mail, FileText, Calendar, User } from 'lucide-react';
 import { useState } from 'react';
+import { DateInput } from '../pages/collection/collectionUi';
 
 interface SendNotificationModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export function SendNotificationModal({
   title = 'Gửi thông báo',
   defaultRecipient = ''
 }: SendNotificationModalProps) {
+  const [scheduleDate, setScheduleDate] = useState('');
   if (!isOpen) return null;
 
   const [notificationType, setNotificationType] = useState<'electronic' | 'paper'>('electronic');
@@ -245,10 +247,7 @@ export function SendNotificationModal({
                         <Calendar className="w-3 h-3 inline mr-1" />
                         Ngày gửi
                       </label>
-                      <input
-                        type="date"
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      <DateInput ariaLabel="Ngày gửi" value={scheduleDate} onChange={setScheduleDate} />
                     </div>
                     <div>
                       <label className="block text-xs text-slate-600 mb-1">

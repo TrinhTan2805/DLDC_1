@@ -57,7 +57,7 @@ import {
   Badge, TruncatedText, RowIconAction, Pagination, tabClass,
   BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, ROW_ICON_BTN,
   INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
-  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, normalizeSearch
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, normalizeSearch, DateInput
 } from '../collection/collectionUi';
 
 // --- Lớp giao diện dùng chung trong file (compomennt.md 5.3, 5.4) ---
@@ -3439,7 +3439,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
 
               <div>
                 <label className={LABEL_CLS}>Ngày hiệu lực <span className={REQUIRED_MARK}>*</span></label>
-                <input title="Ngày hiệu lực" type="date" className={INPUT_CLS} value={newEffectiveDate} onChange={(e) => setNewEffectiveDate(e.target.value)} />
+                <DateInput ariaLabel="Ngày hiệu lực" value={newEffectiveDate} onChange={setNewEffectiveDate} />
               </div>
 
               <div>

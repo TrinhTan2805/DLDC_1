@@ -860,6 +860,8 @@ export function MasterDataScaleManagementPage() {
                               aria-label="Loại thực thể"
                               value={formData.dataType}
                               onChange={(e) => setFormData({ ...formData, dataType: e.target.value as DataType })}
+                              disabled={!!editingEntity}
+                              title={editingEntity ? 'Không thay đổi loại thực thể khi chỉnh sửa' : undefined}
                               className={INPUT_CLS}
                             >
                               <option value="individual">Thực thể Cá nhân</option>

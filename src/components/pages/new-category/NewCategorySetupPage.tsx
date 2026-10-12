@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DateInput } from '../collection/collectionUi';
 import { Plus, Search, Settings, Eye, Edit, Trash2, CheckSquare, Share2, FileSearch, BarChart3, Filter, List } from 'lucide-react';
 
 interface Category {
@@ -136,6 +137,8 @@ const mockPublishedCategories: PublishedCategory[] = [
 
 export function NewCategorySetupPage() {
   const [activeTab, setActiveTab] = useState<'setup' | 'approval' | 'publish' | 'report' | 'statistics'>('setup');
+  const [statsFromDate, setStatsFromDate] = useState('');
+  const [statsToDate, setStatsToDate] = useState('');
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [approvalRequests] = useState<ApprovalRequest[]>(mockApprovalRequests);
   const [publishedCategories] = useState<PublishedCategory[]>(mockPublishedCategories);
@@ -1000,17 +1003,11 @@ export function NewCategorySetupPage() {
                 <div className="grid grid-cols-4 gap-4 items-end">
                   <div>
                     <label className="block text-xs text-slate-600 mb-2">Từ ngày</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
+                    <DateInput ariaLabel="Từ ngày" value={statsFromDate} onChange={setStatsFromDate} />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-2">Đến ngày</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
+                    <DateInput ariaLabel="Đến ngày" value={statsToDate} onChange={setStatsToDate} />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-2">Loại thống kê</label>

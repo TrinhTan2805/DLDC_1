@@ -7,7 +7,7 @@ import {
   Badge, TruncatedText, RowIconAction, Pagination, tabClass,
   BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON,
   INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
-  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, formatDateVN
+  SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, formatDateVN, DateInput
 } from '../collection/collectionUi';
 
 // --- Lớp giao diện dùng chung trong file (compomennt.md 5.3, 5.4) ---
@@ -3673,12 +3673,10 @@ export function OpenDataPublishedListPage() {
 
                 <div>
                   <label className={LABEL_CLS}>Ngày bắt đầu</label>
-                  <input
-                    type="date"
-                    aria-label="Ngày bắt đầu"
-                    value={scheduleFormData.startDate}
-                    onChange={(e) => setScheduleFormData({ ...scheduleFormData, startDate: e.target.value })}
-                    className={INPUT_CLS}
+                  <DateInput
+                    ariaLabel="Ngày bắt đầu"
+                    value={scheduleFormData.startDate || ''}
+                    onChange={(v) => setScheduleFormData({ ...scheduleFormData, startDate: v })}
                   />
                 </div>
 

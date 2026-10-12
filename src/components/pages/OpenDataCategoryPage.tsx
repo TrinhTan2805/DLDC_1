@@ -19,6 +19,7 @@ import {
   Share2
 } from 'lucide-react';
 import { StatusTag } from '../common/StatusTag';
+import { DateInput } from './collection/collectionUi';
 
 interface OpenDataCategory {
   id: string;
@@ -1528,20 +1529,18 @@ export function OpenDataCategoryPage() {
                 </div>
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Từ ngày</label>
-                  <input
-                    type="date"
+                  <DateInput
+                    ariaLabel="Từ ngày"
                     value={advancedSearchForm.createdDateFrom}
-                    onChange={(e) => setAdvancedSearchForm({ ...advancedSearchForm, createdDateFrom: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    onChange={(v) => setAdvancedSearchForm({ ...advancedSearchForm, createdDateFrom: v })}
                   />
                 </div>
                 <div>
                   <label className="block text-sm text-slate-700 mb-2">Đến ngày</label>
-                  <input
-                    type="date"
+                  <DateInput
+                    ariaLabel="Đến ngày"
                     value={advancedSearchForm.createdDateTo}
-                    onChange={(e) => setAdvancedSearchForm({ ...advancedSearchForm, createdDateTo: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    onChange={(v) => setAdvancedSearchForm({ ...advancedSearchForm, createdDateTo: v })}
                   />
                 </div>
               </div>

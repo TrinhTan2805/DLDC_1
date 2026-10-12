@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Shield, Key, Copy, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK } from '../../collection/collectionUi';
+import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK, DateInput } from '../../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
@@ -25,6 +25,8 @@ export function ProvisionAccessControlModal({
 }: ProvisionAccessControlModalProps) {
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState('');
+  const [validFrom, setValidFrom] = useState('2026-05-19');
+  const [validTo, setValidTo] = useState('2027-05-19');
 
   const generateToken = (org: string) => {
     const prefix = org.includes('Công an') ? 'BCA' : org.includes('Y tế') ? 'SYT' : 'ORG';
@@ -36,6 +38,8 @@ export function ProvisionAccessControlModal({
     if (isOpen) {
       setSelectedOrgs([...preConfiguredOrganizations]);
       setOrgSearchQuery('');
+      setValidFrom('2026-05-19');
+      setValidTo('2027-05-19');
     }
   }, [isOpen, preConfiguredOrganizations]);
 
@@ -76,6 +80,11 @@ export function ProvisionAccessControlModal({
       toast.error('Vui lòng chọn thêm ít nhất một Đơn vị/Tổ chức thụ hưởng mới.');
       return;
     }
+    // Trường bắt buộc (trước đây do thuộc tính required của input date đảm nhận)
+    if (!validFrom) {
+      toast.error('Vui lòng nhập Hiệu lực từ ngày.');
+      return;
+    }
 
     const scopes: string[] = ['Đọc (GET)']; // Default scope since UI is removed
 
@@ -87,8 +96,8 @@ export function ProvisionAccessControlModal({
           authorization: getUsernameForOrg(org),
           scopes: scopes.join(', '),
           ipWhitelist: form.ipWhitelist.value.trim() || 'Tất cả IP',
-          validFrom: form.validFrom.value,
-          validTo: form.validTo.value,
+          validFrom,
+          validTo,
           status: 'Hợp lệ'
         });
       });
@@ -267,13 +276,7 @@ export function ProvisionAccessControlModal({
                 <label className={LABEL_CLS}>
                   Hiệu lực từ ngày <span className={REQUIRED_MARK}>*</span>
                 </label>
-                <input
-                  name="validFrom"
-                  type="date"
-                  required
-                  defaultValue="2026-05-19"
-                  className={INPUT_CLS}
-                />
+                <DateInput ariaLabel="Hiệu lực từ ngày" value={validFrom} onChange={setValidFrom} />
               </div>
 
               {/* End Date */}
@@ -281,12 +284,7 @@ export function ProvisionAccessControlModal({
                 <label className={LABEL_CLS}>
                   Hiệu lực đến ngày
                 </label>
-                <input
-                  name="validTo"
-                  type="date"
-                  defaultValue="2027-05-19"
-                  className={INPUT_CLS}
-                />
+                <DateInput ariaLabel="Hiệu lực đến ngày" value={validTo} onChange={setValidTo} />
               </div>
 
             </div>

@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
+import { DateInput } from '../pages/collection/collectionUi';
 
 interface AdvancedSearchModalProps {
   isOpen: boolean;
@@ -8,6 +10,10 @@ interface AdvancedSearchModalProps {
 }
 
 export function AdvancedSearchModal({ isOpen, onClose, onSearch, fields }: AdvancedSearchModalProps) {
+  // Giá trị các ô ngày (ISO) theo name; xoá khi đóng modal giống form cũ bị huỷ khi ẩn
+  const [dateValues, setDateValues] = useState<Record<string, string>>({});
+  useEffect(() => { if (!isOpen) setDateValues({}); }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,11 +58,15 @@ export function AdvancedSearchModal({ isOpen, onClose, onSearch, fields }: Advan
                     ))}
                   </select>
                 ) : field.type === 'date' ? (
-                  <input
-                    type="date"
-                    name={field.name}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <>
+                    <DateInput
+                      ariaLabel={field.label}
+                      value={dateValues[field.name] || ''}
+                      onChange={(v) => setDateValues((prev) => ({ ...prev, [field.name]: v }))}
+                    />
+                    {/* Giữ giá trị ISO trong FormData theo name như ô ngày cũ */}
+                    <input type="hidden" name={field.name} value={dateValues[field.name] || ''} />
+                  </>
                 ) : (
                   <input
                     type="text"

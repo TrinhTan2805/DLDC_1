@@ -1,5 +1,28 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Nút chọn bị khóa: chỉ khóa nút, nhãn giữ chữ đen (Ngày thực hiện: 09/10/2026) — 198
+
+**Nội dung (PM yêu cầu):** trường "Định dạng file kết xuất" (modal Chi tiết yêu cầu kết xuất dữ liệu) chỉ disable radio button, nhãn không cần disable; kiểm tra tương tự các màn hình.
+
+**Rà soát:** mọi nhãn bọc / đứng cạnh radio, checkbox, công tắc có đổi sang chữ xám hoặc làm mờ khi khóa — **chỉ 1 chỗ** bị: `provisioning/modals/ProvisionDataRequestModal.tsx` (EXCEL / CSV / JSON / XML).
+
+**Đã sửa:**
+- Nhãn radio Định dạng file kết xuất: bỏ chữ xám `#94A3B8` khi xem — chỉ nút radio bị khóa, nhãn giữ chữ đen (vẫn con trỏ not-allowed).
+- Cùng modal: ô **Từ ngày / Đến ngày** đang dùng ô ngày của trình duyệt (hiện `06/30/2026` — mm/dd/yyyy) → `DateInput` dùng chung, luôn dd/mm/yyyy.
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Mô hình dữ liệu chủ — khóa "Loại thực thể" khi chỉnh sửa (Ngày thực hiện: 09/10/2026) — 197
+
+**Nội dung (PM yêu cầu):** disable trường Loại thực thể trong chỉnh sửa mô hình dữ liệu chủ.
+
+**File sửa:**
+- `master-data/MasterDataScaleManagementPage.tsx` — modal Chỉnh sửa thực thể dữ liệu chủ: ô "Loại thực thể" `disabled` khi đang chỉnh sửa (thêm mới vẫn chọn được).
+- `master-data/MasterDataWizard.tsx` — wizard Chỉnh sửa dữ liệu chủ: ô "Loại thực thể" `disabled` khi `isEditingEntity`.
+- Ô khóa theo kiểu chung 5.2 (nền #F0F0F0, viền rgba(0,0,0,0.26), chữ đen); chú thích khi di chuột "Không thay đổi loại thực thể khi chỉnh sửa".
+
+**Kiểm tra:** tsc không có lỗi ở file sửa; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
 ## Quản lý phiên bản danh mục — cố định cột Thao tác (Ngày thực hiện: 09/10/2026) — 196
 
 **Nội dung (PM yêu cầu):** modal "Quản lý phiên bản danh mục" cố định cột Thao tác khi bảng cuộn ngang.

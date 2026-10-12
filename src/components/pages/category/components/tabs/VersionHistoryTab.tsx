@@ -4,6 +4,7 @@ import {
   Clock, CheckSquare, Archive, Layers
 } from 'lucide-react';
 import { BaseModal } from '../../../../common/BaseModal';
+import { DateInput } from '../../../collection/collectionUi';
 
 export interface VersionRecord {
   id: number;
@@ -259,21 +260,9 @@ export function VersionHistoryTab({ searchTerm, setSearchTerm, versions }: Versi
               <div>
                 <label className="block text-[13px] font-normal text-black uppercase tracking-wider mb-2">Khoảng thời gian</label>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={filterFromDate}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterFromDate(e.target.value)}
-                    title="Từ ngày"
-                    className="flex-1 px-3 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700"
-                  />
+                  <DateInput ariaLabel="Từ ngày" value={filterFromDate} onChange={setFilterFromDate} className="flex-1 min-w-0" />
                   <span className="text-slate-400 text-[13px] shrink-0">–</span>
-                  <input
-                    type="date"
-                    value={filterToDate}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterToDate(e.target.value)}
-                    title="Đến ngày"
-                    className="flex-1 px-3 py-2.5 border border-slate-200 focus:border-blue-500 rounded-xl text-[13px] bg-white outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700"
-                  />
+                  <DateInput ariaLabel="Đến ngày" value={filterToDate} onChange={setFilterToDate} className="flex-1 min-w-0" />
                 </div>
               </div>
             </div>

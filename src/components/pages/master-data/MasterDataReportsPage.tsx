@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import {
   Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, BTN_FOCUS,
   INPUT_CLS, FIELD_LABEL, FIELD_VALUE, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL,
-  normalizeSearch,
+  normalizeSearch, DateInput,
 } from '../collection/collectionUi';
 import {
   LineChart, Line as LineR, BarChart, Bar as BarR, XAxis as XAxisR, YAxis as YAxisR,
@@ -627,30 +627,20 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
                           <option value="deleted">Đã xóa</option>
                         </select>
                       </div>
-                      <div>
+                      <div onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}>
                         <label className={FILTER_LABEL}>Từ ngày</label>
-                        <input
-                          type="date"
-                          title="Từ ngày"
+                        <DateInput
+                          ariaLabel="Từ ngày"
                           value={searchFilters.dateFrom}
-                          onChange={(e) =>
-                            setSearchFilters({ ...searchFilters, dateFrom: e.target.value })
-                          }
-                          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                          className={INPUT_CLS}
+                          onChange={(v) => setSearchFilters({ ...searchFilters, dateFrom: v })}
                         />
                       </div>
-                      <div>
+                      <div onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}>
                         <label className={FILTER_LABEL}>Đến ngày</label>
-                        <input
-                          type="date"
-                          title="Đến ngày"
+                        <DateInput
+                          ariaLabel="Đến ngày"
                           value={searchFilters.dateTo}
-                          onChange={(e) =>
-                            setSearchFilters({ ...searchFilters, dateTo: e.target.value })
-                          }
-                          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                          className={INPUT_CLS}
+                          onChange={(v) => setSearchFilters({ ...searchFilters, dateTo: v })}
                         />
                       </div>
                       <div className="flex items-end">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, Eye, Edit, Trash2, X, Save, Play, Clock, RefreshCw, CheckCircle, XCircle, AlertCircle, Mail, Database, Settings, Calendar, FileText, Download, Copy } from 'lucide-react';
+import { DateInput } from '../collection/collectionUi';
 
 interface UpdateRule {
   id: string;
@@ -754,20 +755,18 @@ export function OpenDataUpdateRulesPage({ onNavigate }: OpenDataUpdateRulesPageP
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm text-slate-700 mb-2">Thời gian bắt đầu *</label>
-                            <input
-                              type="date"
+                            <DateInput
+                              ariaLabel="Thời gian bắt đầu"
                               value={formData.startDate}
-                              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                              onChange={(v) => setFormData({ ...formData, startDate: v })}
                             />
                           </div>
                           <div>
                             <label className="block text-sm text-slate-700 mb-2">Thời gian kết thúc (tùy chọn)</label>
-                            <input
-                              type="date"
+                            <DateInput
+                              ariaLabel="Thời gian kết thúc (tùy chọn)"
                               value={formData.endDate}
-                              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                              onChange={(v) => setFormData({ ...formData, endDate: v })}
                             />
                           </div>
                         </div>

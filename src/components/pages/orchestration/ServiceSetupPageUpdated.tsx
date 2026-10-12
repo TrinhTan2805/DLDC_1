@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp, Download, Filter } from "lucide-react";
 import { StatusTag } from '../../common/StatusTag';
+import { DateInput } from '../collection/collectionUi';
 import { MonitoringPage } from './MonitoringPage';
 import { AddProvisionServiceModal } from './AddProvisionServiceModal';
 import { ApprovalReviewModal } from './ApprovalReviewModal';
@@ -1949,29 +1950,20 @@ export function ServiceSetupPage() {
                     <label htmlFor="version-release-date" className="block text-sm text-slate-700 mb-2">
                       Ngày phát hành <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id="version-release-date"
-                      type="date"
-                      title="Chọn ngày phát hành"
-                      aria-label="Chọn ngày phát hành"
+                    <DateInput
+                      ariaLabel="Chọn ngày phát hành"
                       value={versionForm.releaseDate}
-                      onChange={(e) => setVersionForm({ ...versionForm, releaseDate: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
+                      onChange={(v) => setVersionForm({ ...versionForm, releaseDate: v })}
                     />
                   </div>
                   <div>
                     <label htmlFor="version-end-date" className="block text-sm text-slate-700 mb-2">
                       Ngày kết thúc
                     </label>
-                    <input
-                      id="version-end-date"
-                      type="date"
-                      title="Chọn ngày kết thúc (nếu có)"
-                      aria-label="Chọn ngày kết thúc (nếu có)"
+                    <DateInput
+                      ariaLabel="Chọn ngày kết thúc (nếu có)"
                       value={versionForm.endOfLife}
-                      onChange={(e) => setVersionForm({ ...versionForm, endOfLife: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      onChange={(v) => setVersionForm({ ...versionForm, endOfLife: v })}
                     />
                   </div>
                 </div>

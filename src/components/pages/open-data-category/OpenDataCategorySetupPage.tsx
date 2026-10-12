@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, Settings, Eye, Edit, Trash2, CheckSquare, Share2, FileSearch, BarChart3, Filter, List } from 'lucide-react';
+import { DateInput } from '../collection/collectionUi';
 
 interface Category {
   id: string;
@@ -143,6 +144,9 @@ export function OpenDataCategorySetupPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
+  // Tab Thu thập số liệu thống kê: khoảng ngày (ISO yyyy-mm-dd)
+  const [statsFromDate, setStatsFromDate] = useState('');
+  const [statsToDate, setStatsToDate] = useState('');
 
   // Approval tab filters
   const [approvalFilterStatus, setApprovalFilterStatus] = useState<string>('all');
@@ -1000,17 +1004,11 @@ export function OpenDataCategorySetupPage() {
                 <div className="grid grid-cols-4 gap-4 items-end">
                   <div>
                     <label className="block text-xs text-slate-600 mb-2">Từ ngày</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
+                    <DateInput ariaLabel="Từ ngày" value={statsFromDate} onChange={setStatsFromDate} />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-2">Đến ngày</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
+                    <DateInput ariaLabel="Đến ngày" value={statsToDate} onChange={setStatsToDate} />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-2">Loại thống kê</label>
