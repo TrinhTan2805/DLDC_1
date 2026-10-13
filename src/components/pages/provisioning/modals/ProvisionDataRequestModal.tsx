@@ -103,11 +103,15 @@ export function ProvisionDataRequestModal({ isOpen, onClose, onCreate, requestDa
 
           <div>
             <label className={LABEL_CLS}>Đính kèm công văn</label>
-            {viewOnly ? (
-              <div className="h-10 px-3 flex items-center bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg text-[13px] text-[#94A3B8]">
-                {attachment?.name || requestData?.attachment?.name || 'Không có tệp đính kèm'}
-              </div>
-            ) : (
+            {viewOnly ? (() => {
+              // Ô giả lập ở màn Xem chi tiết (mục 5.2): nền #F0F0F0, viền rgba(0,0,0,0.26); có tệp → chữ đen, trống → xám
+              const fileName = attachment?.name || requestData?.attachment?.name;
+              return (
+                <div className={`h-10 px-3 flex items-center bg-[#F0F0F0] border border-[rgba(0,0,0,0.26)] rounded-lg text-[13px] cursor-not-allowed ${fileName ? 'text-[#000000]' : 'text-[#94A3B8]'}`}>
+                  <span className="truncate">{fileName || 'Không có tệp đính kèm'}</span>
+                </div>
+              );
+            })() : (
               <div className="flex items-center gap-3">
                 <label className={BTN_OUTLINE}>
                   <span>Chọn tệp</span>
