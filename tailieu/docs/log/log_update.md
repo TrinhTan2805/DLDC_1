@@ -6740,3 +6740,27 @@ Redesign thanh tìm kiếm & bộ lọc tại tab **Kiểm tra & Phê duyệt** 
 **Các file bị ảnh hưởng:**
 - `src/components/civil-legal-center/CivilLegalCenterInfoTable.tsx`
 - `src/components/civil-legal-center/CivilLegalCenterInfoModal.tsx`
+
+
+---
+
+## Modal Chi tiết yêu cầu kết xuất dữ liệu — ô "Đính kèm công văn" theo chuẩn ô bị khóa (Ngày cập nhật: 13/10/2026)
+
+**Nội dung thay đổi (chế độ xem):** ô giả lập "Đính kèm công văn" theo `compomennt.md` mục 5.2 (Ô bị khóa ở màn Xem chi tiết): nền `#F1F5F9` → `#F0F0F0`, viền `#E2E8F0` → `rgba(0,0,0,0.26)`, con trỏ `not-allowed`; có tệp → tên tệp chữ đen `#000000`, không có tệp → "Không có tệp đính kèm" chữ xám `#94A3B8` (trước đây luôn xám); tên tệp dài được cắt `truncate`.
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/modals/ProvisionDataRequestModal.tsx`
+
+---
+
+## Modal Xem chi tiết / Điều chỉnh cấu trúc trường dữ liệu chia sẻ — chuẩn hóa giao diện (Ngày cập nhật: 13/10/2026)
+
+**Nội dung thay đổi:**
+1. **Bỏ thanh cuộn lồng ở bảng "Cấu trúc các trường"** (mục 5.4): thân modal là vùng cuộn duy nhất, lưới 2 khối nằm bên trong (`items-start`) nên bảng cao theo nội dung. Khối JSON preview giữ `max-h` riêng (ngoại lệ khối code mẫu).
+2. **Tiêu đề khối** "Cấu trúc các trường", "API Response Payload (Preview)" dùng `SECTION_TITLE` có vạch xanh (H2); bỏ icon Database ở tiêu đề.
+3. **Select "Che dấu dữ liệu"**: icon `ChevronDown` tự vẽ thay mũi tên trình duyệt (mục 5.7); cột rộng 160px → 208px để không cắt chữ.
+4. **Chiều cao modal cố định** `h-[90vh] max-h-[800px]` (mục 5.4).
+5. **Ô "Tên trường (API JSON)"** luôn chỉ đọc → nền `#F0F0F0`, con trỏ `not-allowed` ở cả chế độ điều chỉnh (trước nền `#F8FAFC`).
+
+**Các file bị ảnh hưởng:**
+- `src/components/pages/provisioning/modals/SharedFieldsConfigModal.tsx`

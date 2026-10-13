@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Save, Eye, EyeOff, ShieldCheck, Database, Check } from 'lucide-react';
+import { X, Save, Eye, EyeOff, ShieldCheck, Database, Check, ChevronDown } from 'lucide-react';
 import { Portal } from '../../../common/Portal';
-import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS } from '../../collection/collectionUi';
+import { Badge, BTN_GHOST_ICON, BTN_OUTLINE, BTN_PRIMARY, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, SECTION_TITLE } from '../../collection/collectionUi';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
+// Select có icon ChevronDown tự vẽ thay mũi tên mặc định trình duyệt (mục 5.7) — bọc trong div relative
+const SELECT_CLS = `${INPUT_CLS} pr-8 appearance-none`;
+const SELECT_ICON_CLS = 'absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none';
 
 interface FieldConfig {
   id: string;
@@ -113,7 +116,8 @@ export function SharedFieldsConfigModal({
   return (
     <Portal>
       <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        {/* Modal xem/điều chỉnh: chiều cao cố định, thân tự cuộn (mục 5.4) */}
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] max-h-[800px] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
 
           {/* Header */}
           <div className="flex items-start justify-between px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0">
@@ -136,13 +140,17 @@ export function SharedFieldsConfigModal({
             </button>
           </div>
 
-          {/* Body */}
-          <div className="px-6 py-4 overflow-y-auto custom-scrollbar flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Body — thân modal là vùng cuộn duy nhất; lưới nằm bên trong để bảng cao theo nội dung, không cuộn lồng (mục 5.4) */}
+          <div className="px-6 py-4 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
             {/* Table side */}
             <div className="lg:col-span-7 bg-white rounded-lg border border-[#E2E8F0] overflow-hidden flex flex-col">
               <div className="px-4 py-3 border-b border-[#E2E8F0] flex justify-between items-center gap-2">
-                <span className="text-[14px] font-medium text-[#020817]">Cấu trúc các trường</span>
+                <h4 className={`${SECTION_TITLE} !mb-0`}>
+                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
+                  Cấu trúc các trường
+                </h4>
                 <Badge label={`Đang chia sẻ: ${fields.filter(f => f.shared).length} / ${fields.length} trường`} variant="blue" />
               </div>
 
@@ -153,7 +161,7 @@ export function SharedFieldsConfigModal({
                       <th className="px-3 py-[13px] leading-4 text-center font-bold text-black whitespace-nowrap text-[13px] w-12">Chia sẻ</th>
                       <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Tên trường (Hệ thống)</th>
                       <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px]">Tên trường (API JSON)</th>
-                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px] w-40">Che dấu dữ liệu</th>
+                      <th className="px-3 py-[13px] leading-4 text-left font-bold text-black whitespace-nowrap text-[13px] w-52">Che dấu dữ liệu</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -179,22 +187,26 @@ export function SharedFieldsConfigModal({
                             readOnly
                             disabled={readOnly}
                             aria-label={`Tên trường API của ${field.name}`}
-                            className={`${INPUT_CLS} bg-[#F8FAFC] cursor-default`}
+                            // Luôn chỉ đọc → nền ô bị khóa #F0F0F0 ở cả chế độ điều chỉnh (mục 5.2)
+                            className={`${INPUT_CLS} !bg-[#F0F0F0] cursor-not-allowed`}
                             value={field.apiKey}
                           />
                         </td>
                         <td className="px-3 py-1">
-                          <select
-                            disabled
-                            aria-label={`Che dấu dữ liệu của ${field.name}`}
-                            className={`${INPUT_CLS} ${VIEW_FIELD_CLS}`}
-                            value={field.masking}
-                          >
-                            <option value="none">Không che dấu</option>
-                            <option value="mask_first_3">Che dấu 3 ký tự đầu</option>
-                            <option value="mask_last_4">Che dấu 4 ký tự cuối</option>
-                            <option value="mask_all">Che dấu toàn bộ</option>
-                          </select>
+                          <div className="relative">
+                            <select
+                              disabled
+                              aria-label={`Che dấu dữ liệu của ${field.name}`}
+                              className={SELECT_CLS}
+                              value={field.masking}
+                            >
+                              <option value="none">Không che dấu</option>
+                              <option value="mask_first_3">Che dấu 3 ký tự đầu</option>
+                              <option value="mask_last_4">Che dấu 4 ký tự cuối</option>
+                              <option value="mask_all">Che dấu toàn bộ</option>
+                            </select>
+                            <ChevronDown className={SELECT_ICON_CLS} />
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -206,10 +218,10 @@ export function SharedFieldsConfigModal({
             {/* JSON Preview side */}
             <div className="lg:col-span-5 bg-white rounded-lg border border-[#E2E8F0] flex flex-col overflow-hidden min-h-[300px]">
               <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between gap-2">
-                <span className="text-[14px] font-medium text-[#020817] flex items-center gap-1.5">
-                  <Database className="w-4 h-4 text-blue-600" />
+                <h4 className={`${SECTION_TITLE} !mb-0`}>
+                  <span className="w-1 h-4 bg-blue-600 rounded-full shrink-0" />
                   API Response Payload (Preview)
-                </span>
+                </h4>
                 <Badge label="JSON format" variant="blue" />
               </div>
 
@@ -220,6 +232,7 @@ export function SharedFieldsConfigModal({
               </div>
             </div>
 
+          </div>
           </div>
 
           {/* Footer */}
