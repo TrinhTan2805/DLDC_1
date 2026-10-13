@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Factory } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -41,7 +42,7 @@ export function BusinessRegistryPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/business-registry/all"
       lastSyncTime="09/12/2025 14:50:40"
-      onSync={() => alert('Đang đồng bộ dữ liệu đăng ký kinh doanh...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu đăng ký kinh doanh...')}
     />
   );
 }

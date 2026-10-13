@@ -1,7 +1,9 @@
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { Database, Table, Columns, Search, ChevronRight, Info, Link2, ShieldCheck, Calendar, ArrowLeft, Key, Plus, Save, Edit2, Trash2, Filter, ArrowUpDown, FileSpreadsheet, RefreshCw, X, Layers, Check, ArrowDown, ArrowUp, Download } from 'lucide-react';
 import { initialTargetDatabases, mockTables, mockColumns, mockTableData } from './mockTargetDatabases';
 import { Pagination, BTN_OUTLINE, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS } from '../collection/collectionUi';
+import { ColumnPanelHeader, ColumnPanelExpandButton } from './ProcessedDataTab';
 
 interface TargetDatabaseDetailPageProps {
   databaseId: string;
@@ -65,6 +67,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
 
   const [showColumnToggle, setShowColumnToggle] = useState(false);
   const [hiddenColumns, setHiddenColumns] = useState<Record<string, string[]>>({});
+  const [columnPanelCollapsed, setColumnPanelCollapsed] = useState(false);
 
   const toggleColumn = (col: string) => {
     setHiddenColumns(prev => {
@@ -187,11 +190,11 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
   const handleSaveAddTable = () => {
     const finalName = newTableName.trim();
     if (!finalName) {
-      alert('Vui lòng nhập tên bảng');
+      toast.warning('Vui lòng nhập tên bảng');
       return;
     }
     if (mockTables.find(t => t.name.toLowerCase() === finalName.toLowerCase())) {
-      alert('Tên bảng đã tồn tại');
+      toast.error('Tên bảng đã tồn tại');
       return;
     }
 
@@ -928,8 +931,12 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                     )}
 
                   <div className="flex items-start">
-                    {showColumnToggle && (
+                    {showColumnToggle && columnPanelCollapsed && (
+                      <ColumnPanelExpandButton onClick={() => setColumnPanelCollapsed(false)} />
+                    )}
+                    {showColumnToggle && !columnPanelCollapsed && (
                       <div className="w-56 border-r border-slate-200 pr-4 mr-4 shrink-0 max-h-[600px] overflow-y-auto custom-scrollbar">
+                        <ColumnPanelHeader onCollapse={() => setColumnPanelCollapsed(true)} />
                         {dataItems.length > 0 && Object.keys(dataItems[0]).map(col => {
                            const isHidden = (hiddenColumns[selectedTable || ''] || []).includes(col);
                            return (
@@ -1133,7 +1140,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
                     <Filter className="w-3.5 h-3.5 text-slate-500" />
                     <span className="font-semibold">Điều kiện lọc:</span>
                   </div>
-                  <span className="text-blue-600 font-semibold">{filters.length > 0 && filters[0].value ? filters.length : 0} điều kiện</span>
+                  <span className="text-blue-600 font-semibold">{filters.length > 0 && filters[0].type === 'condition' && filters[0].value ? filters.length : 0} điều kiện</span>
                 </div>
                 <div className="flex items-center justify-between text-[13px] text-slate-700">
                   <div className="flex items-center gap-1.5">

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState, ChangeEvent } from 'react';
 import { Search, Filter, Upload, Download, RefreshCw, Database, Server, History as HistoryIcon } from 'lucide-react';
 import { ActionIconButton } from './ActionIconButton';
@@ -87,12 +88,12 @@ export function GenericDataTable({
 
   const handleImport = (file: File) => {
     console.log('Importing file:', file.name);
-    alert(`Đã nhập file: ${file.name}`);
+    toast.success(`Đã nhập file: ${file.name}`);
   };
 
   const handleExport = () => {
     console.log('Exporting data...');
-    alert('Đang xuất dữ liệu...');
+    toast.info('Đang xuất dữ liệu...');
   };
 
   const handleViewDetail = (item: any) => {
@@ -311,7 +312,7 @@ export function GenericDataTable({
                 </button>
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
+                    let pageNum: number;
                     if (totalPages <= 5) {
                       pageNum = i + 1;
                     } else if (currentPage <= 3) {

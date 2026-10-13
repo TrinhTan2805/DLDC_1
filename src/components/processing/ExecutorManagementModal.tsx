@@ -1,3 +1,4 @@
+import { confirmDialog } from '../common/confirmDialog';
 import { useState } from 'react';
 import { X, Plus, Trash2, Edit } from 'lucide-react';
 
@@ -54,8 +55,8 @@ export function ExecutorManagementModal({ onClose }: ExecutorManagementModalProp
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa người thực hiện này?')) {
+  const handleDelete = async (id: number) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa người thực hiện này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setExecutors(executors.filter(e => e.id !== id));
     }
   };

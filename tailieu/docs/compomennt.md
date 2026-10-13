@@ -382,7 +382,7 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 | Mục (item) | Cao 32px, padding 8×12, chữ **13px / 400 / `#020817`**, icon 16px `#475569` bên trái, cách chữ 8px |
 | Nhóm | Khi ≥ 4 mục và thao tác thuộc **nhiều đối tượng** → chia nhóm theo đối tượng (VD "Dữ liệu", "Dịch vụ"). Nhãn nhóm 12px / 500 / `#64748B`, **không uppercase**; giữa các nhóm có đường phân cách 1px `#E2E8F0` |
 | Thứ tự trong nhóm | Tạo / cập nhật → đổi trạng thái (Bật/Ngừng hoạt động) → **Xóa (cuối cùng)** |
-| Mục nguy hiểm | Xóa / thao tác không hoàn tác: **chữ và icon `#DC2626`**, đặt cuối nhóm, **bắt buộc có modal xác nhận** (mục 5.4) |
+| Mục nguy hiểm | Xóa / thao tác không hoàn tác: **chữ và icon `#DC2626`**, đặt cuối nhóm, **bắt buộc có modal xác nhận** (mục 5.4.1) |
 
 **Thao tác không áp dụng theo trạng thái** (VD dịch vụ Bản nháp chưa thể "Cập nhật dữ liệu"):
 - Nút icon bên ngoài: **giữ nguyên vị trí**, làm mờ (`opacity-50 cursor-not-allowed`), tooltip ghi lý do.
@@ -522,16 +522,132 @@ const ALIGN = { stt: 'text-center', text: 'text-left', number: 'text-right tabul
   </div>
 </div>
 
-### 5.5. Thông báo (Toast / Sonner)
-- Vị trí: Góc dưới bên phải hoặc trên cùng giữa.
-- Màu sắc: Tương ứng với trạng thái (Success, Error, Warning).
+### 5.4.1. Popup xác nhận / cảnh báo (ConfirmModal)
+Dùng component chung **`ConfirmModal`** (`src/components/common/ConfirmModal.tsx`) cho mọi thao tác cần người dùng xác nhận trước khi thực hiện. **Không dùng** `window.confirm()` / `alert()` của trình duyệt; **không tự viết** modal xác nhận riêng ở từng màn.
+
+**Khi nào dùng:**
+
+| Loại (`type`) | Dùng khi | Ví dụ |
+| :--- | :--- | :--- |
+| `delete` | Xóa, thao tác **không hoàn tác** | Xóa người dùng, xóa danh mục |
+| `warning` | Thao tác **có rủi ro / ảnh hưởng** dữ liệu hoặc người dùng khác (vẫn có thể khôi phục) | Khóa tài khoản, ngừng hoạt động dịch vụ, hủy công bố, thoát khi chưa lưu |
+| `info` | Xác nhận thao tác thông thường, cần người dùng chắc chắn | Gửi phê duyệt, đồng bộ dữ liệu, gửi thông báo |
+| `success` | Xác nhận một bước đã hoàn tất và hỏi bước tiếp theo | "Đã lưu bản nháp. Gửi phê duyệt ngay?" |
+
+> Kết quả thao tác (thành công / thất bại) **không** dùng popup — dùng Toast (mục 5.5). Popup chỉ dùng khi **cần người dùng quyết định**.
+
+**Bố cục** (modal nhỏ — cao theo nội dung, không áp dụng chiều cao cố định của mục 5.4):
+
+| Phần | Quy định |
+| :--- | :--- |
+| Nền mờ | `bg-black/50`; bấm ra ngoài = **Hủy**; modal chồng nhau có nền riêng, luôn nằm trên modal đang mở (z-index từ `9100`) |
+| Khung | Nền trắng, bo **16px**, rộng tối đa **448px** (`max-w-md`), bóng `shadow-2xl`, `role="alertdialog"` |
+| Header | Padding 16×24, viền dưới `#E2E8F0`: **[Icon tròn 40px] Tiêu đề + câu phụ … [X]** |
+| Icon | Vòng tròn **40px**, icon lucide **20px**, màu theo loại (bảng dưới) |
+| Tiêu đề | **16px / 600 / `#020817`** — dạng "Xác nhận + hành động" (VD: "Xác nhận xóa", "Xác nhận khóa tài khoản") |
+| Câu phụ | **13px / 400 / `#64748B`**, dưới tiêu đề — hậu quả của thao tác (VD: "Hành động này không thể hoàn tác."); bỏ trống nếu không cần |
+| Thân | Padding 16×24; nội dung hiển thị **thẳng trên nền trắng** (không khung, không nền xám), **13px / `#020817`** — câu hỏi có **tên đối tượng in đậm** (VD: Bạn có chắc chắn muốn xóa người dùng **"Nguyễn Văn A"**?) |
+| Footer | Padding 16×24, nền `#F8FAFC`, viền trên `#E2E8F0`, nút **căn phải**, cách nhau 12px: **[Hủy] (Outline) → [Nút xác nhận]** |
+| Nút xác nhận | Nhãn = **động từ của thao tác** (Xóa, Khóa, Gửi, Đồng ý…), không dùng chung chung "OK"; bấm xong popup tự đóng |
+
+**Icon và màu theo loại:**
+
+| Loại | Icon | Nền vòng tròn | Màu icon | Nút xác nhận |
+| :--- | :--- | :--- | :--- | :--- |
+| `delete` | `Trash2` | `#FEF2F2` | `#DC2626` | **Destructive** (nền `#DC2626`) |
+| `warning` | `AlertTriangle` | `#FFF7ED` | `#D97706` | **Destructive** (nền `#DC2626`) |
+| `info` | `Info` | `#EAF3FF` | `#155DFC` | **Primary** (nền `#155DFC`) |
+| `success` | `CheckCircle2` | `#F0FDF4` | `#16A34A` | **Primary** (nền `#155DFC`) |
+
+```tsx
+import { ConfirmModal } from '../../common/ConfirmModal';
+
+<ConfirmModal
+  isOpen={showDeleteConfirm}
+  onClose={() => setShowDeleteConfirm(false)}
+  onConfirm={confirmDelete}
+  type="delete"                                   // 'delete' | 'warning' | 'info' | 'success'
+  title="Xác nhận xóa"
+  subtitle="Hành động này không thể hoàn tác."
+  message={<>Bạn có chắc chắn muốn xóa người dùng <b>"{user.name}"</b>?</>}
+  confirmText="Xóa"
+/>
+```
+
+> Ghi chú: màu icon Cảnh báo trong component đang là `#D97706` (khác màu Warning `#CA8A04` ở bảng màu mục 2) — giữ `#D97706` để đồng bộ với toast cảnh báo (mục 5.5); chờ PM xác nhận.
 
 **Ví dụ hiển thị:**
-<div style="margin-top: 8px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: fit-content;">
-  <span style="color: #16a34a; font-size: 18px;">✅</span>
-  <div>
-    <p style="margin: 0; font-size: 14px; font-weight: 500; color: #020817;">Thành công!</p>
-    <p style="margin: 0; font-size: 12px; color: #64748b;">Dữ liệu đã được lưu vào hệ thống.</p>
+<div style="margin-top: 8px; width: 448px; max-width: 100%; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid #e2e8f0;">
+  <div style="display: flex; align-items: flex-start; gap: 12px; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+    <div style="width: 40px; height: 40px; border-radius: 50%; background: #FEF2F2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">🗑</div>
+    <div style="flex: 1;">
+      <p style="margin: 2px 0 0; font-size: 16px; font-weight: 600; color: #020817;">Xác nhận xóa</p>
+      <p style="margin: 2px 0 0; font-size: 13px; color: #64748B;">Hành động này không thể hoàn tác.</p>
+    </div>
+    <span style="color: #475569; font-size: 18px;">✕</span>
+  </div>
+  <div style="padding: 16px 24px; font-size: 13px; color: #020817;">Bạn có chắc chắn muốn xóa người dùng <b>"Nguyễn Văn A"</b>?</div>
+  <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; background: #F8FAFC; border-top: 1px solid #E2E8F0;">
+    <span style="height: 40px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid #CBD5E1; border-radius: 8px; background: white; font-size: 13px; font-weight: 500; color: #334155;">Hủy</span>
+    <span style="height: 40px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: 8px; background: #DC2626; font-size: 13px; font-weight: 500; color: white;">Xóa</span>
+  </div>
+</div>
+
+### 5.5. Thông báo (Toast / Sonner) 
+Dùng `toast.success / error / warning / info` của **sonner** (`<Toaster />` đặt 1 lần ở `App.tsx`, cấu hình tại `src/components/ui/sonner.tsx`). **Không dùng** `alert()` / `confirm()` của trình duyệt (xác nhận thao tác dùng popup xác nhận — mục 5.4.1).
+
+| Thuộc tính | Quy định |
+| :--- | :--- |
+| Vị trí | **Góc trên bên phải** (`top-right`), cách mép trên / phải **12px**; nhiều toast xếp chồng từ trên xuống, toast mới nằm trên |
+| Khung | **Nền đặc theo trạng thái**, không viền, bo góc **8px**, bóng `0 4px 12px rgba(0,0,0,0.15)`, padding **12×16px**, cao tối thiểu **44px**, rộng vừa nội dung (tối đa 420px) |
+| Bố cục | `[Icon trạng thái]  Nội dung  [X]` — icon bên trái, nút đóng `X` bên phải; khoảng cách giữa các phần **12px** |
+| Icon trạng thái | Icon viền (lucide), **20px**, màu trắng: Thành công `CircleCheck`, Lỗi `CircleX`, Cảnh báo `TriangleAlert`, Thông tin `Info` |
+| Nội dung | **14px / 500**, chữ **trắng**, 1 câu ngắn, viết hoa chữ đầu, không dấu "!" ở cuối, không emoji (VD: "Thực hiện thao tác thành công") |
+| Nút đóng `X` | 16px, màu trắng, luôn hiển thị; hover nền `rgba(255,255,255,0.15)` bo 4px |
+| Thời gian hiển thị | Tự ẩn sau **4 giây** (Lỗi: **6 giây**); rê chuột vào thì dừng đếm |
+
+**Màu nền theo trạng thái** (chữ, icon, nút X đều trắng):
+
+| Trạng thái | Hàm gọi | Nền | Dùng khi |
+| :--- | :--- | :--- | :--- |
+| Thành công | `toast.success` | `#16A34A` *(theo ảnh mẫu)* | Lưu / thêm / sửa / xóa / gửi thành công |
+| Lỗi | `toast.error` | `#DC2626` *(đề xuất)* | Thao tác thất bại, lỗi hệ thống |
+| Cảnh báo | `toast.warning` | `#D97706` *(đề xuất)* | Dữ liệu chưa hợp lệ ở mức thao tác, cần lưu ý |
+| Thông tin | `toast.info` | `#155DFC` *(đề xuất)* | Thông tin trung tính (đang xử lý, đã sao chép…) |
+
+> Lỗi **nhập liệu theo từng trường** không dùng toast — báo lỗi inline ngay dưới ô (viền đỏ mảnh + chữ đỏ 12px).
+
+```tsx
+// src/components/ui/sonner.tsx — cấu hình chung, mọi toast trong hệ thống ăn theo
+<Sonner
+  position="top-right"
+  offset={12}
+  closeButton
+  duration={4000}
+  icons={{ success: <CircleCheck className="w-5 h-5" />, error: <CircleX className="w-5 h-5" />,
+           warning: <TriangleAlert className="w-5 h-5" />, info: <Info className="w-5 h-5" /> }}
+  toastOptions={{ classNames: {
+    toast: 'flex items-center gap-3 min-h-11 px-4 py-3 rounded-lg border-0 shadow-[0_4px_12px_rgba(0,0,0,0.15)] text-white text-[14px] font-medium',
+    success: '!bg-[#16A34A]', error: '!bg-[#DC2626]', warning: '!bg-[#D97706]', info: '!bg-[#155DFC]',
+    closeButton: '!static !order-last !translate-none !bg-transparent !border-0 !text-white hover:!bg-white/15 rounded',
+  } }}
+/>
+
+toast.success('Thực hiện thao tác thành công');
+toast.error('Thực hiện thao tác thất bại', { duration: 6000 });
+```
+
+**Ví dụ hiển thị:**
+<div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px; width: fit-content;">
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 44px; background: #16A34A; color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
+    <span style="display:inline-flex; width:20px; height:20px; border:2px solid white; border-radius:50%; align-items:center; justify-content:center; font-size:11px;">✓</span>
+    <span>Thực hiện thao tác thành công</span>
+    <span style="margin-left: 12px; font-size: 16px;">✕</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 44px; background: #DC2626; color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: 500;">
+    <span style="display:inline-flex; width:20px; height:20px; border:2px solid white; border-radius:50%; align-items:center; justify-content:center; font-size:11px;">✕</span>
+    <span>Thực hiện thao tác thất bại</span>
+    <span style="margin-left: 12px; font-size: 16px;">✕</span>
   </div>
 </div>
 

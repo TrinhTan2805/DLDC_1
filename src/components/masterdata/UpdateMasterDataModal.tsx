@@ -1,3 +1,5 @@
+import { confirmDialog } from '../common/confirmDialog';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, Database, AlertTriangle, Eye, CheckCircle, XCircle, History as HistoryIcon, FileText, Send, RefreshCw } from 'lucide-react';
 
@@ -98,19 +100,19 @@ export function UpdateMasterDataModal({ onClose, entityName, entityId }: UpdateM
     }
   };
 
-  const handleApproveRecords = () => {
+  const handleApproveRecords = async () => {
     if (selectedRecords.length === 0) {
-      alert('Vui lòng chọn ít nhất 1 bản ghi để phê duyệt');
+      toast.warning('Vui lòng chọn ít nhất 1 bản ghi để phê duyệt');
       return;
     }
     
-    if (confirm(`Phê duyệt ${selectedRecords.length} bản ghi đã chọn?`)) {
+    if ((await confirmDialog(`Phê duyệt ${selectedRecords.length} bản ghi đã chọn?`, { type: 'info', title: 'Xác nhận phê duyệt', confirmText: 'Phê duyệt' }))) {
       setRecords(records.map(record => 
         selectedRecords.includes(record.id) 
           ? { ...record, status: 'approved' as const }
           : record
       ));
-      alert(`Đã phê duyệt ${selectedRecords.length} bản ghi thành công`);
+      toast.success(`Đã phê duyệt ${selectedRecords.length} bản ghi thành công`);
       setSelectedRecords([]);
     }
   };
@@ -123,18 +125,18 @@ export function UpdateMasterDataModal({ onClose, entityName, entityId }: UpdateM
           ? { ...record, status: 'rejected' as const, reason }
           : record
       ));
-      alert('Đã từ chối bản ghi');
+      toast.success('Đã từ chối bản ghi');
     }
   };
 
-  const handleRevokeApproval = (id: string) => {
-    if (confirm('Hủy phê duyệt bản ghi này?')) {
+  const handleRevokeApproval = async (id: string) => {
+    if ((await confirmDialog('Hủy phê duyệt bản ghi này?', { type: 'warning', title: 'Xác nhận hủy phê duyệt', confirmText: 'Hủy phê duyệt' }))) {
       setRecords(records.map(record => 
         record.id === id 
           ? { ...record, status: 'updated' as const }
           : record
       ));
-      alert('Đã hủy phê duyệt bản ghi');
+      toast.success('Đã hủy phê duyệt bản ghi');
     }
   };
 

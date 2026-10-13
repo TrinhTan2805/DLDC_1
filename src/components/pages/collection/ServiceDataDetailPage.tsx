@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, Download, Filter, Search, Eye } from 'lucide-react';
 import { DataDetailModal } from '../../DataDetailModal';
@@ -227,7 +228,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
   const currentRecords = filteredRecords.slice(startIndex, endIndex);
 
   const handleExport = () => {
-    alert('Đang kết xuất danh sách bản ghi...');
+    toast.info('Đang kết xuất danh sách bản ghi...');
   };
 
   return (
@@ -409,7 +410,7 @@ export function ServiceDataDetailPage({ isOpen, onClose, service }: ServiceDataD
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
                         <StatusTag 
-                          label={record.statusText} 
+                          label={record.statusText ?? ''} 
                           variant={record.status === 'valid' ? 'green' : 'orange'} 
                         />
                         {record.status === 'error' && record.errorMessage && (

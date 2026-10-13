@@ -1,3 +1,4 @@
+import { confirmDialog } from '../common/confirmDialog';
 import { useState } from 'react';
 import { X, Plus, SquarePen, Trash2, Save, Settings } from 'lucide-react';
 
@@ -87,8 +88,8 @@ export function AttributeManagementModal({ onClose, entityName = 'Dữ liệu ch
     setShowAddForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa thuộc tính này?')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa thuộc tính này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setAttributes(attributes.filter(attr => attr.id !== id));
     }
   };

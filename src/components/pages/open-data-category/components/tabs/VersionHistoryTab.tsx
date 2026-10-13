@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React from 'react';
 import { History as HistoryIcon, ArrowLeft, PlusCircle, Download, RotateCcw } from 'lucide-react';
 import { CategoryItem, VersionHistoryItem } from '../../OpenDataCategoryPage';
@@ -46,7 +47,7 @@ export function VersionHistoryTab({
                      <td className="px-4 py-3 text-[13px] text-left"><code className="px-2 py-0.5 bg-slate-100 text-blue-700 rounded text-xs">{item.code}</code></td>
                      <td className="px-4 py-3 text-[13px] text-slate-900 font-semibold text-left">{item.name}</td>
                      <td className="px-4 py-3 text-[13px] text-slate-600 text-left">v1.3</td>
-                     <td className="px-4 py-3 text-[13px] text-slate-600 text-left">{item.updatedDate}</td>
+                     <td className="px-4 py-3 text-[13px] text-slate-600 text-left">{(item as CategoryItem & { updatedDate?: string }).updatedDate ?? '-'}</td>
                      <td className="px-4 py-3 text-[13px] text-slate-600 text-left">{item.updatedBy || 'Nguyễn Văn A'}</td>
                      <td className="px-4 py-3 text-right">
                        <div className="flex items-center justify-end">
@@ -119,7 +120,7 @@ export function VersionHistoryTab({
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button
-                          onClick={() => alert(`Đang tải về bộ dữ liệu phiên bản ${item.version}...`)}
+                          onClick={() => toast.info(`Đang tải về bộ dữ liệu phiên bản ${item.version}...`)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                           title={`Tải xuống bản ${item.version}`}
                         >

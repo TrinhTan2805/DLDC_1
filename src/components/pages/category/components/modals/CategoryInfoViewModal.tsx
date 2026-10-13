@@ -112,7 +112,7 @@ export function CategoryInfoViewModal({ isOpen, onClose, entity, requestStatus, 
                 className={tabClass(detailTab === t.k)}
               >
                 {t.l}
-                {typeof t.c === 'number' && (
+                {'c' in t && typeof t.c === 'number' && (
                   <span className={`min-w-5 h-5 px-1.5 inline-flex items-center justify-center rounded-full text-[12px] font-medium tabular-nums ${detailTab === t.k ? 'bg-[#EAF3FF] text-[#155DFC]' : 'bg-[#F1F5F9] text-[#64748B]'}`}>{t.c}</span>
                 )}
               </button>

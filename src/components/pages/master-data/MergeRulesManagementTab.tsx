@@ -410,7 +410,7 @@ export function MergeRulesManagementTab({ readOnly = false }: { readOnly?: boole
 
   const handleConfirmApprove = () => {
     if (!approvalRule || !selectedApprover) return;
-    toast.success('Đã gửi trình duyệt quy tắc hợp nhất thành công!');
+    toast.success('Đã gửi trình duyệt quy tắc hợp nhất thành công');
     handleCloseApprovalModal();
   };
 

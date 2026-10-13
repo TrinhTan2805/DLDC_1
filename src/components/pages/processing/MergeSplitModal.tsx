@@ -20,7 +20,7 @@ export function MergeSplitModal({ isOpen, onClose, sourceFields, onMergeSubmit, 
   const [selectedMergeFields, setSelectedMergeFields] = useState<string[]>(initialData?.fields || []);
 
   const [splitSource, setSplitSource] = useState(initialData?.source || '');
-  const [splitResults, setSplitResults] = useState(initialData?.results || [{ id: '1', name: 'Tên cột 1', type: 'NVARCHAR', regex: '' }, { id: '2', name: 'Tên cột 2', type: 'NVARCHAR', regex: '' }]);
+  const [splitResults, setSplitResults] = useState<{ id: string; name: string; type: string; regex: string }[]>(initialData?.results || [{ id: '1', name: 'Tên cột 1', type: 'NVARCHAR', regex: '' }, { id: '2', name: 'Tên cột 2', type: 'NVARCHAR', regex: '' }]);
 
   // Reset state when modal opens or initialData changes
   React.useEffect(() => {

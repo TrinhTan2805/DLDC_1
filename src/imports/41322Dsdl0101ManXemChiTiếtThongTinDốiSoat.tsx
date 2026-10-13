@@ -12,7 +12,7 @@ function Wrapper1({ children, additionalClassNames = "" }: React.PropsWithChildr
   );
 }
 
-function Wrapper({ children }: React.PropsWithChildren<{}>) {
+function Wrapper({ children }: React.PropsWithChildren<{ additionalClassNames?: string }>) {
   return (
     <div className="h-[20px] relative shrink-0">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative size-full">{children}</div>

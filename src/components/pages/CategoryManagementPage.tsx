@@ -1,3 +1,5 @@
+import { confirmDialog } from '../common/confirmDialog';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { 
   FolderTree, 
@@ -352,12 +354,12 @@ export function CategoryManagementPage() {
     e.preventDefault();
     
     if (!formData.code || !formData.name || !formData.dataType || !formData.managingUnit) {
-      alert('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toast.warning('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
 
     if (categories.some(cat => cat.code === formData.code && cat.id !== editingCategory?.id)) {
-      alert('Mã danh mục đã tồn tại');
+      toast.error('Mã danh mục đã tồn tại');
       return;
     }
 
@@ -401,13 +403,13 @@ export function CategoryManagementPage() {
     setShowAddModal(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const category = categories.find(c => c.id === id);
     if (category?.status === 'approved') {
-      alert('Không thể xóa danh mục đã được phê duyệt');
+      toast.error('Không thể xóa danh mục đã được phê duyệt');
       return;
     }
-    if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa danh mục này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setCategories(categories.filter(cat => cat.id !== id));
     }
   };
@@ -422,7 +424,7 @@ export function CategoryManagementPage() {
 
   const handleConfirmSendApproval = () => {
     if (!selectedApprover) {
-      alert('Vui lòng chọn người phê duyệt');
+      toast.warning('Vui lòng chọn người phê duyệt');
       return;
     }
 
@@ -434,7 +436,7 @@ export function CategoryManagementPage() {
       cat.id === categoryToApprove.id ? { ...cat, status: 'pending' } : cat
     ));
 
-    alert(`Đã gửi yêu cầu phê duyệt đến ${approver?.name} (${approver?.position})`);
+    toast.success(`Đã gửi yêu cầu phê duyệt đến ${approver?.name} (${approver?.position})`);
     
     setShowApprovalModal(false);
     setCategoryToApprove(null);
@@ -442,8 +444,8 @@ export function CategoryManagementPage() {
     setApprovalNote('');
   };
 
-  const handleApprove = (id: string) => {
-    if (confirm('Phê duyệt danh mục này?')) {
+  const handleApprove = async (id: string) => {
+    if ((await confirmDialog('Phê duyệt danh mục này?', { type: 'info', title: 'Xác nhận phê duyệt', confirmText: 'Phê duyệt' }))) {
       setCategories(categories.map(cat => 
         cat.id === id 
           ? { 
@@ -454,7 +456,7 @@ export function CategoryManagementPage() {
             } 
           : cat
       ));
-      alert('Đã phê duyệt danh mục');
+      toast.success('Đã phê duyệt danh mục');
     }
   };
 
@@ -472,12 +474,12 @@ export function CategoryManagementPage() {
             } 
           : cat
       ));
-      alert('Đã từ chối danh mục');
+      toast.success('Đã từ chối danh mục');
     }
   };
 
   const handleExportReport = () => {
-    alert('Xuất báo cáo danh mục (chức năng đang phát triển)');
+    toast.info('Xuất báo cáo danh mục (chức năng đang phát triển)');
   };
 
   const handlePublishCategory = (category: Category) => {
@@ -489,12 +491,12 @@ export function CategoryManagementPage() {
   const handleProposePublish = (id: string) => {
     const category = categories.find(c => c.id === id);
     if (!category || category.status !== 'approved') {
-      alert('Chỉ có thể đề xuất công bố danh mục đã được phê duyệt');
+      toast.warning('Chỉ có thể đề xuất công bố danh mục đã được phê duyệt');
       return;
     }
 
     if (category.proposedForPublish) {
-      alert('Danh mục này đã được đề xuất công bố');
+      toast.warning('Danh mục này đã được đề xuất công bố');
       return;
     }
 
@@ -509,7 +511,7 @@ export function CategoryManagementPage() {
         : cat
     ));
 
-    alert('Đã gửi đề xuất công bố danh mục thành công!');
+    toast.success('Đã gửi đề xuất công bố danh mục thành công');
   };
 
   const handleConfirmPublish = () => {
@@ -535,7 +537,7 @@ export function CategoryManagementPage() {
       public: 'Toàn dân'
     };
 
-    alert(`Đã công bố danh mục "${categoryToPublish.name}" với phạm vi: ${scopeLabels[publishShareScope]}`);
+    toast.success(`Đã công bố danh mục "${categoryToPublish.name}" với phạm vi: ${scopeLabels[publishShareScope]}`);
     
     setShowPublishModal(false);
     setCategoryToPublish(null);

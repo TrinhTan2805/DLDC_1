@@ -492,7 +492,7 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
               <div className="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => toast.success('Đã áp dụng bộ lọc thành công!')}
+                  onClick={() => toast.success('Đã áp dụng bộ lọc thành công')}
                   className={BTN_PRIMARY}
                 >
                   <CheckCircle className="w-4 h-4" />

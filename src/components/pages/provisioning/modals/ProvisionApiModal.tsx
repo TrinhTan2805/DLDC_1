@@ -201,7 +201,7 @@ export function ProvisionApiModal({ isOpen, onClose, apiData, onSave, mode = 'ed
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (agencyUnits.length === 0) {
-      toast.error('Vui lòng chọn ít nhất một cơ quan/đơn vị nhận!');
+      toast.error('Vui lòng chọn ít nhất một cơ quan/đơn vị nhận');
       return;
     }
     if (onSave) {

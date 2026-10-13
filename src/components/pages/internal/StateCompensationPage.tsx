@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Coins } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -14,7 +15,7 @@ export function StateCompensationPage() {
       detailFields={[{ label: 'Số hồ sơ', key: 'caseNumber' }, { label: 'Người yêu cầu', key: 'applicantName' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/compensation/all"
       lastSyncTime="09/12/2025 11:45:35"
-      onSync={() => alert('Đang đồng bộ dữ liệu bồi thường nhà nước...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu bồi thường nhà nước...')}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { MaritalStatusSearchFilter } from './marital-status-cert/MaritalStatusSearchFilter';
@@ -257,7 +258,7 @@ export function MaritalStatusCertModal({
                   setIsFilterOpen={setIsFilterOpen}
                   filterConditions={filterConditions}
                   setFilterConditions={setFilterConditions}
-                  onExport={() => alert('Đang kết xuất...')}
+                  onExport={() => toast.info('Đang kết xuất...')}
                   onRefresh={() => {}}
                   isInline={isInline}
                 />

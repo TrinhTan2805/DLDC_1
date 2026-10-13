@@ -234,7 +234,7 @@ export function RequestDetailModal({
               <label className="text-sm text-blue-700 mb-2 block">Các trường dữ liệu được yêu cầu</label>
               <div className="bg-white border border-blue-300 rounded-lg p-3">
                 <div className="flex flex-wrap gap-2">
-                  {requestDetails.selectedFields.map((field, idx) => (
+                  {requestDetails.selectedFields.map((field: any, idx: number) => (
                     <span 
                       key={idx}
                       className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded text-xs font-mono"
@@ -364,7 +364,7 @@ export function RequestDetailModal({
               Lịch sử xử lý
             </h3>
             <div className="space-y-3">
-              {requestDetails.processLogs.map((log, idx) => (
+              {requestDetails.processLogs.map((log: any, idx: number) => (
                 <div key={log.id} className="flex gap-3">
                   <div className="flex flex-col items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${

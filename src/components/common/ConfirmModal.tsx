@@ -99,12 +99,10 @@ export function ConfirmModal({
             </button>
           </div>
 
-          {/* Thân: nội dung 13px */}
+          {/* Thân: nội dung 13px hiển thị thẳng trên nền trắng (không khung xám) */}
           {message && (
-            <div className="px-6 py-4">
-              <div className="bg-[#F8FAFC] rounded-lg p-4 text-[13px] text-[#020817] leading-5 border border-[#E2E8F0]">
-                {message}
-              </div>
+            <div className="px-6 py-4 text-[13px] text-[#020817] leading-5">
+              {message}
             </div>
           )}
 

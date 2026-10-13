@@ -98,7 +98,7 @@ export function DataProcessingTemplate({
           )}
 
           {activeTab === 'processing' && (
-            <ProcessingConfigManager />
+            <ProcessingConfigManager title={title} description={description} dataSourceKey={title} />
           )}
 
           {activeTab === 'warnings' && (

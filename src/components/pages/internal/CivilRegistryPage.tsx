@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { FileUser } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -40,7 +41,7 @@ export function CivilRegistryPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/civil-registry/all"
       lastSyncTime="09/12/2025 13:45:15"
-      onSync={() => alert('Đang đồng bộ dữ liệu hộ tịch...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu hộ tịch...')}
     />
   );
 }

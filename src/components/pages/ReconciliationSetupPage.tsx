@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import * as React from 'react';
 import { useState } from 'react';
 import { Settings, Plus, Search, Edit, Trash2, Save, X, Calendar, Database, FileText, Clock, Play, Loader2, CheckCircle, History as HistoryIcon, Eye, Download, Send, AlertCircle, Info, Filter, Layers, Server, Package, RefreshCw, BarChart3, FileCheck, XCircle } from 'lucide-react';
@@ -624,7 +625,7 @@ export function ReconciliationSetupPage() {
 
       setLogs([newLog, ...logs]);
       setSendingPackageId(null);
-      alert('Gửi gói tin thành công!');
+      toast.success('Gửi gói tin thành công');
     }, 2000);
   };
 
@@ -1360,7 +1361,7 @@ export function ReconciliationSetupPage() {
         isOpen={showAPIConfigModal}
         onClose={() => setShowAPIConfigModal(false)}
         onSave={() => {
-          alert('Lưu cấu hình gói tin đối soát thành công!');
+          toast.success('Lưu cấu hình gói tin đối soát thành công');
           setShowAPIConfigModal(false);
         }}
       />
@@ -1410,7 +1411,7 @@ export function ReconciliationSetupPage() {
             </div>
             <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
               <button onClick={() => setShowDeletePackageModal(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200" title="Hủy bỏ">Hủy</button>
-              <button onClick={() => { setPackages(packages.filter(p => p.id !== packageToDelete.id)); setShowDeletePackageModal(false); alert('Đã xóa gói tin!'); }} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2" title="Xác nhận xóa gói tin"><Trash2 className="w-4 h-4" />Xóa</button>
+              <button onClick={() => { setPackages(packages.filter(p => p.id !== packageToDelete.id)); setShowDeletePackageModal(false); toast.success('Đã xóa gói tin'); }} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2" title="Xác nhận xóa gói tin"><Trash2 className="w-4 h-4" />Xóa</button>
             </div>
           </div>
         </div>

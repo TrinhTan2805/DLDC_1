@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Plus, Trash2, PlayCircle, Save } from 'lucide-react';
 
@@ -81,11 +82,11 @@ export function APIConnectionForm() {
   };
 
   const handleTestConnection = () => {
-    alert('Đang kiểm tra kết nối...\n\nThành công! Kết nối đến API hoạt động bình thường.');
+    toast.success('Đang kiểm tra kết nối...\n\nThành công! Kết nối đến API hoạt động bình thường.');
   };
 
   const handleSave = () => {
-    alert('Đã lưu cấu hình kết nối thành công!');
+    toast.success('Đã lưu cấu hình kết nối thành công');
   };
 
   return (

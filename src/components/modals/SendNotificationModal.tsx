@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Bell, Mail, FileText, Calendar, User } from 'lucide-react';
 import { useState } from 'react';
 import { DateInput } from '../pages/collection/collectionUi';
@@ -24,7 +25,7 @@ export function SendNotificationModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement send notification logic
-    alert('Thông báo đã được gửi thành công!');
+    toast.success('Thông báo đã được gửi thành công');
     onClose();
   };
 

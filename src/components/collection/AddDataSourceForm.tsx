@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 
@@ -29,7 +30,7 @@ export function AddDataSourceForm({ onBack }: AddDataSourceFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData, headers, parameters);
-    alert('Đã thêm mới phương thức thu thập dữ liệu thành công!');
+    toast.success('Đã thêm mới phương thức thu thập dữ liệu thành công');
     onBack();
   };
 

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { CheckSquare, XSquare, Eye, Clock, CheckCircle, XCircle, Send, FileText, User, X } from 'lucide-react';
 
@@ -119,7 +120,7 @@ export function OpenDataApprovalPage() {
   const handleSendToReviewer = () => {
     if (!selectedRequest || !selectedRecipient) return;
     const recipient = mockUsers.find(u => u.id === selectedRecipient);
-    alert(`Đã gửi yêu cầu "${selectedRequest.datasetName}" đến ${recipient?.name} để trình duyệt`);
+    toast.success(`Đã gửi yêu cầu "${selectedRequest.datasetName}" đến ${recipient?.name} để trình duyệt`);
     setShowSendToReviewerModal(false);
     setSelectedRecipient('');
     setSendNote('');
@@ -632,7 +633,7 @@ export function OpenDataApprovalPage() {
               </button>
               <button
                 onClick={() => {
-                  alert(`Đã ${approvalType === 'approve' ? 'phê duyệt' : 'từ chối'} yêu cầu: ${selectedRequest.datasetName}`);
+                  toast.success(`Đã ${approvalType === 'approve' ? 'phê duyệt' : 'từ chối'} yêu cầu: ${selectedRequest.datasetName}`);
                   setShowApprovalModal(false);
                   setApprovalNote('');
                 }}

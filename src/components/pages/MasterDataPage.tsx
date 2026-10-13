@@ -1,3 +1,5 @@
+import { confirmDialog } from '../common/confirmDialog';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { 
   HardDrive,
@@ -282,17 +284,17 @@ export function MasterDataPage() {
     setShowAddModal(true);
   };
 
-  const handleSendReview = (id: string) => {
-    if (confirm('Gửi rà soát và phê duyệt dữ liệu chủ này?')) {
+  const handleSendReview = async (id: string) => {
+    if ((await confirmDialog('Gửi rà soát và phê duyệt dữ liệu chủ này?', { type: 'info', title: 'Xác nhận gửi phê duyệt', confirmText: 'Gửi' }))) {
       setEntities(entities.map(ent => 
         ent.id === id ? { ...ent, status: 'review' } : ent
       ));
-      alert('Đã gửi yêu cầu phê duyệt dữ liệu chủ');
+      toast.success('Đã gửi yêu cầu phê duyệt dữ liệu chủ');
     }
   };
 
-  const handleApprove = (id: string) => {
-    if (confirm('Phê duyệt dữ liệu chủ này?')) {
+  const handleApprove = async (id: string) => {
+    if ((await confirmDialog('Phê duyệt dữ liệu chủ này?', { type: 'info', title: 'Xác nhận phê duyệt', confirmText: 'Phê duyệt' }))) {
       setEntities(entities.map(ent => 
         ent.id === id 
           ? { 
@@ -303,7 +305,7 @@ export function MasterDataPage() {
             } 
           : ent
       ));
-      alert('Đã phê duyệt dữ liệu chủ');
+      toast.success('Đã phê duyệt dữ liệu chủ');
     }
   };
 
@@ -321,12 +323,12 @@ export function MasterDataPage() {
             } 
           : ent
       ));
-      alert('Đã từ chối dữ liệu chủ');
+      toast.success('Đã từ chối dữ liệu chủ');
     }
   };
 
-  const handleRevokeApproval = (id: string) => {
-    if (confirm('Hủy phê duyệt dữ liệu chủ này?')) {
+  const handleRevokeApproval = async (id: string) => {
+    if ((await confirmDialog('Hủy phê duyệt dữ liệu chủ này?', { type: 'warning', title: 'Xác nhận hủy phê duyệt', confirmText: 'Hủy phê duyệt' }))) {
       setEntities(entities.map(ent => 
         ent.id === id 
           ? { 
@@ -337,7 +339,7 @@ export function MasterDataPage() {
             } 
           : ent
       ));
-      alert('Đã hủy phê duyệt dữ liệu chủ');
+      toast.success('Đã hủy phê duyệt dữ liệu chủ');
     }
   };
 
@@ -366,11 +368,11 @@ export function MasterDataPage() {
           } 
         : ent
     ));
-    alert('Đã công khai dữ liệu chủ thành công!');
+    toast.success('Đã công khai dữ liệu chủ thành công');
   };
 
-  const handleUnpublish = (id: string) => {
-    if (confirm('Hủy công khai dữ liệu chủ này?')) {
+  const handleUnpublish = async (id: string) => {
+    if ((await confirmDialog('Hủy công khai dữ liệu chủ này?', { type: 'warning', title: 'Xác nhận hủy công khai', confirmText: 'Hủy công khai' }))) {
       setEntities(entities.map(ent => 
         ent.id === id 
           ? { 
@@ -382,48 +384,48 @@ export function MasterDataPage() {
             } 
           : ent
       ));
-      alert('Đã hủy công khai dữ liệu chủ');
+      toast.success('Đã hủy công khai dữ liệu chủ');
     }
   };
 
-  const handleArchive = (id: string) => {
-    if (confirm('Lưu trữ (xóa mềm) dữ liệu chủ này?')) {
+  const handleArchive = async (id: string) => {
+    if ((await confirmDialog('Lưu trữ (xóa mềm) dữ liệu chủ này?', { type: 'warning', title: 'Xác nhận lưu trữ', confirmText: 'Lưu trữ' }))) {
       setEntities(entities.map(ent => 
         ent.id === id ? { ...ent, status: 'archived' } : ent
       ));
-      alert('Đã lưu trữ dữ liệu chủ');
+      toast.success('Đã lưu trữ dữ liệu chủ');
     }
   };
 
-  const handleLock = (id: string) => {
-    if (confirm('Khóa dữ liệu chủ này? Khi khóa, dữ liệu sẽ không thể chỉnh sửa.')) {
+  const handleLock = async (id: string) => {
+    if ((await confirmDialog('Khóa dữ liệu chủ này? Khi khóa, dữ liệu sẽ không thể chỉnh sửa.', { type: 'warning', title: 'Xác nhận khóa', confirmText: 'Khóa' }))) {
       setEntities(entities.map(ent => 
         ent.id === id ? { ...ent, isLocked: true } : ent
       ));
-      alert('Đã khóa dữ liệu chủ');
+      toast.success('Đã khóa dữ liệu chủ');
     }
   };
 
-  const handleUnlock = (id: string) => {
-    if (confirm('Mở khóa dữ liệu chủ này?')) {
+  const handleUnlock = async (id: string) => {
+    if ((await confirmDialog('Mở khóa dữ liệu chủ này?', { type: 'info', title: 'Xác nhận mở khóa', confirmText: 'Mở khóa' }))) {
       setEntities(entities.map(ent => 
         ent.id === id ? { ...ent, isLocked: false } : ent
       ));
-      alert('Đã mở khóa dữ liệu chủ');
+      toast.success('Đã mở khóa dữ liệu chủ');
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const entity = entities.find(e => e.id === id);
     if (!entity) return;
 
     if (entity.isLocked) {
-      alert('Không thể xóa dữ liệu chủ đang bị khóa. Vui lòng mở khóa trước.');
+      toast.error('Không thể xóa dữ liệu chủ đang bị khóa. Vui lòng mở khóa trước.');
       return;
     }
 
     if (entity.usageCount && entity.usageCount > 0) {
-      if (!confirm(`Cảnh báo: Dữ liệu chủ này đang được sử dụng bởi ${entity.usageCount} hệ thống. Bạn có chắc chắn muốn xóa?`)) {
+      if (!(await confirmDialog(`Cảnh báo: Dữ liệu chủ này đang được sử dụng bởi ${entity.usageCount} hệ thống. Bạn có chắc chắn muốn xóa?`, { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
         return;
       }
     }
@@ -431,16 +433,16 @@ export function MasterDataPage() {
     const confirmation = prompt('Nhập lý do xóa dữ liệu chủ:');
     if (confirmation) {
       setEntities(entities.filter(ent => ent.id !== id));
-      alert('Đã xóa dữ liệu chủ vĩnh viễn');
+      toast.success('Đã xóa dữ liệu chủ vĩnh viễn');
     }
   };
 
-  const handleRestore = (id: string) => {
-    if (confirm('Khôi phục dữ liệu chủ này?')) {
+  const handleRestore = async (id: string) => {
+    if ((await confirmDialog('Khôi phục dữ liệu chủ này?', { type: 'info', title: 'Xác nhận khôi phục', confirmText: 'Khôi phục' }))) {
       setEntities(entities.map(ent => 
         ent.id === id ? { ...ent, status: 'draft' } : ent
       ));
-      alert('Đã khôi phục dữ liệu chủ');
+      toast.success('Đã khôi phục dữ liệu chủ');
     }
   };
 
@@ -773,7 +775,7 @@ export function MasterDataPage() {
                   <button
                     onClick={() => {
                       if (entity.isLocked) {
-                        alert('Dữ liệu chủ đang bị khóa. Vui lòng mở khóa trước khi cập nhật.');
+                        toast.warning('Dữ liệu chủ đang bị khóa. Vui lòng mở khóa trước khi cập nhật.');
                         return;
                       }
                       setSelectedEntity(entity);

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -31,7 +32,7 @@ export function EditDataCollectionForm({ data, onBack, onSave }: EditDataCollect
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Mockup: chỉ hiển thị thông báo
-    alert('Mockup: Cập nhật dữ liệu thành công!\n(Chưa kết nối backend thực tế)');
+    toast.success('Mockup: Cập nhật dữ liệu thành công!\n(Chưa kết nối backend thực tế)');
     onBack();
   };
 

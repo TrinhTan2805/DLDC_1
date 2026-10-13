@@ -4,6 +4,7 @@ import { LoginPage } from './components/pages/LoginPage';
 import { auth } from './lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Toaster } from './components/ui/sonner';
+import { ConfirmDialogHost } from './components/common/confirmDialog';
 import { PreviewApiDocsPage } from './components/pages/provisioning/PreviewApiDocsPage';
 
 // Main App Component
@@ -61,6 +62,7 @@ export default function App() {
     <>
       <MainLayout onLogout={handleLogout} />
       <Toaster />
+      <ConfirmDialogHost />
     </>
   );
 }

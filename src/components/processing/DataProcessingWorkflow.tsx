@@ -119,7 +119,7 @@ export function DataProcessingWorkflow({ onStepClick, currentStep }: DataProcess
                     isActive ? 'scale-110 shadow-2xl ring-4 ring-offset-4' : 'hover:scale-105 hover:shadow-xl'
                   } ${getStepColor(step.color, 'hover')}`}
                   style={{
-                    ringColor: isActive
+                    ['--tw-ring-color' as string]: isActive
                       ? step.color === 'blue'
                         ? 'rgb(59 130 246 / 0.3)'
                         : step.color === 'green'

@@ -232,7 +232,7 @@ export function UniqueIdentifierRulesTab({ readOnly = false }: { readOnly?: bool
 
   const handleConfirmApprove = () => {
     if (!approvalRule || !selectedApprover) return;
-    toast.success('Đã gửi phê duyệt quy tắc định danh thành công!');
+    toast.success('Đã gửi phê duyệt quy tắc định danh thành công');
     handleCloseApprovalModal();
   };
 

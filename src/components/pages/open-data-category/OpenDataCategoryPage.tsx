@@ -439,7 +439,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
             }
           : item
       ));
-      toast.success('Hệ thống đã lưu thành công nhánh phiên bản mới đang chỉnh sửa (v1.4). Các thay đổi này cần được phê duyệt trước khi công bố!');
+      toast.success('Hệ thống đã lưu thành công nhánh phiên bản mới đang chỉnh sửa (v1.4). Các thay đổi này cần được phê duyệt trước khi công bố');
       setShowEditModal(false);
       setSelectedItem(null);
     }
@@ -960,7 +960,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   if (submitItems.length > 0) {
                     const updatedIds = submitItems.map(i => i.id);
                     setData(data.map(item => updatedIds.includes(item.id) ? { ...item, approvalStatus: 'pending' as const } : item));
-                    toast.success('Đã gửi yêu cầu trình duyệt thành công!');
+                    toast.success('Đã gửi yêu cầu trình duyệt thành công');
                   }
                   setIsSubmitting(false);
                   setSelectedIds(new Set());
@@ -977,7 +977,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     if (submitItems.length > 0) {
                       const updatedIds = submitItems.map(i => i.id);
                       setData(data.map(item => updatedIds.includes(item.id) ? { ...item, approvalStatus: 'rejected' as const } : item));
-                      toast.success('Đã từ chối danh mục!');
+                      toast.success('Đã từ chối danh mục');
                     }
                     setIsApproving(false);
                     setSelectedIds(new Set());
@@ -992,7 +992,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     if (submitItems.length > 0) {
                       const updatedIds = submitItems.map(i => i.id);
                       setData(data.map(item => updatedIds.includes(item.id) ? { ...item, approvalStatus: 'approved' as const } : item));
-                      toast.success('Đã phê duyệt thành công!');
+                      toast.success('Đã phê duyệt thành công');
                     }
                     setIsApproving(false);
                     setSelectedIds(new Set());
@@ -1887,7 +1887,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         : item
                     ));
                     setShowEditModal(false);
-                    toast.success('Đã gửi yêu cầu trình duyệt thành công!');
+                    toast.success('Đã gửi yêu cầu trình duyệt thành công');
                   }}
                   className={BTN_OUTLINE}
                 >
@@ -1900,7 +1900,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                   type="button"
                   onClick={() => {
                     if (selectedItem.approvalStatus !== 'approved') {
-                      toast.error('Chỉ dữ liệu đã phê duyệt mới được công khai!');
+                      toast.error('Chỉ dữ liệu đã phê duyệt mới được công khai');
                       return;
                     }
                     setShowEditModal(false);
@@ -2112,7 +2112,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                     }
                     setShowPublishFromModalModal(false);
                     setSelectedItem(null);
-                    toast.success('Đã công khai dữ liệu thành công!');
+                    toast.success('Đã công khai dữ liệu thành công');
                   }}
                   className={BTN_PRIMARY}
                 >
@@ -2210,7 +2210,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                         ? { ...item, approvalStatus: 'approved' as const }
                         : item
                     ));
-                    toast.success('Đã phê duyệt thành công!', approvalNote ? { description: 'Nội dung: ' + approvalNote } : undefined);
+                    toast.success('Đã phê duyệt thành công', approvalNote ? { description: 'Nội dung: ' + approvalNote } : undefined);
                   }
                   setShowApprovalModal(false);
                   setApprovalNote('');
@@ -2279,7 +2279,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 type="button"
                 onClick={() => {
                   if (!rejectReason.trim()) {
-                    toast.error('Vui lòng nhập lý do từ chối!');
+                    toast.error('Vui lòng nhập lý do từ chối');
                     return;
                   }
                   if (selectedItem) {
@@ -2569,7 +2569,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 <button
                   type="button"
                   onClick={() => {
-                    toast.success(`Khôi phục dữ liệu về phiên bản ${selectedVersionToCompare.version} thành công!`);
+                    toast.success(`Khôi phục dữ liệu về phiên bản ${selectedVersionToCompare.version} thành công`);
                     setShowVersionComparisonModal(false);
                   }}
                   className={BTN_PRIMARY}
@@ -2580,7 +2580,7 @@ export function OpenDataCategoryPage({ categoryName, categoryId }: OpenDataCateg
                 <button
                   type="button"
                   onClick={() => {
-                    toast.success(`Đã tải xuống thành công tệp dữ liệu phiên bản ${selectedVersionToCompare.version}!`);
+                    toast.success(`Đã tải xuống thành công tệp dữ liệu phiên bản ${selectedVersionToCompare.version}`);
                   }}
                   className={BTN_OUTLINE}
                 >

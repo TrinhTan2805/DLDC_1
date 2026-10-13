@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, useEffect, type FormEvent } from 'react';
 import {
   X, FileText, Database, Plug, Shield, Upload,
@@ -99,7 +100,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    alert('Thêm mới dịch vụ cung cấp API thành công!');
+    toast.success('Thêm mới dịch vụ cung cấp API thành công');
     onClose();
   };
 
@@ -1053,7 +1054,7 @@ export function AddProvisionServiceModal({ isOpen, onClose, mode = 'add', data }
  type="button" 
  disabled={!approvalNote.trim()}
  onClick={() => {
- alert(`Thực hiện thành công: ${
+ toast.success(`Thực hiện thành công: ${
  approvalDecision === 'approve' ? 'Phê duyệt' : 
  approvalDecision === 'reject' ? 'Từ chối' : 
  'Yêu cầu bổ sung thông tin'

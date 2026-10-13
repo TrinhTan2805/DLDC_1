@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Shield as ShieldIcon } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -38,7 +39,7 @@ export function GuardianshipCertificatePage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/civil-registry/guardianship"
       lastSyncTime="09/12/2025 07:15:20"
-      onSync={() => alert('Đang đồng bộ dữ liệu giám hộ...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu giám hộ...')}
     />
   );
 }

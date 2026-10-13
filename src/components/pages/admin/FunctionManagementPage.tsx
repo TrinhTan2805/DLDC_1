@@ -283,7 +283,7 @@ export function FunctionManagementPage() {
 
   const handleSave = () => {
     console.log('Saving function:', formData);
-    toast.success(`Đã lưu chức năng "${formData.name}" thành công!`);
+    toast.success(`Đã lưu chức năng "${formData.name}" thành công`);
   };
 
   const handleRefresh = () => {
@@ -347,7 +347,7 @@ export function FunctionManagementPage() {
       setExpandedMenus(new Set(expandedMenus).add(addFormData.parentId));
     }
     setModalType(null);
-    toast.success('Thêm mới chức năng thành công!');
+    toast.success('Thêm mới chức năng thành công');
   };
 
   const SelectedIcon = formData.icon ? IconComponents[formData.icon] : undefined;

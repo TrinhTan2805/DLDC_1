@@ -1471,13 +1471,7 @@ export default function MasterDataReportsPage({ onNavigate }: MasterDataReportsP
             </div>
 
             <div className={MODAL_FOOTER}>
-              <button
-                type="button"
-                onClick={() => setShowDetailModal(false)}
-                className={BTN_OUTLINE}
-              >
-                <Edit className="w-4 h-4" /> Chỉnh sửa
-              </button>
+              {/* PM 13/10/2026: bỏ nút "Chỉnh sửa" ở modal Xem chi tiết (màn báo cáo chỉ xem) */}
               {viewStep > 1 && (
                 <button
                   type="button"

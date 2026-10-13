@@ -1273,7 +1273,7 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                 </div>
               </div>
 
-              {/* Ngày hiệu lực — không cho đổi khi đang chỉnh sửa thực thể đã có */}
+              {/* Ngày hiệu lực — cho phép chỉnh sửa cả khi sửa thực thể đã có (PM 13/10/2026) */}
               <div>
                 <label className={LABEL_CLS}>
                   Ngày hiệu lực
@@ -1284,7 +1284,6 @@ export function MasterDataWizard({ isOpen, onClose, onSubmit, onSaveDraft, initi
                     ariaLabel="Ngày hiệu lực"
                     value={wizardData.effectiveDate || ''}
                     onChange={(v) => setWizardData({ ...wizardData, effectiveDate: v })}
-                    disabled={isEditingEntity}
                     className="flex-1"
                   />
                   <Tooltip>

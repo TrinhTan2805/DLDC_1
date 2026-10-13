@@ -1,3 +1,4 @@
+import { confirmDialog } from '../common/confirmDialog';
 import { useState } from 'react';
 import { X, Plus, Link2, Save, Trash2 } from 'lucide-react';
 
@@ -40,7 +41,7 @@ export function RelationshipModal({ onClose }: RelationshipModalProps) {
     name: '',
     sourceEntity: '',
     targetEntity: '',
-    relationType: '1-n' as const,
+    relationType: '1-n' as Relationship['relationType'],
     foreignKey: '',
     junctionTable: '',
   });
@@ -81,8 +82,8 @@ export function RelationshipModal({ onClose }: RelationshipModalProps) {
     setShowAddForm(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa quan hệ này?')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa quan hệ này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setRelationships(relationships.filter(rel => rel.id !== id));
     }
   };

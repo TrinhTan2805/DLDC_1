@@ -1,3 +1,4 @@
+import { confirmDialog } from '../../common/confirmDialog';
 import { useState } from 'react';
 import { Plus, Edit, Trash2, Save, Network, ArrowRight, Key, Table, AlertCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
@@ -260,7 +261,7 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
 
   const handleConfirmApprove = () => {
     if (!approvalRelationship || !selectedApprover) return;
-    toast.success('Đã gửi phê duyệt quan hệ thực thể thành công!');
+    toast.success('Đã gửi phê duyệt quan hệ thực thể thành công');
     handleCloseApprovalModal();
   };
 
@@ -270,8 +271,8 @@ export function EntityRelationshipsTab({ readOnly = false }: { readOnly?: boolea
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa quan hệ này?')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa quan hệ này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setRelationships(relationships.filter(rel => rel.id !== id));
     }
   };

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 // MainLayout Component - Updated
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -876,7 +877,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
           if (onLogout) {
             onLogout();
           } else {
-            alert('Đăng xuất thành công!');
+            toast.success('Đăng xuất thành công');
           }
         }}
       />

@@ -694,7 +694,7 @@ export function ApprovalTab() {
     setComment('');
 
     const actionText = approvalAction === 'approve' ? 'phê duyệt' : 'từ chối';
-    toast.success(`Đã ${actionText} thành công ${targetIds.length} bản ghi!`);
+    toast.success(`Đã ${actionText} thành công ${targetIds.length} bản ghi`);
   };
 
   const statCards = [

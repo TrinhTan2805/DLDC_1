@@ -1,5 +1,248 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Sửa toàn bộ lỗi TypeScript (tsc 956 → 0) (Ngày thực hiện: 13/10/2026) — 218
+
+**Nội dung (PM yêu cầu):** sửa các lỗi `tsc --noEmit`.
+
+**1. Nguyên nhân chính (783 lỗi):** file `src/react-shim.d.ts` khai báo đè module `react` thành kiểu `any` rút gọn, che kiểu thật của `@types/react` 18.3.28 đã cài → lỗi hàng loạt ở `ui/*`, biểu đồ recharts… → **xóa file shim** (đã có trong git, khôi phục được). Bổ sung kiểu `window.__activeModalsCount` trong `src/types.d.ts` (BaseModal, ConfirmModal, các modal danh mục).
+
+**2. Lỗi gây sai khi chạy (đã sửa):**
+- `orchestration/DataReconciliationAPIPage.tsx`: dùng `useState` nhưng chưa import (màn sẽ lỗi khi mở).
+- `collection/ServiceModals.tsx`: dùng `AdvancedDataMapping` chưa import; `collection/AdvancedDataMapping.tsx` thiếu import icon `Download`.
+- `provisioning/DataProvisionServiceSetupPage.tsx`: modal Công khai dịch vụ truyền sai tên prop (`service` / `onPublish` thay vì `requestData` / `onConfirmPublish`) → bấm Công khai không cập nhật trạng thái; đã truyền đúng.
+- `category/CategorySetupPage.tsx`: biến không tồn tại `setShowEditModal`, `defaultAttribute` (nút Thêm thuộc tính trong wizard) → bỏ / dùng `{}`.
+- `collection/ViewDataCollectionDetail.tsx`: `className` truyền object → đổi sang chuỗi class.
+- `processing/DataProcessingManager.tsx` → `DataClassificationModal` truyền đúng prop `config`; `processing/DataProcessingTemplate.tsx` truyền đủ prop cho `ProcessingConfigManager`; `processing/DataProcessingWorkflow.tsx` style `ringColor` (không hợp lệ) → biến `--tw-ring-color`.
+
+**3. Lỗi kiểu dữ liệu khác:** phân trang 10 bảng hộ tịch (`setCurrentPage(prev => …)` → giá trị số), import `sonner@2.0.3` → `sonner`, `main.tsx` bỏ đuôi `.tsx`, icon lucide có `title` → bọc `<span title>`, bổ sung kiểu / trường tùy chọn (User, Category, ErrorRecord, CategoryRelationType, TargetDatabase…), kiểm tra null (CategorySetupPageNew), tham số ngầm `any`… (khoảng 40 file).
+
+**Kiểm tra:** `npx tsc --noEmit` **0 lỗi**; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Ẩn/Hiện cột — nút < / > thu gọn, mở cột Danh sách trường (Ngày thực hiện: 13/10/2026) — 217
+
+**Nội dung (PM yêu cầu):** khi bật **Ẩn/Hiện cột**, cột danh sách trường có nút **<** để thu gọn và **>** để mở lại; áp dụng cho tab **Dữ liệu sau xử lý** (Xử lý dữ liệu) và tab **Dữ liệu bảng** (Xem chi tiết CSDL đích).
+- Đầu cột thêm tiêu đề "Danh sách trường" + nút `<` (tooltip "Thu gọn danh sách trường").
+- Thu gọn → cột ẩn, bảng dữ liệu giãn rộng; còn nút `>` nhỏ bên trái bảng (tooltip "Mở danh sách trường") để mở lại. Lựa chọn ẩn/hiện cột giữ nguyên.
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (thêm `ColumnPanelHeader`, `ColumnPanelExpandButton` dùng chung), `processing/TargetDatabaseDetailPage.tsx`.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — đổi nhãn "Xem dữ liệu" thành "Xem cơ sở dữ liệu" (Ngày thực hiện: 13/10/2026) — 216
+
+**Nội dung (PM yêu cầu):** liên kết cạnh "CSDL làm sạch: …" ở màn Quản lý Quy tắc Xử lý đổi nhãn **Xem dữ liệu** → **Xem cơ sở dữ liệu** (vẫn mở màn Xem chi tiết CSDL đích).
+
+**File sửa:** `processing/GenericProcessingPage.tsx`.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — tab "Dữ liệu sau xử lý" dùng bộ lọc nâng cao như tab Dữ liệu bảng của CSDL đích (Ngày thực hiện: 13/10/2026) — 215
+
+**Nội dung (PM yêu cầu):** bỏ ô tên CSDL, ô chọn bảng, thanh tìm kiếm ở tab **Dữ liệu sau xử lý**; thay bằng thanh công cụ + bộ lọc nâng cao giống tab **Dữ liệu bảng** ở màn Xem chi tiết CSDL đích (bổ sung mục 214).
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (viết lại), `processing/GenericProcessingPage.tsx` (bỏ prop tên CSDL).
+- Thanh công cụ: [Lọc] [Sắp xếp] [Xuất excel] [Ẩn/Hiện cột] … [Xóa dữ liệu] [Tải lại] — cùng giao diện với màn CSDL đích.
+- **Lọc:** điều kiện (trường / toán tử Bằng, Khác, Chứa, Lớn hơn, Nhỏ hơn / giá trị), nối AND / OR, **Gom Nhóm**; [Áp dụng] lọc thật trên dữ liệu mẫu, [Xóa bộ lọc] trả về toàn bộ.
+- **Sắp xếp:** nhiều điều kiện ASC / DESC, [Áp dụng] / [Xóa sắp xếp].
+- **Ẩn/Hiện cột:** danh sách checkbox bên trái bảng.
+- **Xuất excel:** toast thành công (số bản ghi theo bộ lọc). **Xóa dữ liệu:** popup xác nhận loại delete → xóa dữ liệu mẫu + toast; **Tải lại:** nạp lại dữ liệu.
+- Bảng dữ liệu đầu ra: `DIP_PERSON` (cùng nguồn `mockTableData` với màn CSDL đích) + phân trang.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — thêm tab "Dữ liệu sau xử lý" (Ngày thực hiện: 13/10/2026) — 214
+
+**Nội dung (PM yêu cầu):** màn Quản lý Quy tắc Xử lý (Xử lý dữ liệu › từng CSDL) thêm tab **Dữ liệu sau xử lý** cạnh tab Lịch sử, hiển thị bảng dữ liệu sau khi chạy xử lý — lấy theo bảng dữ liệu ở tab **Dữ liệu bảng** của màn Xem chi tiết CSDL đích.
+
+**File sửa / thêm:**
+- `processing/ProcessedDataTab.tsx` (mới): ô hiển thị CSDL làm sạch (VD "CSDL Kho DLDC") + chọn bảng (danh sách bảng của CSDL đích, mặc định `DIP_PERSON`) + tìm kiếm (bấm nút / Enter) + bảng dữ liệu theo chuẩn bảng 5.3 (cột STT + các cột của bảng) + phân trang 5.14; bảng chưa có dữ liệu hiện "Bảng chưa có dữ liệu".
+- `processing/GenericProcessingPage.tsx`: thêm tab và tiêu đề trang "Dữ liệu sau xử lý" khi chọn tab.
+
+**Ghi chú:** dữ liệu dùng chung nguồn mock `mockTableData` với màn Xem chi tiết CSDL đích — hiện chỉ bảng `DIP_PERSON` có dữ liệu (5 bản ghi), các bảng khác hiển thị "Bảng chưa có dữ liệu".
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — thẻ thống kê màn Quản lý Quy tắc Xử lý theo chuẩn, bỏ tỷ lệ % (Ngày thực hiện: 13/10/2026) — 213
+
+**Nội dung (PM yêu cầu):** 4 thẻ KPI ở màn **Quản lý Quy tắc Xử lý** (Xử lý dữ liệu › CSDL trong ngành / ngoài ngành › từng CSDL) đồng bộ theo thẻ thống kê chuẩn (compomennt.md mục 5.6.1) và bỏ tỷ lệ % trong thẻ.
+
+**File sửa:** `processing/GenericProcessingPage.tsx` (dùng chung cho mọi CSDL trong mục Xử lý dữ liệu)
+- Thẻ: nền trắng, viền 1px `#E2E8F0`, bo 16px, padding 16px, không bóng; ô icon bên trái `p-2 rounded-lg` nền `{màu}-50`, icon 20px.
+- Nhãn 16px / 400 / `#64748B` (bỏ chữ in hoa, đậm, giãn chữ); số liệu 16px / 600 / `#0F172A` (bỏ màu xanh / tím).
+- Icon: Thu thập `Database` (blue), Làm sạch `Eraser` (green), Chuẩn hóa `ListChecks` (indigo), Biến đổi `Shuffle` (purple).
+- Bỏ badge tỷ lệ 99.7% / 90.4% / 90.4%.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Phê duyệt danh mục / cấu trúc dùng popup; từ chối có toast; confirm() → popup chung; modal thành công → toast (Ngày thực hiện: 13/10/2026) — 212
+
+**1. Thiết lập danh mục (`/category-setup`) — Phê duyệt danh mục / Phê duyệt cấu trúc** (`category/CategorySetupPage.tsx`):
+- Sau khi phê duyệt, nếu cùng danh mục còn yêu cầu loại kia đang chờ → hiện **popup loại success** (thay toast kèm nút bị vỡ bố cục): tiêu đề "Đã phê duyệt danh mục/cấu trúc <mã>", nội dung "Danh mục <mã> còn N yêu cầu phê duyệt … đang chờ. Bạn có muốn chuyển sang phê duyệt … không?", nút [Đóng] / [Chuyển sang phê duyệt …]. Không còn chờ → toast thành công như cũ.
+- **Từ chối** (mọi luồng: từ chối nhanh, hàng loạt, modal xem cấu trúc / thông tin / phiên bản / hết hiệu lực) gom về `applyBulkReject` → **toast thành công** "Đã từ chối danh mục/cấu trúc <mã>" hoặc "Đã từ chối N yêu cầu".
+
+**2. `window.confirm()` → popup xác nhận chung:** thêm `src/components/common/confirmDialog.tsx` (`confirmDialog(message, { type, title, confirmText })` trả về Promise, hiển thị `ConfirmModal`; `<ConfirmDialogHost />` đặt ở `App.tsx`). Thay 28 chỗ trong 16 file đang dùng: `pages/MasterDataPage.tsx` (9), `pages/CategoryManagementPage.tsx`, `pages/OpenDataCategoryPage.tsx`, `master-data/HistoryTab.tsx` (xuất báo cáo, khôi phục phiên bản — viết lại nội dung), `master-data/EntityRelationshipsTab.tsx`, `master-data/AttributesManagementTab.tsx`, `masterdata/*Modal` (Attribute, MergeRule, Relationship, UpdateMasterData), `common/ApprovalModal.tsx`, `common/APIConnectionManager.tsx`, `modals/APIConfigModal.tsx`, `processing/ExecutorManagementModal.tsx`, `processing/ScheduleManagementModal.tsx`, `processing/TargetDatabaseManagementPage.tsx`. Loại / tiêu đề / nút theo thao tác: Xóa → delete "Xác nhận xóa" [Xóa]; Khóa / Hủy phê duyệt / Hủy công khai / Lưu trữ / Tạo lại API Key → warning; Phê duyệt / Gửi / Mở khóa / Khôi phục → info.
+
+**3. Modal "thành công" tự viết → toast:** `collection/CollectionSetupPage.tsx` (Cập nhật dữ liệu), `open-data/OpenDataPublishedListPage.tsx` (7 thông báo lưu nháp / phê duyệt / từ chối / gửi phê duyệt). `collection/ServiceModals.tsx` "Kết nối thành công" có hỏi bước tiếp → chuyển sang `ConfirmModal` loại success [Đóng] / [Tiếp tục].
+
+**4. Toast chung** (`ui/sonner.tsx`): thêm kiểu cho nút hành động trong toast (nếu có).
+
+**Giữ nguyên (chờ PM):** modal lỗi chi tiết có hướng dẫn khắc phục (`ServiceModals` Kết nối thất bại / Không có dữ liệu); modal xem kết quả / lỗi đồng bộ có bảng dữ liệu (`DataProcessingManager`, `SyncHistoryTable`, `DataDetailModal`, `DataManagementDetail`, `SendDataForm`).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Chuẩn hóa thông báo toàn hệ thống: Toast theo mục 5.5, thông báo thuần túy dùng Toast (Ngày thực hiện: 13/10/2026) — 211
+
+**Nội dung (PM yêu cầu):** toast hiện có đổi theo định dạng compomennt.md mục 5.5; chỗ nào chỉ thông báo cho người dùng thì dùng toast, chỉ thao tác cần người dùng xác nhận mới dùng popup.
+
+**1. Cấu hình toast chung** — `src/components/ui/sonner.tsx` (mọi toast trong hệ thống ăn theo, không sửa từng màn): góc trên phải cách mép 12px; nền đặc theo trạng thái (thành công `#16A34A`, lỗi `#DC2626`, cảnh báo `#D97706`, thông tin `#155DFC`); chữ / icon / nút X trắng; [icon 20px] Nội dung 14px/500 [X luôn hiện]; bo 8px, padding 12×16, cao tối thiểu 44px, rộng tối đa 420px; tự ẩn 4 giây; nội dung nhiều dòng (`\n`) xuống dòng đúng.
+
+**2. `alert()` của trình duyệt → toast:** 166 chỗ / 68 file đang dùng (Thu thập, Danh mục, Dữ liệu chủ, Dữ liệu mở, Điều phối / Đối soát, Xử lý, Khai thác nội bộ, các modal hộ tịch, modal dùng chung…). Loại toast theo nội dung: lỗi / không thể / đã tồn tại / không tìm thấy → `error`; vui lòng… / chưa… / chỉ có thể… / không có… → `warning`; thành công / Đã… → `success`; đang kết xuất / đang đồng bộ / chức năng đang phát triển → `info`. Bỏ emoji đầu câu và dấu "!" cuối câu. Không sửa 21 file thừa (không còn được import).
+
+**3. Popup chỉ báo kết quả → toast:** `category/CategorySetupPage.tsx` (Đã lưu cấu trúc nháp; Đã trình duyệt ×2; Không thể phê duyệt / từ chối khi chưa gửi phê duyệt → `toast.warning`), `category/components/tabs/RelationshipsTab.tsx` (Thêm mới / Cập nhật quan hệ thành công).
+
+**4. Toast có sẵn:** bỏ dấu "!" cuối câu ở 78 thông báo.
+
+**Chưa làm (chờ PM):** 33 chỗ `window.confirm()` (cần chuyển sang `ConfirmModal` — mỗi chỗ phải thêm state, sửa riêng từng màn) và các modal "thành công" tự viết riêng (VD `CollectionSetupPage` modal cập nhật thành công, `ServiceModals`, `OpenDataPublishedListPage`).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956; lỗi `sonner@2.0.3` ở ErrorListModal / ErrorRecordsList có từ trước); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Thiết lập thu thập — popup "Kích hoạt lại dịch vụ" bỏ câu phụ mặc định (Ngày thực hiện: 13/10/2026) — 210
+
+**Nội dung (PM yêu cầu):** popup **Kích hoạt lại dịch vụ** (`/collection-setup`) không hiển thị câu phụ mặc định "Hành động này không thể hoàn tác" (không phù hợp với thao tác kích hoạt).
+
+**File sửa:** `collection/CollectionSetupPage.tsx` — `ConfirmModal` kích hoạt lại thêm `subtitle=""`.
+
+**Rà lại thống kê popup xác nhận (đính chính):** chỉ 2 popup không khai báo loại (hiển thị mặc định `delete`, đúng với thao tác xóa): `admin/FunctionManagementPage.tsx` (Xác nhận xóa) và `collection/UnitManagementPage.tsx` (Xác nhận xóa). Popup xóa ở `admin/SystemNotificationManagementPage.tsx` và `collection/ServiceModals.tsx` đã khai báo `type="delete"`.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Thiết lập thu thập — popup "Kích hoạt lại dịch vụ" đổi sang loại success (Ngày thực hiện: 13/10/2026) — 209
+
+**Nội dung (PM yêu cầu):** popup xác nhận **Kích hoạt lại dịch vụ** (dịch vụ đang Ngừng hoạt động) ở màn Thiết lập thu thập (`/collection-setup`) đổi sang loại `success`: icon tích xanh lá trên nền `#F0FDF4`, nút xác nhận Primary "Hoạt động".
+
+**File sửa:** `collection/CollectionSetupPage.tsx` — `ConfirmModal` kích hoạt lại: `type="info"` → `type="success"`.
+
+**Đính chính thống kê trước đó:** popup này trước đây là loại `info` (không phải không khai báo loại / hiển thị như `delete` như đã báo).
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Popup xác nhận — bỏ khung nền xám của nội dung (Ngày thực hiện: 13/10/2026) — 208
+
+**Nội dung (PM yêu cầu):** trong popup xác nhận / cảnh báo, nội dung (VD "Bạn có chắc chắn muốn…") hiển thị **thẳng trên nền trắng**, bỏ nền `#F8FAFC` và viền `#E2E8F0` bao quanh. Áp dụng cho mọi popup dùng `ConfirmModal` (28 chỗ).
+
+**File sửa:**
+- `tailieu/docs/compomennt.md` mục 5.4.1 — dòng "Thân" và ví dụ hiển thị cập nhật theo.
+- `src/components/common/ConfirmModal.tsx` — thân popup chỉ còn padding 16×24, chữ 13px `#020817`.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956; lỗi `__activeModalsCount` trong ConfirmModal có từ trước); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Bổ sung quy định Popup xác nhận / cảnh báo (compomennt.md mục 5.4.1) (Ngày thực hiện: 13/10/2026) — 207
+
+**Nội dung (PM yêu cầu):** file component chưa có quy định riêng cho popup xác nhận / cảnh báo → bổ sung mục **5.4.1**, lấy component chung `src/components/common/ConfirmModal.tsx` làm chuẩn. **Chỉ sửa tài liệu, không sửa code.**
+- Khi nào dùng 4 loại `delete` / `warning` / `info` / `success`; kết quả thao tác dùng Toast (5.5), popup chỉ dùng khi cần người dùng quyết định; không dùng `window.confirm()` / `alert()`.
+- Bố cục: khung bo 16px rộng tối đa 448px; header [icon tròn 40px] tiêu đề 16px/600 + câu phụ 13px #64748B + [X]; thân khối nền #F8FAFC 13px, tên đối tượng in đậm; footer nền #F8FAFC, [Hủy] → [nút xác nhận] căn phải; nhãn nút là động từ của thao tác.
+- Bảng icon / màu theo loại; delete & warning dùng nút Destructive, info & success dùng nút Primary. Kèm đoạn code mẫu và ví dụ hiển thị.
+- Cập nhật tham chiếu: bảng menu "Mục nguy hiểm" và mục 5.5 trỏ tới mục 5.4.1.
+
+**Chờ PM xác nhận:** màu icon Cảnh báo `#D97706` (component hiện tại) khác màu Warning `#CA8A04` ở bảng màu mục 2.
+
+## Quy định Toast (compomennt.md mục 5.5) theo ảnh mẫu (Ngày thực hiện: 13/10/2026) — 206
+
+**Nội dung (PM yêu cầu):** viết lại quy định Toast trong `tailieu/docs/compomennt.md` mục 5.5 giống toast trong ảnh mẫu ("Thực hiện thao tác thành công"). **Chỉ sửa tài liệu, chưa sửa code.**
+- Vị trí góc **trên bên phải**, cách mép 12px; nền **đặc theo trạng thái**, chữ / icon / nút X **trắng**; bo 8px, padding 12×16, cao tối thiểu 44px.
+- Bố cục [icon viền 20px] Nội dung (14px/500) [X luôn hiện]; tự ẩn 4 giây (lỗi 6 giây).
+- Màu: Thành công `#16A34A` (theo ảnh); Lỗi `#DC2626`, Cảnh báo `#D97706`, Thông tin `#155DFC` (đề xuất — chờ PM xác nhận).
+- Không dùng `alert()` / `confirm()`; lỗi nhập liệu theo trường vẫn báo inline dưới ô.
+- Kèm mẫu cấu hình `src/components/ui/sonner.tsx` để áp dụng cho toàn hệ thống khi triển khai.
+
+**Ghi chú:** màu nền thành công lấy theo ảnh (ước lượng bằng mắt, chưa đo mã màu chính xác).
+
+## Quản lý thông báo hệ thống — thêm modal Xem chi tiết (Ngày thực hiện: 13/10/2026) — 205
+
+**Nội dung (PM yêu cầu):** thêm modal **Xem chi tiết thông báo hệ thống**, bố cục giống modal Thêm mới / Sửa.
+- Cột Thao tác thêm icon **Xem chi tiết** (Eye) trước Sửa / Xóa; cột rộng `w-32`.
+- Các ô Tiêu đề, Nội dung, **Ngày cập nhật** (chỉ có ở Xem chi tiết), Đối tượng nhận (radio), Vai trò / Nhóm người dùng / Người dùng (checkbox) khóa theo chuẩn: ô nền #F0F0F0, chữ đen; radio/checkbox chỉ khóa nút, nhãn giữ màu đen.
+- Ẩn ô tìm kiếm nhóm / người dùng; chip đã chọn không có nút bỏ chọn; nhánh Theo người dùng chỉ liệt kê người đã chọn.
+- Modal cao cố định `h-[90vh] max-h-[800px]`, thân cuộn; chân chỉ có nút **Đóng** (không có nút Chỉnh sửa, theo quy định mục 200/201).
+
+**File sửa:** `admin/SystemNotificationManagementPage.tsx` — `renderFormModal` thêm mode `view` (thân bọc `<fieldset disabled>`), `renderAudienceFields(…, readOnly)`.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Quản lý thông báo hệ thống — thay nút Làm mới / Sắp xếp bằng Bộ lọc nâng cao (Ngày thực hiện: 13/10/2026) — 204
+
+**Nội dung (PM yêu cầu, theo ảnh mẫu):** thanh công cụ còn [Ô tìm kiếm] [Tìm kiếm] [Bộ lọc] … [Thêm mới]. Bấm **Bộ lọc** (icon chuyển thành X, nền #EAF3FF) mở khung lọc nâng cao chuẩn (`FILTER_GRID_CLS`) gồm **Thời gian từ** / **Thời gian đến** (DateInput dd/mm/yyyy), lọc theo Ngày cập nhật, áp dụng ngay khi chọn ngày.
+
+**File sửa:** `admin/SystemNotificationManagementPage.tsx`
+- Bỏ nút Làm mới và nút Sắp xếp trên thanh công cụ (sắp xếp vẫn bấm được ở tiêu đề cột Ngày cập nhật).
+- Thêm nút Bộ lọc (`filterBtnClass`) + khung lọc; Thời gian từ không vượt Thời gian đến và ngược lại.
+- Dữ liệu mock: Ngày cập nhật khác nhau (05–12/12/2025) để demo bộ lọc.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Quản lý thông báo hệ thống — bỏ tooltip chi tiết ở cột Đối tượng nhận (Ngày thực hiện: 13/10/2026) — 203
+
+**Nội dung (PM yêu cầu):** cột **Đối tượng nhận** chỉ hiển thị tóm tắt ("Tất cả người dùng" / "N nhóm người dùng" / "N người dùng"), không còn tooltip liệt kê vai trò, nhóm, người dùng (bổ sung mục 202).
+
+**File sửa:** `admin/SystemNotificationManagementPage.tsx` — bỏ Tooltip ở ô bảng và hàm `audienceDetail`.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Quản lý thông báo hệ thống — chọn Đối tượng nhận: tất cả / theo nhóm (theo vai trò) / theo người dùng (Ngày thực hiện: 13/10/2026) — 202
+
+**Nội dung (PM yêu cầu):**
+1. Modal **Thêm mới** và **Sửa** thông báo hệ thống thêm trường bắt buộc **Đối tượng nhận**, chỉ chọn 1 trong 3 kiểu: Tất cả người dùng (mặc định) / Theo nhóm người dùng / Theo người dùng cụ thể. Modal Sửa cho phép đổi đối tượng nhận.
+2. **Theo nhóm người dùng:** chọn **Vai trò** trước (chọn nhiều), sau đó chọn **Nhóm người dùng** thuộc các vai trò đã chọn (chọn nhiều, có ô tìm theo tên/mã nhóm, nhóm hiển thị theo từng vai trò). Chưa chọn vai trò thì khung nhóm bị khóa (nền #F0F0F0) kèm gợi ý "Vui lòng chọn vai trò trước". Bỏ chọn vai trò thì bỏ luôn các nhóm của vai trò đó.
+3. Mock vai trò **chưa có nhóm người dùng** (Quản trị viên, Biên tập viên, Người xem — hiện "Chưa có nhóm"): khi chọn hiện "Vai trò này chưa có nhóm người dùng nào"; bấm Gửi báo lỗi "Các vai trò đã chọn chưa có nhóm người dùng nào. Vui lòng chọn vai trò khác".
+4. **Theo người dùng cụ thể:** danh sách checkbox, tìm theo tên người dùng / tài khoản (không lọc theo vai trò, nhóm).
+5. Mục đã chọn hiển thị dạng chip có nút bỏ chọn. Thiếu thông tin báo lỗi inline dưới ô (viền đỏ mảnh + chữ đỏ 12px), nút Gửi/Lưu vẫn sáng; Tiêu đề / Nội dung cũng chuyển sang báo lỗi inline (trước là toast).
+6. Bảng danh sách thêm cột **Đối tượng nhận** ("Tất cả người dùng" / "N nhóm người dùng" / "N người dùng"); rê chuột hiện tooltip chi tiết vai trò, nhóm / tên người dùng.
+7. **Chuông thông báo lọc theo người đăng nhập:** chỉ khi người đang đăng nhập thuộc đối tượng nhận thì thông báo mới hiện ở chuông TopBar và màn Thông báo.
+
+**File sửa:**
+- `src/data/notificationRecipients.ts` (mới) — mock vai trò (6, trong đó 3 vai trò chưa có nhóm), nhóm (8, khớp Quản lý người dùng), người dùng (12, gồm người đang đăng nhập), hàm `isAudienceMember`.
+- `src/data/notificationCatalog.ts` — `broadcastSystemNotification(title, message, audience?)` bỏ qua nếu người đăng nhập không thuộc đối tượng nhận (mặc định: tất cả).
+- `src/components/user/currentUser.ts` — nhóm của người đăng nhập (mock) đổi `Quản trị viên` → `Quản trị hệ thống` để khớp nhóm QTHT (demo gửi theo nhóm); hiển thị ở modal Thông tin cá nhân thay đổi theo.
+- `admin/SystemNotificationManagementPage.tsx` — trường Đối tượng nhận, kiểm tra bắt buộc, cột bảng, modal rộng `max-w-2xl`.
+
+**Kịch bản demo chuông:** gửi Tất cả → có chuông; Theo nhóm "Quản trị hệ thống" → có chuông; nhóm khác → không có; Theo người dùng chọn "Nguyễn Văn A (bạn)" → có chuông, không chọn → không có.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới (956 như trước); `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Dữ liệu chủ — cho sửa Ngày hiệu lực khi chỉnh sửa; bỏ nút Chỉnh sửa ở Báo cáo dữ liệu chủ (Ngày thực hiện: 13/10/2026) — 201
+
+**Nội dung (PM yêu cầu):**
+1. Wizard **Chỉnh sửa dữ liệu chủ** (bước 1): cho phép chỉnh sửa trường **Ngày hiệu lực** (trước bị khóa khi sửa thực thể đã có).
+2. Bỏ nút **Chỉnh sửa** ở modal Xem chi tiết thực thể dữ liệu chủ tại màn **Báo cáo dữ liệu chủ** (bổ sung mục 200).
+
+**File sửa:**
+- `master-data/MasterDataWizard.tsx` — bỏ `disabled` của ô Ngày hiệu lực (DateInput dd/mm/yyyy); Tạo mới và Chỉnh sửa đều nhập được.
+- `master-data/MasterDataReportsPage.tsx` — chân modal Xem chi tiết còn [Quay lại] / [Đóng] / [Tiếp theo].
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Modal Xem chi tiết thực thể dữ liệu chủ — bỏ nút Chỉnh sửa (Ngày thực hiện: 13/10/2026) — 200
+
+**Nội dung (PM yêu cầu):** bỏ nút "Chỉnh sửa" ở chân modal Xem chi tiết thực thể dữ liệu chủ (Mô hình dữ liệu chủ).
+
+**File sửa:** `master-data/MasterDataScaleManagementPage.tsx` — chân modal còn [Quay lại] (từ bước 2) / [Đóng] / [Tiếp theo]; chỉnh sửa vẫn thực hiện qua nút Chỉnh sửa ở cột Thao tác của bảng.
+
+**Chưa đổi:** modal "Xem chi tiết thực thể dữ liệu chủ" ở màn Báo cáo dữ liệu chủ (`MasterDataReportsPage.tsx`) vẫn còn nút Chỉnh sửa — chờ PM xác nhận.
+
+**Kiểm tra:** tsc không phát sinh lỗi mới; `npm run build` thành công.
+
+## Ô nhập ngày thống nhất dd/mm/yyyy (DateInput) toàn hệ thống (Ngày thực hiện: 12/10/2026) — 199
+
+**Nội dung (PM yêu cầu):** mọi ô có dạng ngày tháng dùng chung định dạng như bộ lọc Thời gian từ/đến ở Thiết lập thu thập (dd/mm/yyyy + icon lịch), không dùng ô ngày của trình duyệt (hiện mm/dd/yyyy theo ngôn ngữ máy).
+
+**Đã sửa:** thay toàn bộ `<input type="date">` (~72 ô, ~40 file: Cung cấp dữ liệu — Dịch vụ chia sẻ, Yêu cầu, Đối soát, Giám sát, modal Kết xuất / Phân quyền; Điều phối; Dữ liệu mở, Báo cáo dữ liệu mở, Danh mục dữ liệu mở; Dữ liệu chủ báo cáo; Danh mục dùng chung; Thông báo; Tìm kiếm nâng cao; Giám hộ; Nhật ký thu thập; Dashboard; các modal báo cáo / gửi thông báo / yêu cầu dữ liệu…) bằng `DateInput` dùng chung (giá trị ISO giữ nguyên, logic lọc không đổi; bỏ icon lịch tự gắn bên cạnh để không trùng). Phần này đã được commit trong `adea8b99` (12/10/2026).
+
+**Chưa thay (không phải ô chỉ có ngày — chờ PM quyết định):**
+- `type="datetime-local"` (ngày + giờ): `notifications/NotificationBrowser.tsx` (3 ô), `admin/UserActivityHistoryPage.tsx` (Từ ngày / Đến ngày).
+- `type="month"`: `open-data-report/OpenDataReportPage.tsx` (Từ tháng / Đến tháng).
+
+**Ghi chú:** 2 agent thực hiện bị dừng do hết hạn mức trước bước kiểm tra cuối; đã kiểm tra lại: không còn `type="date"`, `npm run build` thành công, tsc không phát sinh lỗi mới.
+
 ## Nút chọn bị khóa: chỉ khóa nút, nhãn giữ chữ đen (Ngày thực hiện: 09/10/2026) — 198
 
 **Nội dung (PM yêu cầu):** trường "Định dạng file kết xuất" (modal Chi tiết yêu cầu kết xuất dữ liệu) chỉ disable radio button, nhãn không cần disable; kiểm tra tương tự các màn hình.

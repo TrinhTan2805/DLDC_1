@@ -644,7 +644,7 @@ export function MasterDataAPage() {
                         {record.isDeleted ? (
                           <button
                             className="p-1 text-green-600 hover:bg-green-50 rounded"
-                            onClick={() => handleRestore(record.id)}
+                            onClick={() => handleRestore()}
                             title="Khôi phục"
                           >
                             <RotateCcw className="w-4 h-4" />
@@ -652,7 +652,7 @@ export function MasterDataAPage() {
                         ) : (
                           <button
                             className="p-1 text-red-600 hover:bg-red-50 rounded"
-                            onClick={() => handleDelete(record.id)}
+                            onClick={() => handleDelete()}
                             title="Xóa"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -876,7 +876,7 @@ export function MasterDataAPage() {
                   ...record,
                   ...updatedRecord,
                   secondarySource: typeof updatedRecord.secondarySource === 'string' 
-                    ? updatedRecord.secondarySource.split(',').map(s => s.trim()).filter(s => s)
+                    ? updatedRecord.secondarySource.split(',').map((s: string) => s.trim()).filter((s: string) => s)
                     : updatedRecord.secondarySource
                 };
               }
@@ -904,7 +904,7 @@ export function MasterDataAPage() {
             });
             setData(updatedData);
             setApprovalRecord(null);
-            alert(`Đã phê duyệt bản ghi thành công!\n\nNgười phê duyệt: ${mockApprovers.find(a => a.id === approverId)?.name}\nGhi chú: ${note || '(Không có)'}`);
+            alert(`Đã phê duyệt bản ghi thành công!\n\nNgười phê duyệt: ${mockApprovers.find(a => String(a.id) === String(approverId))?.name}\nGhi chú: ${note || '(Không có)'}`);
           }}
           onReject={(approverId, reason) => {
             const updatedData = data.map(record => {
@@ -915,7 +915,7 @@ export function MasterDataAPage() {
             });
             setData(updatedData);
             setApprovalRecord(null);
-            alert(`Đã từ chối phê duyệt bản ghi!\n\nNgười từ chối: ${mockApprovers.find(a => a.id === approverId)?.name}\nLý do: ${reason}`);
+            alert(`Đã từ chối phê duyệt bản ghi!\n\nNgười từ chối: ${mockApprovers.find(a => String(a.id) === String(approverId))?.name}\nLý do: ${reason}`);
           }}
         />
       )}

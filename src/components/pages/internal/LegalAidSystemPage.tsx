@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { HandHeart } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -40,7 +41,7 @@ export function LegalAidSystemPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-aid/all"
       lastSyncTime="09/12/2025 13:30:25"
-      onSync={() => alert('Đang đồng bộ dữ liệu trợ giúp pháp lý...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu trợ giúp pháp lý...')}
     />
   );
 }

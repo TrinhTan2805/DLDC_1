@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { DateInput } from './pages/collection/collectionUi';
 import { X, ChevronRight, ChevronLeft, Check, AlertCircle, User, Shield, Settings, Key, Globe, Plus, Building2, Mail, Phone, Search, Filter } from 'lucide-react';
@@ -167,7 +168,7 @@ export function GrantPermissionModal({
     console.log('Permission granted:', permissionData);
     
     // Show success message
-    alert(`Đã cấp quyền thành công!\n\nAPI: ${selectedApi?.name}\nĐơn vị: ${selectedOrganization}\nLog đã được ghi nhận và thông báo đã được gửi.`);
+    toast.success(`Đã cấp quyền thành công!\n\nAPI: ${selectedApi?.name}\nĐơn vị: ${selectedOrganization}\nLog đã được ghi nhận và thông báo đã được gửi.`);
     
     // Reset and close
     handleClose();
@@ -847,7 +848,7 @@ export function GrantPermissionModal({
                   // Validate required fields
                   if (!newOrgForm.name || !newOrgForm.code || !newOrgForm.parent || 
                       !newOrgForm.contactName || !newOrgForm.contactEmail || !newOrgForm.contactPhone) {
-                    alert('Vui lòng điền đầy đủ các trường bắt buộc!');
+                    toast.warning('Vui lòng điền đầy đủ các trường bắt buộc');
                     return;
                   }
 
@@ -880,7 +881,7 @@ export function GrantPermissionModal({
                   });
 
                   // Show success message
-                  alert(`Đã tạo đơn vị "${newOrg.name}" thành công!`);
+                  toast.success(`Đã tạo đơn vị "${newOrg.name}" thành công`);
                 }}
                 className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
               >

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { ArrowLeft, Save, X, Eye, EyeOff, Server, Globe2, FileDown, Database, Plus, Upload, Download } from 'lucide-react';
 import { useState } from 'react';
 import { AdvancedDataMapping } from '../pages/collection/AdvancedDataMapping';
@@ -69,13 +70,13 @@ export function AddDataCollectionForm({ onBack, onSave }: AddDataCollectionFormP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Mockup: Thêm mới kết nối thành công với 4 Tabs!\n(Chưa kết nối backend thực tế)');
+    toast.success('Mockup: Thêm mới kết nối thành công với 4 Tabs!\n(Chưa kết nối backend thực tế)');
     onSave && onSave(formData);
     onBack();
   };
 
   const handleTestConnection = () => {
-    alert('Đang kiểm tra kết nối tới Endpoint/Server...\n\n(Mockup: Kết nối thành công 200 OK)');
+    toast.success('Đang kiểm tra kết nối tới Endpoint/Server...\n\n(Mockup: Kết nối thành công 200 OK)');
     setActiveTab('mapping');
   };
 

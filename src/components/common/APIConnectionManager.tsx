@@ -1,3 +1,5 @@
+import { confirmDialog } from './confirmDialog';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Plus, Server, CheckCircle, XCircle, Clock, Eye, Edit, Trash2, RefreshCw, Link, Key } from 'lucide-react';
 import { APIConnectionFormModal } from './APIConnectionFormModal';
@@ -110,17 +112,17 @@ export function APIConnectionManager() {
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa kết nối này?')) {
+  const handleDelete = async (id: number) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa kết nối này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setConnections(connections.filter(c => c.id !== id));
-      alert('Đã xóa kết nối thành công!');
+      toast.success('Đã xóa kết nối thành công');
     }
   };
 
   const handleTest = (id: number) => {
     const connection = connections.find(c => c.id === id);
     if (connection) {
-      alert(`Đang test kết nối: ${connection.name}\n\nKết quả: Kết nối thành công!\nResponse time: 120ms`);
+      toast.success(`Đang test kết nối: ${connection.name}\n\nKết quả: Kết nối thành công!\nResponse time: 120ms`);
       // Update status
       setConnections(connections.map(c => 
         c.id === id ? { ...c, status: 'connected', responseTime: '120ms' } : c
@@ -137,12 +139,12 @@ export function APIConnectionManager() {
         responseTime: '-'
       };
       setConnections([...connections, newConnection]);
-      alert('Đã thêm kết nối mới thành công!');
+      toast.success('Đã thêm kết nối mới thành công');
     } else if (modalMode === 'edit' && selectedConnection) {
       setConnections(connections.map(c => 
         c.id === selectedConnection.id ? { ...c, ...data } : c
       ));
-      alert('Đã cập nhật kết nối thành công!');
+      toast.success('Đã cập nhật kết nối thành công');
     }
   };
 

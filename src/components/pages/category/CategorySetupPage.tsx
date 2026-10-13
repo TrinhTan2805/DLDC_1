@@ -459,6 +459,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
     subtitle: string;
     message: ReactNode;
     confirmText: string;
+    cancelText?: string;
     onConfirm: () => void;
   } | null>(null);
 
@@ -492,14 +493,14 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   const confirmEdit = (updatedData: Partial<MasterDataEntity>) => {
     // Không dùng hàm này cho Save sửa nữa (do sửa qua Wizard) nhưng giữ lại dự phòng
     setEntities(entities.map(e => e.id === editingEntity?.id ? { ...e, ...updatedData } as MasterDataEntity : e));
-    setShowEditModal(false);
     setIsViewMode(false);
     setEditingEntity(null);
   };
 
   // --------------------------------------------------------------------------------
   // Sau khi phê duyệt danh mục / cấu trúc: nếu cùng danh mục còn yêu cầu loại kia đang chờ
-  // → thông báo kèm nút chuyển sang thẻ phê duyệt tương ứng, lọc sẵn danh mục (PM duyệt phương án B 07/10/2026)
+  // → thông báo kèm nút chuyển sang thẻ phê duyệt tương ứng, lọc sẵn danh mục (PM duyệt phương án B 07/10/2026).
+  // Cần người dùng quyết định (chuyển hay không) → popup success (compomennt.md 5.4.1, PM 13/10/2026); không còn chờ → toast
   // --------------------------------------------------------------------------------
   const [approvalEntityFilter, setApprovalEntityFilter] = useState<{ ids: string[]; label: string } | null>(null);
   const APPROVAL_KIND_LABEL: Record<string, string> = { category: 'danh mục', structure: 'cấu trúc' };
@@ -523,19 +524,21 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
         return;
       }
       const codes = waitingEntityIds.map(id => waiting.find(r => r.entityId === id)?.entityCode || id);
-      toast.success(title, {
-        description: done.length === 1
-          ? `Danh mục còn ${waiting.length} yêu cầu phê duyệt ${APPROVAL_KIND_LABEL[other]} đang chờ.`
-          : `${waitingEntityIds.length} danh mục có yêu cầu phê duyệt ${APPROVAL_KIND_LABEL[other]} đang chờ.`,
-        duration: 8000,
-        action: {
-          label: `Chuyển sang phê duyệt ${APPROVAL_KIND_LABEL[other]}`,
-          onClick: () => {
-            setActiveTab('approval');
-            setApprovalTab(other);
-            setStatusFilter('pending');
-            setApprovalEntityFilter({ ids: waitingEntityIds, label: codes.join(', ') });
-          },
+      setGenericConfirm({
+        isOpen: true,
+        type: 'success',
+        title,
+        subtitle: '',
+        message: done.length === 1
+          ? <>Danh mục <strong>{codes[0]}</strong> còn {waiting.length} yêu cầu phê duyệt {APPROVAL_KIND_LABEL[other]} đang chờ. Bạn có muốn chuyển sang phê duyệt {APPROVAL_KIND_LABEL[other]} không?</>
+          : <>{waitingEntityIds.length} danh mục (<strong>{codes.join(', ')}</strong>) có yêu cầu phê duyệt {APPROVAL_KIND_LABEL[other]} đang chờ. Bạn có muốn chuyển sang phê duyệt {APPROVAL_KIND_LABEL[other]} không?</>,
+        confirmText: `Chuyển sang phê duyệt ${APPROVAL_KIND_LABEL[other]}`,
+        cancelText: 'Đóng',
+        onConfirm: () => {
+          setActiveTab('approval');
+          setApprovalTab(other);
+          setStatusFilter('pending');
+          setApprovalEntityFilter({ ids: waitingEntityIds, label: codes.join(', ') });
         },
       });
     });
@@ -575,6 +578,13 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
   };
 
   const applyBulkReject = (ids: string[], note: string) => {
+    const rejected = requests.filter(r => ids.includes(r.id) && r.status === 'pending');
+    if (rejected.length > 0) {
+      const kindLabel = APPROVAL_KIND_LABEL[rejected[0].type];
+      toast.success(rejected.length === 1
+        ? (kindLabel ? `Đã từ chối ${kindLabel} ${rejected[0].entityCode}` : 'Đã từ chối yêu cầu')
+        : `Đã từ chối ${rejected.length} yêu cầu`);
+    }
     setRequests(requests.map(r => ids.includes(r.id) ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
   };
 
@@ -606,11 +616,11 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   const handleSaveStep1 = (action: 'draft' | 'submit' | 'next' | 'next3') => {
     if (!formData.code?.trim()) {
-      toast.error('Vui lòng nhập mã danh mục!');
+      toast.error('Vui lòng nhập mã danh mục');
       return;
     }
     if (!formData.name?.trim()) {
-      toast.error('Vui lòng nhập tên danh mục!');
+      toast.error('Vui lòng nhập tên danh mục');
       return;
     }
 
@@ -688,10 +698,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       setPendingApprovalData(req);
       setShowSimpleApproveModal(true);
     } else {
-      setGenericConfirm({
-         isOpen: true, type: 'warning', title: 'Không thể phê duyệt', subtitle: 'Thông báo lỗi',
-         message: 'Danh mục này chưa được gửi phê duyệt (không có yêu cầu Pending)!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-      });
+      toast.warning('Không thể phê duyệt: danh mục này chưa được gửi phê duyệt');
     }
   };
 
@@ -701,10 +708,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
       setPendingApprovalData(req);
       setShowSimpleRejectModal(true);
     } else {
-      setGenericConfirm({
-         isOpen: true, type: 'warning', title: 'Không thể từ chối', subtitle: 'Thông báo lỗi',
-         message: 'Danh mục này chưa được gửi phê duyệt (không có yêu cầu Pending)!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-      });
+      toast.warning('Không thể từ chối: danh mục này chưa được gửi phê duyệt');
     }
   };
 
@@ -764,7 +768,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
 
   const handleSaveAttribute = () => {
     if (!attributeFormData.fieldName || !attributeFormData.displayName) {
-      toast.error('Vui lòng nhập đầy đủ Tên trường và Tên hiển thị!');
+      toast.error('Vui lòng nhập đầy đủ Tên trường và Tên hiển thị');
       return;
     }
 
@@ -883,9 +887,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               onDeleteAttribute={(id) => { setAttributeToDeleteId(id); setShowDeleteAttributeModal(true); }}
               getDataTypeLabel={getDataTypeLabel}
               onSave={() => {
-                setGenericConfirm({
-                   isOpen: true, type: 'success', title: 'Đã lưu', subtitle: '', message: 'Lưu cấu trúc nháp thành công!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-                });
+                toast.success('Lưu cấu trúc nháp thành công');
               }}
               onSaveAndSubmit={() => {
                 if (selectedEntityId) confirmSubmitApproval(selectedEntityId, 'structure');
@@ -959,7 +961,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           selectedAttributes={selectedAttributes}
           onSelectAttribute={(id) => setSelectedAttributes(prev => prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id])}
           onSelectAllAttributes={(checked) => setSelectedAttributes(checked ? attributes.map(a => a.id) : [])}
-          onAddAttribute={() => { setAttributeFormData(defaultAttribute); setShowAttributeModal(true); }}
+          onAddAttribute={() => { setAttributeFormData({}); setShowAttributeModal(true); }}
           onEditAttribute={(attr) => { setAttributeFormData(attr); setShowAttributeModal(true); }}
           onDeleteAttribute={(id) => setAttributes(prev => prev.filter(a => a.id !== id))}
           onAddAttributeInline={handleAddAttributeInline}
@@ -982,6 +984,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             subtitle={genericConfirm.subtitle}
             message={genericConfirm.message}
             confirmText={genericConfirm.confirmText}
+            cancelText={genericConfirm.cancelText}
             onConfirm={genericConfirm.onConfirm}
           />
         )}
@@ -1059,7 +1062,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
           entity={entities.find(e => e.id === pendingApprovalData?.entityId) || null}
           submissionContent={pendingApprovalData?.submissionContent}
           onConfirm={(note) => {
-            setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
+            if (pendingApprovalData) applyBulkReject([pendingApprovalData.id], note);
             // Cập nhật lifecycle status của entity nếu rejected
             if (pendingApprovalData?.type === 'category') {
               setEntities(entities.map(e => e.id === pendingApprovalData.entityId ? { ...e, lifecycleStatus: 'rejected' } as MasterDataEntity : e));
@@ -1132,9 +1135,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               setEntities(entities.map(e => e.id === expireEntity.id ? { ...e, lifecycleStatus: 'pending_expiration' } as MasterDataEntity : e));
               
               setShowExpireRequestModal(false);
-              setGenericConfirm({
-                 isOpen: true, type: 'success', title: 'Đã trình duyệt', subtitle: '', message: 'Yêu cầu ngừng hiệu lực danh mục đã được gửi để phê duyệt!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-              });
+              toast.success('Đã gửi yêu cầu ngừng hiệu lực danh mục để phê duyệt');
            }}
         />
 
@@ -1151,7 +1152,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               setShowExpireApproveModal(false);
            }}
            onReject={(note) => {
-              setRequests(requests.map(r => r.id === pendingApprovalData?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
+              if (pendingApprovalData) applyBulkReject([pendingApprovalData.id], note);
               if (expireEntity) {
                  setEntities(entities.map(e => e.id === expireEntity.id ? { ...e, lifecycleStatus: 'active' } as MasterDataEntity : e));
               }
@@ -1170,7 +1171,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             setShowVersionChangeModal(false);
           }}
           onReject={(note) => {
-            setRequests(requests.map(r => r.id === versionChangeRequest?.id ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
+            if (versionChangeRequest) applyBulkReject([versionChangeRequest.id], note);
             setShowVersionChangeModal(false);
           }}
         />
@@ -1192,7 +1193,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             setShowStructureViewModal(false);
           }}
           onReject={(note) => {
-            setRequests(requests.map(r => r.id === structureViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
+            if (structureViewRequestId) applyBulkReject([structureViewRequestId], note);
             setShowStructureViewModal(false);
           }}
         />
@@ -1213,7 +1214,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
             setShowInfoViewModal(false);
           }}
           onReject={(note) => {
-            setRequests(requests.map(r => r.id === infoViewRequestId ? { ...r, status: 'rejected', reviewedBy: 'Admin', reviewedDate: formatDateVN(new Date()), comments: note } : r));
+            if (infoViewRequestId) applyBulkReject([infoViewRequestId], note);
             if (infoViewEntity) {
               setEntities(entities.map(e => e.id === infoViewEntity.id ? { ...e, lifecycleStatus: 'draft' } as MasterDataEntity : e));
             }
@@ -1288,9 +1289,7 @@ export const CategorySetupPage = ({ userRole = 'leader' }: { userRole?: string }
               setVersions(prev => [newVersion, ...prev]);
             }
 
-            setGenericConfirm({
-               isOpen: true, type: 'success', title: 'Đã trình duyệt', subtitle: '', message: 'Gửi yêu cầu phê duyệt thành công!', confirmText: 'Đóng', onConfirm: () => setGenericConfirm(null)
-            });
+            toast.success('Gửi yêu cầu phê duyệt thành công');
             setShowApprovalModal(false);
           }}
         />

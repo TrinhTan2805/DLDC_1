@@ -668,7 +668,7 @@ export function CategorySetupPageNew() {
       <PortalModal isOpen={showDetailModal && !!selectedCategory} onClose={() => { setShowDetailModal(false); setSelectedCategory(null); }}>
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="text-lg text-slate-900">Chi tiết danh mục: {selectedCategory.name}</h3>
+              <h3 className="text-lg text-slate-900">Chi tiết danh mục: {selectedCategory?.name}</h3>
               <button
                 onClick={() => {
                   setShowDetailModal(false);
@@ -688,31 +688,31 @@ export function CategorySetupPageNew() {
                   <div>
                     <label className="block text-xs text-slate-600 mb-1">Mã danh mục</label>
                     <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                      {selectedCategory.code}
+                      {selectedCategory?.code}
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-1">Tên danh mục</label>
                     <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                      {selectedCategory.name}
+                      {selectedCategory?.name}
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-1">Loại</label>
                     <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm">
-                      {getTypeBadge(selectedCategory.type)}
+                      {getTypeBadge(selectedCategory?.type ?? '')}
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs text-slate-600 mb-1">Trạng thái</label>
                     <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm">
-                      {getStatusBadge(selectedCategory.status)}
+                      {getStatusBadge(selectedCategory?.status ?? '')}
                     </div>
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs text-slate-600 mb-1">Mô tả</label>
                     <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-900">
-                      {selectedCategory.description}
+                      {selectedCategory?.description}
                     </div>
                   </div>
                 </div>
@@ -733,7 +733,7 @@ export function CategorySetupPageNew() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedCategory.fields.map((field, index) => (
+                      {selectedCategory?.fields.map((field, index) => (
                         <tr key={field.id} className="border-b border-slate-100">
                           <td className="px-4 py-2 text-sm text-slate-900">{index + 1}</td>
                           <td className="px-4 py-2 text-sm text-slate-900">{field.name}</td>

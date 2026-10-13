@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { DateInput } from '../pages/collection/collectionUi';
 import { X, Globe, Calendar, User, Building2, Link2, CheckCircle, AlertCircle, Copy, ExternalLink, Settings } from 'lucide-react';
@@ -81,7 +82,7 @@ export function PublishMasterDataModal({ onClose, onConfirm, entityName, entityC
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Đã sao chép vào clipboard');
+    toast.success('Đã sao chép vào clipboard');
   };
 
   const fullApiUrl = `https://dldc.moj.gov.vn${formData.apiEndpoint}`;

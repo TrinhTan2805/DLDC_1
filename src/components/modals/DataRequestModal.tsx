@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { DateInput } from '../pages/collection/collectionUi';
 import { X, FileText, Server, Calendar, AlertCircle, Download, Database, Table, Columns, Check, Search, ChevronRight, User, Building } from 'lucide-react';
@@ -874,11 +875,11 @@ export function DataRequestModal({ isOpen, onClose, onSubmit, services }: DataRe
                   type="button"
                   onClick={() => {
                     if (currentStep === 1 && (!formData.requester || !formData.requesterDepartment || !formData.requesterEmail || !formData.requesterPhone || !formData.purpose)) {
-                      alert('Vui lòng điền đầy đủ thông tin bước 1');
+                      toast.warning('Vui lòng điền đầy đủ thông tin bước 1');
                       return;
                     }
                     if (currentStep === 2 && (!selectedDatabase || !selectedTable || selectedColumns.length === 0)) {
-                      alert('Vui lòng chọn database, bảng và ít nhất 1 trường dữ liệu');
+                      toast.warning('Vui lòng chọn database, bảng và ít nhất 1 trường dữ liệu');
                       return;
                     }
                     setCurrentStep(currentStep + 1);

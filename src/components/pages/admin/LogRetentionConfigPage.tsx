@@ -186,7 +186,7 @@ export function LogRetentionConfigPage({ embedded = false }: { embedded?: boolea
 
   const confirmAdd = () => {
     if (!formData.logTypeName || formData.retentionDays <= 0) {
-      toast.error('Vui lòng nhập đầy đủ thông tin hợp lệ!');
+      toast.error('Vui lòng nhập đầy đủ thông tin hợp lệ');
       return;
     }
 
@@ -203,12 +203,12 @@ export function LogRetentionConfigPage({ embedded = false }: { embedded?: boolea
 
     setConfigs([...configs, newConfig]);
     setShowAddModal(false);
-    toast.success('Thêm mới cấu hình thành công!');
+    toast.success('Thêm mới cấu hình thành công');
   };
 
   const confirmEdit = () => {
     if (!selectedConfig || !formData.logTypeName || formData.retentionDays <= 0) {
-      toast.error('Vui lòng nhập đầy đủ thông tin hợp lệ!');
+      toast.error('Vui lòng nhập đầy đủ thông tin hợp lệ');
       return;
     }
 
@@ -229,7 +229,7 @@ export function LogRetentionConfigPage({ embedded = false }: { embedded?: boolea
     setConfigs(updatedConfigs);
     setShowEditModal(false);
     setSelectedConfig(null);
-    toast.success('Cập nhật cấu hình thành công!');
+    toast.success('Cập nhật cấu hình thành công');
   };
 
   const closeDeleteConfirm = () => {
@@ -242,7 +242,7 @@ export function LogRetentionConfigPage({ embedded = false }: { embedded?: boolea
 
     setConfigs(configs.filter(config => config.id !== selectedConfig.id));
     closeDeleteConfirm();
-    toast.success('Xóa cấu hình thành công!');
+    toast.success('Xóa cấu hình thành công');
   };
 
   const handleExportExcel = () => {

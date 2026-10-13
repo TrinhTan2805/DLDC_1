@@ -1,6 +1,8 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Download, FileText, GitCompare, Calendar, User, Edit, CheckCircle, XCircle, Search, Filter as FilterIcon, Eye } from 'lucide-react';
 import { StatusTag } from '../../common/StatusTag';
+import { confirmDialog } from '../../common/confirmDialog';
 
 // Mock data for change history
 const mockHistoryData = {
@@ -182,22 +184,19 @@ export function HistoryTab({ records }: HistoryTabProps) {
     return matchesFilter && matchesSearch;
   });
 
-  const handleExportReport = () => {
+  const handleExportReport = async () => {
     if (viewMode === 'timeline' && !selectedRecordCode) {
-      alert('⚠️ Vui lòng chọn bản ghi để xuất báo cáo!');
+      toast.warning('Vui lòng chọn bản ghi để xuất báo cáo');
       return;
     }
-    const confirmed = window.confirm(
-      `📄 XUẤT BÁO CÁO LỊCH SỬ\n\n` +
-      (viewMode === 'timeline' 
-        ? `Bản ghi: ${selectedRecordCode}\nSố phiên bản: ${selectedHistory.length}\n\n`
-        : `Tổng số bản ghi: ${filteredHistory.length}\n\n`) +
-      `Chọn định dạng xuất:\n` +
-      `[OK] - PDF\n` +
-      `[Cancel] - Hủy`
+    const confirmed = await confirmDialog(
+      viewMode === 'timeline'
+        ? <>Xuất báo cáo lịch sử bản ghi <strong>{selectedRecordCode}</strong> ({selectedHistory.length} phiên bản) ra file PDF?</>
+        : <>Xuất báo cáo lịch sử <strong>{filteredHistory.length}</strong> bản ghi ra file PDF?</>,
+      { type: 'info', title: 'Xác nhận xuất báo cáo', confirmText: 'Xuất PDF' }
     );
     if (confirmed) {
-      alert(`✅ Đã xuất báo cáo PDF thành công`);
+      toast.success(`Đã xuất báo cáo PDF thành công`);
     }
   };
 
@@ -480,7 +479,7 @@ export function HistoryTab({ records }: HistoryTabProps) {
                     <td className="px-4 py-3 text-sm">
                       {record.changes.length > 0 ? (
                         <div className="space-y-1">
-                          {record.changes.map((change, idx) => (
+                          {record.changes.map((change: any, idx: number) => (
                             <div key={idx} className="text-slate-700">
                               <span className="text-slate-600">{change.field}:</span>{' '}
                               <span className="text-red-600 line-through">{change.old}</span>{' '}
@@ -1031,7 +1030,7 @@ export function HistoryTab({ records }: HistoryTabProps) {
               </div>
 
               {/* Changes preview */}
-              {selectedHistory.find(h => h.version === selectedRestoreVersion)?.changes.length > 0 && (
+              {(selectedHistory.find(h => h.version === selectedRestoreVersion)?.changes.length ?? 0) > 0 && (
                 <div className="bg-white border border-slate-200 rounded-lg p-6">
                   <h4 className="text-slate-900 mb-4 flex items-center gap-2">
                     <Edit className="w-5 h-5 text-orange-600" />
@@ -1075,23 +1074,13 @@ export function HistoryTab({ records }: HistoryTabProps) {
                   Hủy bỏ
                 </button>
                 <button
-                  onClick={() => {
-                    const confirmed = window.confirm(
-                      `♻️ XÁC NHẬN KHÔI PHỤC PHIÊN BẢN\n\n` +
-                      `Mã bản ghi: ${restoreRecordCode}\n` +
-                      `Phiên bản khôi phục: v${selectedRestoreVersion}\n` +
-                      `Phiên bản hiện tại: v${selectedHistory[0]?.version}\n\n` +
-                      `⚠️ Thao tác này KHÔNG THỂ HOÀN TÁC!\n\n` +
-                      `Bạn có chắc chắn muốn tiếp tục?`
+                  onClick={async () => {
+                    const confirmed = await confirmDialog(
+                      <>Khôi phục bản ghi <strong>{restoreRecordCode}</strong> từ phiên bản <strong>v{selectedRestoreVersion}</strong> (phiên bản hiện tại: v{selectedHistory[0]?.version})?</>,
+                      { type: 'warning', title: 'Xác nhận khôi phục phiên bản', subtitle: 'Thao tác này không thể hoàn tác.', confirmText: 'Khôi phục' }
                     );
                     if (confirmed) {
-                      alert(
-                        `✅ KHÔI PHỤC THÀNH CÔNG\n\n` +
-                        `Bản ghi: ${restoreRecordCode}\n` +
-                        `Đã khôi phục từ phiên bản ${selectedRestoreVersion}\n` +
-                        `Phiên bản mới: v${selectedHistory[0]?.version + 1}\n\n` +
-                        `Dữ liệu đã được khôi phục về trạng thái lúc ${selectedHistory.find(h => h.version === selectedRestoreVersion)?.date}`
-                      );
+                      toast.success(`Khôi phục bản ghi ${restoreRecordCode} về phiên bản v${selectedRestoreVersion} thành công`);
                       setShowRestoreModal(false);
                       setRestoreRecordCode('');
                       setSelectedRestoreVersion(null);

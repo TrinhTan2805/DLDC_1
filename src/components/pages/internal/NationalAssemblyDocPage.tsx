@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Landmark } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -35,7 +36,7 @@ export function NationalAssemblyDocPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-documents/national-assembly"
       lastSyncTime="09/12/2025 16:10:45"
-      onSync={() => alert('Đang đồng bộ văn bản Quốc hội...')}
+      onSync={() => toast.info('Đang đồng bộ văn bản Quốc hội...')}
     />
   );
 }

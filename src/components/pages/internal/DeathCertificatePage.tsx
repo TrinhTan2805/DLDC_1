@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { FileBadge } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -40,7 +41,7 @@ export function DeathCertificatePage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/civil-registry/death"
       lastSyncTime="09/12/2025 11:15:25"
-      onSync={() => alert('Đang đồng bộ dữ liệu khai tử...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu khai tử...')}
     />
   );
 }

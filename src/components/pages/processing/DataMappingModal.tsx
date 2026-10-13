@@ -174,7 +174,7 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
     }
 
     if (!activeSourceField) {
-      toast.warning('Vui lòng chọn một trường nguồn trước khi ánh xạ!');
+      toast.warning('Vui lòng chọn một trường nguồn trước khi ánh xạ');
       return;
     }
 
@@ -201,7 +201,7 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
   };
 
   const handleSaveConfig = () => {
-    toast.success('Đã lưu cấu hình ánh xạ!');
+    toast.success('Đã lưu cấu hình ánh xạ');
     onClose();
   };
 

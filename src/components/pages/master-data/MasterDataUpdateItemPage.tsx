@@ -209,7 +209,7 @@ function normalizeIdentifier(value: string): string {
 // Cấu hình quan hệ giữa các danh mục dữ liệu chủ — giống mục "Thiết lập quan hệ giữa thực thể"
 // (chọn 2 thực thể, khai báo khóa liên kết). Liên kết chéo thực thể ở màn Chi tiết bản ghi
 // được xác định dựa trên các quan hệ khai báo tại đây, không hard-code cố định 1 trường cho từng danh mục.
-type CategoryRelationType = 'one-to-one' | 'one-to-many' | 'many-to-many';
+type CategoryRelationType = 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many';
 
 interface CategoryRelationship {
   id: string;
@@ -738,7 +738,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
 
   const handleConfirmReject = () => {
     if (!rejectModal.reason.trim()) {
-      toast.error('Vui lòng nhập lý do từ chối!');
+      toast.error('Vui lòng nhập lý do từ chối');
       return;
     }
     const ids = rejectModal.ids;
@@ -754,7 +754,7 @@ export function MasterDataUpdateItemPage({ masterId, masterLabel }: Props) {
 
   const handleConfirmUnapprove = () => {
     if (!unapproveModal.reason.trim()) {
-      toast.error('Vui lòng nhập lý do hủy phê duyệt!');
+      toast.error('Vui lòng nhập lý do hủy phê duyệt');
       return;
     }
     const id = unapproveModal.id;

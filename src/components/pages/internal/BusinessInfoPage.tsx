@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Building } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -14,7 +15,7 @@ export function BusinessInfoPage() {
       detailFields={[{ label: 'Mã số thuế', key: 'taxCode' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/business-registry/info"
       lastSyncTime="09/12/2025 14:10:20"
-      onSync={() => alert('Đang đồng bộ thông tin doanh nghiệp...')}
+      onSync={() => toast.info('Đang đồng bộ thông tin doanh nghiệp...')}
     />
   );
 }

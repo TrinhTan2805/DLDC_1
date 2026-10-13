@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { Plus, Search, Server, Eye, Edit, Trash2, CheckCircle, XCircle, Settings as SettingsIcon, Database, Globe, X, Save, EyeOff, Eye as EyeIcon, FileCheck, FileText, Shield, GitBranch, Clock, AlertCircle, User, Lock, Share, Wifi, FolderOpen, Mail, MessageSquare, BarChart3, TrendingUp, Download, Filter } from "lucide-react";
 import { StatusTag } from '../../common/StatusTag';
@@ -677,7 +678,7 @@ export function ServiceSetupPage() {
       setServices(prev => prev.map(s => 
         s.id === serviceId ? { ...s, status: 'published' } : s
       ));
-      alert('Dịch vụ đã được công khai tự động lên Cổng dữ liệu dùng chung thành công!');
+      toast.success('Dịch vụ đã được công khai tự động lên Cổng dữ liệu dùng chung thành công');
     }, 2000);
   };
 
@@ -745,7 +746,7 @@ export function ServiceSetupPage() {
     return (
       <StatusTag 
         label={type} 
-        variant={type === 'REST' ? 'blue' : type === 'SOAP' ? 'purple' : 'pink'} 
+        variant={type === 'REST' ? 'blue' : type === 'SOAP' ? 'purple' : 'indigo'} 
       />
     );
   };
@@ -1484,7 +1485,7 @@ export function ServiceSetupPage() {
  setModalMode('approve');
  setShowAddModal(true);
  } else {
- alert('Không tìm thấy thông tin chi tiết của dịch vụ này.');
+ toast.error('Không tìm thấy thông tin chi tiết của dịch vụ này.');
  }
  }}
  className="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 shadow-sm shadow-blue-100 transition-all active:scale-95"
@@ -2028,7 +2029,7 @@ export function ServiceSetupPage() {
               <button
                 onClick={() => {
                   if (!versionForm.apiCode || !versionForm.version || !versionForm.releaseDate || !versionForm.changelog) {
-                    alert('Vui lòng điền đầy đủ các trường bắt buộc!');
+                    toast.warning('Vui lòng điền đầy đủ các trường bắt buộc');
                     return;
                   }
 
@@ -2057,7 +2058,7 @@ export function ServiceSetupPage() {
                     status: 'current'
                   });
 
-                  alert(`Đã tạo phiên bản ${newVersion.version} cho API ${newVersion.apiCode} thành công!`);
+                  toast.success(`Đã tạo phiên bản ${newVersion.version} cho API ${newVersion.apiCode} thành công`);
                 }}
                 className="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
               >

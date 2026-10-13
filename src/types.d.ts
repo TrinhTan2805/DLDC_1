@@ -6,6 +6,10 @@ declare global {
       [elemName: string]: any;
     }
   }
+  interface Window {
+    // Đếm số modal đang mở để xếp z-index modal chồng nhau (BaseModal, ConfirmModal, …)
+    __activeModalsCount?: number;
+  }
 }
 
 declare module 'react' {

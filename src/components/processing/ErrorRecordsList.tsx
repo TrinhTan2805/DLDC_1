@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Search, AlertTriangle, X, Clock, Eye, Download, Send } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface ErrorRecord {
   id: number;
   recordId: string;
   fieldName: string;
-  originalValue: string;
+  originalValue: string | null;
   errorType: string;
   errorMessage: string;
   suggestedValue?: string;
-  status: 'unprocessed' | 'processed';
+  status: 'unprocessed' | 'processed' | 'pending';
 }
 
 interface ErrorRecordsListProps {

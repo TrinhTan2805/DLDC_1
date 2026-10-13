@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { FileText } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -38,7 +39,7 @@ export function DivorceCertificatePage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/civil-registry/divorce"
       lastSyncTime="09/12/2025 09:45:10"
-      onSync={() => alert('Đang đồng bộ dữ liệu khai ly hôn...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu khai ly hôn...')}
     />
   );
 }

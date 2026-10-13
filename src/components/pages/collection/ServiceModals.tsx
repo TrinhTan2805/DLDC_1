@@ -12,43 +12,26 @@ import { ConfirmModal } from '../../common/ConfirmModal';
 import { BaseModal } from '../../common/BaseModal';
 import { Portal } from '../../common/Portal';
 import { StructureLoadingConfig } from './StructureLoadingConfig';
+import { AdvancedDataMapping } from './AdvancedDataMapping';
 import { initialSourceSystems } from './mockSourceSystems';
 import { StatusTag } from '../../common/StatusTag';
 import { toast } from 'sonner';
 import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, tabClass, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, resolveConnectionType } from './collectionUi';
 
-const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => {
-  if (!isOpen) return null;
-  return (
-    <Portal>
-      <div 
-        className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 animate-in fade-in duration-200"
-        onClick={onClose}
-      >
-        <div 
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col relative animate-in fade-in zoom-in-95 duration-200"
-          style={{ maxWidth: '450px' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button onClick={onClose} aria-label="Đóng" className={`absolute right-4 top-4 z-10 ${BTN_GHOST_ICON}`}>
-            <X className="w-4 h-4"/>
-          </button>
-          <div className="p-6 pb-4 flex flex-col items-center">
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
-              <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
-            </div>
-            <h3 className="text-[16px] font-semibold text-[#020817] mb-1">Kết nối thành công</h3>
-            <p className="text-[#64748B] text-[13px] mb-4 text-center px-4 leading-relaxed">Kết nối thành công, vui lòng thực hiện Nạp cấu trúc.</p>
-          </div>
-          <div className="px-6 py-4 flex justify-center gap-3 bg-[#F8FAFC] border-t border-[#E2E8F0] w-full">
-            <button onClick={onClose} className={BTN_OUTLINE}>Đóng</button>
-            <button onClick={onContinue} className={BTN_PRIMARY}>Tiếp tục</button>
-          </div>
-        </div>
-      </div>
-    </Portal>
-  );
-};
+// Kết nối thành công + hỏi bước tiếp theo → popup xác nhận loại success (compomennt.md 5.4.1)
+const ConnectionSuccessModal = ({ isOpen, onClose, onContinue }: { isOpen: boolean, onClose: () => void, onContinue: () => void }) => (
+  <ConfirmModal
+    isOpen={isOpen}
+    onClose={onClose}
+    onConfirm={onContinue}
+    type="success"
+    title="Kết nối thành công"
+    subtitle=""
+    message="Kết nối thành công, vui lòng thực hiện Nạp cấu trúc."
+    confirmText="Tiếp tục"
+    cancelText="Đóng"
+  />
+);
 
 const ConnectionErrorModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   if (!isOpen) return null;

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { DateInput } from '../pages/collection/collectionUi';
 import { X, FileText, Calendar, Download, Filter, TrendingUp, Activity, CheckCircle } from 'lucide-react';
@@ -30,7 +31,7 @@ export function ReportModal({ isOpen, onClose, services }: ReportModalProps) {
   const handleGenerate = () => {
     // Simulate report generation
     const fileName = `bao-cao-${reportConfig.reportType}-${reportConfig.dateFrom}-${reportConfig.dateTo}.${reportConfig.format.toLowerCase()}`;
-    alert(`Đang tạo báo cáo: ${fileName}\n\nBáo cáo sẽ được tải xuống sau vài giây...`);
+    toast.info(`Đang tạo báo cáo: ${fileName}\n\nBáo cáo sẽ được tải xuống sau vài giây...`);
     onClose();
   };
 

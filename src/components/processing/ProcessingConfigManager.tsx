@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { Plus, Eye, Settings, Calendar, User, SquarePen, Play, Clock } from 'lucide-react';
 import { RuleManagementModal } from './RuleManagementModal';
@@ -130,7 +131,7 @@ export function ProcessingConfigManager({ title, description, dataSourceKey }: P
   const handleConfirmRun = () => {
     if (runningConfig) {
       // Simulate running rules
-      alert(`Bắt đầu chạy ${runningConfig.totalRules} quy tắc cho "${runningConfig.dataSource}"\n\nỨớc tính thời gian: ${Math.ceil(runningConfig.totalRecords / 1000)} phút`);
+      toast.info(`Bắt đầu chạy ${runningConfig.totalRules} quy tắc cho "${runningConfig.dataSource}"\n\nỨớc tính thời gian: ${Math.ceil(runningConfig.totalRecords / 1000)} phút`);
       setShowRunModal(false);
       setRunningConfig(null);
     }

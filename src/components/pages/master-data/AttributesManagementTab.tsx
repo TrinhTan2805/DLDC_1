@@ -1,3 +1,4 @@
+import { confirmDialog } from '../../common/confirmDialog';
 import { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Plus, Edit, Trash2, Search, History as HistoryIcon, Check, AlertCircle, ChevronDown, Database, X, FileText, Send, Eye, ArrowRight, Network, Key, Info } from 'lucide-react';
 import { toast } from 'sonner';
@@ -518,7 +519,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
 
   const handleConfirmApprove = () => {
     if (!approvalAttribute || !selectedApprover) return;
-    toast.success('Đã gửi trình duyệt thuộc tính thành công!');
+    toast.success('Đã gửi trình duyệt thuộc tính thành công');
     handleCloseApprovalModal();
   };
 
@@ -637,8 +638,8 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
     setShowAttributeWizard(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa thuộc tính này? Thao tác này sẽ tạo phiên bản mới của cấu trúc dữ liệu.')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa thuộc tính này? Thao tác này sẽ tạo phiên bản mới của cấu trúc dữ liệu.', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       const currentAttributes = attributes[selectedEntity] || [];
       setAttributes({
         ...attributes,
@@ -781,7 +782,7 @@ export function AttributesManagementTab({ readOnly = false }: { readOnly?: boole
     }));
     handleCloseDldcModal();
     handleCloseStructureApprovalModal();
-    toast.success('Đã gửi trình duyệt cấu trúc thành công!');
+    toast.success('Đã gửi trình duyệt cấu trúc thành công');
   };
 
   const handleOpenDeleteConfirm = (attribute: MasterDataAttribute) => {

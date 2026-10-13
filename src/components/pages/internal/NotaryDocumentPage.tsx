@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { ScrollText as DocumentText } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -14,7 +15,7 @@ export function NotaryDocumentPage() {
       detailFields={[{ label: 'Số VB', key: 'documentNumber' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/notary/documents"
       lastSyncTime="09/12/2025 14:40:25"
-      onSync={() => alert('Đang đồng bộ văn bản công chứng...')}
+      onSync={() => toast.info('Đang đồng bộ văn bản công chứng...')}
     />
   );
 }

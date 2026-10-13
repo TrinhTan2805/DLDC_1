@@ -44,7 +44,7 @@ export function ConfigDetailModal({ config, onClose }: ConfigDetailModalProps) {
     }
   };
 
-  const status = statusConfig[config.status];
+  const status = statusConfig[config.status as keyof typeof statusConfig];
   const StatusIcon = status.icon;
 
   // Mock processing steps data
@@ -80,14 +80,14 @@ export function ConfigDetailModal({ config, onClose }: ConfigDetailModalProps) {
 
   const handleFixError = (id: string) => {
     const updatedLogs = filteredErrorLogs.map(log => 
-      log.id === id ? { ...log, status: 'fixed' } : log
+      log.id === id ? { ...log, status: 'fixed' as const } : log
     );
     setFilteredErrorLogs(updatedLogs);
   };
 
   const handleIgnoreError = (id: string) => {
     const updatedLogs = filteredErrorLogs.map(log => 
-      log.id === id ? { ...log, status: 'ignored' } : log
+      log.id === id ? { ...log, status: 'ignored' as const } : log
     );
     setFilteredErrorLogs(updatedLogs);
   };

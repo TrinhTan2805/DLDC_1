@@ -194,7 +194,7 @@ export function SecurityConfigPage() {
     // Lưu cấu hình
     console.log('Saving config:', config);
     localStorage.setItem('security_config', JSON.stringify(config));
-    toast.success('Đã lưu cấu hình thành công!');
+    toast.success('Đã lưu cấu hình thành công');
     setHasChanges(false);
   };
 

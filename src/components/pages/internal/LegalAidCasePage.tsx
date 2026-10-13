@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Briefcase } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -14,7 +15,7 @@ export function LegalAidCasePage() {
       detailFields={[{ label: 'Số vụ việc', key: 'caseNumber' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-aid/cases"
       lastSyncTime="09/12/2025 13:15:30"
-      onSync={() => alert('Đang đồng bộ vụ việc trợ giúp pháp lý...')}
+      onSync={() => toast.info('Đang đồng bộ vụ việc trợ giúp pháp lý...')}
     />
   );
 }

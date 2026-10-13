@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Search, Filter, Download, FileText, File as FileIcon, BarChart3, PieChart as PieChartIcon, TrendingUp, Calendar, Eye, Activity, LineChart as LineChartIcon, RefreshCw } from 'lucide-react';
 import {
@@ -97,13 +98,13 @@ export function OpenDataStatisticsPage() {
 
       <div className="flex justify-end gap-3 mb-2">
         <button 
-          onClick={() => alert("Đang tải xuống báo cáo dạng Excel...")}
+          onClick={() => toast.info("Đang tải xuống báo cáo dạng Excel...")}
           className="px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded flex items-center gap-2 hover:bg-blue-50 text-[13px] font-medium"
         >
           <FileText className="w-4 h-4" /> Xuất Excel
         </button>
         <button 
-          onClick={() => alert("Đang tải xuống báo cáo dạng PDF...")}
+          onClick={() => toast.info("Đang tải xuống báo cáo dạng PDF...")}
           className="px-4 py-2 bg-red-600 text-white rounded flex items-center gap-2 hover:bg-red-700 text-[13px] font-medium"
         >
           <FileIcon className="w-4 h-4" /> Xuất PDF
@@ -170,8 +171,8 @@ export function OpenDataStatisticsPage() {
           <option>Toàn thời gian</option>
         </select>
         <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium ml-auto">Tạo Báo Cáo</button>
-        <button onClick={() => alert("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-[13px] flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
-        <button onClick={() => alert("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[13px] flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
+        <button onClick={() => toast.info("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-[13px] flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
+        <button onClick={() => toast.info("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[13px] flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
       </div>
 
       <div className="bg-white p-6 rounded-lg border border-slate-200">
@@ -202,8 +203,8 @@ export function OpenDataStatisticsPage() {
           <option>Theo Định dạng dữ liệu</option>
         </select>
         <button className="px-4 py-1.5 bg-blue-600 text-white rounded text-[13px] font-medium ml-auto">Xử lý Dữ liệu</button>
-        <button onClick={() => alert("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-[13px] flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
-        <button onClick={() => alert("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[13px] flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
+        <button onClick={() => toast.info("Xuất Excel")} className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded text-[13px] flex gap-1 items-center hover:bg-slate-200 transition-colors"><FileText className="w-4 h-4"/> Excel</button>
+        <button onClick={() => toast.info("Xuất PDF")} className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded text-[13px] flex gap-1 items-center hover:bg-red-100 transition-colors"><FileIcon className="w-4 h-4"/> PDF</button>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -288,7 +289,7 @@ export function OpenDataStatisticsPage() {
           <button className="px-8 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 flex items-center gap-2 h-[38px] transition-colors">
             <TrendingUp className="w-4 h-4" /> Tạo báo cáo
           </button>
-          <button onClick={() => alert("Xuất File PDF!")} className="w-10 h-[38px] bg-red-600 text-white rounded-md flex items-center justify-center hover:bg-red-700 transition-colors">
+          <button onClick={() => toast.info("Xuất File PDF")} className="w-10 h-[38px] bg-red-600 text-white rounded-md flex items-center justify-center hover:bg-red-700 transition-colors">
             <FileIcon className="w-4 h-4" />
           </button>
         </div>

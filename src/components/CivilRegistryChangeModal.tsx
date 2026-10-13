@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, RefreshCw, Calendar } from 'lucide-react';
 import { useState } from 'react';
 import { CivilRegistryChangeSearchFilter } from './civil-registry-change/CivilRegistryChangeSearchFilter';
@@ -120,7 +121,7 @@ export function CivilRegistryChangeModal({
   ];
 
   const handlePdfView = () => {
-    alert('Chức năng xem file chi tiết sẽ được bổ sung sau.');
+    toast.info('Chức năng xem file chi tiết sẽ được bổ sung sau.');
   };
 
   return (
@@ -172,7 +173,7 @@ export function CivilRegistryChangeModal({
                   setIsFilterOpen={setIsFilterOpen}
                   filterConditions={filterConditions}
                   setFilterConditions={setFilterConditions}
-                  onExport={() => alert('Đang kết xuất...')}
+                  onExport={() => toast.info('Đang kết xuất...')}
                   onRefresh={() => {}}
                   isInline={isInline}
                 />

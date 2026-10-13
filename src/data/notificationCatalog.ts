@@ -3,6 +3,9 @@
 //   success (Thành công) | error (Lỗi hệ thống) | warning (Cảnh báo - bị từ chối) | info (Thông báo)
 // Hệ thống KHÔNG phân chia thông báo theo mức độ ưu tiên.
 
+import { CURRENT_USER } from '../components/user/currentUser';
+import { isAudienceMember, type NotificationAudience } from './notificationRecipients';
+
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
 export interface NotificationItem {
@@ -296,7 +299,14 @@ export function subscribeToNotifications(listener: NotificationListener): () => 
   };
 }
 
-export function broadcastSystemNotification(title: string, message: string): NotificationItem {
+// Chỉ người dùng đang đăng nhập thuộc đối tượng nhận mới thấy thông báo (chuông TopBar, màn Thông báo);
+// trả về null nếu người đăng nhập không thuộc đối tượng nhận.
+export function broadcastSystemNotification(
+  title: string,
+  message: string,
+  audience: NotificationAudience = { mode: 'all' },
+): NotificationItem | null {
+  if (!isAudienceMember(audience, CURRENT_USER)) return null;
   const item: NotificationItem = {
     id: `SYS-${Date.now()}`,
     type: 'info',

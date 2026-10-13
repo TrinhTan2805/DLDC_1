@@ -278,7 +278,7 @@ export function CollectionLogs() {
                     <span>•</span>
                     <span>{log.time}</span>
                     <span>•</span>
-                    <span>{log.user}</span>
+                    <span>{(log as { user?: string }).user ?? '-'}</span>
                   </div>
                 </div>
               </div>

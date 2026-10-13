@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, PlayCircle } from 'lucide-react';
 
@@ -37,11 +38,11 @@ export function LGSPConnectionModal({ isOpen, onClose }: LGSPConnectionModalProp
   if (!isOpen) return null;
 
   const handleTestConnection = () => {
-    alert('Đang kiểm tra kết nối...\n\nThành công! Kết nối đến API hoạt động bình thường.');
+    toast.success('Đang kiểm tra kết nối...\n\nThành công! Kết nối đến API hoạt động bình thường.');
   };
 
   const handleSave = () => {
-    alert('Đã lưu cấu hình kết nối LGSP thành công!');
+    toast.success('Đã lưu cấu hình kết nối LGSP thành công');
     onClose();
   };
 

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, useRef } from 'react';
 import { X, Upload, Download, AlertCircle, CheckCircle, SquarePen, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
@@ -104,7 +105,7 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
 
         setImportData(users);
       } catch (error) {
-        alert('Lỗi khi đọc file Excel. Vui lòng kiểm tra lại định dạng file.');
+        toast.error('Lỗi khi đọc file Excel. Vui lòng kiểm tra lại định dạng file.');
       }
     };
     reader.readAsBinaryString(file);
@@ -172,7 +173,7 @@ export function ImportExcelModal({ isOpen, onClose, onImport }: ImportExcelModal
   const handleImport = () => {
     const validUsers = importData.filter(user => user.errors.length === 0);
     if (validUsers.length === 0) {
-      alert('Không có bản ghi hợp lệ nào để import!');
+      toast.warning('Không có bản ghi hợp lệ nào để import');
       return;
     }
     onImport(validUsers);

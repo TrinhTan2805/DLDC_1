@@ -24,7 +24,9 @@ interface User {
   groups: string[];
   permissions: string[];
   status: 'active' | 'inactive';
-  errors: string[];
+  errors?: string[];
+  createdDate?: string;
+  lastLogin?: string;
 }
 
 const initialUsersData: User[] = [
@@ -455,7 +457,7 @@ export function UserManagementPage() {
     setUsers(users.map(u => u.id === selectedUser.id ? updatedUser : u));
     setSelectedUser(updatedUser);
 
-    toast.success(`Đã cập nhật nhóm cho người dùng ${selectedUser.name} thành công!`);
+    toast.success(`Đã cập nhật nhóm cho người dùng ${selectedUser.name} thành công`);
     
     if (prevModalType === 'detail') {
       setModalType('detail');
@@ -473,7 +475,7 @@ export function UserManagementPage() {
 
     if (modalType === 'add') {
       if (users.some(u => u.username.toLowerCase() === formData.username.toLowerCase())) {
-        toast.error('Tên đăng nhập đã tồn tại trong hệ thống!');
+        toast.error('Tên đăng nhập đã tồn tại trong hệ thống');
         return;
       }
 
@@ -494,7 +496,7 @@ export function UserManagementPage() {
       (newUser as any).lastLogin = 'Chưa đăng nhập';
 
       setUsers([newUser, ...users]);
-      toast.success('Thêm người dùng mới thành công!');
+      toast.success('Thêm người dùng mới thành công');
     } else if (modalType === 'edit' && selectedUser) {
       setUsers(users.map(u => {
         if (u.id === selectedUser.id) {
@@ -510,7 +512,7 @@ export function UserManagementPage() {
         }
         return u;
       }));
-      toast.success('Cập nhật thông tin người dùng thành công!');
+      toast.success('Cập nhật thông tin người dùng thành công');
     }
     handleCloseModal();
   };
@@ -519,7 +521,7 @@ export function UserManagementPage() {
     if (selectedUser) {
       const newStatus = selectedUser.status === 'active' ? 'inactive' : 'active';
       setUsers(users.map(u => u.id === selectedUser.id ? { ...u, status: newStatus } : u));
-      toast.success(`Đã ${newStatus === 'active' ? 'kích hoạt' : 'ngừng hoạt động'} tài khoản của ${selectedUser.name} thành công!`);
+      toast.success(`Đã ${newStatus === 'active' ? 'kích hoạt' : 'ngừng hoạt động'} tài khoản của ${selectedUser.name} thành công`);
       handleCloseModal();
     }
   };
@@ -527,7 +529,7 @@ export function UserManagementPage() {
   const handleDeleteUser = () => {
     if (selectedUser) {
       setUsers(users.filter(u => u.id !== selectedUser.id));
-      toast.success('Xóa người dùng thành công!');
+      toast.success('Xóa người dùng thành công');
       handleCloseModal();
     }
   };
@@ -535,7 +537,7 @@ export function UserManagementPage() {
   const handleImportUsers = (users: ImportUser[]) => {
     // Logic to import users
     console.log('Importing users:', users);
-    toast.success(`Đã nhập khẩu thành công ${users.length} người dùng!`);
+    toast.success(`Đã nhập khẩu thành công ${users.length} người dùng`);
     handleCloseModal();
   };
 
@@ -1076,7 +1078,7 @@ export function UserManagementPage() {
       {modalType === 'reset-password' && selectedUser && (
         <ResetPasswordModal
           isOpen={true}
-          user={selectedUser}
+          user={{ id: String(selectedUser.id), username: selectedUser.username, fullName: selectedUser.name, email: selectedUser.email }}
           onClose={handleCloseModal}
         />
       )}

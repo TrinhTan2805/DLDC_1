@@ -226,7 +226,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
     
     const filterRec = (items: MenuItem[]): MenuItem[] => {
       return items
-        .map(item => {
+        .map((item): MenuItem | null => {
           const titleMatches = item.title.toLowerCase().includes(term);
           const filteredSubItems = item.subItems ? filterRec(item.subItems) : undefined;
           const hasMatchingChildren = filteredSubItems && filteredSubItems.length > 0;

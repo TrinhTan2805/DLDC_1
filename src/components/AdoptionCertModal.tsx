@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, ArrowLeft, RefreshCw, Calendar, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 import { AdoptionSearchFilter } from './adoption-cert/AdoptionSearchFilter';
@@ -266,7 +267,7 @@ export function AdoptionCertModal({
   ];
 
   const handlePdfView = () => {
-     alert('Chức năng xem file chi tiết sẽ được bổ sung sau.');
+     toast.info('Chức năng xem file chi tiết sẽ được bổ sung sau.');
   };
 
   return (
@@ -318,7 +319,7 @@ export function AdoptionCertModal({
                   setIsFilterOpen={setIsFilterOpen}
                   filterConditions={filterConditions}
                   setFilterConditions={setFilterConditions}
-                  onExport={() => alert('Đang kết xuất...')}
+                  onExport={() => toast.info('Đang kết xuất...')}
                   onRefresh={() => {}}
                   isInline={isInline}
                 />

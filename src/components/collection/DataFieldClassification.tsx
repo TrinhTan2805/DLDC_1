@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Save, AlertCircle } from 'lucide-react';
 
@@ -60,7 +61,7 @@ export function DataFieldClassification({ tableName, tableSecurityLevel = 'noi-b
   };
 
   const handleSave = () => {
-    alert('Đã lưu cấu hình phân loại dữ liệu!');
+    toast.success('Đã lưu cấu hình phân loại dữ liệu');
   };
 
   const publicLevelColors: { [key: string]: string } = {

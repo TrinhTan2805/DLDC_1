@@ -24,7 +24,7 @@ export const CURRENT_USER: CurrentUser = {
   phone: '024 3933 3333',
   department: 'Cục Công nghệ thông tin',
   role: 'Quản trị viên',
-  groups: ['Quản trị viên'],
+  groups: ['Quản trị hệ thống'], // khớp nhóm QTHT ở data/notificationRecipients.ts (demo gửi thông báo theo nhóm)
   status: 'active',
   createdDate: '01/01/2024',
   lastLogin: '21/05/2026 10:30:15',

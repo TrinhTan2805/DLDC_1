@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { Search, Download, Eye, SquarePen, Trash2, Plus, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -492,7 +493,7 @@ export function DataCollectionList() {
         onClose={() => setShowAddModal(false)}
         onSave={(data) => {
           console.log('Saved new DataCollection', data);
-          alert('Đã lưu dữ liệu thành công!');
+          toast.success('Đã lưu dữ liệu thành công');
         }}
       />
 
@@ -505,7 +506,7 @@ export function DataCollectionList() {
         initialData={selectedItem}
         onSave={(data) => {
           console.log('Updated DataCollection', data);
-          alert('Đã cập nhật dữ liệu thành công!');
+          toast.success('Đã cập nhật dữ liệu thành công');
         }}
       />
 
@@ -517,7 +518,7 @@ export function DataCollectionList() {
         }}
         onConfirm={() => {
           console.log('Deleted DataCollection', selectedItem?.id);
-          alert('Đã xóa dữ liệu thành công!');
+          toast.success('Đã xóa dữ liệu thành công');
         }}
         title="Xác nhận xóa luồng thu thập"
         subtitle="Hành động này không thể hoàn tác"

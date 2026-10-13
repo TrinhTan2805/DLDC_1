@@ -1,3 +1,4 @@
+import { confirmDialog } from '../../common/confirmDialog';
 import React, { useState, useEffect } from 'react';
 import { X, Plus, SquarePen, Trash2, Clock, CheckCircle } from 'lucide-react';
 
@@ -130,8 +131,8 @@ export function ScheduleManagementModal({ isOpen, onClose, systemName, datasetNa
     setView('form');
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa lịch biểu này?')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa lịch biểu này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setSchedules(prev => prev.filter(s => s.id !== id));
     }
   };

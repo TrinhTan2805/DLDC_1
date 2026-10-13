@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Search, AlertTriangle, SquarePen, Check, Download, RefreshCw, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import { EditRecordModal } from './EditRecordModal';
@@ -206,7 +207,7 @@ export function WarningDataList() {
   const handleFixAll = () => {
     const pendingRecords = errorRecords.filter(r => r.status === 'pending');
     if (pendingRecords.length === 0) {
-      alert('Không có bản ghi nào cần sửa!');
+      toast.warning('Không có bản ghi nào cần sửa');
       return;
     }
     
@@ -218,7 +219,7 @@ export function WarningDataList() {
     // setErrorRecords(updatedRecords);
     
     setShowFixAllModal(false);
-    alert(`Đã áp dụng đề xuất cho ${pendingRecords.length} bản ghi!`);
+    toast.success(`Đã áp dụng đề xuất cho ${pendingRecords.length} bản ghi`);
   };
 
   const handleCheckMasterData = async (recordId: string, field: string, originalValue: string) => {

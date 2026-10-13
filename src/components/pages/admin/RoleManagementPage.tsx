@@ -272,7 +272,7 @@ export function RoleManagementPage() {
 
   const handleSaveRole = () => {
     if (!formData.name.trim()) {
-      toast.error('Ràng buộc tính hợp lệ: Tên vai trò không được để trống!');
+      toast.error('Ràng buộc tính hợp lệ: Tên vai trò không được để trống');
       return;
     }
 
@@ -305,7 +305,7 @@ export function RoleManagementPage() {
         }]
       };
       setRoles([...roles, newRole]);
-      toast.success(`Ghi nhận vai trò mới "${formData.name}" thành công!`);
+      toast.success(`Ghi nhận vai trò mới "${formData.name}" thành công`);
     } else if (modalType === 'edit' && selectedRole) {
       setRoles(roles.map(r => {
         if (r.id === selectedRole.id) {
@@ -338,7 +338,7 @@ export function RoleManagementPage() {
         }
         return r;
       }));
-      toast.success(`Đã ghi nhận phiên bản chỉnh sửa mới cho vai trò "${formData.name}"!`);
+      toast.success(`Đã ghi nhận phiên bản chỉnh sửa mới cho vai trò "${formData.name}"`);
     }
     handleCloseModal();
   };
@@ -346,7 +346,7 @@ export function RoleManagementPage() {
   const handleDeleteRole = () => {
     if (selectedRole) {
       if (selectedRole.memberCount > 0 || selectedRole.groupCount > 0) {
-        toast.error('Ràng buộc hệ thống: Không thể xóa vai trò đã được gán cho người dùng hoặc nhóm người dùng!');
+        toast.error('Ràng buộc hệ thống: Không thể xóa vai trò đã được gán cho người dùng hoặc nhóm người dùng');
         return;
       }
       setRoles(roles.filter(r => r.id !== selectedRole.id));

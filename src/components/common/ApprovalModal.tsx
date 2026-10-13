@@ -1,3 +1,5 @@
+import { confirmDialog } from './confirmDialog';
+import { toast } from 'sonner';
 import { X, AlertCircle, Clock, CheckCircle, XCircle, User, FileText, Link2, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 
@@ -99,13 +101,13 @@ export function ApprovalModal({ isOpen, onClose, record, onApprove, onReject }: 
 
   if (!isOpen || !record) return null;
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!selectedApprover) {
-      alert('Vui lòng chọn người phê duyệt');
+      toast.warning('Vui lòng chọn người phê duyệt');
       return;
     }
     if (!note.trim()) {
-      const confirmed = window.confirm('Bạn chưa nhập ghi chú. Bạn có chắc muốn tiếp tục?');
+      const confirmed = (await confirmDialog('Bạn chưa nhập ghi chú. Bạn có chắc muốn tiếp tục?', { type: 'warning', title: 'Chưa nhập ghi chú', confirmText: 'Tiếp tục' }));
       if (!confirmed) return;
     }
     onApprove(selectedApprover, note);
@@ -113,11 +115,11 @@ export function ApprovalModal({ isOpen, onClose, record, onApprove, onReject }: 
 
   const handleReject = () => {
     if (!selectedApprover) {
-      alert('Vui lòng chọn người phê duyệt');
+      toast.warning('Vui lòng chọn người phê duyệt');
       return;
     }
     if (!note.trim()) {
-      alert('Vui lòng nhập lý do từ chối');
+      toast.warning('Vui lòng nhập lý do từ chối');
       return;
     }
     onReject(selectedApprover, note);

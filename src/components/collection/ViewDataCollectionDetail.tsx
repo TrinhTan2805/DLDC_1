@@ -100,11 +100,7 @@ export function ViewDataCollectionDetail({ data, onBack, onEdit }: ViewDataColle
             }}
           ></div>
           <p
-            className={{
-              'px-3 py-1.5 rounded-lg text-base inline-block': true,
-              'bg-blue-100 text-blue-700': data.category === 'external',
-              'bg-green-100 text-green-700': data.category === 'internal'
-            }}
+            className={`px-3 py-1.5 rounded-lg text-base inline-block ${data.category === 'external' ? 'bg-blue-100 text-blue-700' : data.category === 'internal' ? 'bg-green-100 text-green-700' : ''}`}
           >
             {data.category === 'external' ? 'Thu thập từ Bộ ngoài' : 'Thu thập từ các Hệ thống trong nội bộ'}
           </p>

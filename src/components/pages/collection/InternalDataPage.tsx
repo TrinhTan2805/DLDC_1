@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Building, Download, Plus, Search, Filter, Eye, PlayCircle, PauseCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { StatsCard } from '../../common/StatsCard';
@@ -152,7 +153,7 @@ export function InternalDataPage() {
   };
 
   const handleExport = () => {
-    alert('Đang kết xuất danh sách nguồn dữ liệu trong ngành ra file Excel...');
+    toast.info('Đang kết xuất danh sách nguồn dữ liệu trong ngành ra file Excel...');
   };
 
   return (

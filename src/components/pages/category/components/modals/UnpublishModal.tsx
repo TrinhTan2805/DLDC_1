@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, Save, AlertTriangle, Loader2, Globe, Users, Building2 } from 'lucide-react';
 
@@ -19,7 +20,7 @@ export function UnpublishModal({ isOpen, onClose, onConfirm, recordName, scopes 
 
   const handleConfirm = () => {
     if (!reason.trim()) {
-      alert('Vui lòng nhập lý do hủy công khai!');
+      toast.warning('Vui lòng nhập lý do hủy công khai');
       return;
     }
 

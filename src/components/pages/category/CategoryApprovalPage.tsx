@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { CheckSquare, XSquare, Eye, Clock, CheckCircle, XCircle, Send, Plus, X } from 'lucide-react';
 
@@ -81,13 +82,13 @@ export function CategoryApprovalPage() {
   };
 
   const handleSubmitSelected = () => {
-    alert(`Đã gửi ${selectedCategories.length} danh mục để trình duyệt`);
+    toast.success(`Đã gửi ${selectedCategories.length} danh mục để trình duyệt`);
     setSelectedCategories([]);
     setShowSubmitModal(false);
   };
 
   const handleCreateAndSubmit = () => {
-    alert(`Đã tạo và gửi trình duyệt danh mục: ${newCategory.name}`);
+    toast.success(`Đã tạo và gửi trình duyệt danh mục: ${newCategory.name}`);
     setNewCategory({ name: '', type: 'standard', description: '' });
     setShowCreateModal(false);
   };
@@ -95,7 +96,7 @@ export function CategoryApprovalPage() {
   const handleSendToReviewer = () => {
     if (!selectedRequest || !selectedRecipient) return;
     const recipient = mockUsers.find(u => u.id === selectedRecipient);
-    alert(`Đã gửi yêu cầu "${selectedRequest.categoryName}" đến ${recipient?.name} để trình duyệt`);
+    toast.success(`Đã gửi yêu cầu "${selectedRequest.categoryName}" đến ${recipient?.name} để trình duyệt`);
     setShowSendToReviewerModal(false);
     setSelectedRecipient('');
     setSendNote('');

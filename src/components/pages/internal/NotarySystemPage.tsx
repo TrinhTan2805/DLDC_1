@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Stamp } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -40,7 +41,7 @@ export function NotarySystemPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/notary/all"
       lastSyncTime="09/12/2025 15:25:50"
-      onSync={() => alert('Đang đồng bộ dữ liệu công chứng...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu công chứng...')}
     />
   );
 }

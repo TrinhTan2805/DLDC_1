@@ -1553,7 +1553,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
   const handleOpenSubmitNewCategory = () => {
     if (!formData.code.trim() || !formData.name.trim() || !formData.dataField.trim()) {
-      toast.error('Vui lòng nhập đầy đủ Mã danh mục, Tên danh mục và Đơn vị chủ trì cung cấp!');
+      toast.error('Vui lòng nhập đầy đủ Mã danh mục, Tên danh mục và Đơn vị chủ trì cung cấp');
       return;
     }
     setSelectedCategory({
@@ -1577,7 +1577,7 @@ export function OpenDataSetupPage({ onNavigate }: OpenDataSetupPageProps) {
 
   const handleOpenSubmitEditCategory = () => {
     if (!formData.code.trim() || !formData.name.trim() || !formData.dataField.trim()) {
-      toast.error('Vui lòng nhập đầy đủ Mã danh mục, Tên danh mục và Đơn vị chủ trì cung cấp!');
+      toast.error('Vui lòng nhập đầy đủ Mã danh mục, Tên danh mục và Đơn vị chủ trì cung cấp');
       return;
     }
     setIsEditCategorySubmission(true);

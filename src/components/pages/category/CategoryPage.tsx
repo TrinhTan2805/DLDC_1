@@ -254,7 +254,8 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
     { id: '63', code: 'VN63', name: 'Yên Bái', description: 'Tỉnh', type: 'reference', status: 'active', createdDate: '01/01/2024', fields: [{ id: 'f1', name: 'Mã tỉnh', dataType: 'TEXT', required: true }, { id: 'f2', name: 'Tên tỉnh', dataType: 'TEXT', required: true }] }
   ].map(c => ({
     ...c,
-    status: 'approved',
+    type: c.type as Category['type'],
+    status: 'approved' as const,
     dataStatus: 'new' as const,
     createdBy: 'Hệ thống',
     updatedDate: '15/01/2026',
@@ -2128,7 +2129,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                 type="button"
                 onClick={() => {
                   if (!unpublishReason.trim()) {
-                    toast.error('Vui lòng nhập lý do hủy công khai!');
+                    toast.error('Vui lòng nhập lý do hủy công khai');
                     return;
                   }
                   setPublishStatus('stopped');
@@ -2228,7 +2229,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
                 type="button"
                 onClick={() => {
                   if (!archiveRequestData.approver || !archiveRequestData.reason.trim()) {
-                    toast.error('Vui lòng chọn người phê duyệt và nhập lý do ngừng áp dụng!');
+                    toast.error('Vui lòng chọn người phê duyệt và nhập lý do ngừng áp dụng');
                     return;
                   }
 
@@ -2272,6 +2273,7 @@ export function CategoryPage({ categoryName, categoryId, readOnly = false, initi
             dataStatus: 'new',
             createdDate: currentDate,
             createdBy: 'Nguyễn Văn A',
+            fields: [],
           };
           setCategories(prev => [...prev, newCat]);
           setVersionHistoryList(prev => [{

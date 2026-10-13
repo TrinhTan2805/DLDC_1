@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, RefreshCw, Calendar, ArrowUp, FileText, FileDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { ParentChildSearchFilter } from './parent-child-recognition/ParentChildSearchFilter';
@@ -260,7 +261,7 @@ export function ParentChildRecognitionModal({
                   setIsFilterOpen={setIsFilterOpen}
                   filterConditions={filterConditions}
                   setFilterConditions={setFilterConditions}
-                  onExport={() => alert('Đang kết xuất...')}
+                  onExport={() => toast.info('Đang kết xuất...')}
                   onRefresh={() => {}}
                   isInline={isInline}
                 />

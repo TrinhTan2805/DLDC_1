@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, Key, Save, Play, RefreshCw } from 'lucide-react';
 
@@ -57,7 +58,7 @@ export function IdentifierRuleModal({ onClose, entityName = 'Dữ liệu chủ' 
   };
 
   const handleSave = () => {
-    alert(`Đã lưu quy tắc định danh duy nhất cho ${entityName}`);
+    toast.success(`Đã lưu quy tắc định danh duy nhất cho ${entityName}`);
     onClose();
   };
 

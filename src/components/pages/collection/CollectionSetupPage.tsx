@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Filter, RefreshCw, Search, Plus, Eye, Edit, Settings as SettingsIcon, Trash2, FileText, Activity, Settings, AlertCircle, AlertTriangle, X, Download, Send, ChevronLeft, ChevronRight, Calendar, Wrench, Power, Layers, Database, Eraser, CheckCircle, MoreVertical } from "lucide-react";
@@ -121,7 +122,6 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
   const [showDataDetailPage, setShowDataDetailPage] = useState(false);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
-  const [showUpdateSuccessModal, setShowUpdateSuccessModal] = useState(false);
   const [showIntegrateWarningModal, setShowIntegrateWarningModal] = useState(false);
   const [showDeleteDataConfirmModal, setShowDeleteDataConfirmModal] = useState(false);
   const [showDeleteStructureConfirmModal, setShowDeleteStructureConfirmModal] = useState(false);
@@ -263,12 +263,12 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         : `Kiểm tra cấu trúc thất bại: ${service.errorDetails?.errorMessage || 'Lỗi không xác định'}`
     });
 
-    alert(`✅ Đã gửi thông báo tự động cho ${service.managingUnit}\n\nTrạng thái: ${service.statusText}\nThời gian: ${formatDateVN(new Date(), true)}`);
+    toast.success(`Đã gửi thông báo tự động cho ${service.managingUnit}\n\nTrạng thái: ${service.statusText}\nThời gian: ${formatDateVN(new Date(), true)}`);
   };
 
   // Export function for service list
   const handleExportServiceList = () => {
-    alert('Đang kết xuất danh sách dịch vụ ra file Excel...');
+    toast.info('Đang kết xuất danh sách dịch vụ ra file Excel...');
   };
 
   return (
@@ -591,7 +591,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                                       <MenuAction icon={<Plus className="w-4 h-4" />} label="Tích hợp mới" reason={rules.integrate}
                                         onSelect={() => { setSelectedService(service); setShowIntegrateWarningModal(true); }} />
                                       <MenuAction icon={<RefreshCw className="w-4 h-4" />} label="Cập nhật dữ liệu" reason={rules.update}
-                                        onSelect={() => { setSelectedService(service); setShowUpdateSuccessModal(true); }} />
+                                        onSelect={() => { setSelectedService(service); toast.success(`Khởi tạo yêu cầu cập nhật dữ liệu thành công: ${service.name}`); }} />
                                     </>
                                   )}
                                   <MenuAction icon={<Eraser className="w-4 h-4" />} label="Xóa dữ liệu thu thập" reason={rules.deleteData} danger
@@ -667,13 +667,14 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         isOpen={showActivateModal}
         onClose={() => setShowActivateModal(false)}
         onConfirm={() => {
-          alert(`Đã kích hoạt lại dịch vụ: ${selectedService?.name}`);
+          toast.success(`Đã kích hoạt lại dịch vụ: ${selectedService?.name}`);
           setShowActivateModal(false);
         }}
         title="Kích hoạt lại dịch vụ"
+        subtitle=""
         message={<>Bạn có chắc chắn muốn chuyển dịch vụ <strong>{selectedService?.name}</strong> sang trạng thái Hoạt động?</>}
         confirmText="Hoạt động"
-        type="info"
+        type="success"
       />
       <DeleteServiceModal
         isOpen={showDeleteModal}
@@ -685,34 +686,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         onClose={() => setShowSettingsModal(false)}
         service={selectedService}
       />
-      <BaseModal
-        isOpen={showUpdateSuccessModal}
-        onClose={() => setShowUpdateSuccessModal(false)}
-        title="Cập nhật dữ liệu"
-        maxWidth="max-w-md"
-      >
-        <div className="flex flex-col items-center py-4">
-          <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mb-5 ring-4 ring-emerald-100">
-            <CheckCircle className="w-7 h-7 text-emerald-600" />
-          </div>
-          <p className="text-[13px] font-bold text-center leading-relaxed px-4 mb-6 text-slate-800">
-            Khởi tạo yêu cầu Cập nhật dữ liệu thành công!
-          </p>
-          {selectedService && (
-            <p className="text-[12px] text-slate-500 text-center mb-6 -mt-4 font-medium px-4">
-              Hệ thống đang tiến hành đồng bộ dữ liệu cho: <span className="text-slate-900 font-semibold">{selectedService.name}</span>
-            </p>
-          )}
-          <div className="flex justify-center w-full">
-            <button 
-              onClick={() => setShowUpdateSuccessModal(false)}
-              className={BTN_PRIMARY}
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      </BaseModal>
+      {/* PM 13/10/2026: modal "Cập nhật dữ liệu thành công" thay bằng toast (compomennt.md 5.5) */}
       <BaseModal
         isOpen={showIntegrateWarningModal}
         onClose={() => setShowIntegrateWarningModal(false)}
@@ -771,7 +745,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         isOpen={showDeleteDataConfirmModal}
         onClose={() => setShowDeleteDataConfirmModal(false)}
         onConfirm={() => {
-          alert('Đã xóa dữ liệu thu thập thành công!');
+          toast.success('Đã xóa dữ liệu thu thập thành công');
         }}
         title="Thông báo"
         subtitle="Cảnh báo hành động xóa dữ liệu"
@@ -784,7 +758,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
         isOpen={showDeleteStructureConfirmModal}
         onClose={() => setShowDeleteStructureConfirmModal(false)}
         onConfirm={() => {
-          alert(`Đã xóa cấu trúc của dịch vụ: ${selectedService?.name}`);
+          toast.success(`Đã xóa cấu trúc của dịch vụ: ${selectedService?.name}`);
         }}
         title="Thông báo"
         subtitle="Cảnh báo hành động xóa cấu trúc"
@@ -988,7 +962,7 @@ export function CollectionSetupPage({ onNavigate, activeTab: propActiveTab, onTa
                 <button
                   disabled={!inactiveReason.trim()}
                   onClick={() => {
-                    alert(`Đã yêu cầu ngừng hoạt động dịch vụ: ${selectedService?.name}.\nLý do: ${inactiveReason}`);
+                    toast.success(`Đã yêu cầu ngừng hoạt động dịch vụ: ${selectedService?.name}.\nLý do: ${inactiveReason}`);
                     setShowInactiveModal(false);
                     setInactiveReason('');
                   }}

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Building2 } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -33,7 +34,7 @@ export function GovernmentDocPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-documents/government"
       lastSyncTime="09/12/2025 15:50:20"
-      onSync={() => alert('Đang đồng bộ văn bản Chính phủ...')}
+      onSync={() => toast.info('Đang đồng bộ văn bản Chính phủ...')}
     />
   );
 }

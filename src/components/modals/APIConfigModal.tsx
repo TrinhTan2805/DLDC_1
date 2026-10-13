@@ -1,3 +1,5 @@
+import { confirmDialog } from '../common/confirmDialog';
+import { toast } from 'sonner';
 import { X, Settings, Key, Shield, Bell, Zap, Server, Globe, Lock, Unlock, AlertTriangle, Check, Copy, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
@@ -44,12 +46,12 @@ export function APIConfigModal({ isOpen, service, onClose, onSave }: APIConfigMo
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleRegenerateKey = () => {
-    const confirmed = confirm('Bạn có chắc chắn muốn tạo lại API Key? Key cũ sẽ không còn hiệu lực.');
+  const handleRegenerateKey = async () => {
+    const confirmed = (await confirmDialog('Bạn có chắc chắn muốn tạo lại API Key? Key cũ sẽ không còn hiệu lực.', { type: 'warning', title: 'Xác nhận tạo lại API Key', confirmText: 'Tạo lại', subtitle: 'API Key cũ sẽ không còn hiệu lực.' }));
     if (confirmed) {
       const newKey = 'moj_live_' + Math.random().toString(36).substring(2, 40);
       setApiKey(newKey);
-      alert('API Key mới đã được tạo thành công!');
+      toast.success('API Key mới đã được tạo thành công');
     }
   };
 

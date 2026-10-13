@@ -1,3 +1,4 @@
+import { confirmDialog } from '../../common/confirmDialog';
 import { useState } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, Database, Filter, X } from 'lucide-react';
 import { TargetDatabaseModal } from './TargetDatabaseModal';
@@ -66,8 +67,8 @@ export function TargetDatabaseManagementPage() {
   };
 
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa kết nối CSDL này?')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa kết nối CSDL này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setData(data.filter(item => item.id !== id));
     }
   };

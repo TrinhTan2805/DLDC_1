@@ -1,4 +1,5 @@
 import { Plus, Search, GitCompare, Eye, Edit, Trash2, CheckCircle, XCircle, Activity, X, Save, Server } from 'lucide-react';
+import { useState } from 'react';
 import { StatusTag } from '../../common/StatusTag';
 
 interface ReconciliationAPI {

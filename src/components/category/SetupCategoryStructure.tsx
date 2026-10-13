@@ -254,10 +254,10 @@ export function SetupCategoryStructure() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-slate-900 font-mono">{field.name}</span>
                       {field.isPrimaryKey && (
-                        <Key className="w-4 h-4 text-amber-600" title="Khóa chính" />
+                        <span title="Khóa chính"><Key className="w-4 h-4 text-amber-600" /></span>
                       )}
                       {field.isForeignKey && (
-                        <Link className="w-4 h-4 text-blue-600" title="Khóa ngoại" />
+                        <span title="Khóa ngoại"><Link className="w-4 h-4 text-blue-600" /></span>
                       )}
                     </div>
                   </td>

@@ -1,3 +1,5 @@
+import { confirmDialog } from '../common/confirmDialog';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, Plus, GitBranch, Save, Trash2, SquarePen, Play } from 'lucide-react';
 
@@ -56,14 +58,14 @@ export function MergeRuleModal({ onClose, entityName = 'Dữ liệu chủ' }: Me
     setShowAddForm(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa quy tắc này?')) {
+  const handleDelete = async (id: string) => {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa quy tắc này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setRules(rules.filter(rule => rule.id !== id));
     }
   };
 
   const handleTest = () => {
-    alert('Chức năng kiểm thử quy tắc hợp nhất đang được phát triển...');
+    toast.info('Chức năng kiểm thử quy tắc hợp nhất đang được phát triển...');
   };
 
   const strategyLabels = {

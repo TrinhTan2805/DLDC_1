@@ -3,8 +3,8 @@ import { DatabaseTemplate } from '../DatabaseTemplate';
 
 export function MarriageCertificatePage({ mode = 'thu thập', context = 'thu thập', onBack }: any) {
   const stats = [
-    { id: '1', title: 'Giấy đăng ký kết hôn', icon: Heart, color: 'red', lastMonth: 1245, thisMonth: 2179 },
-    { id: '2', title: 'Bản khai hôn nhân', icon: Heart, color: 'blue', lastMonth: 850, thisMonth: 1120 },
+    { id: '1', title: 'Giấy đăng ký kết hôn', icon: Heart, color: 'red', lastMonth: 1245, thisMonth: 2179, value: '2,179', change: '' },
+    { id: '2', title: 'Bản khai hôn nhân', icon: Heart, color: 'blue', lastMonth: 850, thisMonth: 1120, value: '1,120', change: '' },
   ];
 
   return (

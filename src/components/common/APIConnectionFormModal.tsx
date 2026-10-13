@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, PlayCircle, Save } from 'lucide-react';
 
@@ -144,7 +145,7 @@ export function APIConnectionFormModal({
   };
 
   const handleTestConnection = () => {
-    alert('Đang kiểm tra kết nối...\n\nThành công! Kết nối đến API hoạt động bình thường.');
+    toast.success('Đang kiểm tra kết nối...\n\nThành công! Kết nối đến API hoạt động bình thường.');
   };
 
   const handleSubmit = (e: React.FormEvent) => {

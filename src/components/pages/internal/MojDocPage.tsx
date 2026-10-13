@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Scale } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -29,7 +30,7 @@ export function MojDocPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-documents/moj"
       lastSyncTime="09/12/2025 15:30:15"
-      onSync={() => alert('Đang đồng bộ tài liệu chuyên ngành...')}
+      onSync={() => toast.info('Đang đồng bộ tài liệu chuyên ngành...')}
     />
   );
 }

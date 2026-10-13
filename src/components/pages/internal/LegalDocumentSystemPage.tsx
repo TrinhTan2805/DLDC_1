@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -41,7 +42,7 @@ export function LegalDocumentSystemPage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-documents/all"
       lastSyncTime="09/12/2025 16:40:35"
-      onSync={() => alert('Đang đồng bộ dữ liệu văn bản pháp luật...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu văn bản pháp luật...')}
     />
   );
 }

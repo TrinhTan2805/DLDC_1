@@ -33,12 +33,12 @@ export function TargetDatabaseConfigModal({
 
   React.useEffect(() => {
     if (initialData) {
-      setFormData(prev => ({ ...prev, ...initialData }));
+      setFormData((prev: typeof formData) => ({ ...prev, ...initialData }));
     }
   }, [initialData]);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: typeof formData) => ({ ...prev, [field]: value }));
   };
 
   const isNextDisabled = !formData.name;

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock, Check, Play, RefreshCw, ArrowUpRight } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertTriangle, AlertCircle, CheckCircle, Send, Download, Eye, Lock, EyeOff, SquarePen, X, Network, Plus, Trash2, ArrowLeftRight, Database, Clock, Check, Play, RefreshCw, ArrowUpRight, Eraser, ListChecks, Shuffle } from 'lucide-react';
 
 import { DataMappingModal } from './DataMappingModal';
 import { SelectTargetDatabaseModal } from './SelectTargetDatabaseModal';
 import { TargetDatabaseConfigModal } from './TargetDatabaseConfigModal';
 import { ScheduleManagementModal } from './ScheduleManagementModal';
 import { TargetDatabase, initialTargetDatabases } from './mockTargetDatabases';
+import { ProcessedDataTab } from './ProcessedDataTab';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { Portal } from '../../common/Portal';
@@ -400,6 +401,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           <div className="flex justify-between items-center mb-2">
             <h1 className="font-bold text-slate-800" style={{ fontSize: '24px' }}>
               {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
+                activeTab === 'processed-data' ? 'Dữ liệu sau xử lý' :
                 activeTab === 'classification' ? 'Phân loại Dữ liệu' : 'Quản lý Quy tắc Xử lý'}
             </h1>
             <div className="flex items-center gap-1.5">
@@ -450,38 +452,31 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               onClick={() => (window as any).navigateToPage?.(`target-database-detail-${cleanTargetDB.id}`)}
               className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[13px] font-medium text-[#155DFC] hover:bg-blue-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
             >
-              Xem dữ liệu
+              Xem cơ sở dữ liệu
               <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Stats Overview */}
+          {/* Thẻ thống kê — compomennt.md 5.6.1 (PM 13/10/2026: bỏ tỷ lệ %) */}
           <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-4 rounded-xl border border-blue-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi thu thập</span>
-              <span className="text-[16px] font-bold text-blue-600">50,000</span>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-emerald-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi còn lại sau làm sạch</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[16px] font-bold text-emerald-600">49,850</span>
-                <span className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">99.7%</span>
+            {[
+              { label: 'Số lượng bản ghi thu thập', value: '50,000', icon: Database, tone: 'bg-blue-50 text-blue-600' },
+              { label: 'Số lượng bản ghi còn lại sau làm sạch', value: '49,850', icon: Eraser, tone: 'bg-green-50 text-green-600' },
+              { label: 'Số lượng bản ghi còn lại sau chuẩn hóa', value: '45,230', icon: ListChecks, tone: 'bg-indigo-50 text-indigo-600' },
+              { label: 'Số lượng bản ghi còn lại sau biến đổi', value: '45,230', icon: Shuffle, tone: 'bg-purple-50 text-purple-600' },
+            ].map(({ label, value, icon: Icon, tone }) => (
+              <div key={label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg shrink-0 ${tone}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[16px] text-[#64748B]">{label}</div>
+                    <div className="text-[16px] font-semibold text-[#0F172A]">{value}</div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-indigo-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi còn lại sau chuẩn hóa</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[16px] font-bold text-indigo-600">45,230</span>
-                <span className="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">90.4%</span>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-purple-100 flex flex-col justify-center shadow-sm">
-              <span className="font-bold text-slate-500 uppercase tracking-wider mb-2" style={{ fontSize: '13px' }}>Số lượng bản ghi còn lại sau biến đổi</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[16px] font-bold text-purple-600">45,230</span>
-                <span className="text-[11px] font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded">90.4%</span>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Tabs */}
@@ -550,6 +545,16 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               style={{ fontSize: '13px' }}
             >
               Lịch sử
+            </button>
+            <button
+              onClick={() => setActiveTab('processed-data')}
+              className={`pb-3 px-4 font-medium border-b-2 ml-4 transition-colors ${activeTab === 'processed-data'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              style={{ fontSize: '13px' }}
+            >
+              Dữ liệu sau xử lý
             </button>
           </div>
 
@@ -1460,6 +1465,8 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 </div>
               </div>
             )}
+
+            {activeTab === 'processed-data' && <ProcessedDataTab />}
 
             {activeTab === 'history' && (
               <div className="flex flex-col">

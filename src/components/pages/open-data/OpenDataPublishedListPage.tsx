@@ -724,8 +724,6 @@ export function OpenDataPublishedListPage() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestModalTab, setRequestModalTab] = useState<'general' | 'settings'>('general');
   const [editingItem, setEditingItem] = useState<PublishedData | null>(null);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [successPopupMessage, setSuccessPopupMessage] = useState('Yêu cầu công bố đã được ghi nhận');
   const [scheduleStatusConfirm, setScheduleStatusConfirm] = useState<{ schedule: ScheduleItem; action: 'pause' | 'resume' } | null>(null);
   const [requestFileName, setRequestFileName] = useState('');
   const [requestDescription, setRequestDescription] = useState('');
@@ -1125,27 +1123,27 @@ export function OpenDataPublishedListPage() {
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!requestFileName) {
-      toast.error("Vui lòng nhập tên tập dữ liệu!");
+      toast.error("Vui lòng nhập tên tập dữ liệu");
       setRequestModalTab('general');
       return;
     }
     if (!requestCategory) {
-      toast.error("Vui lòng chọn danh mục dữ liệu mở!");
+      toast.error("Vui lòng chọn danh mục dữ liệu mở");
       setRequestModalTab('general');
       return;
     }
     if (!requestPublisher) {
-      toast.error("Vui lòng nhập đơn vị chủ trì cung cấp!");
+      toast.error("Vui lòng nhập đơn vị chủ trì cung cấp");
       setRequestModalTab('general');
       return;
     }
     if (!requestTopic) {
-      toast.error("Vui lòng chọn chủ đề!");
+      toast.error("Vui lòng chọn chủ đề");
       setRequestModalTab('general');
       return;
     }
     if (requestFormat.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một định dạng chia sẻ!");
+      toast.error("Vui lòng chọn ít nhất một định dạng chia sẻ");
       setRequestModalTab('general');
       return;
     }
@@ -1154,7 +1152,7 @@ export function OpenDataPublishedListPage() {
       return;
     }
     if (!mainTable) {
-      toast.error("Vui lòng chọn cấu hình nguồn dữ liệu và bảng dữ liệu chính trong tab Thiết lập dữ liệu!");
+      toast.error("Vui lòng chọn cấu hình nguồn dữ liệu và bảng dữ liệu chính trong tab Thiết lập dữ liệu");
       setRequestModalTab('settings');
       return;
     }
@@ -1182,24 +1180,20 @@ export function OpenDataPublishedListPage() {
 
   const handleSaveDraft = () => {
     if (!requestFileName) {
-      toast.error("Vui lòng chọn tập dữ liệu trước khi lưu nháp!");
+      toast.error("Vui lòng chọn tập dữ liệu trước khi lưu nháp");
       return;
     }
     if (editingItem) {
       const updatedRecord = { ...createNewRecord('draft'), id: editingItem.id, creator: editingItem.creator, createdDate: editingItem.createdDate };
       setDataList(dataList.map(d => d.id === editingItem.id ? updatedRecord : d));
       setShowRequestModal(false);
-      setSuccessPopupMessage('Yêu cầu công bố đã được lưu nháp');
-      setShowSuccessPopup(true);
-      setTimeout(() => setShowSuccessPopup(false), 3000);
+      toast.success('Yêu cầu công bố đã được lưu nháp');
       resetRequestForm();
     } else {
       const newRecord = createNewRecord('draft');
       setDataList([newRecord, ...dataList]);
       setShowRequestModal(false);
-      setSuccessPopupMessage('Yêu cầu công bố đã được lưu nháp');
-      setShowSuccessPopup(true);
-      setTimeout(() => setShowSuccessPopup(false), 3000);
+      toast.success('Yêu cầu công bố đã được lưu nháp');
       resetRequestForm();
     }
   };
@@ -1273,9 +1267,7 @@ export function OpenDataPublishedListPage() {
     setShowApprovalModal(false);
     setShowApproveForm(false);
     setApproveOpinion('');
-    setSuccessPopupMessage('Đã phê duyệt yêu cầu công bố thành công!');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
+    toast.success('Đã phê duyệt yêu cầu công bố thành công');
   };
 
   const handleReject = () => {
@@ -1294,9 +1286,7 @@ export function OpenDataPublishedListPage() {
     setShowRejectConfirmModal(false);
     setRejectReason('');
     setRejectReasonError(false);
-    setSuccessPopupMessage('Yêu cầu đã bị từ chối công bố.');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
+    toast.success('Yêu cầu đã bị từ chối công bố');
   };
 
   // Quick bulk approval actions (row checkbox selection)
@@ -1316,9 +1306,7 @@ export function OpenDataPublishedListPage() {
       approver: 'Lãnh đạo Nghiệp vụ'
     } : d));
     setSelectedApprovalIds([]);
-    setSuccessPopupMessage('Đã phê duyệt các yêu cầu đã chọn!');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
+    toast.success('Đã phê duyệt các yêu cầu đã chọn');
   };
 
   const openBulkRejectModal = () => {
@@ -1337,9 +1325,7 @@ export function OpenDataPublishedListPage() {
     setSelectedApprovalIds([]);
     setShowBulkRejectModal(false);
     setBulkRejectReason('');
-    setSuccessPopupMessage('Đã từ chối các yêu cầu đã chọn.');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
+    toast.success('Đã từ chối các yêu cầu đã chọn');
   };
 
 
@@ -1369,9 +1355,7 @@ export function OpenDataPublishedListPage() {
     setSendApprovalItem(null);
     setSendApprovalApprover('');
     setSendApprovalNote('');
-    setSuccessPopupMessage('Yêu cầu công bố đã được gửi đi phê duyệt thành công!');
-    setShowSuccessPopup(true);
-    setTimeout(() => setShowSuccessPopup(false), 3000);
+    toast.success('Yêu cầu công bố đã được gửi đi phê duyệt thành công');
   };
 
   // Phân trang chuẩn (compomennt.md 5.14) — giữ hành vi cũ: không hiển thị khi không có bản ghi
@@ -3008,23 +2992,23 @@ export function OpenDataPublishedListPage() {
                       e.preventDefault();
                       e.stopPropagation();
                       if (!requestFileName) {
-                        toast.error("Vui lòng nhập tên tập dữ liệu!");
+                        toast.error("Vui lòng nhập tên tập dữ liệu");
                         return;
                       }
                       if (!requestCategory) {
-                        toast.error("Vui lòng chọn danh mục dữ liệu mở!");
+                        toast.error("Vui lòng chọn danh mục dữ liệu mở");
                         return;
                       }
                       if (!requestPublisher) {
-                        toast.error("Vui lòng nhập đơn vị chủ trì cung cấp!");
+                        toast.error("Vui lòng nhập đơn vị chủ trì cung cấp");
                         return;
                       }
                       if (!requestTopic) {
-                        toast.error("Vui lòng chọn chủ đề!");
+                        toast.error("Vui lòng chọn chủ đề");
                         return;
                       }
                       if (requestFormat.length === 0) {
-                        toast.error("Vui lòng chọn ít nhất một định dạng chia sẻ!");
+                        toast.error("Vui lòng chọn ít nhất một định dạng chia sẻ");
                         return;
                       }
                       setRequestModalTab('settings');
@@ -3487,7 +3471,7 @@ export function OpenDataPublishedListPage() {
                 const matchedDataset = APPROVED_CATEGORIES.find(c => c.code === scheduleFormData.datasetId);
 
                 if (scheduleFormData.frequency === 'weekly' && (!scheduleFormData.weeklyDays || scheduleFormData.weeklyDays.length === 0)) {
-                  toast.error('Vui lòng chọn ít nhất một thứ trong tuần!');
+                  toast.error('Vui lòng chọn ít nhất một thứ trong tuần');
                   return;
                 }
 
@@ -3508,10 +3492,10 @@ export function OpenDataPublishedListPage() {
                     quarterlyMonth: scheduleFormData.quarterlyMonth,
                     nextRun: `06/06/2026 ${scheduleFormData.startTime}`
                   } : s));
-                  toast.success('Đã cập nhật lịch công bố tự động thành công!');
+                  toast.success('Đã cập nhật lịch công bố tự động thành công');
                 } else {
                   if (!matchedDataset) {
-                    toast.error('Vui lòng chọn tập dữ liệu mở!');
+                    toast.error('Vui lòng chọn tập dữ liệu mở');
                     return;
                   }
                   const newSchedule: ScheduleItem = {
@@ -3536,7 +3520,7 @@ export function OpenDataPublishedListPage() {
                     quarterlyMonth: scheduleFormData.quarterlyMonth
                   };
                   setSchedules([newSchedule, ...schedules]);
-                  toast.success('Đã thêm lịch công bố tự động thành công!');
+                  toast.success('Đã thêm lịch công bố tự động thành công');
                 }
                 setShowScheduleModal(false);
               }}
@@ -3772,7 +3756,7 @@ export function OpenDataPublishedListPage() {
                 onClick={() => {
                   setSchedules(schedules.filter(s => s.id !== selectedSchedule.id));
                   setShowDeleteScheduleModal(false);
-                  toast.success('Đã xóa lịch công bố tự động thành công!');
+                  toast.success('Đã xóa lịch công bố tự động thành công');
                 }}
                 className={BTN_DESTRUCTIVE}
               >
@@ -3872,42 +3856,7 @@ export function OpenDataPublishedListPage() {
         document.body
       )}
 
-      {/* SUCCESS POPUP — giữ cơ chế Portal + z-index, khung theo compomennt.md 5.4 */}
-      {showSuccessPopup && createPortal(
-        <div className={MODAL_OVERLAY_PORTAL} style={{ zIndex: 2147483647 }}>
-          <div className={`${MODAL_BOX} max-w-sm`}>
-            <div className={MODAL_HEADER}>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[#F0FDF4] shrink-0">
-                  <CheckCircle className="w-5 h-5 text-[#16A34A]" />
-                </div>
-                <h3 className={MODAL_TITLE}>Thành công</h3>
-              </div>
-              <button
-                type="button"
-                aria-label="Đóng"
-                onClick={() => setShowSuccessPopup(false)}
-                className={BTN_GHOST_ICON}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className={MODAL_BODY}>
-              <p className="text-[13px] text-[#020817] leading-relaxed">{successPopupMessage}</p>
-            </div>
-            <div className={MODAL_FOOTER}>
-              <button
-                type="button"
-                onClick={() => setShowSuccessPopup(false)}
-                className={BTN_PRIMARY}
-              >
-                Đồng ý
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+      {/* PM 13/10/2026: popup "Thành công" thay bằng toast (compomennt.md 5.5) */}
 
       {scheduleStatusConfirm && createPortal(
         <div className={MODAL_OVERLAY_PORTAL} style={{ zIndex: 2147483647 }}>

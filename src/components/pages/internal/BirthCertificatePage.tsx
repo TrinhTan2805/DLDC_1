@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Baby } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -43,7 +44,7 @@ export function BirthCertificatePage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/civil-registry/birth"
       lastSyncTime="09/12/2025 12:30:40"
-      onSync={() => alert('Đang đồng bộ dữ liệu khai sinh...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu khai sinh...')}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, ChangeEvent } from 'react';
 import { Search, Filter, Download, FileText, BarChart3, PieChart, TrendingUp, Calendar, Building2, Tag, FileType, Shield, Eye, MousePointer, RefreshCw, Database, SlidersHorizontal, X } from 'lucide-react';
 import { BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -124,11 +125,11 @@ export function CategoryStatisticsReportPage() {
   });
 
   const handleExportExcel = () => {
-    alert('Xuất dữ liệu ra Excel');
+    toast.info('Xuất dữ liệu ra Excel');
   };
 
   const handleExportPDF = () => {
-    alert('Xuất dữ liệu ra PDF');
+    toast.info('Xuất dữ liệu ra PDF');
   };
 
   return (

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Users } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -14,7 +15,7 @@ export function LegalAidPersonPage() {
       detailFields={[{ label: 'Họ tên', key: 'fullName' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/legal-aid/persons"
       lastSyncTime="09/12/2025 12:50:45"
-      onSync={() => alert('Đang đồng bộ người được trợ giúp pháp lý...')}
+      onSync={() => toast.info('Đang đồng bộ người được trợ giúp pháp lý...')}
     />
   );
 }

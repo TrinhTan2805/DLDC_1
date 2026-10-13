@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { Users } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -36,7 +37,7 @@ export function AdoptionCertificatePage() {
       ]}
       apiEndpoint="https://api.btp.gov.vn/v1/civil-registry/adoption"
       lastSyncTime="09/12/2025 08:30:45"
-      onSync={() => alert('Đang đồng bộ dữ liệu nhận con nuôi...')}
+      onSync={() => toast.info('Đang đồng bộ dữ liệu nhận con nuôi...')}
     />
   );
 }

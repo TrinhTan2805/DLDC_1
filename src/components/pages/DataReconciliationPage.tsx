@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, ChangeEvent } from 'react';
 import {
   Search,
@@ -198,9 +199,9 @@ export function DataReconciliationPage() {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Mock success
-      alert(`✅ Đã gửi yêu cầu đối soát cho "${item.database}"\n\nHệ thống đang thực hiện đối soát dữ liệu. Vui lòng chờ kết quả.`);
+      toast.success(`Đã gửi yêu cầu đối soát cho "${item.database}"\n\nHệ thống đang thực hiện đối soát dữ liệu. Vui lòng chờ kết quả.`);
     } catch (error) {
-      alert('❌ Có lỗi xảy ra khi gửi yêu cầu đối soát. Vui lòng thử lại.');
+      toast.error('Có lỗi xảy ra khi gửi yêu cầu đối soát. Vui lòng thử lại.');
     } finally {
       setReconcilingId(null);
     }
@@ -360,7 +361,7 @@ export function DataReconciliationPage() {
     if (!selectedReconciliation) return;
 
     // Mock notification send
-    alert(`Đã gửi thông báo cho Quản trị viên về ${selectedReconciliation.discrepanciesFound} bản ghi bất thường trong "${selectedReconciliation.database}"`);
+    toast.success(`Đã gửi thông báo cho Quản trị viên về ${selectedReconciliation.discrepanciesFound} bản ghi bất thường trong "${selectedReconciliation.database}"`);
   };
 
   return (

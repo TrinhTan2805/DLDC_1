@@ -1724,14 +1724,7 @@ export function MasterDataScaleManagementPage() {
               </div>
 
               <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => { setViewingEntity(null); handleEdit(viewingEntity); }}
-                  className={BTN_OUTLINE}
-                >
-                  <Edit className="w-4 h-4" />
-                  Chỉnh sửa
-                </button>
+                {/* PM 13/10/2026: bỏ nút "Chỉnh sửa" ở modal Xem chi tiết (sửa qua cột Thao tác của bảng) */}
                 {viewStep > 1 && (
                   <button
                     type="button"

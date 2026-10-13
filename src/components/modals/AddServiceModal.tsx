@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, Server, Database, Code, Shield, FileText, Table, Columns, Check, Search, ChevronRight } from 'lucide-react';
 
@@ -727,11 +728,11 @@ export function AddServiceModal({ isOpen, onClose, onSave }: AddServiceModalProp
                   type="button"
                   onClick={() => {
                     if (currentStep === 1 && (!formData.code || !formData.name || !formData.department || !formData.description)) {
-                      alert('Vui lòng điền đầy đủ thông tin bước 1');
+                      toast.warning('Vui lòng điền đầy đủ thông tin bước 1');
                       return;
                     }
                     if (currentStep === 2 && (!selectedDatabase || !selectedTable || selectedColumns.length === 0)) {
-                      alert('Vui lòng chọn database, bảng và ít nhất 1 trường dữ liệu');
+                      toast.warning('Vui lòng chọn database, bảng và ít nhất 1 trường dữ liệu');
                       return;
                     }
                     setCurrentStep(currentStep + 1);

@@ -739,7 +739,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
     ));
     
     setSelectedGroup(updatedGroup);
-    toast.success('Đã lưu danh sách thành viên thành công!');
+    toast.success('Đã lưu danh sách thành viên thành công');
     handleCloseModal();
   };
 
@@ -753,13 +753,13 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
 
   const handleSaveGroup = () => {
     if (!formData.name || !formData.code || !formData.department || !formData.role) {
-      toast.error('Vui lòng điền đầy đủ các thông tin bắt buộc (*)!');
+      toast.error('Vui lòng điền đầy đủ các thông tin bắt buộc (*)');
       return;
     }
 
     if (modalType === 'add') {
       if (groups.some(g => g.code.toUpperCase() === formData.code.toUpperCase())) {
-        toast.error('Mã nhóm đã tồn tại trong hệ thống!');
+        toast.error('Mã nhóm đã tồn tại trong hệ thống');
         return;
       }
 
@@ -780,7 +780,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         modules: formData.modules
       };
       setGroups([...groups, newGroup]);
-      toast.success('Thêm nhóm người dùng mới thành công!');
+      toast.success('Thêm nhóm người dùng mới thành công');
     } else if (modalType === 'edit' && selectedGroup) {
       setGroups(groups.map(g => g.id === selectedGroup.id ? {
         ...g,
@@ -792,7 +792,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
         groupAdmin: formData.groupAdmin,
         modules: formData.modules
       } : g));
-      toast.success('Cập nhật nhóm người dùng thành công!');
+      toast.success('Cập nhật nhóm người dùng thành công');
     }
     handleCloseModal();
   };
@@ -800,7 +800,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
   const handleDeleteGroup = () => {
     if (selectedGroup) {
       setGroups(groups.filter(g => g.id !== selectedGroup.id));
-      toast.success('Xóa nhóm người dùng thành công!');
+      toast.success('Xóa nhóm người dùng thành công');
       handleCloseModal();
     }
   };
@@ -1840,7 +1840,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                     type="button"
                     onClick={() => {
                       if (selectedMenuItems.length === 0) {
-                        toast.error('Vui lòng chọn ít nhất một menu chức năng!');
+                        toast.error('Vui lòng chọn ít nhất một menu chức năng');
                         return;
                       }
                       setActiveDetailTab('data-scope');
@@ -1868,7 +1868,7 @@ export function GroupManagementPage({ currentPage }: GroupManagementPageProps) {
                         localStorage.setItem('field_security_checked', JSON.stringify(fieldSecurityChecked));
                         localStorage.setItem('field_security_methods', JSON.stringify(fieldSecurityMethods));
                       }
-                      toast.success('Đã lưu cấu hình phân quyền thành công!');
+                      toast.success('Đã lưu cấu hình phân quyền thành công');
                       handleCloseModal();
                     }}
                     className={BTN_PRIMARY}

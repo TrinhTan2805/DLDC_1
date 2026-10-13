@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X } from 'lucide-react';
 
 interface ChangeBackgroundModalProps {
@@ -18,7 +19,7 @@ export function ChangeBackgroundModal({ isOpen, onClose }: ChangeBackgroundModal
   ];
 
   const handleSelect = (bg: typeof backgrounds[0]) => {
-    alert(`Đã chọn nền: ${bg.name}`);
+    toast.success(`Đã chọn nền: ${bg.name}`);
     onClose();
   };
 

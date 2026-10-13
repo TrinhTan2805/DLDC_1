@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState, ChangeEvent } from 'react';
 import { Search, FileText, Calendar, User, Download, Eye, Filter, ChevronDown, Globe, CheckCircle, AlertCircle, RefreshCw, XCircle, Share2, Clock, Ban } from 'lucide-react';
 import { PublishConfigModal } from './components/modals/PublishConfigModal';
@@ -162,7 +163,7 @@ export function CategoryPublishedListPage() {
   };
 
   const handleDownload = (item: PublishedData, format: string) => {
-    alert(`Tải xuống danh mục: ${item.name}\nĐịnh dạng: ${format}`);
+    toast.info(`Tải xuống danh mục: ${item.name}\nĐịnh dạng: ${format}`);
   };
 
   return (
@@ -476,7 +477,7 @@ export function CategoryPublishedListPage() {
           onConfirm={(config) => {
             setShowPublishModal(false);
             setSelectedData(null);
-            alert('Mã ' + selectedData.code + ' đã được công bố danh mục thành công. Số phạm vi đã chọn: ' + config.scopes.length);
+            toast.success('Mã ' + selectedData.code + ' đã được công bố danh mục thành công. Số phạm vi đã chọn: ' + config.scopes.length);
           }}
         />
       )}
@@ -494,7 +495,7 @@ export function CategoryPublishedListPage() {
           onConfirm={(reason, selectedScopes) => {
             setShowUnpublishModal(false);
             setSelectedData(null);
-            alert(`Mã ${selectedData.code} đã được ngừng công khai đối với các phạm vi đã chọn. Lý do: ${reason}`);
+            toast.success(`Mã ${selectedData.code} đã được ngừng công khai đối với các phạm vi đã chọn. Lý do: ${reason}`);
           }}
         />
       )}

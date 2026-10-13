@@ -145,7 +145,7 @@ export function DataProvisionServicesPage({ category, group, description }: Data
       ));
 
       // Update selectedApiForConfig immediately so that if re-opened it is in sync
-      setSelectedApiForConfig(prev => prev ? { ...prev, sharedCount: activeCount, fields: updatedFields } : null);
+      setSelectedApiForConfig((prev: typeof selectedApiForConfig) => prev ? { ...prev, sharedCount: activeCount, fields: updatedFields } : null);
 
       triggerToast(`Đã cập nhật cấu trúc gói tin. Số trường chia sẻ mới: ${activeCount}/7 trường.`);
     }

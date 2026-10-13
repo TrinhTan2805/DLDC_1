@@ -120,10 +120,10 @@ export function DataDetailModal({
   }, [selectedVersion, generatedVersions, data]);
 
   // Auto-generate data sources if merge mode and no sources provided
-  let generatedDataSources = dataSources;
+  let generatedDataSources: DataSource[] = dataSources;
   if (mode === 'merge' && dataSources.length === 0) {
     // Create mock data sources with status for each field
-    generatedDataSources = [
+    generatedDataSources = ([
       {
         id: 'source-1',
         name: 'Nguồn chính - Sở Tư pháp Hà Nội',
@@ -168,7 +168,7 @@ export function DataDetailModal({
           status: 'valid',
         }
       },
-    ].filter(source => Object.keys(source.data).length > 0);
+    ] as DataSource[]).filter(source => Object.keys(source.data).length > 0);
     
     // Auto-generate fieldStatus for merged data
     const autoFieldStatus: Record<string, 'valid' | 'warning'> = {};

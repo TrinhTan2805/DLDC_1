@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface DeleteDataConfirmModalProps {
@@ -9,7 +10,7 @@ interface DeleteDataConfirmModalProps {
 export function DeleteDataConfirmModal({ data, onConfirm, onCancel }: DeleteDataConfirmModalProps) {
   const handleConfirm = () => {
     // Mockup: chỉ hiển thị thông báo
-    alert('Mockup: Xóa dữ liệu thành công!\n(Chưa kết nối backend thực tế)');
+    toast.success('Mockup: Xóa dữ liệu thành công!\n(Chưa kết nối backend thực tế)');
     onConfirm();
   };
 

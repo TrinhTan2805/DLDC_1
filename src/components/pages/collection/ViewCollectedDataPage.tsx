@@ -6,7 +6,7 @@ interface StatsCardProps {
   value: string;
   change?: string;
   isPositive?: boolean;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
 }
 

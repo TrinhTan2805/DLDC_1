@@ -96,7 +96,7 @@ export function ParentChildTable({
           </span>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
               disabled={currentPage === 1}
               className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >
@@ -125,7 +125,7 @@ export function ParentChildTable({
             })}
 
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
               disabled={currentPage === totalPages || totalPages === 0}
               className="px-3 py-1.5 border border-[#e2e8f0] rounded-lg text-slate-600 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors font-medium disabled:!bg-[#F1F5F9] disabled:!text-[#94A3B8] disabled:!border-[#E2E8F0] disabled:!shadow-none "
             >

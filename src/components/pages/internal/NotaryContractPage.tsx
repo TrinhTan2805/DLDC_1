@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { FileCheck } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -20,7 +21,7 @@ export function NotaryContractPage() {
       detailFields={[{ label: 'Số HĐ', key: 'contractNumber' }, { label: 'Loại HĐ', key: 'contractType' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/notary/contracts"
       lastSyncTime="09/12/2025 15:05:40"
-      onSync={() => alert('Đang đồng bộ hợp đồng công chứng...')}
+      onSync={() => toast.info('Đang đồng bộ hợp đồng công chứng...')}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { 
   Plus, Search, Server, CheckCircle, Clock, XCircle, Eye, Edit, X, Check,
@@ -1335,7 +1336,7 @@ export function DataCoordinationPage() {
           ));
         }}
         onPublish={(id) => {
-          alert(`Dịch vụ ${id} đã được công khai`);
+          toast.success(`Dịch vụ ${id} đã được công khai`);
         }}
       />
       <DataRequestModal
@@ -1356,7 +1357,7 @@ export function DataCoordinationPage() {
         }}
         onSave={() => {
           if (selectedServiceForAccess) {
-            alert(`Quyền truy cập cho dịch vụ ${selectedServiceForAccess.name} đã được cập nhật`);
+            toast.success(`Quyền truy cập cho dịch vụ ${selectedServiceForAccess.name} đã được cập nhật`);
           }
           setShowAccessControlModal(false);
           setSelectedServiceForAccess(null);
@@ -1401,7 +1402,7 @@ export function DataCoordinationPage() {
         onClose={() => setShowConfigModal(false)}
         service={selectedServiceForConfig}
         onSave={() => {
-          alert('Cấu hình API đã được lưu thành công!');
+          toast.success('Cấu hình API đã được lưu thành công');
         }}
       />
       <ProcessRequestModal

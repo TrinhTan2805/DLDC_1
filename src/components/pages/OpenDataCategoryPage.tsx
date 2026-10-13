@@ -1,3 +1,5 @@
+import { confirmDialog } from '../common/confirmDialog';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { 
   Globe, 
@@ -270,12 +272,12 @@ export function OpenDataCategoryPage() {
     e.preventDefault();
     
     if (!formData.code || !formData.name || !formData.dataType || !formData.managingUnit) {
-      alert('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toast.warning('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
 
     if (categories.some(cat => cat.code === formData.code && cat.id !== editingCategory?.id)) {
-      alert('Mã danh mục đã tồn tại');
+      toast.error('Mã danh mục đã tồn tại');
       return;
     }
 
@@ -320,13 +322,13 @@ export function OpenDataCategoryPage() {
     setShowAddModal(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const category = categories.find(c => c.id === id);
     if (category?.status === 'approved' || category?.status === 'published') {
-      alert('Không thể xóa danh mục đã được phê duyệt hoặc công bố');
+      toast.error('Không thể xóa danh mục đã được phê duyệt hoặc công bố');
       return;
     }
-    if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+    if ((await confirmDialog('Bạn có chắc chắn muốn xóa danh mục này?', { type: 'delete', title: 'Xác nhận xóa', confirmText: 'Xóa', subtitle: 'Hành động này không thể hoàn tác.' }))) {
       setCategories(categories.filter(cat => cat.id !== id));
     }
   };
@@ -341,7 +343,7 @@ export function OpenDataCategoryPage() {
 
   const handleConfirmSendApproval = () => {
     if (!selectedApprover) {
-      alert('Vui lòng chọn người phê duyệt');
+      toast.warning('Vui lòng chọn người phê duyệt');
       return;
     }
 
@@ -353,7 +355,7 @@ export function OpenDataCategoryPage() {
       cat.id === categoryToApprove.id ? { ...cat, status: 'pending' } : cat
     ));
 
-    alert(`Đã gửi yêu cầu phê duyệt đến ${approver?.name} (${approver?.position})`);
+    toast.success(`Đã gửi yêu cầu phê duyệt đến ${approver?.name} (${approver?.position})`);
     
     setShowApprovalModal(false);
     setCategoryToApprove(null);
@@ -361,8 +363,8 @@ export function OpenDataCategoryPage() {
     setApprovalNote('');
   };
 
-  const handleApprove = (id: string) => {
-    if (confirm('Phê duyệt danh mục dữ liệu mở này?')) {
+  const handleApprove = async (id: string) => {
+    if ((await confirmDialog('Phê duyệt danh mục dữ liệu mở này?', { type: 'info', title: 'Xác nhận phê duyệt', confirmText: 'Phê duyệt' }))) {
       setCategories(categories.map(cat => 
         cat.id === id 
           ? { 
@@ -373,7 +375,7 @@ export function OpenDataCategoryPage() {
             } 
           : cat
       ));
-      alert('Đã phê duyệt danh mục dữ liệu mở');
+      toast.success('Đã phê duyệt danh mục dữ liệu mở');
     }
   };
 
@@ -391,7 +393,7 @@ export function OpenDataCategoryPage() {
             } 
           : cat
       ));
-      alert('Đã từ chối danh mục');
+      toast.success('Đã từ chối danh mục');
     }
   };
 
@@ -404,12 +406,12 @@ export function OpenDataCategoryPage() {
   const handleProposePublish = (id: string) => {
     const category = categories.find(c => c.id === id);
     if (!category || category.status !== 'approved') {
-      alert('Chỉ có thể đề xuất công bố danh mục đã được phê duyệt');
+      toast.warning('Chỉ có thể đề xuất công bố danh mục đã được phê duyệt');
       return;
     }
 
     if (category.proposedForPublish) {
-      alert('Danh mục này đã được đề xuất công bố');
+      toast.warning('Danh mục này đã được đề xuất công bố');
       return;
     }
 
@@ -424,7 +426,7 @@ export function OpenDataCategoryPage() {
         : cat
     ));
 
-    alert('Đã gửi đề xuất công bố danh mục dữ liệu mở thành công!');
+    toast.success('Đã gửi đề xuất công bố danh mục dữ liệu mở thành công');
   };
 
   const handleConfirmPublish = () => {
@@ -445,7 +447,7 @@ export function OpenDataCategoryPage() {
         : cat
     ));
 
-    alert(`Đã công bố danh mục dữ liệu mở "${categoryToPublish.name}" với phạm vi: ${shareScopeLabels[publishShareScope]}`);
+    toast.success(`Đã công bố danh mục dữ liệu mở "${categoryToPublish.name}" với phạm vi: ${shareScopeLabels[publishShareScope]}`);
     
     setShowPublishModal(false);
     setCategoryToPublish(null);
@@ -453,7 +455,7 @@ export function OpenDataCategoryPage() {
   };
 
   const handleExportReport = () => {
-    alert('Xuất báo cáo danh mục dữ liệu mở (chức năng đang phát triển)');
+    toast.info('Xuất báo cáo danh mục dữ liệu mở (chức năng đang phát triển)');
   };
 
   return (

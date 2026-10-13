@@ -160,7 +160,7 @@ export function CategoryMojUnitsPage() {
           : u
       );
       saveUnits(updated);
-      toast.success('Cập nhật đơn vị thành công!');
+      toast.success('Cập nhật đơn vị thành công');
     } else {
       // Add
       const newUnit: UnitRecord = {
@@ -172,7 +172,7 @@ export function CategoryMojUnitsPage() {
         status: formState.status
       };
       saveUnits([...units, newUnit]);
-      toast.success('Thêm mới đơn vị thành công!');
+      toast.success('Thêm mới đơn vị thành công');
     }
 
     setShowFormModal(false);

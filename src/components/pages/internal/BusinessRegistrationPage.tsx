@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { FileText } from 'lucide-react';
 import { GenericDataTable } from '../../common/GenericDataTable';
 
@@ -14,7 +15,7 @@ export function BusinessRegistrationPage() {
       detailFields={[{ label: 'Số hồ sơ', key: 'registrationNumber' }]}
       apiEndpoint="https://api.btp.gov.vn/v1/business-registry/registrations"
       lastSyncTime="09/12/2025 14:25:55"
-      onSync={() => alert('Đang đồng bộ hồ sơ đăng ký doanh nghiệp...')}
+      onSync={() => toast.info('Đang đồng bộ hồ sơ đăng ký doanh nghiệp...')}
     />
   );
 }

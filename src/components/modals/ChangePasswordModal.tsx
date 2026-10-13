@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { X, Eye, EyeOff } from 'lucide-react';
 
@@ -21,7 +22,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle password change logic here
-    alert('Đổi mật khẩu thành công!');
+    toast.success('Đổi mật khẩu thành công');
     onClose();
   };
 

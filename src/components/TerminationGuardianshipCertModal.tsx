@@ -1,3 +1,4 @@
+import { toast } from 'sonner';
 import { X, Search, Filter, Download, XCircle, CheckCircle, AlertCircle, Eye, FileText, RefreshCw, Calendar, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 import { TerminationGuardianshipSearchFilter } from './termination-guardianship/TerminationGuardianshipSearchFilter';
@@ -142,7 +143,7 @@ export function TerminationGuardianshipCertModal({
   ];
 
   const handlePdfView = () => {
-    alert('Chức năng xem file chi tiết sẽ được bổ sung sau.');
+    toast.info('Chức năng xem file chi tiết sẽ được bổ sung sau.');
   };
 
   return (
@@ -194,7 +195,7 @@ export function TerminationGuardianshipCertModal({
                   setIsFilterOpen={setIsFilterOpen}
                   filterConditions={filterConditions}
                   setFilterConditions={setFilterConditions}
-                  onExport={() => alert('Đang kết xuất...')}
+                  onExport={() => toast.info('Đang kết xuất...')}
                   onRefresh={() => {}}
                   isInline={isInline}
                 />
@@ -286,7 +287,7 @@ export function TerminationGuardianshipCertModal({
                     acc.push(
                       <div key={`field-${index}`} className={`space-y-1 ${field.colSpan2 ? 'col-span-2' : ''}`}>
                         <div className="text-[13px] font-semibold text-slate-700">{field.label}</div>
-                        <div className={`text-[13px] ${field.isBlue ? 'text-blue-600' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
+                        <div className={`text-[13px] ${'isBlue' in field && field.isBlue ? 'text-blue-600' : 'text-slate-900'} ${field.isItalic ? 'italic whitespace-pre-wrap text-slate-600' : ''}`}>
                           {field.value || '-'}
                         </div>
                       </div>

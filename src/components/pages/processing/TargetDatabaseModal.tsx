@@ -7,12 +7,12 @@ import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS, LABEL_CLS, REQUIRE
 interface TargetDatabaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Omit<TargetDatabase, 'id'>) => void;
+  onSave: (data: Omit<TargetDatabase, 'id' | 'lastUpdated'>) => void;
   editingData?: TargetDatabase | null;
 }
 
 export function TargetDatabaseModal({ isOpen, onClose, onSave, editingData }: TargetDatabaseModalProps) {
-  const [formData, setFormData] = useState<Omit<TargetDatabase, 'id' | 'status'>>({
+  const [formData, setFormData] = useState<Omit<TargetDatabase, 'id' | 'status' | 'lastUpdated'>>({
     name: '',
     type: '',
     host: '',

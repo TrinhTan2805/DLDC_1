@@ -862,7 +862,7 @@ export function DataProcessingManager() {
       {/* Data Classification Modal */}
       {showClassificationModal && currentItem && (
         <DataClassificationModal 
-          dataName={currentItem.dataName}
+          config={{ ...currentItem, dataSource: currentItem.dataName }}
           onClose={() => {
             setShowClassificationModal(false);
             setCurrentItem(null);

@@ -776,8 +776,10 @@ export function DataProvisionServiceSetupPage() {
       <ProvisionServicePublishModal
         isOpen={showPublishModal}
         onClose={() => setShowPublishModal(false)}
-        service={selectedService}
-        onPublish={(serviceToPublish, reason) => {
+        requestData={selectedService}
+        onConfirmPublish={(_id: string, _platforms: string[], reason: string) => {
+          const serviceToPublish = selectedService;
+          if (!serviceToPublish) return;
           const now = new Date();
           const day = String(now.getDate()).padStart(2, '0');
           const month = String(now.getMonth() + 1).padStart(2, '0');

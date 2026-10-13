@@ -627,14 +627,14 @@ export function AccessLogPage() {
   const sessionActions = selectedLog ? getSessionActions(selectedLog.sessionId) : [];
 
   const handleExportAccessLog = () => {
-    toast.success('Xuất file excel nhật ký truy cập thành công!', {
+    toast.success('Xuất file excel nhật ký truy cập thành công', {
       description: `Đã xuất ${filteredLogs.length} dòng dữ liệu ra file Excel.`,
       duration: 3000
     });
   };
 
   const handleExportLoginLog = () => {
-    toast.success('Xuất file excel nhật ký đăng nhập thành công!', {
+    toast.success('Xuất file excel nhật ký đăng nhập thành công', {
       description: `Đã xuất ${filteredLoginLogs.length} dòng dữ liệu ra file Excel.`,
       duration: 3000
     });

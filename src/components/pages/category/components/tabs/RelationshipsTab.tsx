@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, ReactNode, ChangeEvent, MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
+import { toast } from 'sonner';
 import { Network, ArrowRight, Key, Table, Search, AlertCircle, Info, ChevronDown, Plus, Trash2, SquarePen, CheckCircle2, Send, Eye } from 'lucide-react';
 import { MasterDataEntity, EntityRelationship, RelationshipType, RelationshipStatus, FieldDataType } from '../../categoryTypes';
 import { ConfirmModal } from '../../../../common/ConfirmModal';
@@ -315,15 +316,7 @@ export function RelationshipsTab({
 
     // Show success dialog
     setTimeout(() => {
-      setGenericConfirm({
-        isOpen: true,
-        type: 'success',
-        title: editingRelation ? 'Cập nhật thành công' : 'Thêm mới thành công',
-        subtitle: '',
-        message: editingRelation ? 'Cập nhật quan hệ danh mục thành công!' : 'Thêm mới quan hệ danh mục thành công!',
-        confirmText: 'Đóng',
-        onConfirm: () => setGenericConfirm(null)
-      });
+      toast.success(editingRelation ? 'Cập nhật quan hệ danh mục thành công' : 'Thêm mới quan hệ danh mục thành công');
     }, 200);
   };
 

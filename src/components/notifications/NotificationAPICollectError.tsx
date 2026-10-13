@@ -290,7 +290,7 @@ export function NotificationAPICollectError() {
                       <div className="flex items-center gap-1">
                         <span className="text-slate-900">{error.retryCount}/{error.maxRetries}</span>
                         {error.autoRetry && (
-                          <RefreshCw className="w-3 h-3 text-blue-600" title="Auto retry enabled" />
+                          <span title="Auto retry enabled"><RefreshCw className="w-3 h-3 text-blue-600" /></span>
                         )}
                       </div>
                       <div className="text-xs text-slate-500">
