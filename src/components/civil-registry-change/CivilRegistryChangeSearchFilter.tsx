@@ -1,3 +1,4 @@
+import { AddGroupButton, FilterGroupRow, isFilterGroup, newFilterGroup } from '../common/AdvancedFilterGroup';
 import React from 'react';
 import { Filter, Download, Plus, Trash2, CheckCircle, X, RefreshCw } from 'lucide-react';
 
@@ -10,6 +11,13 @@ interface CivilRegistryChangeSearchFilterProps {
   onRefresh?: () => void;
   isInline?: boolean;
 }
+
+// Trường dữ liệu cho điều kiện trong nhóm (Gom Nhóm) — giống danh sách trường ở điều kiện thường
+const FILTER_FIELD_OPTIONS = [
+  { value: 'changedPersonName', label: 'Người được thay đổi' },
+  { value: 'recordCode', label: 'Mã hồ sơ' },
+  { value: 'personalId', label: 'SĐD cá nhân' },
+];
 
 export function CivilRegistryChangeSearchFilter({
   isFilterOpen,
@@ -63,21 +71,26 @@ export function CivilRegistryChangeSearchFilter({
           <div className="flex items-center justify-between mb-4 relative z-10">
             <h4 className="text-[13px] font-semibold text-slate-700">Điều kiện lọc nâng cao</h4>
             <div className="flex items-center gap-2">
-              <button 
-                onClick={() => {
-                  const newId = Date.now().toString();
-                  setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
-                }}
-                className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-[13px] font-medium hover:bg-blue-50 transition-all shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Thêm điều kiện
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => {
+                    const newId = Date.now().toString();
+                    setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+                  }}
+                  className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-[13px] font-medium hover:bg-blue-50 transition-all shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm điều kiện
+                </button>
+                <AddGroupButton className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg flex items-center gap-2 text-[13px] font-medium hover:bg-blue-50 transition-all shadow-sm" onClick={() => setFilterConditions([...filterConditions, newFilterGroup()])} />
+              </div>
             </div>
           </div>
 
           <div className="space-y-3 relative z-10">
-            {filterConditions.map((condition, index) => (
+            {filterConditions.map((condition, index) => isFilterGroup(condition) ? (
+              <FilterGroupRow key={condition.id} group={condition} showLogic={index > 0} fieldOptions={FILTER_FIELD_OPTIONS} variant="compact" onChange={(g) => setFilterConditions(filterConditions.map((c: any) => c.id === g.id ? g : c))} onRemove={() => setFilterConditions(filterConditions.filter((c: any) => c.id !== condition.id))} />
+            ) : (
               <div key={condition.id} className="flex items-center gap-3">
                 <div className="w-20 flex-shrink-0">
                   {index > 0 && (

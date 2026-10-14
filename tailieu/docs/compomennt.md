@@ -18,13 +18,13 @@ Hệ thống sử dụng bộ font **Inter** cho **mọi phần tử**. Cỡ ch�
 
 | Thành phần | Cỡ chữ (Size) | Trọng số (Weight) | Màu sắc | Ghi chú |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tiêu đề trang (H1)** | **20px**, cao dòng 32px | **Bold (700)** | **`#2A0F0F`** | Tiêu đề trang / tiêu đề khối nội dung chính (PM chốt 06/10/2026) |
-| **Tiêu đề modal** | 16px | **Semibold (600)** | `#020817` | Tiêu đề header của modal / dialog — giữ 16px; độ đậm 600 (PM chốt 09/10/2026) |
-| **Tiêu đề phụ (H2)** | 14px | Medium (500) | `#020817` | Tiêu đề khối/section **và tiêu đề nhóm** trong khối (PM chốt 07/10/2026: bỏ H3 13px). Tiêu đề khối có vạch xanh `#155DFC` bên trái (`SECTION_TITLE`); tiêu đề nhóm không có vạch (`GROUP_TITLE`) |
+| **Tiêu đề trang (H1)** | **20px**, cao dòng 32px | **Bold (700)** | **`#2A0F0F`** | Tiêu đề trang / tiêu đề khối nội dung chính ( 06/10/2026) |
+| **Tiêu đề modal** | 16px | **Semibold (600)** | `#020817` | Tiêu đề header của modal / dialog — giữ 16px; độ đậm 600 ( 09/10/2026) |
+| **Tiêu đề phụ (H2)** | 14px | Medium (500) | `#020817` | Tiêu đề khối/section **và tiêu đề nhóm** trong khối ( 07/10/2026: bỏ H3 13px). Tiêu đề khối có vạch xanh `#155DFC` bên trái (`SECTION_TITLE`); tiêu đề nhóm không có vạch (`GROUP_TITLE`) |
 | **Văn bản nội dung (P)** | 13px | Regular (400) | `#020817` | Cỡ chữ mặc định |
 | **Tên hệ thống (logo)** | 13px | Semibold (600) | `#020817` | Sidebar |
 | **Dòng phụ dưới logo** | 12px | Regular (400) | `#64748B` | Sidebar |
-| **Menu sidebar** | 12px | 400 (đang chọn: **500**) | **`#000000`** (đen — PM chốt 09/10/2026; đang chọn: **`#155DFC`**) | Mục 5.18 |
+| **Menu sidebar** | 12px | 400 (đang chọn: **500**) | **`#000000`** (đen —  09/10/2026; đang chọn: **`#155DFC`**) | Mục 5.18 |
 | **Breadcrumb** | 12px | Regular (400) | `#020817` | Mục 5.15 |
 | **Tab nội dung** | 14px | Semibold (600) | Đang chọn `#155DFC`, thường `#64748B` | Mục 5.9 |
 | **Nhãn thẻ thống kê** | 16px | Regular (400) | `#64748B` | Mục 5.6.1 |
@@ -33,7 +33,7 @@ Hệ thống sử dụng bộ font **Inter** cho **mọi phần tử**. Cỡ ch�
 | **Tiêu đề cột bảng (`th`)** | 13px | **Bold (700)** | `#000000` | Mục 5.3 |
 | **Ô bảng (`td`)** | 13px | Regular (400) | `#000000` | Mục 5.3 |
 | **Badge** | 13px | Regular (400) | Theo loại badge | Mục 5.8 |
-| **Nhãn trường** (form Thêm mới/Chỉnh sửa **và** tên trường ở Xem chi tiết) | 13px | **Semibold (600)** | `#020817` | Một kiểu chung — mục 5.2, 5.17; độ đậm 600 (PM chốt 09/10/2026) |
+| **Nhãn trường** (form Thêm mới/Chỉnh sửa **và** tên trường ở Xem chi tiết) | 13px | **Semibold (600)** | `#020817` | Một kiểu chung — mục 5.2, 5.17; độ đậm 600 ( 09/10/2026) |
 | **Ô nhập liệu / Giá trị trường** | 13px | Regular (400) | `#020817` | Mục 5.2, 5.17 |
 | **Nhãn trong vùng bộ lọc** | 13px | Semibold (600) | `#0E0D0D` | Theo trang chuẩn BTP — mục 5.19 |
 | **Chú thích (Small)** | 12px | Regular (400) | `#64748B` | Mô tả nhỏ |
@@ -225,11 +225,11 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 - Viền: 1px `#E2E8F0` — *đề xuất, chưa xác nhận từ trang chuẩn*.
 - Trạng thái Focus: ring 2px màu primary `#155DFC`.
 - **Nhãn trường:** 13px / **Semibold (600)** / `#020817` (đen), cách ô nhập 4px — **dùng chung một kiểu với tên trường ở màn Xem chi tiết** (mục 5.17).
-- **Ô bị khóa (disabled / readOnly) — một kiểu chung cho form Thêm mới, Chỉnh sửa và màn Xem chi tiết** *(PM chốt 09/10/2026)*: nền **`#F0F0F0`**, viền **`rgba(0,0,0,0.26)`**, **giá trị chữ đen `#000000`**, ô trống hiện placeholder `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`**. Đã áp vào `INPUT_CLS` và `DateInput` dùng chung (không cần thêm `VIEW_FIELD_CLS` nữa, giữ hằng này để tương thích). *Trước đó form dùng chữ `#94A3B8`, nền `#F1F5F9` rồi `#F0F0F0`.*
+- **Ô bị khóa (disabled / readOnly) — một kiểu chung cho form Thêm mới, Chỉnh sửa và màn Xem chi tiết** *( 09/10/2026)*: nền **`#F0F0F0`**, viền **`rgba(0,0,0,0.26)`**, **giá trị chữ đen `#000000`**, ô trống hiện placeholder `#94A3B8`, con trỏ `not-allowed` — **không dùng `opacity`**. Đã áp vào `INPUT_CLS` và `DateInput` dùng chung (không cần thêm `VIEW_FIELD_CLS` nữa, giữ hằng này để tương thích). *Trước đó form dùng chữ `#94A3B8`, nền `#F1F5F9` rồi `#F0F0F0`.*
 - **Ô bị khóa ở màn Xem chi tiết** *(07/10/2026)*: **giá trị đã có hiển thị chữ đen `#000000`**; ô trống hiển thị **placeholder xám `#94A3B8`**, 13px / 400; nền `#F0F0F0` (như trang BTP hiển thị); viền `rgba(0,0,0,0.26)`. Code: ghép `VIEW_FIELD_CLS` (trong `collectionUi.tsx`) sau `INPUT_CLS` — `disabled:!text-[#000000] disabled:!bg-[#F0F0F0] disabled:!border-[rgba(0,0,0,0.26)] disabled:placeholder:text-[#94A3B8]`. Màn xem chi tiết mà ô không bị khóa sẵn → bọc form bằng `<fieldset disabled={isViewMode}>` để mọi ô nhận kiểu này. Ô giả lập bằng `div` (VD ô tệp đính kèm) theo cùng quy tắc: có giá trị → chữ đen, trống → chữ xám.
 - **Trường bắt buộc (Required):** Nhãn đi kèm dấu sao đỏ `*` màu `#DC2626`. Khi có lỗi (validation), viền chuyển `#DC2626` và hiển thị thông báo lỗi 12px `#DC2626` bên dưới.
 - **Cỡ chữ:** Nhãn và nội dung ô nhập đều 13px (theo bảng Typography mục 1).
-- **Placeholder (chữ gợi ý) — một mã màu chung cho toàn hệ thống** *(PM chốt 09/10/2026)*: **`#94A3B8`**, 13px / Regular (400), áp cho mọi ô nhập / ô tìm kiếm / bộ lọc / form Thêm mới – Chỉnh sửa / modal và cả ô bị khóa ở màn Xem chi tiết. `<select>` đang ở lựa chọn rỗng (VD "-- Chọn ... --") hiển thị cùng màu placeholder.
+- **Placeholder (chữ gợi ý) — một mã màu chung cho toàn hệ thống** *(09/10/2026)*: **`#94A3B8`**, 13px / Regular (400), áp cho mọi ô nhập / ô tìm kiếm / bộ lọc / form Thêm mới – Chỉnh sửa / modal và cả ô bị khóa ở màn Xem chi tiết. `<select>` đang ở lựa chọn rỗng (VD "-- Chọn ... --") hiển thị cùng màu placeholder.
   - **Cách áp dụng:** quy định đặt **một chỗ duy nhất** trong `src/index.css` (biến `--color-placeholder` + quy tắc `::placeholder`). **Không** đặt màu placeholder riêng trong từng màn (`placeholder:text-…`); muốn đổi màu toàn hệ thống chỉ sửa biến `--color-placeholder`. Phần tử tự dựng giả placeholder (VD ô chọn có tìm kiếm) dùng `text-[var(--color-placeholder)]`.
 - Trạng thái lỗi/disabled **chưa đo** ở trang chuẩn — dùng quy định trên cho tới khi đo đủ.
 
@@ -574,7 +574,6 @@ import { ConfirmModal } from '../../common/ConfirmModal';
 />
 ```
 
-> Ghi chú: màu icon Cảnh báo trong component đang là `#D97706` (khác màu Warning `#CA8A04` ở bảng màu mục 2) — giữ `#D97706` để đồng bộ với toast cảnh báo (mục 5.5); chờ PM xác nhận.
 
 **Ví dụ hiển thị:**
 <div style="margin-top: 8px; width: 448px; max-width: 100%; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid #e2e8f0;">
@@ -716,7 +715,7 @@ toast.error('Thực hiện thao tác thất bại', { duration: 6000 });
 ### 5.7. Chọn giá trị (Select / Dropdown)
 - Dùng cho các bộ lọc tìm kiếm hoặc form nhập liệu có danh sách cố định.
 - Hiển thị icon chevron ở góc phải để nhận diện dễ dàng.
-- **Dòng gợi ý (placeholder) của ô chọn** *(PM chốt 09/10/2026)*: thống nhất dạng **`-- Chọn <tên trường> --`** (VD `-- Chọn đơn vị --`, `-- Chọn trạm kết nối --`, `-- Chọn trường dữ liệu --`); tên trường sau "Chọn" **viết thường** (giữ nguyên từ viết tắt như API, CSDL, IP); là lựa chọn đầu tiên với **`value="" disabled hidden`** — chỉ hiển thị trong ô khi chưa chọn, **không xuất hiện trong danh sách** khi mở ra (PM chốt 09/10/2026); ô `<select>` không gắn `value` phải có `defaultValue=""` để dòng gợi ý hiện ban đầu. Dòng gợi ý tự nhận màu placeholder chung `#94A3B8` (mục 5.2, biến `--color-placeholder`). Không dùng kiểu khác (`Chọn …` không gạch, `- … -`, `— … —`, chỉ `--`/`—`, emoji, `…`). Ô chọn tự dựng (Combobox, Radix Select) dùng cùng chữ và cùng màu `text-[var(--color-placeholder)]`.
+- **Dòng gợi ý (placeholder) của ô chọn** *(09/10/2026)*: thống nhất dạng **`-- Chọn <tên trường> --`** (VD `-- Chọn đơn vị --`, `-- Chọn trạm kết nối --`, `-- Chọn trường dữ liệu --`); tên trường sau "Chọn" **viết thường** (giữ nguyên từ viết tắt như API, CSDL, IP); là lựa chọn đầu tiên với **`value="" disabled hidden`** — chỉ hiển thị trong ô khi chưa chọn, **không xuất hiện trong danh sách** khi mở ra (09/10/2026); ô `<select>` không gắn `value` phải có `defaultValue=""` để dòng gợi ý hiện ban đầu. Dòng gợi ý tự nhận màu placeholder chung `#94A3B8` (mục 5.2, biến `--color-placeholder`). Không dùng kiểu khác (`Chọn …` không gạch, `- … -`, `— … —`, chỉ `--`/`—`, emoji, `…`). Ô chọn tự dựng (Combobox, Radix Select) dùng cùng chữ và cùng màu `text-[var(--color-placeholder)]`.
 - **Không phải placeholder:** lựa chọn mang giá trị thật ở bộ lọc (`Tất cả …`), `-- Không chọn --`, `Chưa phân công`, `Không xác thực` — hiển thị chữ đen như giá trị thường.
 
 **Ví dụ hiển thị:**
@@ -962,7 +961,7 @@ Quy định chung — (MUI `Pagination`: variant outlined, size medium, shape ro
 | :--- | :--- |
 | **Sidebar** | Rộng **250px** (thu gọn 80px), nền `#FFFFFF`, cố định bên trái, đường kẻ phải 1px `#E2E8F0`. Nút thu gọn/mở rộng tròn 24px nằm đè mép phải |
 | **Logo** | Tên hệ thống "Kho Dữ liệu dùng chung" 13px/600 `#020817`; dòng "Thuộc quản lý của Bộ Tư pháp" 12px/400 `#64748B`; chữ cách mép trái 54px |
-| **Menu cấp 1** | Chữ 12px/400 **`#000000`** (mọi hàng, kể cả hàng cha — PM chốt 09/10/2026), cao **35px**, bo 10px, cách mép trái 6px |
+| **Menu cấp 1** | Chữ 12px/400 **`#000000`** (mọi hàng, kể cả hàng cha — 09/10/2026), cao **35px**, bo 10px, cách mép trái 6px |
 | **Menu cấp 2** | Chữ 12px/400, cao **30px**, bo 10px, thụt vào 16px so với cấp 1 |
 | **Menu đang chọn** | Nền **`#EAF3FF`**, chữ **`#155DFC`**, đậm **500**, bo **10px** |
 | **Header** | Cao **64px**, nền trắng, viền dưới 1px `#E2E8F0`; bên phải nút chuông 40×40 tròn, icon `#475569`, kèm số đếm (VD "99+") |

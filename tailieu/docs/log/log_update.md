@@ -1,5 +1,45 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Xử lý dữ liệu — tab "Dữ liệu sau xử lý": thanh công cụ giống màn xem dữ liệu thu thập (Ngày thực hiện: 14/10/2026) — 223
+
+**Nội dung (PM yêu cầu):** bỏ thanh công cụ [Lọc] [Sắp xếp] [Xuất excel] [Ẩn/Hiện cột] [Xóa dữ liệu] [Tải lại] ở tab **Dữ liệu sau xử lý**; thay bằng 2 nút giống màn xem dữ liệu thu thập (căn phải, icon 40×40 có tooltip):
+- **Cập nhật dữ liệu** (icon tải lại): nạp lại dữ liệu, xóa điều kiện lọc, toast "Cập nhật dữ liệu thành công".
+- **Bộ lọc nâng cao** (icon phễu, đang mở → X, nền `#EAF3FF`): mở vùng **Điều kiện lọc nâng cao** (khung xám chuẩn 5.19) gồm [Thêm điều kiện] [Gom Nhóm] (mục 222), điều kiện [AND/OR] [Trường] [Bằng / Chứa / Bắt đầu] [Giá trị] [xóa], chân [Áp dụng bộ lọc] [Xóa tất cả]. Áp dụng bộ lọc lọc thật trên dữ liệu mẫu (kể cả nhóm điều kiện).
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (bỏ sắp xếp, xuất excel, ẩn/hiện cột, xóa dữ liệu; giữ `ColumnPanelHeader` / `ColumnPanelExpandButton` dùng ở màn Xem chi tiết CSDL đích).
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xem dữ liệu thu thập — thêm "Gom Nhóm" trong Bộ lọc nâng cao (Ngày thực hiện: 14/10/2026) — 222
+
+**Nội dung (PM yêu cầu, theo ảnh mẫu):** vùng **Điều kiện lọc nâng cao** ở các màn xem dữ liệu thu thập có thêm nút **Gom Nhóm** cạnh "Thêm điều kiện". Bấm vào thêm một nhóm điều kiện:
+- Bên trái nhóm: ô AND / OR nối nhóm với điều kiện phía trước (ẩn nếu nhóm đứng đầu).
+- Khung nhóm nền trắng, viền trái xanh 3px; đầu khung có nút nhỏ **+ Thêm điều kiện** (thêm điều kiện vào nhóm) và nút xóa nhóm (đỏ).
+- Mỗi điều kiện trong nhóm: [AND/OR từ điều kiện thứ 2] [Chọn trường dữ liệu] [Bằng / Chứa / Bắt đầu] [Nhập giá trị…] [xóa]; xóa điều kiện cuối thì xóa luôn nhóm.
+- Danh sách trường trong nhóm giống danh sách trường của điều kiện thường ở từng màn.
+
+**File thêm / sửa:**
+- `src/components/common/AdvancedFilterGroup.tsx` (mới): `AddGroupButton`, `FilterGroupRow`, `newFilterGroup`, `isFilterGroup` — nhóm lưu chung mảng `filterConditions` với `kind: 'group'`.
+- 24 bộ lọc `*SearchFilter.tsx` (Khai sinh, Khai tử, Kết hôn, Tình trạng hôn nhân, Giám hộ, Chấm dứt giám hộ, Nhận cha mẹ con, Nuôi con nuôi, Thay đổi hộ tịch, Quốc tịch, Đấu giá, Nhóm danh mục, Trẻ em, Thi hành án, Trung tâm / Thông tin pháp lý dân sự, Hộ tịch, Gia đình, Quốc tế, Pháp luật quốc gia, Người có công, Biện pháp bảo đảm, An sinh xã hội…), `court-judgment/CourtJudgmentView.tsx`, `pages/internal/LegalCenterPage.tsx`. Ô trong nhóm dùng cùng kiểu ô với từng màn (13px ở các màn hộ tịch, ô chuẩn 40px ở các màn còn lại).
+
+**Ghi chú:** bộ lọc nâng cao ở các màn này hiện là giao diện mẫu (chưa lọc dữ liệu thật); nhóm điều kiện cũng chỉ là giao diện.
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — đổi nội dung 4 thẻ thống kê (Ngày thực hiện: 14/10/2026) — 221
+
+**Nội dung (PM yêu cầu, theo ảnh mẫu):** 4 thẻ KPI màn Quản lý Quy tắc Xử lý đổi nhãn / số liệu; **giữ ô icon** (PM xác nhận sau — ban đầu bỏ icon):
+- Số lượng Thu thập: 134
+- Số lượt đã làm sạch: 134
+- Số lượt đã chuẩn hóa: 0
+- Số lượt đã biến đổi: 0
+
+Khung, cỡ chữ, màu giữ theo thẻ thống kê chuẩn (compomennt.md 5.6.1): nhãn 16px `#64748B`, số 16px/600 `#0F172A`.
+
+**File sửa:** `processing/GenericProcessingPage.tsx` (icon giữ như mục 213: Database / Eraser / ListChecks / Shuffle).
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công.
+
 ## Modal Xem chi tiết / Điều chỉnh cấu trúc trường dữ liệu chia sẻ — chuẩn hóa giao diện (Ngày thực hiện: 13/10/2026) — 220
 
 **Nội dung thay đổi:**

@@ -1,3 +1,4 @@
+import { AddGroupButton, FilterGroupRow, isFilterGroup, newFilterGroup } from '../../common/AdvancedFilterGroup';
 import React, { useState, useMemo } from 'react';
 import { DatabasePageTemplate } from '../collection/DatabasePageTemplate';
 import { GenericProcessingPage } from '../processing/GenericProcessingPage';
@@ -78,6 +79,14 @@ interface RecordItem {
   nationality?: string;
   agency?: string;
 }
+
+// Trường dữ liệu cho điều kiện trong nhóm (Gom Nhóm) — giống danh sách trường ở điều kiện thường
+const FILTER_FIELD_OPTIONS = [
+  { value: 'name', label: 'Họ tên' },
+  { value: 'birthDate', label: 'Ngày sinh' },
+  { value: 'personalId', label: 'Số định danh' },
+  { value: 'gender', label: 'Giới tính' },
+];
 
 export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', onBack }: LegalCenterPageProps) {
   const items = [
@@ -389,21 +398,26 @@ export function LegalCenterPage({ mode = 'thu thập', context = 'thu thập', o
           <div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-[14px] font-medium text-[#020817]">Điều kiện lọc nâng cao</h4>
-              <button
-                type="button"
-                onClick={() => {
-                  const newId = Date.now().toString();
-                  setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
-                }}
-                className={BTN_OUTLINE}
-              >
-                <Plus className="w-4 h-4" />
-                Thêm điều kiện
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newId = Date.now().toString();
+                    setFilterConditions([...filterConditions, { id: newId, logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }]);
+                  }}
+                  className={BTN_OUTLINE}
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm điều kiện
+                </button>
+                <AddGroupButton className={BTN_OUTLINE} onClick={() => setFilterConditions([...filterConditions, newFilterGroup()])} />
+              </div>
             </div>
 
             <div className="space-y-2">
-              {filterConditions.map((condition, index) => (
+              {filterConditions.map((condition, index) => isFilterGroup(condition) ? (
+              <FilterGroupRow key={condition.id} group={condition} showLogic={index > 0} fieldOptions={FILTER_FIELD_OPTIONS} variant="standard" onChange={(g) => setFilterConditions(filterConditions.map((c: any) => c.id === g.id ? g : c))} onRemove={() => setFilterConditions(filterConditions.filter((c: any) => c.id !== condition.id))} />
+            ) : (
                 <div key={condition.id} className="flex items-center gap-2">
                   <div className="w-24 flex-shrink-0">
                     {index > 0 && (

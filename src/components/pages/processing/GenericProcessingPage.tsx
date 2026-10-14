@@ -460,10 +460,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
           {/* Thẻ thống kê — compomennt.md 5.6.1 (PM 13/10/2026: bỏ tỷ lệ %) */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Số lượng bản ghi thu thập', value: '50,000', icon: Database, tone: 'bg-blue-50 text-blue-600' },
-              { label: 'Số lượng bản ghi còn lại sau làm sạch', value: '49,850', icon: Eraser, tone: 'bg-green-50 text-green-600' },
-              { label: 'Số lượng bản ghi còn lại sau chuẩn hóa', value: '45,230', icon: ListChecks, tone: 'bg-indigo-50 text-indigo-600' },
-              { label: 'Số lượng bản ghi còn lại sau biến đổi', value: '45,230', icon: Shuffle, tone: 'bg-purple-50 text-purple-600' },
+              { label: 'Số lượng Thu thập', value: '134', icon: Database, tone: 'bg-blue-50 text-blue-600' },
+              { label: 'Số lượt đã làm sạch', value: '134', icon: Eraser, tone: 'bg-green-50 text-green-600' },
+              { label: 'Số lượt đã chuẩn hóa', value: '0', icon: ListChecks, tone: 'bg-indigo-50 text-indigo-600' },
+              { label: 'Số lượt đã biến đổi', value: '0', icon: Shuffle, tone: 'bg-purple-50 text-purple-600' },
             ].map(({ label, value, icon: Icon, tone }) => (
               <div key={label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
                 <div className="flex items-center gap-3">

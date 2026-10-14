@@ -6,6 +6,7 @@ import {
 } from '../pages/collection/collectionUi';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import { COURT_JUDGMENT_RECORDS, DetailRecord } from './courtJudgmentMock';
+import { AddGroupButton, FilterGroupRow, isFilterGroup, newFilterGroup } from '../common/AdvancedFilterGroup';
 
 interface CourtJudgmentViewProps {
   title: string;
@@ -92,14 +93,17 @@ export function CourtJudgmentView({ title }: CourtJudgmentViewProps) {
           <div className="mt-[15px] p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-[14px] font-medium text-[#020817]">Điều kiện lọc nâng cao</h4>
-              <button
-                type="button"
-                onClick={() => setFilterConditions([...filterConditions, { id: Date.now().toString(), logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }])}
-                className={BTN_OUTLINE}
-              >
-                <Plus className="w-4 h-4" />
-                Thêm điều kiện
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFilterConditions([...filterConditions, { id: Date.now().toString(), logic: 'AND', field: '', operator: '=', type: 'Text', value: '' }])}
+                  className={BTN_OUTLINE}
+                >
+                  <Plus className="w-4 h-4" />
+                  Thêm điều kiện
+                </button>
+                <AddGroupButton className={BTN_OUTLINE} onClick={() => setFilterConditions([...filterConditions, newFilterGroup()])} />
+              </div>
             </div>
 
             {filterConditions.length === 0 && (
@@ -107,7 +111,9 @@ export function CourtJudgmentView({ title }: CourtJudgmentViewProps) {
             )}
 
             <div className="space-y-2">
-              {filterConditions.map((condition, index) => (
+              {filterConditions.map((condition, index) => isFilterGroup(condition) ? (
+                <FilterGroupRow key={condition.id} group={condition} showLogic={index > 0} fieldOptions={FIELD_OPTIONS} onChange={(g) => setFilterConditions(filterConditions.map((c: any) => c.id === g.id ? g : c))} onRemove={() => setFilterConditions(filterConditions.filter((c: any) => c.id !== condition.id))} />
+              ) : (
                 <div key={condition.id} className="flex items-center gap-2">
                   <div className="w-24 flex-shrink-0">
                     {index > 0 && (
