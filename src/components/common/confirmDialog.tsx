@@ -11,6 +11,8 @@ export interface ConfirmDialogOptions {
   subtitle?: string;
   confirmText?: string;
   cancelText?: string;
+  /** Chỉ hiện nút đóng — cảnh báo chặn thao tác (Promise trả về false) */
+  hideConfirm?: boolean;
 }
 
 interface PendingDialog extends ConfirmDialogOptions {
@@ -55,6 +57,7 @@ export function ConfirmDialogHost() {
       message={dialog.message}
       confirmText={dialog.confirmText ?? 'Đồng ý'}
       cancelText={dialog.cancelText ?? 'Hủy'}
+      hideConfirm={dialog.hideConfirm}
       onConfirm={() => finish(true)}
       onClose={() => finish(false)}
     />

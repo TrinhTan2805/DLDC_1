@@ -4,6 +4,8 @@ import { Database, Table, Columns, Search, ChevronRight, Info, Link2, ShieldChec
 import { initialTargetDatabases, mockTables, mockColumns, mockTableData } from './mockTargetDatabases';
 import { Pagination, BTN_OUTLINE, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS } from '../collection/collectionUi';
 import { ColumnPanelHeader, ColumnPanelExpandButton } from './ProcessedDataTab';
+import { confirmDialog } from '../../common/confirmDialog';
+import { ConfirmModal } from '../../common/ConfirmModal';
 
 interface TargetDatabaseDetailPageProps {
   databaseId: string;
@@ -95,8 +97,23 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
     setViewMode('structure');
   }, [selectedTable]);
 
-  const handleStartEdit = () => {
+  // Cảnh báo trước khi chỉnh sửa cấu trúc bảng (PM 14/10/2026) — popup loại warning (compomennt.md 5.4.1):
+  // bảng còn dữ liệu → không cho chỉnh sửa, yêu cầu xóa dữ liệu trước; bảng chưa có / đã xóa dữ liệu → hỏi xác nhận
+  const handleStartEdit = async () => {
     if (!selectedTable) return;
+    const rowCount = (mockTableData[selectedTable] || []).length;
+    if (rowCount > 0) {
+      await confirmDialog(
+        <>Bảng <strong>{selectedTable}</strong> đang có <strong>{rowCount.toLocaleString('vi-VN')}</strong> bản ghi. Vui lòng xóa dữ liệu trong bảng (tab Dữ liệu bảng → Xóa dữ liệu) trước khi chỉnh sửa cấu trúc.</>,
+        { type: 'warning', title: 'Không thể chỉnh sửa cấu trúc', subtitle: 'Bảng đang có dữ liệu.', cancelText: 'Đóng', hideConfirm: true }
+      );
+      return;
+    }
+    const ok = await confirmDialog(
+      <>Bạn có chắc chắn muốn chỉnh sửa cấu trúc bảng <strong>{selectedTable}</strong>? Thay đổi cấu trúc có thể ảnh hưởng đến các cấu hình ánh xạ, quy tắc xử lý đang sử dụng bảng này.</>,
+      { type: 'warning', title: 'Xác nhận chỉnh sửa cấu trúc', subtitle: 'Bảng chưa có dữ liệu.', confirmText: 'Tiếp tục' }
+    );
+    if (!ok) return;
     setIsEditingTable(true);
     setEditableColumns([...(mockColumns[selectedTable] || [])].map(col => ({ ...col })));
   };
@@ -166,6 +183,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
       mockTables.splice(tableIndex, 1);
     }
     delete mockColumns[selectedTable];
+    toast.success(`Xóa bảng ${selectedTable} thành công`);
     setSelectedTable(null);
     setShowDeleteConfirmModal(false);
   };
@@ -174,6 +192,7 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
     if (!selectedTable) return;
     mockTableData[selectedTable] = [];
     setShowClearDataConfirmModal(false);
+    toast.success(`Xóa dữ liệu bảng ${selectedTable} thành công`);
   };
 
   const handleStartAddTable = () => {
@@ -1029,38 +1048,17 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirmModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setShowDeleteConfirmModal(false)}></div>
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4 mx-auto">
-                <Trash2 className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Xác nhận xóa bảng</h3>
-              <p className="text-slate-600 text-center text-[13px] mb-6">
-                Bạn có chắc chắn muốn xóa bảng <span className="font-bold text-slate-800">"{selectedTable}"</span>? Toàn bộ dữ liệu của bảng cũng sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.
-              </p>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowDeleteConfirmModal(false)}
-                  className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  onClick={handleConfirmDeleteTable}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-                >
-                  Xóa bảng
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Xác nhận xóa bảng — popup xác nhận chung (compomennt.md 5.4.1) */}
+      <ConfirmModal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => setShowDeleteConfirmModal(false)}
+        onConfirm={handleConfirmDeleteTable}
+        type="delete"
+        title="Xác nhận xóa bảng"
+        subtitle="Hành động này không thể hoàn tác."
+        message={<>Bạn có chắc chắn muốn xóa bảng <strong>"{selectedTable}"</strong>? Toàn bộ dữ liệu của bảng cũng sẽ bị xóa vĩnh viễn.</>}
+        confirmText="Xóa bảng"
+      />
 
       {/* Export Modal */}
       {showExportModal && (
@@ -1173,37 +1171,17 @@ export function TargetDatabaseDetailPage({ databaseId }: TargetDatabaseDetailPag
         </div>
       )}
 
-      {/* Clear Data Confirm Modal */}
-      {showClearDataConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Xác nhận xóa dữ liệu</h3>
-              <p className="text-slate-600 text-center text-[13px] mb-6">
-                Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của bảng <span className="font-bold text-slate-800">"{selectedTable}"</span>? Thao tác này không thể hoàn tác.
-              </p>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowClearDataConfirmModal(false)}
-                  className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  onClick={handleConfirmClearData}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-                >
-                  Xóa dữ liệu
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Xác nhận xóa dữ liệu bảng — popup xác nhận chung (compomennt.md 5.4.1) */}
+      <ConfirmModal
+        isOpen={showClearDataConfirmModal}
+        onClose={() => setShowClearDataConfirmModal(false)}
+        onConfirm={handleConfirmClearData}
+        type="delete"
+        title="Xác nhận xóa dữ liệu"
+        subtitle="Hành động này không thể hoàn tác."
+        message={<>Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của bảng <strong>"{selectedTable}"</strong>?</>}
+        confirmText="Xóa dữ liệu"
+      />
     </div>
   );
 }

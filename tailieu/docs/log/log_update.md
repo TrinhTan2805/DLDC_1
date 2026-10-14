@@ -1,5 +1,37 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Xem chi tiết CSDL đích — popup Xóa bảng / Xóa dữ liệu theo chuẩn popup xác nhận (Ngày thực hiện: 14/10/2026) — 226
+
+**Nội dung (PM yêu cầu):** popup **Xóa bảng** (và popup **Xóa dữ liệu** cùng kiểu) ở màn Xem chi tiết CSDL đích chưa đồng bộ với các popup khác (icon giữa, tiêu đề 20px đậm căn giữa, nút giãn đều, nền mờ blur) → chuyển sang `ConfirmModal` chung loại `delete` (compomennt.md 5.4.1): header [icon thùng rác tròn] tiêu đề 16px/600 + câu phụ "Hành động này không thể hoàn tác." + [X]; nội dung trên nền trắng, tên bảng in đậm; chân [Hủy] → [Xóa bảng] / [Xóa dữ liệu] (nút đỏ) căn phải.
+- Xóa bảng: "Bạn có chắc chắn muốn xóa bảng **"<tên>"**? Toàn bộ dữ liệu của bảng cũng sẽ bị xóa vĩnh viễn."
+- Xóa dữ liệu: "Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của bảng **"<tên>"**?"
+- Thêm toast thành công sau khi xóa: "Xóa bảng <tên> thành công" / "Xóa dữ liệu bảng <tên> thành công".
+
+**File sửa:** `processing/TargetDatabaseDetailPage.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xem chi tiết CSDL đích — Chỉnh sửa cấu trúc: phải xóa dữ liệu trước (Ngày thực hiện: 14/10/2026) — 225
+
+**Nội dung (PM yêu cầu, bổ sung mục 224):** bấm **Chỉnh sửa cấu trúc**:
+1. **Bảng đang có dữ liệu** → **không cho chỉnh sửa**: popup cảnh báo "Không thể chỉnh sửa cấu trúc" — "Bảng **<tên>** đang có **N** bản ghi. Vui lòng xóa dữ liệu trong bảng (tab Dữ liệu bảng → Xóa dữ liệu) trước khi chỉnh sửa cấu trúc." **Chỉ có nút [Đóng]** (PM bỏ nút "Đến tab Dữ liệu bảng") — `ConfirmModal` / `confirmDialog` thêm tùy chọn `hideConfirm` (ẩn nút xác nhận) dùng cho cảnh báo chặn thao tác.
+2. **Bảng chưa có dữ liệu hoặc đã xóa dữ liệu** → popup "Xác nhận chỉnh sửa cấu trúc" — "Bạn có chắc chắn muốn chỉnh sửa cấu trúc bảng **<tên>**? …"; [Hủy] / [Tiếp tục] → vào chế độ chỉnh sửa.
+
+**File sửa:** `processing/TargetDatabaseDetailPage.tsx` (`handleStartEdit` kiểm tra số bản ghi của bảng; dữ liệu mẫu chỉ bảng `DIP_PERSON` có bản ghi), `common/ConfirmModal.tsx`, `common/confirmDialog.tsx` (tùy chọn `hideConfirm`).
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
+## Xem chi tiết CSDL đích — popup cảnh báo khi Chỉnh sửa cấu trúc (Ngày thực hiện: 14/10/2026) — 224
+
+**Nội dung (PM yêu cầu):** bấm **Chỉnh sửa cấu trúc** (tab Cấu trúc bảng, màn Xem chi tiết CSDL đích) hiện popup cảnh báo trước khi vào chế độ sửa (`ConfirmModal` loại `warning`, compomennt.md 5.4.1):
+- Tiêu đề "Cảnh báo chỉnh sửa cấu trúc"; câu phụ "Cân nhắc trước khi thay đổi cấu trúc bảng dữ liệu."
+- Nội dung: "Thay đổi cấu trúc bảng **<tên bảng>** có thể ảnh hưởng đến dữ liệu hiện có và các cấu hình ánh xạ, quy tắc xử lý đang sử dụng bảng này. Bạn có chắc chắn muốn tiếp tục?"
+- Nút [Hủy] → giữ nguyên; [Tiếp tục] → vào chế độ chỉnh sửa cấu trúc như trước.
+
+**File sửa:** `processing/TargetDatabaseDetailPage.tsx` (`handleStartEdit` dùng `confirmDialog`).
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công. Server port 3000 không chạy tại thời điểm kiểm tra.
+
 ## Xử lý dữ liệu — tab "Dữ liệu sau xử lý": thanh công cụ giống màn xem dữ liệu thu thập (Ngày thực hiện: 14/10/2026) — 223
 
 **Nội dung (PM yêu cầu):** bỏ thanh công cụ [Lọc] [Sắp xếp] [Xuất excel] [Ẩn/Hiện cột] [Xóa dữ liệu] [Tải lại] ở tab **Dữ liệu sau xử lý**; thay bằng 2 nút giống màn xem dữ liệu thu thập (căn phải, icon 40×40 có tooltip):

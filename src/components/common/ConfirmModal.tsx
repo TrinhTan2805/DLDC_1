@@ -14,6 +14,8 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   type?: 'delete' | 'warning' | 'info' | 'success';
+  /** Chỉ hiện nút đóng (cancelText) — dùng cho cảnh báo chặn thao tác, không cần xác nhận */
+  hideConfirm?: boolean;
 }
 
 // Màu theo bảng màu compomennt.md (mục 2). delete/warning là thao tác nguy hiểm → nút Destructive;
@@ -39,7 +41,8 @@ export function ConfirmModal({
   message,
   confirmText = 'Xác nhận xóa',
   cancelText = 'Hủy',
-  type = 'delete'
+  type = 'delete',
+  hideConfirm = false
 }: ConfirmModalProps) {
   const [modalIndex, setModalIndex] = useState(1);
 
@@ -111,16 +114,18 @@ export function ConfirmModal({
             <button type="button" onClick={onClose} className={BTN_OUTLINE}>
               {cancelText}
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                onConfirm();
-                onClose();
-              }}
-              className={config.confirmCls}
-            >
-              {confirmText}
-            </button>
+            {!hideConfirm && (
+              <button
+                type="button"
+                onClick={() => {
+                  onConfirm();
+                  onClose();
+                }}
+                className={config.confirmCls}
+              >
+                {confirmText}
+              </button>
+            )}
           </div>
         </div>
       </div>
