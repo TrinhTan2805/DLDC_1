@@ -21,22 +21,9 @@ import { ProvisionApiModal } from './modals/ProvisionApiModal';
 import { ProvisionReconciliationApiModal } from './modals/ProvisionReconciliationApiModal';
 import { ProvisionAccessControlModal } from './modals/ProvisionAccessControlModal';
 import { ProvisionVersionHistoryModal } from './modals/ProvisionVersionHistoryModal';
-import { ProvisionAccountModal } from './modals/ProvisionAccountModal';
+import { ProvisionAccountModal } from './modals/ProvisionAccountModal';
+import { MenuAction } from '../collection/collectionUi';
 
-// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2) — giống CollectionSetupPage
-const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason?: string | null; danger?: boolean; onSelect: () => void }) => (
-  <DropdownMenuItem
-    disabled={!!reason}
-    onClick={reason ? undefined : onSelect}
-    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
-  >
-    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
-    <span className="flex flex-col">
-      <span>{label}</span>
-      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
-    </span>
-  </DropdownMenuItem>
-);
 
 // Nút ⋯ mở menu thao tác khác (tooltip chỉ hiện khi hover)
 const MoreActionsTrigger = () => (

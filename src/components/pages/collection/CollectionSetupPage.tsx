@@ -13,7 +13,8 @@ import { Portal } from '../../common/Portal';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { ConfirmModal } from '../../common/ConfirmModal';
-import { TOOLTIP_CLS, Badge, TruncatedText, BTN_FOCUS, BTN_DISABLED, BTN_PRIMARY, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, RowIconAction, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, DateInput, formatDateVN, toLocalIsoDate, normalizeSearch, Pagination, SearchableSelect, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, TABLE_WRAP_CLS } from './collectionUi';
+import { TOOLTIP_CLS, Badge, TruncatedText, BTN_FOCUS, BTN_DISABLED, BTN_PRIMARY, BTN_OUTLINE, BTN_PAGE, BTN_PAGE_IDLE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, RowIconAction, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, DATE_BOX_CLS, DateInput, formatDateVN, toLocalIsoDate, normalizeSearch, Pagination, SearchableSelect, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, TABLE_WRAP_CLS } from './collectionUi';
+import { MenuAction } from './collectionUi';
 
 // Định dạng dung lượng dữ liệu suy ra từ số bản ghi (dùng khi dịch vụ chưa có sẵn dataSize)
 const formatDataSize = (records: number) => {
@@ -75,20 +76,6 @@ const getActionRules = (s: { serviceStatus: ServiceStatus; dataStatus: DataStatu
   };
 };
 
-// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
-const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
-  <DropdownMenuItem
-    disabled={!!reason}
-    onClick={reason ? undefined : onSelect}
-    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
-  >
-    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
-    <span className="flex flex-col">
-      <span>{label}</span>
-      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
-    </span>
-  </DropdownMenuItem>
-);
 
 // (v1.4) Người tạo mặc định cho dịch vụ chưa có sẵn createdBy trong dữ liệu mẫu
 const DEFAULT_CREATORS = ['Nguyễn Văn A', 'Trần Thị Bình', 'Lê Minh Châu', 'Phạm Quốc Dũng', 'Hoàng Thu Hà'];

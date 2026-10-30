@@ -12,22 +12,9 @@ import { ProvisionRequestHandoverModal } from './modals/ProvisionRequestHandover
 import { ProvisionServicePublishModal } from './modals/ProvisionServicePublishModal';
 import { ProvisionServiceUnpublishModal } from './modals/ProvisionServiceUnpublishModal';
 import { ProvisionHandoverDetailModal } from './modals/ProvisionHandoverDetailModal';
-import { ProvisionPublishDetailModal } from './modals/ProvisionPublishDetailModal';
+import { ProvisionPublishDetailModal } from './modals/ProvisionPublishDetailModal';
+import { MenuAction } from '../collection/collectionUi';
 
-// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
-const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
-  <DropdownMenuItem
-    disabled={!!reason}
-    onClick={reason ? undefined : onSelect}
-    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
-  >
-    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
-    <span className="flex flex-col">
-      <span>{label}</span>
-      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
-    </span>
-  </DropdownMenuItem>
-);
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '';

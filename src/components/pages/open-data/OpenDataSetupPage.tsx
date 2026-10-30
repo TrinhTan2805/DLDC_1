@@ -9,7 +9,8 @@ import {
   BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON, ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS,
   INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
   SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch, formatDateVN, DateInput
-} from '../collection/collectionUi';
+} from '../collection/collectionUi';
+import { MenuAction } from '../collection/collectionUi';
 
 // --- Lớp giao diện dùng chung trong file (compomennt.md 5.3, 5.4) ---
 const TH = 'px-3 py-[13px] leading-4 font-bold text-black whitespace-nowrap text-[13px]';
@@ -39,20 +40,6 @@ const READONLY_BOX = 'w-full h-10 px-3 flex items-center border border-[#E2E8F0]
 // Thẻ nhóm (mục 5.6)
 const GROUP_CARD = 'rounded-2xl border border-[#E2E8F0] p-4';
 
-// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
-const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
-  <DropdownMenuItem
-    disabled={!!reason}
-    onClick={reason ? undefined : onSelect}
-    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
-  >
-    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
-    <span className="flex flex-col">
-      <span>{label}</span>
-      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
-    </span>
-  </DropdownMenuItem>
-);
 
 interface DataField {
   id: string;

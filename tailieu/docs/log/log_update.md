@@ -1,5 +1,16 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Menu "Xem thêm" (⋮) cột Thao tác — lý do bị khóa chuyển vào tooltip (Ngày thực hiện: 30/10/2026) — 227
+
+**Nội dung (PM yêu cầu):** trong menu "Xem thêm" ở cột Thao tác, mục bị vô hiệu (VD "Cập nhật dữ liệu", "Xóa dữ liệu thu thập", "Ngừng hoạt động") **không hiện dòng lý do bên dưới** nữa; mục chỉ còn icon + tên (chữ / icon xám), lý do hiện trong **tooltip** khi rê chuột vào mục (tooltip chuẩn 5.3.1, hiện bên trái menu). Mục đang dùng được giữ nguyên.
+- Rê chuột vào mục bị khóa **giữ con trỏ thường** (không đổi sang biểu tượng cấm): `MENU_ITEM` đổi `data-[disabled]:cursor-not-allowed` → `cursor-default` (áp dụng mọi menu dùng `MENU_ITEM`, kể cả Báo cáo dữ liệu chủ).
+
+**File sửa:**
+- `collection/collectionUi.tsx`: thêm component dùng chung `MenuAction` (bọc `div` để mục disabled vẫn nhận hover).
+- Bỏ 7 bản sao `MenuAction` riêng, dùng bản chung: `collection/CollectionSetupPage.tsx` (Thiết lập thu thập), `category/components/tabs/SetupTab.tsx` (Thiết lập danh mục), `master-data/MasterDataScaleManagementPage.tsx` (Mô hình dữ liệu chủ), `master-data/MasterDataUpdateItemPage.tsx` (Cập nhật dữ liệu chủ), `open-data/OpenDataSetupPage.tsx` (Thiết lập dữ liệu mở), `provisioning/DataProvisionApiManagementPage.tsx`, `provisioning/DataProvisionRequestPage.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
 ## Xem chi tiết CSDL đích — popup Xóa bảng / Xóa dữ liệu theo chuẩn popup xác nhận (Ngày thực hiện: 14/10/2026) — 226
 
 **Nội dung (PM yêu cầu):** popup **Xóa bảng** (và popup **Xóa dữ liệu** cùng kiểu) ở màn Xem chi tiết CSDL đích chưa đồng bộ với các popup khác (icon giữa, tiêu đề 20px đậm căn giữa, nút giãn đều, nền mờ blur) → chuyển sang `ConfirmModal` chung loại `delete` (compomennt.md 5.4.1): header [icon thùng rác tròn] tiêu đề 16px/600 + câu phụ "Hành động này không thể hoàn tác." + [X]; nội dung trên nền trắng, tên bảng in đậm; chân [Hủy] → [Xóa bảng] / [Xóa dữ liệu] (nút đỏ) căn phải.

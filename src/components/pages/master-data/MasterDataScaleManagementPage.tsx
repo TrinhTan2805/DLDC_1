@@ -15,7 +15,8 @@ import {
   Badge, TruncatedText, RowIconAction, Pagination, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_DESTRUCTIVE, BTN_GHOST_ICON,
   ROW_ICON_BTN, MENU_ITEM, TOOLTIP_CLS, INPUT_CLS, LABEL_CLS, REQUIRED_MARK, FIELD_LABEL, FIELD_VALUE, SECTION_TITLE,
   SEARCH_INPUT_CLS, SEARCH_BTN_CLS, filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, normalizeSearch
-} from '../collection/collectionUi';
+} from '../collection/collectionUi';
+import { MenuAction } from '../collection/collectionUi';
 
 type TabType = 'setup' | 'attributes' | 'merge-rules' | 'relationships' | 'identifier-rules' | 'approval';
 
@@ -296,20 +297,6 @@ const GROUP_TITLE = 'text-[14px] font-medium text-[#020817]';
 const EMPTY_BOX = 'rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-6 text-center';
 const MUTED = 'text-[#94A3B8]';
 
-// Mục menu ⋯: bị khóa thì hiển thị lý do ngay trong mục (compomennt.md 5.3.2)
-const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason: string | null; danger?: boolean; onSelect: () => void }) => (
-  <DropdownMenuItem
-    disabled={!!reason}
-    onClick={reason ? undefined : onSelect}
-    className={`${MENU_ITEM} items-start ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
-  >
-    <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
-    <span className="flex flex-col">
-      <span>{label}</span>
-      {reason && <span className="text-[12px] text-[#64748B]">{reason}</span>}
-    </span>
-  </DropdownMenuItem>
-);
 
 // Cặp nhãn – giá trị chỉ đọc (compomennt.md 5.17)
 const ViewField = ({ label, children, full, extra }: { label: string; children: ReactNode; full?: boolean; extra?: ReactNode }) => (
