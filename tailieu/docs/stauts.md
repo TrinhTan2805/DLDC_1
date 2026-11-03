@@ -75,6 +75,13 @@
 - `[ ]` Modal gộp/tách bản ghi (`processing/MergeSplitModal.tsx`)
 - `[x]` Quản lý lịch xử lý (`processing/ScheduleManagementModal.tsx`)
 
+### Hợp nhất dữ liệu (chức năng mới v1.4 — tách biệt, thiết kế: `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`)
+- `[x]` Danh sách cấu hình hợp nhất (`processing/merge/DataMergePage.tsx`)
+- `[x]` Wizard thêm mới / chỉnh sửa cấu hình hợp nhất (`processing/merge/DataMergeWizard.tsx`)
+- `[x]` Chi tiết cấu hình hợp nhất (`processing/merge/DataMergeDetail.tsx`)
+- `[x]` Dữ liệu mẫu hợp nhất (`processing/merge/mockDataMerge.ts`)
+- `[x]` Bước Xử lý nguồn của wizard hợp nhất (`processing/merge/MergeSourceRules.tsx`)
+
 ### Trang xử lý từng lĩnh vực nghiệp vụ
 - `[x]` Xử lý chung (template) (`processing/GenericProcessingPage.tsx`)
 - `[ ]` Xử lý Hộ tịch (`processing/ProcessingCivilRegistryPage.tsx`)

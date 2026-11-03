@@ -184,6 +184,8 @@ import { ProcessingCooperationDeptPage } from '../pages/processing/ProcessingCoo
 import { ProcessingCooperationDbPage } from '../pages/processing/ProcessingCooperationDbPage';
 import { ProcessingCooperationPage } from '../pages/processing/ProcessingCooperationPage';
 import { TargetDatabaseManagementPage } from '../pages/processing/TargetDatabaseManagementPage';
+// (v1.4) Hợp nhất dữ liệu — chức năng mới, tách biệt (tailieu/docs/thiet_ke_hop_nhat_du_lieu.md)
+import { DataMergePage } from '../pages/processing/merge/DataMergePage';
 import { TargetDatabaseDetailPage } from '../pages/processing/TargetDatabaseDetailPage';
 import { NotificationBrowser } from '../notifications/NotificationBrowser';
 import { UserGuidePage } from '../pages/UserGuidePage';
@@ -383,6 +385,10 @@ const pageConfig: Record<string, { title: string; description: string }> = {
     title: 'Cập nhật dữ liệu chủ',
     description: 'Cập nhật và quản lý dữ liệu chủ theo từng loại'
   },
+  'processing-data-merge': {
+    title: 'Hợp nhất dữ liệu',
+    description: 'Gộp nhiều bộ dữ liệu đã xử lý vào cùng một bảng CSDL đích (UNION / JOIN)'
+  },
   'target-database-management': {
     title: 'Quản lý CSDL đích',
     description: 'Quản lý danh sách kết nối và cấu trúc các cơ sở dữ liệu đích'
@@ -526,6 +532,7 @@ export function MainLayout({ onLogout }: MainLayoutProps = {}) {
             {currentPage === 'processing-internal' && <DataProcessingPage initialCategory="Dữ liệu trong ngành" />}
             {currentPage === 'processed-data' && <ProcessedDataPage title="Dữ liệu đã xử lý" dataType="Toàn cục" />}
             {currentPage === 'target-database-management' && <TargetDatabaseManagementPage />}
+            {currentPage === 'processing-data-merge' && <DataMergePage />}
             {currentPage.startsWith('target-database-detail-') && <TargetDatabaseDetailPage databaseId={currentPage.replace('target-database-detail-', '')} />}
             {currentPage === 'category' && <CategoryManagementPage />}
             {currentPage === 'category-dashboard' && <CategoryDashboardPage />}
@@ -993,6 +1000,7 @@ const getBreadcrumbPath = (pageId: string, search: string = ''): string[] => {
     // Collection
     'collection-dashboard': ['Quản lý thu thập', 'Tổng quan thu thập'],
     'processing-dashboard': ['Xử lý dữ liệu', 'Tổng quan xử lý dữ liệu'],
+    'processing-data-merge': ['Xử lý dữ liệu', 'Hợp nhất dữ liệu'],
     'collection-setup': ['Quản lý thu thập', 'Thiết lập thu thập'],
     'collection-source-system': ['Quản lý thu thập', 'Quản lý hệ thống nguồn'],
     'collection-agent': ['Quản lý thu thập', 'Quản trị Agent'],

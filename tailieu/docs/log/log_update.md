@@ -1,5 +1,173 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Hợp nhất dữ liệu — thống nhất luồng nút với màn Xử lý dữ liệu, bỏ Tạm dừng, chỉnh sửa một phần khi có dữ liệu (Ngày thực hiện: 02/11/2026) — 239
+
+**Nội dung (PM yêu cầu: các nút thao tác theo luồng màn Xử lý; khi nào chuyển đổi / cập nhật / xóa / chỉnh sửa, khi nào chọn lại bảng nguồn, bảng đích):**
+- Đối chiếu site test màn Xử lý dữ liệu (`/xu-ly-du-lieu/source-system/7`, chỉ xem): chưa cấu hình → mọi nút khóa; đã cấu hình chưa có dữ liệu → Chuyển đổi mở, Cập nhật / Xóa dữ liệu khóa; có dữ liệu → Chuyển đổi khóa, Cập nhật / Xóa dữ liệu mở, ánh xạ khóa, quy tắc xử lý vẫn sửa được; không có Tạm dừng.
+- **Bỏ trạng thái Tạm dừng / nút Tạm dừng – Kích hoạt** (PM chốt). Xóa dữ liệu không còn chuyển cấu hình sang Tạm dừng → xóa xong Chuyển đổi lại được ngay (trước đây mọi nút chạy bị khóa sau khi xóa dữ liệu). Ngừng chạy tự động thì tắt ở Lịch biểu.
+- **1 hàm quy tắc dùng chung** `mergeActionReasons` cho danh sách và màn chi tiết: Chuyển đổi / Cập nhật / Xóa dữ liệu / Thêm lịch biểu / Xóa cấu hình theo trạng thái (Bản nháp · Hoạt động · Cần cấu hình lại) × dữ liệu (chưa có / có); nút và mục menu ⋯ bị khóa thì xám, rê chuột hiện lý do (Xóa cấu hình khi có dữ liệu: *Đã có dữ liệu – xóa dữ liệu trước khi xóa cấu hình*). Bỏ 2 popup chặn *Không thể chỉnh sửa / xóa cấu hình*.
+- **Chỉnh sửa khi đã có dữ liệu – khóa một phần** (PM chốt): mở wizard; ① sửa tên / mô tả (mã khóa), ③ Xử lý nguồn sửa được; ② Chọn nguồn, ④ Kết hợp, ⑤ Bảng đích & ánh xạ **chỉ xem** kèm dòng báo phải Xóa dữ liệu trước.
+- Tài liệu thiết kế: viết lại 7.12 (ma trận nút theo trạng thái + bảng bước sửa được khi có dữ liệu), cập nhật 4.2, 7.11, 8.
+
+**File sửa:** `processing/merge/mockDataMerge.ts` (bỏ `paused`, thêm `hasMergeData`, `mergeActionReasons`), `DataMergePage.tsx`, `DataMergeDetail.tsx`, `DataMergeWizard.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+
+**Kiểm tra:** tsc không lỗi; trên app: menu ⋯ của HN_CONG_DAN (có dữ liệu) → Xóa cấu hình xám, tooltip đúng lý do; Chỉnh sửa → bước ② / ④ chỉ xem (dòng báo, mọi ô khóa), bước ③ sửa được, mã cấu hình khóa; Xóa dữ liệu → vẫn *Hoạt động*, nút Chuyển đổi mở.
+
+## Hợp nhất dữ liệu — ánh xạ tự động chỉ khi hệ thống tạo bảng mới (Ngày thực hiện: 02/11/2026) — 238
+
+**Nội dung (PM yêu cầu):** chọn **bảng có sẵn** thì ánh xạ **thủ công**; **tạo bảng mới** thì hệ thống tự tạo cột theo kết quả kết hợp và ánh xạ sẵn; cột đã tạo rồi thì **không tự ánh xạ nữa**.
+- Bước ⑤: bỏ nút *Tự động ánh xạ*. Bảng có sẵn: dòng ghi chú "Chọn giá trị nguồn cho từng cột…". Bảng mới: ghi chú "Hệ thống tạo cột và ánh xạ sẵn…; cột thêm sau thì tự chọn giá trị nguồn"; cột người dùng thêm để trống ánh xạ.
+- Nút *Gợi ý lại cột* đổi thành **Tạo lại cột theo kết quả kết hợp**, có popup xác nhận (tạo lại cả cột và ánh xạ).
+- Tài liệu thiết kế: cập nhật bảng bước ⑤ mục 4.3 và mục 5.2 (cách khớp tên khi tạo bảng mới).
+
+**File sửa:** `processing/merge/DataMergeWizard.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+
+**Kiểm tra:** tsc không lỗi; trên app: Chỉnh sửa HN_CHINH_SACH → bước ⑤ bảng có sẵn FACT_DAN_CU không còn nút tự động; chuyển *Tạo bảng mới* → xác nhận → 11 cột tạo sẵn kèm ánh xạ (SO_CCCD theo độ ưu tiên 2 nguồn); *Thêm cột* → cột mới không có ánh xạ; *Tạo lại cột* hiện popup xác nhận.
+
+## Hợp nhất dữ liệu — mỗi cấu hình 1 loại kết hợp (Join / Union), gom bước Kết hợp, gộp bước Bảng đích & ánh xạ (Ngày thực hiện: 02/11/2026) — 237
+
+**Nội dung (PM yêu cầu: phần Phép hợp nhất 1, 2 rườm rà, gom lại cho dễ thao tác; gộp bước Bảng đích và Ánh xạ):**
+- **Mỗi cấu hình chỉ 1 loại kết hợp** (PM chốt hướng B): *Join – nối thông tin* hoặc *Union – gộp dòng*, chọn bằng nút radio đầu bước ④. Đổi loại khi đã nhập → popup xác nhận, xóa phần kết hợp / lọc / ánh xạ. Trường hợp gộp rồi mới nối (Union rồi Join) để sau – ghi câu 9 mục 11 tài liệu thiết kế.
+- **Bỏ chuỗi "Phép hợp nhất n" / "Kết quả phép n".**
+  - **Join:** *Bảng chính* + bảng **Bảng nối thêm**, mỗi bảng nối 1 dòng (STT · Kiểu nối Left / Inner / Full · Bảng · Điều kiện ghép dạng câu lệnh · Thao tác). Bấm ✎ mở phần sửa ngay dưới dòng: Cột · Điều kiện · So với (Cột bảng nối / Giá trị) · Cột / Giá trị · Chuẩn hóa khi so sánh, *Thêm điều kiện*, *Khi 1 dòng khớp nhiều dòng*. Dòng đủ điều kiện tự thu gọn, thiếu / lỗi tự mở. Vế trái điều kiện chọn được cột của bảng chính và các bảng nối phía trên. Tạo sẵn 1 dòng cho mỗi nguồn còn lại; *Gợi ý điều kiện* điền theo CCCD.
+  - **Union:** chọn *Dòng trùng hoàn toàn* (Giữ tất cả – Union All / Chỉ giữ 1 dòng – Union) + **1 bảng Ghép cột** – mỗi nguồn 1 cột (có thể *Để trống*), *Tự khớp theo tên*. Cột kết quả hiện ở bước sau dạng `Gộp.TEN_COT`.
+  - **1 bộ Điều kiện lọc (WHERE) chung** trên kết quả kết hợp.
+- **Gộp bước ⑤ Bảng đích và ⑥ Ánh xạ thành "⑤ Bảng đích & ánh xạ"** – wizard còn 6 bước. 1 bảng chung, mỗi cột đích 1 dòng: Cột đích · Kiểu dữ liệu · Cho phép trống · Khóa chính · Cách lấy · Giá trị nguồn (+ Thao tác khi tạo bảng mới). Bảng có sẵn: cấu trúc chỉ xem; bảng mới: cột gợi ý **kèm ánh xạ sẵn** từ kết quả kết hợp, sửa / thêm / xóa cột ngay trong bảng (đổi tên cột giữ ánh xạ), *Gợi ý lại cột*, *Tự động ánh xạ*. Đổi CSDL / bảng / chế độ khi đã ánh xạ → popup xác nhận.
+- **Bỏ nguồn ở bước ②** → tự gỡ nguồn đó khỏi bảng nối, điều kiện, ghép cột, lọc, ánh xạ, khóa chính.
+- **Chi tiết:** Tổng quan có *Loại kết hợp*; bảng **Kết hợp – Join** (bảng chính ở tiêu đề, từng bảng nối · kiểu nối · điều kiện ghép · 1 khớp nhiều) hoặc **Kết hợp – Union / Union All** (ghép cột theo từng nguồn); dòng *Điều kiện lọc* bên dưới. **Danh sách:** cột Kiểu 1 nhãn JOIN / UNION, bộ lọc Kiểu theo loại.
+- **Dữ liệu mẫu:** chuyển sang mô hình mới (HN_KHAI_SINH = Union All 2 nguồn, 9 cột ghép, có cột để trống; HN_CONG_DAN = bảng chính Công dân + 2 bảng nối; HN_CHINH_SACH = Inner Join).
+- **Tài liệu thiết kế:** cập nhật mục 1, 3, 4.2, 4.3 (wizard 6 bước), 4.4, 5.1 (viết lại: Kết hợp), 5.2, 5.4, 7.1, 7.4, 7.5, 7.7, 7.10, 9, 11 (thêm câu 9 – đã chốt).
+
+**File sửa:** `processing/merge/mockDataMerge.ts` (mô hình `combineType`, `baseTable`, `joins: JoinStep[]`, `unionAll`, `unionColumns` (refs theo nguồn), `filters` chung; bỏ `operations`), `DataMergeWizard.tsx` (bước ④ và ⑤ viết lại, 6 bước), `DataMergeDetail.tsx`, `DataMergePage.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+
+**Kiểm tra:** tsc không lỗi; trên app (1536×864): thêm mới 3 nguồn → bước ④ Join tạo sẵn bảng chính Công dân + 2 dòng nối, *Gợi ý điều kiện* điền CCCD và tự thu gọn; ✎ mở phần sửa; đổi sang Union hiện popup xác nhận, đồng ý → bảng ghép cột 3 nguồn; bước ⑤ bảng có sẵn DIP_PERSON + *Tự động ánh xạ* (8 cột, trùng tên → theo độ ưu tiên); *Tạo bảng mới* hiện popup xác nhận rồi gợi ý cột kèm ánh xạ sẵn; bảng không tràn ngang; bước ⑥ Xem lại hiện "UNION ALL · 7 cột ghép"; Lưu và kích hoạt → danh sách hiện UNION; Chi tiết HN_CONG_DAN / HN_KHAI_SINH hiện đúng bảng Kết hợp và điều kiện lọc; console không lỗi.
+
+## Hợp nhất dữ liệu — giản lược giao diện, đồng bộ với các màn hiện có (Ngày thực hiện: 30/10/2026) — 236
+
+**Nội dung (PM yêu cầu: giao diện đơn giản, dễ hiểu, dễ thao tác, đồng bộ giao diện hiện có):**
+- **Danh sách:** sắp cột theo màn Thiết lập thu thập (STT · Tên / Mã · Loại nguồn · Kiểu · CSDL / Bảng đích · Người tạo / Ngày tạo · Trạng thái · Dữ liệu đích · Thao tác); bỏ cột *Số nguồn*; gộp *Bản ghi đích* và *Lần chạy gần nhất* thành cột **Dữ liệu đích** (số bản ghi + kết quả lần chạy, thời gian xem khi rê chuột); cố định độ rộng cột tên → bảng không còn tràn ngang ở màn 1536px (trước đây nhãn Trạng thái bị cột Thao tác che).
+- **Wizard:** thanh bước hiện lại tên bước (dùng `sm:flex` như wizard Danh mục; `lg:flex` không hiển thị). Bước ④ Kết hợp: bỏ hình minh họa (vòng tròn giao / icon bảng) phía trên 3 ô chọn; bảng *Điều kiện lọc (WHERE)* chỉ hiện khi đã thêm điều kiện (mặc định chỉ có nút *Thêm điều kiện lọc*); rút gọn ghi chú Left / Full Join.
+- **Chi tiết:** bỏ khung *Luồng hợp nhất* (trùng thông tin với bảng *Kết hợp (n phép)*).
+
+**File sửa:** `processing/merge/DataMergePage.tsx`, `DataMergeWizard.tsx`, `DataMergeDetail.tsx`.
+
+**Kiểm tra:** tsc không lỗi; trên app (1536×864): bảng danh sách vừa khung, không thanh cuộn ngang; wizard hiện tên 7 bước; bước ④ gọn (không hình minh họa, WHERE chỉ là nút).
+
+## Hợp nhất dữ liệu — chuỗi phép hợp nhất (Join / Union), ánh xạ theo kết quả kết hợp, khóa chính – trùng khóa – cho phép trống (Ngày thực hiện: 30/10/2026) — 235
+
+**Nội dung (PM yêu cầu – file note "Bỏ chọn kiểu hợp nhất"):**
+- **Bỏ chọn kiểu hợp nhất** ở bước ① (kiểu chọn cho từng phép). **Bỏ nút Sao chép từ Xử lý dữ liệu** ở bước Xử lý nguồn. Bỏ "Nguồn chính" ở bước ② (bảng trái phép đầu là nguồn tạo dòng).
+- **Thứ tự bước mới:** ① Thông tin → ② Chọn nguồn → ③ Xử lý nguồn → ④ **Kết hợp** → ⑤ **Bảng đích** → ⑥ Ánh xạ → ⑦ Xem lại (Kết hợp trước Bảng đích để gợi ý cột bảng mới từ kết quả kết hợp).
+- **④ Kết hợp:** chuỗi *Phép hợp nhất n* (tạo sẵn theo nguồn đã chọn, thêm phép / xóa phép cuối); mỗi phép: Bảng trái (nguồn hoặc *Kết quả phép trước*) · **Kiểu hợp nhất** (Left Join · Inner Join · **Full Join** · **Union** · **Union All**) · Bảng phải. Join: **Điều kiện ghép (ON)** so cột với **cột hoặc giá trị** (VD `BHXH.TRANG_THAI = 1`), ghi chú đặt điều kiện bảng phải ở ON để không mất dòng Left Join. Union: bảng **Ghép cột** (Cột kết quả · Cột bảng trái · Cột bảng phải, *Tự khớp theo tên*). Cả hai: **Điều kiện lọc (WHERE)**. Không làm GROUP BY / COUNT / ORDER BY.
+- **⑤ Bảng đích:** bỏ phần *Khóa chính bảng đích*; bảng có sẵn hiện thêm *Cho phép trống*; **tạo bảng mới**: gợi ý từ kết quả kết hợp + **Thêm / Sửa / Xóa cột** (tên, kiểu, cho phép trống, khóa chính – đúng 1 cột), *Gợi ý lại từ kết quả kết hợp*.
+- **⑥ Ánh xạ:** bỏ ánh xạ riêng từng nguồn; mỗi cột đích lấy từ **kết quả kết hợp** (`Bảng.Cột`, ô chọn có gõ tìm): **Theo cột / Theo độ ưu tiên** (nhiều cột có thứ tự, lấy cột đầu tiên có dữ liệu) / **Giá trị cố định**; *Tự động ánh xạ* (trùng tên nhiều nguồn → theo độ ưu tiên). **Khóa chính:** *Tự động / Theo cột* + cảnh báo (không phải khóa nguồn; có Union / Full Join; cột có thể trống). **Khi trùng khóa chính:** Giữ dòng cũ / Cập nhật theo dòng mới nhất (chọn cột căn cứ thời gian) / Ưu tiên theo nguồn (sắp thứ tự) / Báo lỗi. Cột **không cho phép trống** chưa ánh xạ → chặn; chỉ lấy từ cột có thể trống → cảnh báo.
+- **Chốt nghiệp vụ:** cột bắt buộc trống → không ghi dòng; dòng đã có mà cột bắt buộc thành trống / nguồn xóa → **xóa hẳn dòng**; không dùng giá trị dự phòng.
+- **Màn Chi tiết / Danh sách:** cột Kiểu hiện JOIN / UNION theo chuỗi phép, bộ lọc Kiểu = có JOIN / có UNION; Tổng quan hiện kiểu từng phép, khóa chính, luật trùng khóa, luồng chuỗi phép và bảng chi tiết phép dạng câu lệnh; tab Ánh xạ: cột đích · kiểu · cho phép trống · cách lấy · giá trị nguồn.
+- **Tài liệu thiết kế:** viết lại 4.3, mục 5 (5.1 Phép hợp nhất · 5.2 Ánh xạ · 5.3 Khóa chính và trùng khóa · 5.4 Cho phép trống · 5.5 Quy tắc nguồn), cập nhật 1, 2, 3, 4.2, 4.4, 7 (định danh dòng theo chuỗi phép, Full Join, xóa hẳn), 9, 11.
+
+**File sửa:** `processing/merge/mockDataMerge.ts` (mô hình `MergeOperation`, `OnCondition`, `WhereCondition`, `UnionColumn`, `ColumnMapping`, `targetKey`, `duplicateRule`, cột `nullable`; dữ liệu mẫu theo mô hình mới; bỏ `EXISTING_PROCESSING_RULES`), `DataMergeWizard.tsx` (viết lại), `DataMergeDetail.tsx`, `DataMergePage.tsx`, `MergeSourceRules.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+
+**Kiểm tra:** tsc không lỗi; trên app: thêm mới 3 nguồn → bước ④ tạo sẵn 2 phép (phép 2 bảng trái = Kết quả phép 1), Gợi ý điều kiện điền CCCD, thêm điều kiện `TRANG_THAI = 1` và WHERE, đổi Union → tự khớp cột không trùng; bước ⑤ tạo bảng mới gợi ý 19 cột; bước ⑥ Tự động ánh xạ (cột trùng tên → theo độ ưu tiên), khóa theo cột hiện cảnh báo, luật Mới nhất bắt chọn cột thời gian; Lưu và kích hoạt → danh sách hiện JOIN; màn Chi tiết HN_CONG_DAN hiện 2 phép (ON có `= '1'`, WHERE) và ánh xạ theo độ ưu tiên; console không lỗi.
+
+## Hợp nhất dữ liệu — phân tích cơ chế cập nhật dữ liệu (tài liệu thiết kế mục 7) (Ngày thực hiện: 28/10/2026) — 234
+
+**Nội dung (PM yêu cầu):** phân tích thấu đáo phần cập nhật, theo 2 cơ chế của Thu thập (có theo dõi thay đổi – CDC / API cập nhật; không có – nạp lại toàn bộ) và trường hợp sửa khóa ghép (CCCD).
+- Viết lại mục 7 `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md` thành **Cơ chế cập nhật dữ liệu**: 7.1 ba loại khóa; 7.2 dữ liệu lưu vết backend (vùng tạm từng nguồn, bảng liên kết `mrg_link`, cột kỹ thuật, mốc đọc nguồn, chỉ mục); 7.3 hai cơ chế cập nhật theo từng nguồn (+ đề xuất so ảnh chụp cho nguồn nạp lại toàn bộ); 7.4 trình tự 1 lần cập nhật (giao dịch, mốc đọc, idempotent); 7.5 ma trận JOIN (nguồn chính / bổ sung × thêm / sửa / sửa khóa ghép / xóa, ghép chuỗi, Inner Join); 7.6 ma trận UNION (nhóm trùng); 7.7 phạm vi xóa – chạy lại khi nguồn nạp lại toàn bộ; 7.8 khi nào phải dựng lại toàn bảng; 7.9 trường hợp đặc biệt (đổi khóa nguồn, xuất hiện lại, khóa ghép rỗng, sự kiện sai thứ tự, lỗi giữa chừng…); 7.10 ví dụ 3 bảng. Mục cũ 7.3 – 7.5 đổi số thành 7.11 – 7.13, sửa các tham chiếu chéo.
+- Kết luận chính: sửa CCCD (khóa ghép) **không** chạy lại toàn bộ – chỉ ghép lại dòng liên quan (tối đa 2 dòng); chỉ dựng lại toàn bảng khi lần đầu, nguồn chính JOIN nạp lại toàn bộ, sửa cấu hình, danh mục tham chiếu đổi, mất mốc CDC.
+- Mục 11 thêm vấn đề cần chốt 7 – 8 (so ảnh chụp, danh mục tham chiếu đổi); câu 3 ghi đã chốt theo quy tắc 7.12.
+- PM chốt: **người dùng không chọn cơ chế cập nhật** – hệ thống tự biết theo Thu thập của từng nguồn, chỉ có 1 nút *Cập nhật dữ liệu*; bấm khi không có thay đổi vẫn chạy bình thường, kết quả 0 thêm / 0 sửa / 0 xóa. Không thêm cột / cảnh báo cơ chế cập nhật trên giao diện.
+
+**File sửa:** `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`. Giao diện không đổi (nút Cập nhật dữ liệu hiện tại đã đúng hành vi trên).
+
+## Hợp nhất dữ liệu — điều kiện chỉnh sửa theo dữ liệu, bộ nút như màn Xử lý dữ liệu, lập lịch, tab Lịch sử chạy (Ngày thực hiện: 28/10/2026) — 233
+
+**Nội dung (PM yêu cầu):** có dữ liệu thì không được chỉnh sửa, muốn sửa phải xóa dữ liệu; dùng bộ nút của màn Xử lý dữ liệu; bổ sung lập lịch như màn xử lý cũ; tab Lịch sử chạy tham khảo màn xử lý cũ.
+- **Điều kiện theo dữ liệu** (giống màn Xử lý dữ liệu / Chi tiết CSDL đích): cấu hình có thêm số bản ghi đã ghi vào bảng đích (`dataCount`). Đã có dữ liệu → *Chỉnh sửa* / *Xóa cấu hình* hiện popup cảnh báo "Không thể chỉnh sửa / xóa cấu hình – vui lòng xóa dữ liệu trước" kèm nút **Xóa dữ liệu** (mở popup xác nhận xóa). Xóa dữ liệu → về 0 bản ghi, cấu hình đang hoạt động chuyển Tạm dừng.
+- **Bộ nút** (bỏ *Hoàn thành cấu hình* vì wizard đã có *Lưu và kích hoạt*): ▶ **Chuyển đổi dữ liệu** (chưa có dữ liệu – chạy toàn bộ) · ⟳ **Cập nhật dữ liệu** (đã có dữ liệu – chạy tăng dần) · 🗑 **Xóa dữ liệu** · ⏰ **Thêm lịch biểu**. Màn Chi tiết: thanh nút màu như màn Xử lý dữ liệu, nút không dùng được mờ + tooltip lý do. Danh sách: nút chạy đổi ▶ / ⟳ theo dữ liệu; menu ⋯ thêm *Thêm lịch biểu*, *Xóa dữ liệu* (mờ khi chưa có dữ liệu), đổi *Xóa* → *Xóa cấu hình*; thêm cột **Bản ghi đích**.
+- **Lập lịch:** dùng lại popup `processing/ScheduleManagementModal.tsx` của màn Xử lý dữ liệu (chỉ import, không sửa file cũ). Bỏ ô chọn *Lịch chạy* ở bước ⑦ wizard (tránh 2 nơi đặt lịch).
+- **Tab Lịch sử chạy** theo tab Lịch sử của màn Xử lý dữ liệu: ô tìm kiếm (Enter / nút); bảng STT · Mã yêu cầu · Loại (Chuyển đổi / Cập nhật / Xóa dữ liệu) · Người tạo · Thời gian · Thời gian xử lý · Trạng thái · Xem chi tiết; phân trang. Popup **Xem chi tiết lịch sử hoạt động** 2 cột (mã yêu cầu, cấu hình, CSDL / bảng đích, loại, trạng thái, mã lỗi | người tạo, thời gian khởi tạo / bắt đầu / hoàn thành / xử lý, số bản ghi không ghép được / trùng / đã xóa) + bảng số bản ghi theo nguồn. Mọi lần Chuyển đổi / Cập nhật / Xóa dữ liệu đều ghi lịch sử.
+- Tài liệu thiết kế: viết lại mục 7.4 (bảng thao tác × chưa có / đã có dữ liệu), cập nhật 4.2, 4.3, 4.4.
+
+**File sửa:** `processing/merge/mockDataMerge.ts` (`dataCount`, `RunActivity`, lịch sử mẫu, bỏ `SCHEDULE_OPTIONS`), `DataMergePage.tsx`, `DataMergeDetail.tsx`, `DataMergeWizard.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`. Không sửa file của màn Xử lý dữ liệu.
+
+**Kiểm tra:** trên app: Chỉnh sửa cấu hình có 12.450 bản ghi → popup "Không thể chỉnh sửa cấu hình" → Xóa dữ liệu → popup xác nhận xóa; màn Chi tiết thanh nút đúng trạng thái (▶ mờ khi đã có dữ liệu); Thêm lịch biểu mở popup lập lịch cũ; tab Lịch sử chạy hiển thị 3 hoạt động, popup chi tiết đủ thông tin.
+
+## Hợp nhất dữ liệu — căn cứ cập nhật theo khóa nguồn, lựa chọn khóa chính bảng đích, tab Dữ liệu đích (Ngày thực hiện: 28/10/2026) — 232
+
+**Nội dung (PM yêu cầu):** case 3 bảng nguồn có khóa chính riêng (không phải CCCD), ghép theo CCCD, bảng đích cũng không lấy CCCD làm khóa → căn cứ cập nhật là **khóa của từng bảng nguồn**; cho phép chọn ID bảng đích theo khóa bảng chính.
+- **Bỏ ô "Trường định danh bản ghi"** ở bước ⑤ (hệ thống tự dùng khóa nguồn).
+- **Bước ② Chọn nguồn:** thêm cột **Khóa nguồn** (khóa chính của bộ dữ liệu). Bộ dữ liệu không có khóa (VD Khai tử) → "Chưa có khóa", khi chọn thì hiện ô chọn trường khóa; chưa chọn → báo lỗi, không đi tiếp.
+- **Bước ④ Bảng đích:** thêm **Khóa chính bảng đích**: *Hệ thống tự sinh* (mặc định) / *Lấy theo khóa nguồn chính* (chỉ JOIN, hiển thị `ID = Công dân.ID_CD`, cảnh báo khóa nguồn phải ổn định). Bảng không có khóa chính → chặn; số cột khóa đích ≠ số trường khóa nguồn chính → báo lỗi. Bảng tạo mới tự thêm cột khóa `ID`.
+- **Bước ⑥ Ánh xạ:** dòng cột khóa chỉ xem (*Hệ thống tự sinh* hoặc khóa nguồn chính), Tự động ánh xạ bỏ qua cột khóa.
+- **Bước ⑦ / màn Chi tiết:** hiện *Khóa chính bảng đích* và cột *Khóa nguồn* của từng nguồn; màn Chi tiết thêm tab **Dữ liệu đích** (dữ liệu lần chạy gần nhất kèm `DIP_RefId`, `DIP_SourceRefs` + danh sách bản ghi nguồn không ghép được / không được chọn).
+- **Dữ liệu mẫu:** bộ dữ liệu có khóa nguồn (`ID_CD`, `MA_HO_SO`, `SO_DANG_KY`…), bảng đích có khóa `ID`; cấu hình `HN_CONG_DAN` dùng khóa theo nguồn chính và có dữ liệu đích mẫu theo ví dụ 3 bảng; thêm cột kỹ thuật `DIP_SourceRefs`.
+- **Tài liệu thiết kế:** thêm mục 7.0 *Căn cứ cập nhật và khóa chính bảng đích* (3 loại khóa, ví dụ 3 bảng, bảng xử lý khi nguồn thay đổi); cập nhật 4.3, 4.4, 5.1, 5.2, 7.1, 7.4.
+
+**File sửa:** `processing/merge/mockDataMerge.ts` (`keyFields`, `TargetKeyMode`, `targetKeyMode` thay `primaryKey`, `sourceKeyOf`, `MERGE_SAMPLE_DATA`), `DataMergeWizard.tsx`, `DataMergeDetail.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+
+**Kiểm tra:** trên app: bước ② hiện khóa nguồn, chọn Khai tử → báo "Nguồn chưa có khóa" và có ô chọn trường khóa; bước ④ cấu hình `HN_CONG_DAN` chọn sẵn *Lấy theo khóa nguồn chính* (`ID = Công dân.ID_CD`); bước ⑥ dòng ID hiện `ID_CD`, đổi sang tự sinh → hiện *Hệ thống tự sinh*; tab Dữ liệu đích hiển thị 4 dòng mẫu + 2 bản ghi không ghép được.
+
+## Hợp nhất dữ liệu — làm lại giao diện Điều kiện ghép theo mẫu "Join dữ liệu" (Ngày thực hiện: 28/10/2026) — 231
+
+**Nội dung (PM yêu cầu):** giao diện điều kiện ghép khó hiểu; làm theo mẫu PM gửi, tiêu đề dùng chung (không gắn tên bảng), bỏ phần diễn giải dài. Mỗi nguồn bổ sung là 1 khối **Phép ghép n**:
+- Hàng 3 ô có hình minh họa phía trên: **Bảng trái** (chọn nguồn chính / nguồn bổ sung xếp trước) · **Kiểu join** (Left Join – giữ toàn bộ bảng trái / Inner Join – chỉ giữ dòng khớp; hình 2 vòng tròn đổi theo kiểu) · **Bảng phải** (nguồn đang ghép, chỉ xem).
+- Bảng **Điều kiện join**: STT · Cột bảng trái · Điều kiện (= <> > >= < <=) · Cột bảng phải · Thao tác (xóa); nút *Thêm điều kiện*; cảnh báo ngắn "Khác kiểu dữ liệu".
+- **Tùy chọn nâng cao** (thu gọn mặc định): xử lý 1 – nhiều, chuẩn hóa giá trị trước khi so sánh.
+- Trường định danh bản ghi (nguồn chính) đặt cuối bước.
+
+**File sửa:** `processing/merge/DataMergeWizard.tsx`, `mockDataMerge.ts` (nhãn `JOIN_TYPE_LABEL`).
+
+## Hợp nhất dữ liệu — bỏ tab Lọc dữ liệu ở bước ③ Xử lý nguồn (Ngày thực hiện: 28/10/2026) — 230
+
+**Nội dung (PM yêu cầu):** bỏ tab **Lọc dữ liệu** vì điều kiện lọc đã có trong quy tắc làm sạch / chuẩn hóa (VD *Kiểm tra tính hợp lệ của dữ liệu* + *Xử lý ngoại lệ = Loại bỏ bản ghi lỗi*). Bước ③ còn 3 tab Làm sạch · Chuẩn hóa · Biến đổi.
+- Gỡ hẳn phần lọc (không để code thừa): kiểu `SourceFilter`, `FilterOperator`, `MergeSourceRef.filters`, `FILTER_OPERATOR_LABEL`, `filterNeedsValue`, `describeFilters`, dữ liệu lọc mẫu; bỏ cột *Điều kiện lọc* ở bước ⑦ và màn Chi tiết, bỏ dòng lọc ở tab Xử lý nguồn của màn Chi tiết; kiểm tra bước ③ chỉ còn quy tắc nhập thiếu.
+- Tài liệu thiết kế: bỏ mục 5.3 Lọc dữ liệu nguồn (mục Quy tắc xử lý nguồn đổi thành 5.3, ghi cách lọc bằng quy tắc hợp lệ).
+
+**File sửa:** `processing/merge/mockDataMerge.ts`, `MergeSourceRules.tsx`, `DataMergeWizard.tsx`, `DataMergeDetail.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+
+## Hợp nhất dữ liệu — thêm bước ③ Xử lý nguồn (làm sạch / chuẩn hóa / biến đổi / lọc cho từng nguồn) (Ngày thực hiện: 28/10/2026) — 229
+
+**Nội dung (PM yêu cầu):** khi thêm mới, chọn nguồn xong phải có chỗ xử lý làm sạch ngay rồi mới tới ánh xạ. Không dùng kết quả của chức năng Xử lý dữ liệu cũ vì chức năng đó xử lý xong là ghi thẳng vào bảng đích → hợp nhất lấy **dữ liệu thu thập gốc** và tự xử lý.
+- Wizard tăng lên **7 bước**: ① Thông tin chung → ② Chọn nguồn → **③ Xử lý nguồn (mới)** → ④ Bảng đích → ⑤ Điều kiện → ⑥ Ánh xạ trường → ⑦ Xem lại & lưu.
+- **Bước ③:** chọn nguồn (nút kèm số quy tắc) → 4 tab **Làm sạch · Chuẩn hóa · Biến đổi · Lọc dữ liệu**. Bố cục giống màn Xử lý dữ liệu: khối quy tắc thu gọn/mở rộng (Kiểm tra chuẩn định dạng, Kiểm tra tính hợp lệ, Thay thế giá trị / thiếu dữ liệu, Đối sánh tồn tại theo trường khóa, Vi phạm ràng buộc tham chiếu, Biến đổi định dạng), mỗi dòng 1 quy tắc, Thêm quy tắc / Xóa; trường áp dụng lấy đúng trường của nguồn. Nút **Sao chép từ Xử lý dữ liệu (n)** tạo bản sao quy tắc sẵn có. Chặn đi tiếp khi quy tắc / điều kiện lọc nhập thiếu (viền đỏ + thông báo).
+- **Lọc dữ liệu nguồn** chuyển từ bước Điều kiện sang tab *Lọc dữ liệu* của bước ③.
+- Bước ② đổi cột "Xử lý gần nhất" → "Thu thập gần nhất". Bước ⑦ thêm cột "Xử lý nguồn" (số quy tắc theo nhóm).
+- Màn Chi tiết thêm tab **Xử lý nguồn** (quy tắc + điều kiện lọc từng nguồn, chỉ đọc).
+- Tài liệu thiết kế cập nhật mục 2, 3, 4.3, 4.4, 5.3, thêm 5.4, mục 9.
+
+**File mới:** `processing/merge/MergeSourceRules.tsx`. **File sửa:** `processing/merge/mockDataMerge.ts` (kiểu `SourceRule`, `RULE_KINDS`, `RULE_INPUTS`, `EXISTING_PROCESSING_RULES`, `MergeSourceRef.rules`), `DataMergeWizard.tsx`, `DataMergeDetail.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`. Không sửa màn Xử lý dữ liệu cũ.
+
+**Kiểm tra:** tsc không lỗi; trên app: thêm mới → chọn Khai sinh + Công dân → bước ③ sao chép 4 quy tắc từ Xử lý dữ liệu, thêm quy tắc trống → báo lỗi, tab Lọc dữ liệu hiển thị đúng; màn Chi tiết tab Xử lý nguồn hiển thị đúng quy tắc của cấu hình mẫu.
+
+## Hợp nhất dữ liệu — bước ④ Điều kiện: thiết lập điều kiện ghép JOIN + lọc dữ liệu nguồn (Ngày thực hiện: 28/10/2026) — 228
+
+**Nội dung (PM yêu cầu):** kiểu JOIN chưa có chỗ đặt điều kiện ghép (trước chỉ chọn 1 trường khóa cho mỗi nguồn). Làm lại bước ④ (đổi tên "Khóa & trùng" → "Điều kiện"):
+- **Định danh bản ghi đích:** chọn trường định danh của nguồn chính (dùng để cập nhật ở các lần chạy sau).
+- **Điều kiện ghép** — mỗi nguồn bổ sung 1 khối: *Ghép vào nguồn* (nguồn chính hoặc nguồn bổ sung xếp trước), *Loại ghép* LEFT / INNER và *Khi 1 bản ghi khớp nhiều* đặt **riêng từng nguồn**; bảng điều kiện nhiều dòng `Trường nguồn ghép vào · Toán tử (= <> > >= < <=) · Trường nguồn này · Chuẩn hóa trước khi so sánh`, nối bằng **VÀ**, nút Thêm / Xóa điều kiện; cảnh báo khi 2 vế khác kiểu dữ liệu; dòng *Diễn giải* `A.X = B.Y VÀ …`; nút *Gợi ý điều kiện* theo trường định danh.
+- **Kiểm tra:** bắt buộc chọn nguồn ghép vào, ≥ 1 điều kiện, đủ 2 vế, có ít nhất 1 điều kiện "=".
+- **Lọc dữ liệu nguồn** (UNION và JOIN, không bắt buộc): chọn nguồn theo tab, mỗi dòng `Trường · Toán tử (Bằng, Khác, >, >=, <, <=, Chứa, Thuộc danh sách, Rỗng, Không rỗng) · Giá trị`, nối bằng VÀ.
+- Bước ⑥ Xem lại và màn Chi tiết (tab Tổng quan) hiển thị cột *Điều kiện ghép* / *Điều kiện lọc*; sơ đồ luồng ghi `LEFT · n điều kiện`.
+- Tài liệu thiết kế cập nhật mục 4.3, 5.2, thêm 5.3, 7.4.
+
+**File sửa:** `processing/merge/mockDataMerge.ts` (kiểu `JoinCondition`, `SourceFilter`; `MergeSourceRef` thêm `joinWith`, `joinType`, `oneToMany`, `conditions`, `filters`, bỏ `joinKey`; `MergeConfig` bỏ `joinMode`, `oneToMany` chung), `DataMergeWizard.tsx`, `DataMergeDetail.tsx`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`. Không chạm file ngoài thư mục `merge/`.
+
+**Kiểm tra:** tsc không lỗi; trên app: mở cấu hình JOIN mẫu → bước ④ hiện đúng 2 điều kiện của nguồn Khai sinh, thêm điều kiện trống → báo lỗi, chọn DATE với VARCHAR → cảnh báo khác kiểu; bước ⑥ và màn Chi tiết hiển thị điều kiện ghép / lọc.
+
+## Hợp nhất dữ liệu (UNION / JOIN) — chức năng mới, tách biệt (Ngày thực hiện: 28/10/2026) — 227
+
+**Nội dung (PM yêu cầu):** bổ sung chức năng gộp nhiều bộ dữ liệu đã xử lý vào cùng một bảng CSDL đích, hỗ trợ 2 kiểu **UNION – Nối hàng** và **JOIN – Ghép cột theo khóa**. Làm thành **chức năng riêng** để nếu không được duyệt thì gỡ ra không ảnh hưởng chức năng cũ. Thiết kế chi tiết, luồng xử lý và lưu ý cho dev: `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+- Menu **Xử lý dữ liệu → Hợp nhất dữ liệu** (1 mục, không có menu con; phân biệt trong/ngoài ngành bằng cột "Loại nguồn" tự tính: Trong ngành / Ngoài ngành / Kết hợp).
+- **Danh sách:** 4 thẻ thống kê (Tổng số / Đang hoạt động / Bản nháp / Cần cấu hình lại), tìm kiếm (Enter / nút Tìm kiếm), bộ lọc (Loại nguồn, Kiểu, CSDL đích, Trạng thái), bảng có cột Tên / Mã, Loại nguồn, Kiểu, CSDL / Bảng đích, Số nguồn, Lần chạy gần nhất, Trạng thái, Người tạo / Ngày tạo; cột Thao tác ghim phải: Xem chi tiết · Chạy ngay (khóa kèm lý do khi Bản nháp / Tạm dừng / Cần cấu hình lại) · menu ⋯ (Chỉnh sửa, Tạm dừng / Kích hoạt, Xóa). Mọi xác nhận dùng `ConfirmModal`, kết quả dùng `toast`.
+- **Wizard 6 bước** (modal cao cố định): ① Thông tin chung + kiểu hợp nhất → ② Chọn nguồn (tất cả bộ dữ liệu, lọc loại nguồn / CSDL nguồn; JOIN chọn Nguồn chính; cảnh báo bộ dữ liệu đang ghi trực tiếp vào bảng đích khác) → ③ Bảng đích (bảng có sẵn hoặc tạo mới, cấu trúc gợi ý từ nguồn + 5 cột kỹ thuật DIP_*) → ④ JOIN: khóa ghép (có nút Gợi ý), loại ghép, xử lý 1-nhiều / UNION: chống trùng + thứ tự ưu tiên nguồn → ⑤ Ánh xạ trường theo từng nguồn (Tự động ánh xạ; JOIN mỗi cột đích chỉ 1 nguồn, cột đã gán cho nguồn khác bị khóa) → ⑥ Xem lại, lịch chạy, Lưu nháp / Lưu và kích hoạt. Kiểm tra bắt buộc từng bước.
+- **Chi tiết cấu hình:** tab Tổng quan (thông tin chung, sơ đồ luồng nguồn → bảng đích, bảng nguồn kèm +thêm/~sửa/−xóa lần chạy gần nhất), tab Ánh xạ (ma trận cột đích × nguồn), tab Lịch sử chạy (popup chi tiết số bản ghi theo từng nguồn).
+- UI theo `compomennt1.md` và bộ class dùng chung `collectionUi.tsx` (BTN_*, INPUT_CLS, Badge, TruncatedText, RowIconAction, Pagination, tabClass, TABLE_*).
+
+**File mới:** `src/components/pages/processing/merge/DataMergePage.tsx`, `DataMergeWizard.tsx`, `DataMergeDetail.tsx`, `mockDataMerge.ts`; `tailieu/docs/thiet_ke_hop_nhat_du_lieu.md`.
+**File sửa (chỉ điểm gắn):** `layout/Sidebar.tsx` (thêm 1 mục menu `processing-data-merge`), `layout/MainLayout.tsx` (import + tiêu đề trang + render + breadcrumb). Không sửa logic màn cũ, không sửa mock dùng chung (chỉ đọc `initialTargetDatabases`).
+**Gỡ chức năng:** xóa thư mục `processing/merge/`; trong `Sidebar.tsx` xóa mục `processing-data-merge` và icon `GitMerge`; trong `MainLayout.tsx` xóa import `DataMergePage` và 3 khai báo `processing-data-merge` (tiêu đề, render, breadcrumb).
+
+**Kiểm tra:** tsc không lỗi ở file mới / file sửa; chạy thử trên app: danh sách, bộ lọc, wizard JOIN đủ 6 bước (gợi ý khóa ghép, tự động ánh xạ, lưu và kích hoạt), chi tiết 3 tab; các màn cũ (Thiết lập thu thập, Xử lý dữ liệu, Quản lý CSDL đích) vẫn hoạt động.
+
 ## Xem chi tiết CSDL đích — popup Xóa bảng / Xóa dữ liệu theo chuẩn popup xác nhận (Ngày thực hiện: 14/10/2026) — 226
 
 **Nội dung (PM yêu cầu):** popup **Xóa bảng** (và popup **Xóa dữ liệu** cùng kiểu) ở màn Xem chi tiết CSDL đích chưa đồng bộ với các popup khác (icon giữa, tiêu đề 20px đậm căn giữa, nút giãn đều, nền mờ blur) → chuyển sang `ConfirmModal` chung loại `delete` (compomennt.md 5.4.1): header [icon thùng rác tròn] tiêu đề 16px/600 + câu phụ "Hành động này không thể hoàn tác." + [X]; nội dung trên nền trắng, tên bảng in đậm; chân [Hủy] → [Xóa bảng] / [Xóa dữ liệu] (nút đỏ) căn phải.
