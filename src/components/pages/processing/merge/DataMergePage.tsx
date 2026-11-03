@@ -1,11 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { Search, Filter, X, Plus, Eye, Play, RefreshCw, Eraser, Clock, MoreVertical, SquarePen, Trash2, Layers, Activity, FileText, AlertTriangle } from 'lucide-react';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '../../../ui/dropdown-menu';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../../ui/tooltip';
 import { ConfirmModal } from '../../../common/ConfirmModal';
 import {
-  Badge, TruncatedText, BTN_PRIMARY, ROW_ICON_BTN, MENU_ITEM, RowIconAction, TOOLTIP_CLS, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS,
+  Badge, TruncatedText, BTN_PRIMARY, ROW_ICON_BTN, MenuAction, RowIconAction, TOOLTIP_CLS, INPUT_CLS, SEARCH_INPUT_CLS, SEARCH_BTN_CLS,
   filterBtnClass, FILTER_GRID_CLS, FILTER_LABEL, TABLE_HEAD_BG, TABLE_HEAD_ROW_CLS, TABLE_WRAP_CLS, Pagination, normalizeSearch, formatDateVN,
 } from '../../collection/collectionUi';
 import { initialTargetDatabases } from '../mockTargetDatabases';
@@ -23,24 +23,6 @@ const TD = 'px-3 py-1 text-left text-black text-[13px]';
 const STICKY_SHADOW = 'shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]';
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
-
-// Mục menu ⋯: bị khóa thì chữ / icon xám, lý do hiện trong tooltip (bọc div vì mục disabled không nhận hover)
-const MenuAction = ({ icon, label, danger, reason, onSelect }: { icon: ReactNode; label: string; danger?: boolean; reason?: string; onSelect: () => void }) => {
-  const item = (
-    <DropdownMenuItem disabled={!!reason} onClick={reason ? undefined : onSelect}
-      className={`${MENU_ITEM} items-start data-[disabled]:opacity-100 data-[disabled]:text-[#94A3B8] ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}>
-      <span className={`mt-0.5 ${reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}`}>{icon}</span>
-      <span>{label}</span>
-    </DropdownMenuItem>
-  );
-  if (!reason) return item;
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild><div className="cursor-default">{item}</div></TooltipTrigger>
-      <TooltipContent side="left" sideOffset={6} className={TOOLTIP_CLS}>{reason}</TooltipContent>
-    </Tooltip>
-  );
-};
 
 const StatCard = ({ icon, tone, label, value }: { icon: ReactNode; tone: string; label: string; value: number }) => (
   <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">

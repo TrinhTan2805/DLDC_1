@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, Columns3, Check, RotateCcw, GripVertical, ArrowUp, ArrowDown, Calendar } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
 import { Popover, PopoverTrigger, PopoverContent } from '../../ui/popover';
+import { DropdownMenuItem } from '../../ui/dropdown-menu';
 
 // --- Thành phần theo tailieu/docs/compomennt.md ---
 
@@ -85,7 +86,7 @@ export const BTN_GHOST_ICON = `p-1.5 rounded-lg text-[#475569] hover:bg-[#F1F5F9
 
 // Nút icon trong cột thao tác (mục 5.3.2): 32×32, icon 16px #475569, tooltip bắt buộc
 export const ROW_ICON_BTN = `w-8 h-8 inline-flex items-center justify-center rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-blue-600 data-[state=open]:bg-[#EAF3FF] data-[state=open]:text-blue-600 transition-colors ${BTN_FOCUS} disabled:text-[#CBD5E1] disabled:bg-transparent disabled:cursor-not-allowed`;
-export const MENU_ITEM = 'min-h-8 px-3 py-1.5 gap-2 text-[13px] cursor-pointer focus:bg-[#F1F5F9] data-[disabled]:opacity-100 data-[disabled]:text-[#94A3B8] data-[disabled]:cursor-not-allowed';
+export const MENU_ITEM = 'min-h-8 px-3 py-1.5 gap-2 text-[13px] cursor-pointer focus:bg-[#F1F5F9] data-[disabled]:opacity-100 data-[disabled]:text-[#94A3B8] data-[disabled]:cursor-default';
 
 // Nút bị vô hiệu giữ nguyên vị trí, tooltip ghi lý do (bọc span vì nút disabled không nhận sự kiện hover)
 export const RowIconAction = ({ label, onClick, children, disabledReason }: { label: string; onClick: () => void; children: ReactNode; disabledReason?: string }) => (
@@ -110,7 +111,31 @@ export const RowIconAction = ({ label, onClick, children, disabledReason }: { la
   </Tooltip>
 );
 
-export const BTN_DESTRUCTIVE = `h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC2626] text-white text-[13px] font-medium hover:bg-[#B91C1C] transition-colors ${BTN_FOCUS} ${BTN_DISABLED}`;
+// Mục trong menu "Xem thêm" (⋮) của cột thao tác: bị vô hiệu thì chữ/icon xám, lý do hiện trong tooltip khi rê chuột
+// (PM 30/10/2026 — không hiện lý do dưới tên mục). Bọc div vì mục disabled của Radix không nhận sự kiện hover.
+export const MenuAction = ({ icon, label, reason, danger, onSelect }: { icon: ReactNode; label: string; reason?: string | null; danger?: boolean; onSelect: () => void }) => {
+  const item = (
+    <DropdownMenuItem
+      disabled={!!reason}
+      onClick={reason ? undefined : onSelect}
+      className={`${MENU_ITEM} ${reason ? '' : danger ? 'text-[#DC2626] focus:text-[#DC2626]' : 'text-[#020817]'}`}
+    >
+      <span className={reason ? 'text-[#CBD5E1]' : danger ? 'text-[#DC2626]' : 'text-[#475569]'}>{icon}</span>
+      <span>{label}</span>
+    </DropdownMenuItem>
+  );
+  if (!reason) return item;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="cursor-default">{item}</div>
+      </TooltipTrigger>
+      <TooltipContent side="left" sideOffset={6} className={TOOLTIP_CLS}>{reason}</TooltipContent>
+    </Tooltip>
+  );
+};
+
+export const BTN_DESTRUCTIVE =`h-10 px-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC2626] text-white text-[13px] font-medium hover:bg-[#B91C1C] transition-colors ${BTN_FOCUS} ${BTN_DISABLED}`;
 
 // Tab nội dung (mục 5.9): cao 48px, padding 12×16, 14px/600; đang chọn #155DFC gạch dưới 2px, thường #64748B
 export const tabClass = (active: boolean) =>
