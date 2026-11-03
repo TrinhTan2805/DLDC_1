@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Database, Settings, Share2, GitCompare, Shield, FileText, FolderTree, HardDrive, Network, Globe, ChevronDown, ChevronRight, ChevronLeft, Monitor, Users, UsersRound, List, Key, Sliders, ScrollText, Database as DatabaseBackup, BarChart3, Building2, Building, UserCircle2, MapPin, Flag, Church, Landmark, Map, Heart, FileUser, HandHeart, UserMinus, Baby, Activity, UserCog, Accessibility, Medal, Shield as ShieldIcon, Users2, Stamp, Scale, FileCheck, Briefcase, Factory, Coins, ScrollText as DocumentText, BookOpen, FileBadge, Gavel, Lock, BookMarked, ClipboardList, GraduationCap, FileSearch, Search, Handshake, Bell, MessageSquare, CheckSquare, AlertTriangle, Plug, UploadIcon, RefreshCw, Server, Eye, FolderOpen, HelpCircle, Package, FolderCog, Circle, History as HistoryIcon, X, Link2, Zap } from "lucide-react";
+import { LayoutDashboard, Database, Settings, Share2, GitCompare, Shield, FileText, FolderTree, HardDrive, Network, Globe, ChevronDown, ChevronRight, ChevronLeft, Monitor, Users, UsersRound, List, Key, Sliders, ScrollText, Database as DatabaseBackup, BarChart3, Building2, Building, UserCircle2, MapPin, Flag, Church, Landmark, Map, Heart, FileUser, HandHeart, UserMinus, Baby, Activity, UserCog, Accessibility, Medal, Shield as ShieldIcon, Users2, Stamp, Scale, FileCheck, Briefcase, Factory, Coins, ScrollText as DocumentText, BookOpen, FileBadge, Gavel, Lock, BookMarked, ClipboardList, GraduationCap, FileSearch, Search, Handshake, Bell, MessageSquare, CheckSquare, AlertTriangle, Plug, UploadIcon, RefreshCw, Server, Eye, FolderOpen, HelpCircle, Package, FolderCog, Circle, History as HistoryIcon, X, Link2, Zap, GitMerge } from "lucide-react";
 import imgLogo from "figma:asset/0b9fbf72a74cf9ec02b7371d312e91e368f930d8.png";
 import imgImageLogo from "figma:asset/009541fc5d689d29107b655d2b8ecd57f6d4b3ff.png";
 
@@ -310,6 +310,12 @@ const menuItems: MenuItem[] = [
             icon: Database,
           },
         ],
+      },
+      // (v1.4) Chức năng mới, tách biệt — xem tailieu/docs/thiet_ke_hop_nhat_du_lieu.md
+      {
+        id: "processing-data-merge",
+        label: "Hợp nhất dữ liệu",
+        icon: GitMerge,
       },
     ],
   },
