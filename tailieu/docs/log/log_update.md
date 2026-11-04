@@ -1,5 +1,13 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Thiết lập điều phối dữ liệu — 6 thẻ thống kê trên 1 hàng (Ngày thực hiện: 04/11/2026) — 241
+
+**Nội dung (PM yêu cầu):** màn **Cung cấp dữ liệu › Thiết lập điều phối dữ liệu › Thiết lập dịch vụ**: 6 thẻ thống kê (Tổng số API, Đang công khai, Chờ phê duyệt, Cần chỉnh sửa, Đã duyệt, Bản nháp) luôn nằm **trên 1 hàng** — trước đây `grid-cols-3 xl:grid-cols-6` nên ở màn hình rộng dưới 1280px bị xuống 2 hàng.
+
+**File sửa:** `provisioning/DataProvisionServiceSetupPage.tsx` (`grid grid-cols-6 gap-4`).
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
+
 ## Hợp nhất dữ liệu — thống nhất luồng nút với màn Xử lý dữ liệu, bỏ Tạm dừng, chỉnh sửa một phần khi có dữ liệu (Ngày thực hiện: 02/11/2026) — 240
 
 **Nội dung (PM yêu cầu: các nút thao tác theo luồng màn Xử lý; khi nào chuyển đổi / cập nhật / xóa / chỉnh sửa, khi nào chọn lại bảng nguồn, bảng đích):**
