@@ -5493,13 +5493,26 @@ body *:not(code):not(pre):not(kbd):not(samp):not(.font-mono) {
 }
 
 
-/* Theo tailieu/docs/compomennt.md muc 5.3: th 13px/700/#000, td 13px/400/#000, chu thuong. */
+/* Theo tailieu/docs/compomennt.md muc 5.3: th 13px/700/#000, td 13px/400/#000, chu thuong.
+   Muc 5.3.3 (PM 12/11/2026): tieu de cot can giua cho moi bang (ghi de text-left/text-right tren tung th). */
 table th, table thead th, th.uppercase {
   text-transform: none !important;
   letter-spacing: normal !important;
   font-weight: 700 !important;
   font-size: 13px !important;
   color: #000000 !important;
+  text-align: center !important;
+}
+/* Muc 5.3 (PM 12/11/2026): dong bo nen dong tieu de bang grid = #F8FAFC cho moi bang
+   (ghi de bg-slate-50 / bg-gray-50 / bg-[#F1F5F9] / bg-white... dat rieng tren thead/th). */
+table thead,
+table thead tr,
+table thead th {
+  background-color: #F8FAFC !important;
+}
+/* (PM 12/11/2026) Vien duoi dong tieu de bang grid 1px #E2E8F0 cho moi bang. */
+table thead th {
+  border-bottom: 1px solid #E2E8F0;
 }
 
 table td, table tbody td {
@@ -5527,6 +5540,17 @@ table td [class*='text-slate-'], table td [class*='text-gray-'] {
 }
 .text-\[13px\] {
   font-size: 13px !important;
+}
+
+/* (PM 12/11/2026) Viền dọc giữa các cột — áp dụng cho TOÀN BỘ bảng grid trong hệ thống.
+   Bảng nào không muốn có viền dọc: gắn class "no-col-borders" vào <table>. */
+table:not(.no-col-borders) th,
+table:not(.no-col-borders) td {
+  border-right: 1px solid #E2E8F0;
+}
+table:not(.no-col-borders) th:last-child,
+table:not(.no-col-borders) td:last-child {
+  border-right: 0;
 }
 
 /* Ghi đè riêng cho bảng Thu thập, tránh rule 14px !important của hệ thống */

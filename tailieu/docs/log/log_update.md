@@ -1,5 +1,55 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Toàn hệ thống — viền dưới dòng tiêu đề bảng grid (Ngày thực hiện: 12/11/2026) — 260
+
+**Nội dung (PM yêu cầu):** nhiều bảng chưa có viền dưới dòng tiêu đề (vd. bảng Hồ sơ đăng ký khai sinh). Thêm rule chung `table thead th { border-bottom: 1px solid #E2E8F0; }` trong `src/index.css` — áp dụng mọi bảng, màu khớp `TABLE_HEAD_ROW_CLS` (compomennt.md mục 5.3).
+
+**File sửa:** `src/index.css`.
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Toàn hệ thống — đồng bộ màu nền dòng tiêu đề bảng grid theo compomennt.md (Ngày thực hiện: 12/11/2026) — 259
+
+**Nội dung (PM yêu cầu):** nền dòng tiêu đề các bảng chưa đồng nhất (khảo sát `thead`: `bg-slate-50` 158, `bg-[#F8FAFC]` 140, `bg-gray-50` 5, `bg-[#f8fafc]` 4, `bg-white` 2, `bg-[#f8f7f5]` 2, `bg-[#e9ecef]` 1; `th`: thêm `bg-[#F1F5F9]` 5, `bg-[#E2E8F0]` 1; 16 file dùng `TABLE_HEAD_BG` = `#F1F5F9`). Đồng bộ về **`#F8FAFC`** theo compomennt.md mục 5.3.
+- `src/index.css`: rule chung `table thead, table thead tr, table thead th { background-color: #F8FAFC !important; }` — ghi đè mọi class nền đặt riêng.
+- `collection/collectionUi.tsx`: `TABLE_HEAD_BG` đổi `bg-[#F1F5F9]` → `bg-[#F8FAFC]` (khớp tài liệu).
+
+**File sửa:** `src/index.css`, `collection/collectionUi.tsx`.
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Toàn hệ thống — viền dọc giữa các cột cho mọi bảng grid (Ngày thực hiện: 12/11/2026) — 258
+
+**Nội dung (PM yêu cầu, mở rộng từ demo mục 257):** tất cả các bảng trong hệ thống có viền dọc 1px `#E2E8F0` giữa các cột (cả `th` và `td`; cột cuối không có viền phải).
+- `src/index.css`: đổi rule demo `table.grid-col-borders` thành rule chung `table:not(.no-col-borders) th/td`. Bảng nào không muốn viền dọc: gắn class `no-col-borders` vào `<table>`.
+- `collection/CollectionSetupPage.tsx`: bỏ class demo `grid-col-borders` (không còn cần).
+
+**File sửa:** `src/index.css` (file chung — PM đã xác nhận), `collection/CollectionSetupPage.tsx` (`[x]`).
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Thiết lập thu thập — DEMO viền dọc giữa các cột bảng (Ngày thực hiện: 12/11/2026) — 257
+
+**Nội dung (PM yêu cầu demo):** bảng danh sách dịch vụ màn **Quản lý thu thập › Thiết lập thu thập** thêm viền dọc 1px `#E2E8F0` giữa các cột (cả dòng tiêu đề và dòng dữ liệu; cột cuối không có viền phải).
+- `src/index.css`: thêm class dùng chung `table.grid-col-borders` (bật viền dọc cho `th` / `td`, bỏ viền ở cột cuối).
+- `collection/CollectionSetupPage.tsx`: gắn class `grid-col-borders` vào `<table>`.
+- Áp dụng bảng khác: chỉ cần thêm class `grid-col-borders`; đổi màu / độ dày: sửa 1 chỗ trong `index.css`. Bỏ demo: xóa class khỏi `<table>`.
+
+**File sửa:** `src/index.css`, `collection/CollectionSetupPage.tsx` (`[x]` trong stauts.md).
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Toàn hệ thống — căn giữa dòng tiêu đề của mọi bảng (Ngày thực hiện: 12/11/2026) — 256
+
+**Nội dung (PM yêu cầu):** tiêu đề cột (`th`) của tất cả các bảng căn giữa, sửa 1 chỗ cho toàn hệ thống:
+- `src/index.css` — rule chung `table th, table thead th, th.uppercase` thêm `text-align: center !important;` (ghi đè `text-left` / `text-right` đang đặt trên từng `th`: ~1.450 / ~128 chỗ). Dữ liệu trong ô (`td`) giữ nguyên căn lề cũ.
+- `tailieu/docs/compomennt.md` mục 5.3.3 — cập nhật nguyên tắc: tiêu đề cột luôn căn giữa; bảng căn lề theo kiểu cột chỉ còn áp dụng cho dữ liệu.
+- Lưu ý: tiêu đề có nội dung bọc trong khối `flex` (icon sắp xếp, ô chọn tất cả…) không chịu `text-align`; nếu gặp cần thêm `justify-center` riêng cho ô đó.
+
+**File sửa:** `src/index.css` (file chung, không có trong stauts.md — PM đã xác nhận), `tailieu/docs/compomennt.md`.
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
 ## Xử lý dữ liệu — Dữ liệu không hợp lệ: hiện đủ giá trị, chỉ bôi đỏ trường lỗi; bỏ icon khóa (Ngày thực hiện: 11/11/2026) — 255
 
 **Nội dung (PM yêu cầu):**

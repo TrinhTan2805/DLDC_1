@@ -465,9 +465,11 @@ const DISABLED = 'disabled:bg-[#F1F5F9] disabled:border-[#E2E8F0] disabled:text-
 > Màu icon trong bảng thống nhất `#475569` (theo nút icon nền trắng ở mục 5.1); các màu gợi ý theo hành động ở mục 3 chỉ áp dụng ngoài bảng (thanh công cụ, form). Ngoại lệ: thao tác nguy hiểm luôn đỏ `#DC2626`.
 
 #### 5.3.3. Căn lề cột
-**Nguyên tắc:** căn lề khai báo **theo kiểu dữ liệu của cột** (không đặt riêng từng cột); **tiêu đề cột căn giống dữ liệu** của cột đó.
+**Nguyên tắc:** căn lề dữ liệu khai báo **theo kiểu dữ liệu của cột** (không đặt riêng từng cột). **Tiêu đề cột luôn căn giữa** cho mọi bảng *(PM 12/11/2026)* — áp dụng toàn cục trong `src/index.css` (`table th { text-align: center !important; }`), không cần đặt class căn lề trên từng `th`.
 
-| Kiểu cột | Căn dữ liệu & tiêu đề | Ghi chú |
+**Viền dọc giữa các cột** *(PM 12/11/2026)*: mọi bảng có viền dọc 1px `#E2E8F0` giữa các cột (cột cuối không viền) — áp dụng toàn cục trong `src/index.css`. Bảng không muốn viền dọc: gắn class `no-col-borders` vào `<table>`.
+
+| Kiểu cột | Căn dữ liệu | Ghi chú |
 | :--- | :--- | :--- |
 | STT | Giữa | Cột hẹp, độ rộng cố định |
 | Văn bản (mã, tên, đơn vị, hệ thống nguồn, người, nội dung) | Trái | Cắt `…` + tooltip (mục 5.3.1) |
