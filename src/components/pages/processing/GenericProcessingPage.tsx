@@ -396,8 +396,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden relative shadow-sm">
-        <div className="p-6 overflow-y-auto custom-scrollbar h-full">
+      {/* Chiều cao khung nội dung = chiều cao tối đa của inner menu Danh mục dữ liệu (InnerSidebar: calc(100vh - 160px)) */}
+      <div className="flex-1 self-start flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden relative shadow-sm" style={{ height: 'calc(100vh - 160px)' }}>
+        {/* Tab Dữ liệu sau xử lý: khung không cuộn (flex cột) — phần còn lại chia cho bảng, chỉ bảng có thanh cuộn dọc */}
+        <div className={`p-6 h-full ${activeTab === 'processed-data' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto custom-scrollbar'}`}>
           <div className="flex justify-between items-center mb-2">
             <h1 className="font-bold text-slate-800" style={{ fontSize: '24px' }}>
               {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
@@ -558,7 +560,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             </button>
           </div>
 
-          <div className="pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
+          <div className={activeTab === 'processed-data' ? 'flex-1 min-h-0 flex flex-col' : 'pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar'}>
             {activeTab === 'mapping' && (
               <div className="flex flex-col">
                 {!selectedTargetDB ? (

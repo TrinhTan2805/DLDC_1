@@ -1,5 +1,148 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Xử lý dữ liệu — Dữ liệu không hợp lệ: hiện đủ giá trị, chỉ bôi đỏ trường lỗi; bỏ icon khóa (Ngày thực hiện: 11/11/2026) — 255
+
+**Nội dung (PM yêu cầu):**
+- Bỏ icon khóa ở tiêu đề cột MaCongDan.
+- Mọi bản ghi hiện đủ giá trị ở tất cả các cột (bỏ `--`); chỉ bôi đỏ trường bị lỗi tương ứng của từng dòng (theo `ERROR_FIELDS`); giá trị lỗi rỗng vẫn hiện `(trống)` màu đỏ.
+- Bộ lọc nâng cao lọc trên giá trị thật; file XML / Excel tải xuống ghi đủ giá trị.
+- Danh sách cột giữ nguyên: MaCongDan, SoDDCN, HoTen, NgaySinh, GioiTinh, MaTinh.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu không hợp lệ: bỏ cột Quy tắc loại bỏ, thêm cột Mã định danh (khóa chính) (Ngày thực hiện: 11/11/2026) — 254
+
+**Nội dung (PM yêu cầu):**
+- Bỏ cột **Quy tắc loại bỏ** (badge nhóm + tên quy tắc) khỏi bảng Dữ liệu không hợp lệ.
+- Thêm cột đầu **MaCongDan** — mã định danh (khóa chính) của bản ghi: luôn hiển thị giá trị (không thay bằng `--`), tiêu đề cột có icon khóa + tooltip "Mã định danh (khóa chính)".
+- Cột bảng: MaCongDan, SoDDCN, HoTen, NgaySinh, GioiTinh, MaTinh. Bộ lọc nâng cao và popup Chọn trường tải xuống dùng cùng danh sách này (bỏ Nhóm quy tắc / Quy tắc loại bỏ khỏi file tải xuống).
+- Dữ liệu quy tắc của bản ghi mẫu vẫn giữ trong code (dùng xác định trường cấu hình).
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — tab Dữ liệu sau xử lý: bỏ 2 thanh cuộn khung, chỉ bảng cuộn dọc (Ngày thực hiện: 10/11/2026) — 253
+
+**Nội dung (PM yêu cầu):** tab **Dữ liệu sau xử lý** có 2 thanh cuộn dọc lồng nhau (khung nội dung `overflow-y-auto` + vùng tab `max-h-[calc(100vh-320px)] overflow-y-auto`). Sửa riêng cho tab này:
+- Khung nội dung (giữ chiều cao bằng inner menu Danh mục dữ liệu) chuyển sang `flex flex-col overflow-hidden` — không cuộn.
+- Vùng tab: `flex-1 min-h-0 flex flex-col` (bỏ `max-h` + `overflow-y-auto` + `pb-32`); `ProcessedDataTab` gốc `flex-1 min-h-0`.
+- Bảng dữ liệu: `flex-initial min-h-0 overflow-auto` — cao theo số dòng, co lại khi thiếu chỗ và **chỉ bảng có thanh cuộn dọc** (kèm cuộn ngang khi nhiều cột); tiêu đề cột `sticky top-0`. Thanh phân trang luôn nằm ngay dưới bảng, không bị đẩy ra ngoài.
+- Các tab khác (Cấu hình ánh xạ, Làm sạch, Chuẩn hóa, Biến đổi, Phân loại, Lịch sử) giữ nguyên cách cuộn cũ.
+
+**File sửa:** `processing/GenericProcessingPage.tsx`, `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — tab Dữ liệu sau xử lý: bỏ khoảng trắng dưới phân trang (Ngày thực hiện: 10/11/2026) — 252
+
+**Nội dung (PM yêu cầu):** cuộn hết tab **Dữ liệu sau xử lý** còn khoảng trắng ~128px dưới thanh phân trang do vùng nội dung tab có `pb-32`. Bỏ `pb-32` riêng cho tab này (`pb-0`); các tab quy tắc khác giữ `pb-32` (chừa chỗ cho dropdown).
+
+**File sửa:** `processing/GenericProcessingPage.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — khung nội dung cao bằng inner menu Danh mục dữ liệu (Ngày thực hiện: 10/11/2026) — 251
+
+**Nội dung (PM yêu cầu):** khung nội dung bên phải (tiêu đề "Dữ liệu sau xử lý", thẻ thống kê, tabs) giảm chiều cao bằng inner menu **Danh mục dữ liệu**: `height: calc(100vh - 160px)` (= `maxHeight` của `InnerSidebar`), `self-start` để không giãn hết chiều cao trang; nội dung bên trong vẫn cuộn dọc như trước. Áp dụng cho khung chung của mọi tab trên màn Xử lý dữ liệu (cùng một khung).
+
+**File sửa:** `processing/GenericProcessingPage.tsx` (`[x]` trong stauts.md). Không sửa `collection/InnerSidebar.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — popup Chọn trường tải xuống: cố định chiều cao, cuộn dọc bên trong (Ngày thực hiện: 10/11/2026) — 250
+
+**Nội dung (PM yêu cầu):** popup **Chọn trường tải xuống** (tab Dữ liệu không hợp lệ) có chiều cao cố định `h-[480px]` (tối đa `90vh` trên màn hình thấp), không co giãn theo số trường. Header, ô **Chọn tất cả** và footer cố định; chỉ danh sách trường cuộn dọc (`flex-1 min-h-0 overflow-y-auto custom-scrollbar`) — theo compomennt.md 5.4.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — đổi tên tab con Dữ liệu loại bỏ → Dữ liệu không hợp lệ (Ngày thực hiện: 10/11/2026) — 249
+
+**Nội dung (PM yêu cầu):** tab con **Dữ liệu loại bỏ** đổi thành **Dữ liệu không hợp lệ**; đổi theo các chữ liên quan: thông báo bảng rỗng ("Không có bản ghi không hợp lệ"), dòng phụ popup Chọn trường tải xuống ("n bản ghi không hợp lệ"), tên file tải xuống `du_lieu_khong_hop_le_DIP_PERSON_<ngày>.xml/.xlsx`, thẻ gốc XML `<DuLieuKhongHopLe>`, tên sheet Excel "Du lieu khong hop le". Cột **Quy tắc loại bỏ** giữ nguyên tên.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: chỉ hiện giá trị sai của trường vi phạm, các trường khác "--" (Ngày thực hiện: 10/11/2026) — 248
+
+**Nội dung (PM yêu cầu):** mỗi bản ghi loại bỏ chỉ hiển thị giá trị của trường vi phạm (vd Trần Văn Nam: chỉ SoDDCN `89a10@`), các trường còn lại hiển thị `--`.
+- Bảng `ERROR_FIELDS` (theo MaCongDan, dữ liệu mẫu) khai báo trường vi phạm của từng bản ghi; bản ghi 20 vi phạm 2 trường (HoTen, GioiTinh).
+- Giá trị sai hiển thị chữ đỏ; giá trị sai rỗng hiển thị `(trống)`; `--` màu xám.
+- Bộ lọc nâng cao lọc trên giá trị đang hiển thị (không lọc trúng giá trị đã ẩn). File XML / Excel tải xuống cũng ghi `--` cho trường không vi phạm.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: bỏ tick chọn bản ghi, bảng chỉ hiện trường có cấu hình trong quy tắc (Ngày thực hiện: 10/11/2026) — 247
+
+**Nội dung (PM yêu cầu, PM chốt qua câu hỏi: bỏ hết tick, tải toàn bộ; không giữ MaCongDan):**
+- Bỏ cột tick chọn (cả ô chọn tất cả ở tiêu đề và ô từng dòng).
+- Nút **Tải xuống** tải **toàn bộ bản ghi loại bỏ theo bộ lọc đang áp dụng**; chỉ khóa khi không có bản ghi. Vẫn chọn định dạng XML / Excel → popup Chọn trường tải xuống (dòng phụ: "n bản ghi loại bỏ (theo bộ lọc) · Định dạng …").
+- Bảng Dữ liệu loại bỏ chỉ hiển thị **Quy tắc loại bỏ** + các trường dữ liệu có cấu hình trong ít nhất một quy tắc Làm sạch / Chuẩn hóa / Biến đổi (`RULE_CONFIG_FIELDS`, dữ liệu mẫu): SoDDCN, HoTen, NgaySinh, GioiTinh, MaTinh. Bộ lọc nâng cao và popup chọn trường dùng cùng danh sách trường này. Tab Dữ liệu hợp lệ giữ đủ cột.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: popup chọn trường khi tải xuống (Ngày thực hiện: 10/11/2026) — 246
+
+**Nội dung (PM yêu cầu):** khi tải xuống bản ghi loại bỏ, hiện popup **Chọn trường tải xuống**:
+- Luồng: tick bản ghi → [Tải xuống] → chọn **Định dạng XML / Excel** → popup mở, mặc định tick tất cả trường.
+- Popup (compomennt.md 5.4): tiêu đề + dòng phụ "n bản ghi đã chọn · Định dạng …", nút X; ô **Chọn tất cả (x/y)** (hỗ trợ trạng thái chọn một phần) và danh sách trường 2 cột: Nhóm quy tắc, Quy tắc loại bỏ, các trường dữ liệu; footer [Hủy] [Tải xuống] — Tải xuống khóa khi chưa chọn trường nào.
+- File XML / Excel chỉ chứa các trường đã chọn, giữ thứ tự như danh sách. Tải xong đóng popup.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: bỏ trường Quy tắc loại bỏ khỏi bộ lọc nâng cao (Ngày thực hiện: 09/11/2026) — 245
+
+**Nội dung (PM yêu cầu):** danh sách **Trường dữ liệu** của Bộ lọc nâng cao (tab Dữ liệu sau xử lý) chỉ gồm các trường dữ liệu của bảng; bỏ lựa chọn **Quy tắc loại bỏ**. Cột Quy tắc loại bỏ vẫn hiển thị trên bảng Dữ liệu loại bỏ.
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (`fieldOptions` lấy từ `dataColumns`).
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: mock nhiều bản ghi cùng một quy tắc (Ngày thực hiện: 09/11/2026) — 244
+
+**Nội dung (PM yêu cầu):** bổ sung dữ liệu mẫu tab con **Dữ liệu loại bỏ** cho trường hợp nhiều bản ghi bị loại bởi cùng một quy tắc (tổng 16 bản ghi, bảng có 2 trang khi hiển thị 10 dòng/trang):
+- **Kiểm tra quy tắc về chuẩn định dạng**: 7 bản ghi (SoDDCN có ký tự đặc biệt / khoảng trắng / chữ cái / sai độ dài, họ tên chứa ký tự đặc biệt hoặc viết thường).
+- **Kiểm tra tính hợp lệ của dữ liệu**: 3 bản ghi. **Kiểm tra đối sánh tồn tại dựa trên trường khóa**: 3 bản ghi (trùng SoDDCN với dữ liệu hợp lệ).
+- Các quy tắc khác giữ 1 bản ghi.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: bỏ cột Lý do, tick chọn bản ghi để tải xuống XML / Excel (Ngày thực hiện: 09/11/2026) — 243
+
+**Nội dung (PM yêu cầu):** tab con **Dữ liệu loại bỏ** của tab Dữ liệu sau xử lý:
+- Bỏ cột **Lý do loại bỏ**; giữ cột **Quy tắc loại bỏ** (badge nhóm + tên quy tắc).
+- Mỗi bản ghi chỉ có ô **tick chọn** (không có thao tác khác); ô tick ở header chọn / bỏ chọn tất cả bản ghi trong trang (hỗ trợ trạng thái chọn một phần). Dòng đã chọn tô nền xanh nhạt.
+- Nút **Tải xuống (n)** trên thanh công cụ (chỉ hiện ở Dữ liệu loại bỏ, bị khóa khi chưa chọn bản ghi) → menu **Định dạng XML** / **Định dạng Excel**. File gồm Nhóm quy tắc, Quy tắc loại bỏ và các trường dữ liệu của bản ghi đã chọn; XML sinh phía client (`<DuLieuLoaiBo><BanGhi>…`), Excel dùng thư viện `xlsx`.
+- Chuyển tab con → xóa lựa chọn.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công.
+
+## Xử lý dữ liệu — tab Dữ liệu sau xử lý chia Dữ liệu hợp lệ / Dữ liệu loại bỏ (Ngày thực hiện: 09/11/2026) — 242
+
+**Nội dung (PM yêu cầu):** tab **Dữ liệu sau xử lý** (màn Xử lý dữ liệu › CSDL Trong ngành) chia 2 tab con:
+- **Dữ liệu hợp lệ**: bảng dữ liệu CSDL đích như trước (`mockTableData.DIP_PERSON`).
+- **Dữ liệu loại bỏ**: bản ghi bị loại sau khi chạy quy tắc; thêm 2 cột đầu **Quy tắc loại bỏ** (badge nhóm Làm sạch / Chuẩn hóa / Biến đổi + tên quy tắc đúng như tiêu đề quy tắc ở các tab quy tắc) và **Lý do loại bỏ**, sau đó là các cột dữ liệu. 6 bản ghi mẫu.
+- Tab con dạng segmented bên trái thanh công cụ, có số lượng bản ghi; [Tải lại] [Bộ lọc] giữ bên phải. Chuyển tab con → xóa bộ lọc, về trang 1. Bộ lọc nâng cao lọc được cả theo Quy tắc loại bỏ / Lý do.
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (không có trong stauts.md).
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công.
+
 ## Thiết lập điều phối dữ liệu — 6 thẻ thống kê trên 1 hàng (Ngày thực hiện: 04/11/2026) — 241
 
 **Nội dung (PM yêu cầu):** màn **Cung cấp dữ liệu › Thiết lập điều phối dữ liệu › Thiết lập dịch vụ**: 6 thẻ thống kê (Tổng số API, Đang công khai, Chờ phê duyệt, Cần chỉnh sửa, Đã duyệt, Bản nháp) luôn nằm **trên 1 hàng** — trước đây `grid-cols-3 xl:grid-cols-6` nên ở màn hình rộng dưới 1280px bị xuống 2 hàng.
