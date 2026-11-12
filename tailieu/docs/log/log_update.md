@@ -1,5 +1,36 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Phạm vi dữ liệu — thêm "Trường hiển thị" cho chiều lấy từ danh mục (Ngày thực hiện: 12/11/2026) — 242
+
+**Nội dung (BA hỏi: chọn Trường giá trị là mã thì bên tài khoản chỉ thấy danh sách mã, không biết tỉnh nào):**
+- Popup Thêm/Sửa chiều phạm vi: thêm ô **Trường hiển thị** (không bắt buộc, chọn tối đa 3 cột cùng bảng, VD `ma_tinh` → `ten_tinh`, `cap_hanh_chinh`). Trường giá trị dùng để **so sánh** khi gọi API; trường hiển thị chỉ để **nhận biết** khi cấp tài khoản. Vẫn sửa được khi chiều đang được API dùng (không ảnh hưởng việc lọc). Đổi Loại / CSDL / Bảng xóa trường hiển thị đã chọn.
+- Thêm bảng **Xem trước danh sách chọn ở tài khoản API** (mã + các cột hiển thị) trong popup.
+- Loại = **CSDL đích**: thêm gợi ý – bảng nghiệp vụ thường chỉ có mã, nên lấy giá trị từ Danh mục dùng chung / Dữ liệu chủ; gắn với cột bảng nghiệp vụ ở Bước 3.
+- Popup tài khoản: chiều có trường hiển thị → danh sách chọn dạng **bảng nhiều cột** (mã | tên | …), tìm được theo cả tên và các cột hiển thị; ô đã chọn hiện *mã – tên* (VD *27 – Bắc Ninh*).
+- Danh sách chiều: cột Nguồn giá trị thêm dòng *Hiển thị: …*.
+- Dữ liệu mẫu chuyển sang dạng dòng theo bảng nguồn (cột lấy từ dữ liệu); 4 chiều mẫu khai sẵn trường hiển thị; dữ liệu đã lưu trước đó tự bổ sung theo mẫu cùng nguồn.
+- HANDOFF cần bổ sung: cột `DISPLAY_COLUMNS` ở `SCOPE_DIMENSION`; API `/scope-dimensions/{id}/values` trả thêm các cột hiển thị (`SELECT DISTINCT <giá trị>, <hiển thị…>`, tên cột đối chiếu whitelist).
+
+**File sửa:** `provisioning/scope/scopeData.ts`, `ScopeValueInputs.tsx` (MultiValueSelect: chế độ bảng nhiều cột, giới hạn số lựa chọn), `ScopeDimensionTab.tsx`, `AccountScopeSection.tsx`.
+
+**Kiểm tra:** tsc không lỗi; trên app: sửa chiều TINH hiện Trường hiển thị `ten_tinh, cap_hanh_chinh` + bảng xem trước; popup tài khoản yte_bacninh_01: ô Tỉnh hiện *27 – Bắc Ninh*, danh sách chọn có tiêu đề `ma_tinh | ten_tinh | cap_hanh_chinh`, gõ "thành phố" lọc ra 5 tỉnh/thành theo cột cấp hành chính.
+
+## Phạm vi dữ liệu (Data scope) cho API cung cấp — danh mục chiều, phạm vi tài khoản, trường phân vùng (Ngày thực hiện: 12/11/2026) — 241
+
+**Nội dung (theo HANDOFF_Code_PhamViDuLieu_API.md + mockup đã chốt với BA; mỗi API key chỉ nhận dữ liệu trong phạm vi được cấp):**
+- **Tab mới "Danh mục chiều phạm vi"** (tab cuối màn Quản lý API cung cấp & đối soát, không thêm menu – BA chốt): bảng STT / Mã chiều / Tên chiều / Phương thức nhập / Nguồn giá trị / Đang dùng ở API / Trạng thái / Thao tác. Popup Thêm/Sửa: Mã (A–Z, 0–9, `_`, ≤ 30, duy nhất, khóa khi sửa), Tên, Phương thức *Lấy từ danh mục* / *Tự nhập*; *Lấy từ danh mục* chọn Loại → Bảng → Trường (combobox có tìm kiếm), **Loại = CSDL đích thì thêm ô CSDL đích** trước Bảng (BA chốt); đổi lựa chọn trước xóa lựa chọn sau. Chiều đang dùng: không xóa (popup liệt kê API), không đổi phương thức/nguồn, chuyển Ngừng hoạt động có xác nhận.
+- **Popup Tạo/Cập nhật tài khoản API**: thêm khối **Phạm vi dữ liệu**, mỗi chiều 1 dòng; chiều *Lấy từ danh mục* chọn nhiều có tìm kiếm + Chọn tất cả / Bỏ chọn, chiều *Tự nhập* gõ rồi Enter (trim, bỏ trùng); dòng trống báo đỏ "Để trống: không có quyền…" (fail-closed). Chiều ngừng hoạt động nhưng còn API dùng vẫn hiện (gắn nhãn) để còn sửa được. Popup rộng max-w-3xl.
+- **Danh sách tài khoản**: thêm cột **Phạm vi dữ liệu** (badge *n/m chiều có giá trị* – rê chuột xem chi tiết, hoặc *Chưa khai báo*).
+- **Phân quyền truy cập**: thêm dòng **Lọc theo phạm vi** (chiều → cột của API đang chọn) và cột chỉ xem **Phạm vi áp dụng** (giá trị lấy từ tài khoản, chiều trống hiện badge đỏ *trống → 403*). Form cấp quyền giữ nguyên.
+- **Thiết lập điều phối › Thiết kế cấu trúc gói tin**: thêm khối **Trường phân vùng dữ liệu** dưới phần cấu hình gói tin (cả Visual và Raw SQL): Chiều phạm vi (mỗi chiều 1 lần) / Cột dữ liệu (bảng chính + bảng liên kết) / **Tham số đầu vào** (tự lấy theo Tên trường API; cột không chia sẻ thì hệ thống tự lọc) / Xóa. Cảnh báo tài khoản sẽ bị 403 khi thêm chiều mới; Raw SQL thiếu cột phân vùng trong SELECT → báo đỏ, không cho lưu; dòng thiếu chiều/cột → không cho lưu. Chế độ Xem: chỉ đọc.
+- Dữ liệu mẫu + store dùng chung (localStorage `provision_scope_dimensions`, `provision_scope_fields`; giá trị tài khoản lưu ở `scopeValues` của `provision_accounts`); trường phân vùng nối giữa 2 màn theo **mã dịch vụ**. Mẫu: API Hộ tịch điện tử lọc theo Tỉnh → `ho_tich_ca_nhan.ma_tinh` (thêm cột `ma_tinh`, `ma_don_vi_dk` vào lược đồ mẫu).
+
+**File mới:** `provisioning/scope/scopeData.ts`, `ScopeDimensionTab.tsx`, `AccountScopeSection.tsx`, `ScopeFieldSection.tsx`, `ScopeValueInputs.tsx`.
+**File sửa:** `provisioning/DataProvisionApiManagementPage.tsx`, `provisioning/modals/ProvisionAccountModal.tsx` (chưa có trong stauts.md – BA đồng ý sửa), `provisioning/modals/ProvisionServiceModal.tsx`.
+**Chưa sửa (file dùng chung, cần PM):** breadcrumb `layout/MainLayout.tsx` chưa có nhãn cho `?tab=chieu_pham_vi` (đang hiện "API Cung cấp dữ liệu").
+
+**Kiểm tra:** tsc không lỗi ở các file trên; trên app: tab Danh mục chiều phạm vi hiện 5 chiều mẫu, chọn CSDL đích hiện thêm ô CSDL; popup tài khoản sinh 4 dòng (chiều đang hoạt động), chọn nhiều giá trị không bị đóng popup; tab Phân quyền hiện *Lọc theo phạm vi: Tỉnh/Thành phố → ma_tinh* và cột Phạm vi áp dụng (Bắc Ninh / trống → 403); Bước 3 hiện khối Trường phân vùng và cảnh báo 403.
+
 ## Hợp nhất dữ liệu — thống nhất luồng nút với màn Xử lý dữ liệu, bỏ Tạm dừng, chỉnh sửa một phần khi có dữ liệu (Ngày thực hiện: 02/11/2026) — 240
 
 **Nội dung (PM yêu cầu: các nút thao tác theo luồng màn Xử lý; khi nào chuyển đổi / cập nhật / xóa / chỉnh sửa, khi nào chọn lại bảng nguồn, bảng đích):**

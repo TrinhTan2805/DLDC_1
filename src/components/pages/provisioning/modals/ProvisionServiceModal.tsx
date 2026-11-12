@@ -4,6 +4,8 @@ import { X, Check, FileText, Plug, LayoutTemplate, ShieldCheck, Plus, Trash2, Co
 import {
   Badge, RowIconAction, SearchableSelect, tabClass, BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, FIELD_LABEL, REQUIRED_MARK, SECTION_TITLE,
 } from '../../collection/collectionUi';
+import { ScopeFieldSection, isScopeFieldsComplete } from '../scope/ScopeFieldSection';
+import { type ScopeField, getServiceScopeMap, scopeFieldsOf, setServiceScopeFields } from '../scope/scopeData';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
@@ -27,7 +29,7 @@ type TabType = 'general' | 'protocol' | 'packet' | 'access' | 'history';
 
 // Mock Database Schema for Civil Registry
 const mockSchema: Record<string, string[]> = {
-  'ho_tich_ca_nhan': ['id', 'ma_vinh_vien', 'ho_ten', 'ngay_sinh', 'gioi_tinh', 'so_dinh_danh'],
+  'ho_tich_ca_nhan': ['id', 'ma_vinh_vien', 'ho_ten', 'ngay_sinh', 'gioi_tinh', 'so_dinh_danh', 'ma_tinh', 'ma_don_vi_dk'],
   'giay_khai_sinh': ['id', 'so_giay_khai_sinh', 'ngay_dang_ky', 'noi_sinh', 'ho_ten_cha', 'ho_ten_me'],
   'dia_chi_thuong_tru': ['id', 'user_id', 'id_ho_tich', 'tinh_thanh', 'quan_huyen', 'phuong_xa', 'chi_tiet'],
   'thong_tin_cha_me': ['id', 'id_ho_tich', 'ho_ten_cha', 'cccd_cha', 'ho_ten_me', 'cccd_me']
@@ -178,6 +180,10 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
   const [rateLimitValue, setRateLimitValue] = useState(100);
   const [hasJoin, setHasJoin] = useState(false);
   const [packetMode, setPacketMode] = useState<'visual' | 'sql'>('visual');
+  // Trường phân vùng dữ liệu (log 241)
+  const [scopeFields, setScopeFields] = useState<ScopeField[]>([]);
+  const [savedScopeFields, setSavedScopeFields] = useState<ScopeField[]>([]);
+  const [showScopeErrors, setShowScopeErrors] = useState(false);
   const [sqlQuery, setSqlQuery] = useState('SELECT *\nFROM ho_tich_ca_nhan\nWHERE id = :id');
   const [isPublic, setIsPublic] = useState(false);
   const [contextPath, setContextPath] = useState(service?.contextPath || '');
@@ -292,8 +298,26 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       setHasJoin(service?.hasJoin ?? false);
       setPacketMode(service?.packetMode || 'visual');
       setSqlQuery(service?.sqlQuery || 'SELECT *\nFROM ho_tich_ca_nhan\nWHERE id = :id');
+      const savedScope = scopeFieldsOf(getServiceScopeMap(), service?.code, service?.name);
+      setScopeFields(savedScope);
+      setSavedScopeFields(savedScope);
+      setShowScopeErrors(false);
     }
   }, [isOpen, service]);
+
+  // Kiểm tra trường phân vùng trước khi lưu (BR07 + AC7: SQL tùy chỉnh phải SELECT cột phân vùng)
+  const scopeFieldsValid = () => {
+    const sqlMissing = packetMode === 'sql' && !/select\s+\*/i.test(sqlQuery)
+      && scopeFields.some(f => f.column && !new RegExp(`\\b${f.column}\\b`, 'i').test(sqlQuery));
+    if (!isScopeFieldsComplete(scopeFields) || sqlMissing) {
+      setShowScopeErrors(true);
+      setActiveTab('packet');
+      return false;
+    }
+    return true;
+  };
+  const persistScopeFields = (code: string, name: string) =>
+    setServiceScopeFields(code, name, scopeFields.filter(f => f.dimension && f.column));
 
   // Mock existing context paths for duplicate check
   const existingContextPaths = ['/api/v1/ho-tich', '/api/v1/ket-hon', '/api/v1/khai-sinh', '/api/v1/khai-tu'];
@@ -345,6 +369,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!scopeFieldsValid()) return;
     const updatedData = {
       ...service,
       name: serviceName,
@@ -365,6 +390,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       packetMode,
       sqlQuery
     };
+    persistScopeFields(updatedData.code || serviceName, serviceName);
     if (onSubmitApproval) {
       onSubmitApproval(updatedData);
     } else {
@@ -395,6 +421,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
       packetMode,
       sqlQuery
     };
+    persistScopeFields(updatedData.code, updatedData.name);
     if (onSaveDraft) onSaveDraft(updatedData);
     onClose();
   };
@@ -1099,6 +1126,23 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                     spellCheck={false}
                   />
                 </section>
+              )}
+
+              {/* Trường phân vùng dữ liệu — phạm vi dữ liệu theo tài khoản API (log 241) */}
+              {!isOpenDataShared && (
+                <ScopeFieldSection
+                  value={scopeFields}
+                  onChange={setScopeFields}
+                  initial={savedScopeFields}
+                  tables={[primaryTable, ...(hasJoin ? (joinedTables || []).map(t => t.name).filter(Boolean) : [])]}
+                  schema={mockSchema}
+                  apiFields={fields}
+                  serviceName={serviceName}
+                  readOnly={isViewMode}
+                  showErrors={showScopeErrors}
+                  sqlMode={packetMode === 'sql'}
+                  sqlQuery={sqlQuery}
+                />
               )}
 
               {/* Live API Response Preview */}
