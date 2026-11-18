@@ -180,7 +180,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
   const [rateLimitValue, setRateLimitValue] = useState(100);
   const [hasJoin, setHasJoin] = useState(false);
   const [packetMode, setPacketMode] = useState<'visual' | 'sql'>('visual');
-  // Trường phân vùng dữ liệu (log 241)
+  // Trường phân vùng dữ liệu (log 261)
   const [scopeFields, setScopeFields] = useState<ScopeField[]>([]);
   const [savedScopeFields, setSavedScopeFields] = useState<ScopeField[]>([]);
   const [showScopeErrors, setShowScopeErrors] = useState(false);
@@ -1128,7 +1128,7 @@ export function ProvisionServiceModal({ isOpen, onClose, onSave, onSaveDraft, on
                 </section>
               )}
 
-              {/* Trường phân vùng dữ liệu — phạm vi dữ liệu theo tài khoản API (log 241) */}
+              {/* Trường phân vùng dữ liệu — phạm vi dữ liệu theo tài khoản API (log 261) */}
               {!isOpenDataShared && (
                 <ScopeFieldSection
                   value={scopeFields}

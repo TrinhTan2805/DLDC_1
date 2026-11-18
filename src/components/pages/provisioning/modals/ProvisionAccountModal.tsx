@@ -21,7 +21,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
   const [clientId, setClientId] = useState('');
   const [apiName, setApiName] = useState('Lấy danh sách Hộ tịch');
   const [isCopied, setIsCopied] = useState(false);
-  // Phạm vi dữ liệu của tài khoản (log 241): mã chiều → giá trị được phép
+  // Phạm vi dữ liệu của tài khoản (log 261): mã chiều → giá trị được phép
   const [scopeValues, setScopeValues] = useState<AccountScopeValues>({});
 
   const generateClientId = () => {
@@ -171,7 +171,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
               </div>
             </div>
 
-            {/* Phạm vi dữ liệu (log 241) */}
+            {/* Phạm vi dữ liệu (log 261) */}
             <AccountScopeSection value={scopeValues} onChange={setScopeValues} />
 
           </div>

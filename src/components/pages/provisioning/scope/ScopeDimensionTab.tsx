@@ -1,4 +1,4 @@
-// Tab "Danh mục chiều phạm vi" của màn Quản lý API cung cấp & đối soát (log 241)
+// Tab "Danh mục chiều phạm vi" của màn Quản lý API cung cấp & đối soát (log 261)
 // BR01–BR03: khai báo chiều; không xóa chiều đang dùng ở API; không đổi Mã chiều sau khi tạo.
 import { useState } from 'react';
 import { createPortal } from 'react-dom';

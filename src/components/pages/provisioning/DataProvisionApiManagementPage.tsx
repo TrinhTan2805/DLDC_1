@@ -479,7 +479,7 @@ export function DataProvisionApiManagementPage() {
   const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar text-[13px] text-[#020817] leading-5';
   const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 
-  // Phạm vi áp dụng (log 241): giá trị lấy từ tài khoản, chỉ xem
+  // Phạm vi áp dụng (log 261): giá trị lấy từ tài khoản, chỉ xem
   const scopeDims = useScopeDimensions();
   const scopeFieldMap = useServiceScopeMap();
   const selectedApiObj = apis.find(a => a.name === selectedApiForAccess);
@@ -971,7 +971,7 @@ export function DataProvisionApiManagementPage() {
                   </div>
 
                   <div className="p-4 space-y-3">
-                  {/* Trường phân vùng của API đang chọn — cấu hình ở Thiết lập điều phối › Thiết kế cấu trúc gói tin (log 241) */}
+                  {/* Trường phân vùng của API đang chọn — cấu hình ở Thiết lập điều phối › Thiết kế cấu trúc gói tin (log 261) */}
                   <div className="flex flex-wrap items-center gap-2 text-[13px]">
                     <span className="font-semibold text-[#020817]">Lọc theo phạm vi:</span>
                     {selectedScopeFields.length === 0
@@ -1043,7 +1043,7 @@ export function DataProvisionApiManagementPage() {
               </div>
             )}
 
-            {/* TAB 5: DANH MỤC CHIỀU PHẠM VI (log 241) */}
+            {/* TAB 5: DANH MỤC CHIỀU PHẠM VI (log 261) */}
             {activeTab === 'chieu_pham_vi' && <ScopeDimensionTab />}
 
             {/* TAB 4: DANH SÁCH TÀI KHOẢN */}

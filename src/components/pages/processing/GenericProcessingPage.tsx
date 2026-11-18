@@ -386,7 +386,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
   const activeService = datasets.find(s => s.id === activeServiceId) || datasets[0];
 
-  // ===== 1 nguồn → nhiều CSDL đích (log 244) =====
+  // ===== 1 nguồn → nhiều CSDL đích (log 264) =====
   // Mỗi dataset có danh sách đích riêng (ánh xạ + điều kiện lọc riêng); quy tắc xử lý & lịch biểu dùng chung.
   const [targetsByDataset, setTargetsByDataset] = useState<Record<string, ProcessingTarget[]>>(
     () => (datasets[0] ? { [datasets[0].id]: seedTargets(datasets[0].id) } : {})
@@ -470,8 +470,10 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden relative shadow-sm">
-        <div className="p-6 overflow-y-auto custom-scrollbar h-full">
+      {/* Chiều cao khung nội dung = chiều cao tối đa của inner menu Danh mục dữ liệu (InnerSidebar: calc(100vh - 160px)) */}
+      <div className="flex-1 self-start flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden relative shadow-sm" style={{ height: 'calc(100vh - 160px)' }}>
+        {/* Tab Dữ liệu sau xử lý: khung không cuộn (flex cột) — phần còn lại chia cho bảng, chỉ bảng có thanh cuộn dọc */}
+        <div className={`p-6 h-full ${activeTab === 'processed-data' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto custom-scrollbar'}`}>
           <div className="flex justify-between items-center mb-2">
             <h1 className="font-bold text-slate-800" style={{ fontSize: '24px' }}>
               {activeTab === 'history' ? 'Lịch sử xử lý dữ liệu' :
@@ -486,7 +488,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               >
                 <Check className="w-5 h-5" />
               </button>
-              {/* Chạy theo từng CSDL đích: bấm → popup chọn đích (log 244) */}
+              {/* Chạy theo từng CSDL đích: bấm → popup chọn đích (log 264) */}
               <button
                 onClick={() => setRunAction('convert')}
                 disabled={targets.length === 0}
@@ -524,7 +526,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             </div>
           </div>
           <p className="text-[13px] text-slate-500">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
-          {/* CSDL đích (1 nguồn → nhiều đích, log 244): mỗi chip mở màn chi tiết CSDL đích */}
+          {/* CSDL đích (1 nguồn → nhiều đích, log 264): mỗi chip mở màn chi tiết CSDL đích */}
           <div className="flex flex-wrap items-center gap-2 mt-1 mb-6 text-[13px] text-slate-500">
             <span>CSDL đích ({targets.length}):</span>
             {targets.length === 0 && <span className="text-[#94A3B8]">Chưa cấu hình</span>}
@@ -643,7 +645,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             </button>
           </div>
 
-          <div className="pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar">
+          <div className={activeTab === 'processed-data' ? 'flex-1 min-h-0 flex flex-col' : 'pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar'}>
             {activeTab === 'mapping' && (
               <TargetsPanel
                 targets={targets}
@@ -1480,7 +1482,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
             {activeTab === 'processed-data' && (
               <div className="space-y-4">
-                {/* Chọn CSDL đích để xem dữ liệu sau xử lý (log 244) */}
+                {/* Chọn CSDL đích để xem dữ liệu sau xử lý (log 264) */}
                 <div className="flex flex-wrap items-center gap-2">
                   <label htmlFor="processed-target" className="text-[13px] font-semibold text-[#020817]">CSDL đích:</label>
                   <select
@@ -1509,7 +1511,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" placeholder="Tìm kiếm theo tên quy tắc, thời gian..." className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:border-blue-500" />
                 </div>
-                {/* Lọc lịch sử theo CSDL đích (log 244) */}
+                {/* Lọc lịch sử theo CSDL đích (log 264) */}
                 <div className="flex items-center gap-2 -mt-3 mb-4">
                   <label htmlFor="history-target" className="text-[13px] font-semibold text-[#020817]">CSDL đích:</label>
                   <select id="history-target" className={`${INPUT_CLS} !w-auto min-w-[320px] cursor-pointer`} value={historyTargetFilter} onChange={(e) => setHistoryTargetFilter(e.target.value)}>
@@ -1793,7 +1795,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         onSave={handleMappingSaved}
       />
 
-      {/* 1 nguồn → nhiều CSDL đích (log 244) */}
+      {/* 1 nguồn → nhiều CSDL đích (log 264) */}
       <TargetFilterModal
         target={filterTarget}
         onClose={() => setFilterTarget(null)}

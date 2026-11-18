@@ -1,4 +1,4 @@
-// Khối "Trường phân vùng dữ liệu" ở tab Thiết kế cấu trúc gói tin (Bước 3) của popup dịch vụ (log 241)
+// Khối "Trường phân vùng dữ liệu" ở tab Thiết kế cấu trúc gói tin (Bước 3) của popup dịch vụ (log 261)
 // BR06: có khai báo ⇒ luôn áp dụng phạm vi · BR07: chiều + cột của bảng đã cấu hình, mỗi chiều 1 lần, nhiều dòng = VÀ
 import { Filter, Plus, Trash2, Info, AlertTriangle, Lock } from 'lucide-react';
 import { Badge, RowIconAction, SearchableSelect, BTN_OUTLINE } from '../../collection/collectionUi';

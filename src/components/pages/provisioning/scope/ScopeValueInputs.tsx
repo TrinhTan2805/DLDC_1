@@ -1,4 +1,4 @@
-// Ô nhập giá trị phạm vi (log 241):
+// Ô nhập giá trị phạm vi (log 261):
 // - MultiValueSelect: chọn nhiều có tìm kiếm + Chọn tất cả / Bỏ chọn (chiều "Lấy từ danh mục")
 // - TagValueInput: gõ giá trị rồi Enter, tự trim + bỏ trùng (chiều "Tự nhập")
 import { useState, type KeyboardEvent } from 'react';
@@ -31,7 +31,7 @@ export interface MultiOption { value: string; label: string; extra?: string[] }
 
 /**
  * Chọn nhiều có tìm kiếm. Có `columns` thì danh sách hiển thị dạng bảng nhiều cột
- * (cột 1 = giá trị, các cột sau = trường hiển thị) – log 242.
+ * (cột 1 = giá trị, các cột sau = trường hiển thị) – log 262.
  */
 export function MultiValueSelect({ values, options, onChange, ariaLabel, placeholder = 'Gõ để tìm và chọn...', disabled = false, columns, chipText, max, hideBulk = false, searchPlaceholder = 'Gõ mã hoặc tên để tìm...' }: {
   values: string[];

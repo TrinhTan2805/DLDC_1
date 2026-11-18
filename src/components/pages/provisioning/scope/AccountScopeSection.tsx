@@ -1,4 +1,4 @@
-// Khối "Phạm vi dữ liệu" trong popup Tạo/Cập nhật tài khoản API + ô tóm tắt ở danh sách tài khoản (log 241, 246)
+// Khối "Phạm vi dữ liệu" trong popup Tạo/Cập nhật tài khoản API + ô tóm tắt ở danh sách tài khoản (log 261, 246)
 // Log 246 (BA): không liệt kê sẵn mọi chiều nữa — chỉ hiện các chiều đã khai, nút "Thêm phạm vi" để thêm từng chiều,
 // mỗi dòng có Chỉnh sửa / Xóa. BR05 giữ nguyên: chiều KHÔNG khai = không có quyền với API lọc theo chiều đó (fail-closed).
 import { useState } from 'react';
@@ -22,7 +22,7 @@ function ScopeValueEditor({ d, values, onChange }: { d: ScopeDimension; values: 
       values={values}
       options={scopeValueOptions(d)}
       onChange={onChange}
-      // Có trường hiển thị → danh sách dạng bảng (mã + các cột hiển thị), chip "01 – Hà Nội" (log 242)
+      // Có trường hiển thị → danh sách dạng bảng (mã + các cột hiển thị), chip "01 – Hà Nội" (log 262)
       columns={d.displayColumns?.length ? [d.sourceColumn || 'Mã', ...d.displayColumns] : undefined}
       chipText={(o) => (o.extra?.[0] ? `${o.value} – ${o.extra[0]}` : o.value)}
     />

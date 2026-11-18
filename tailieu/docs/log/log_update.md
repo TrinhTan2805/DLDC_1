@@ -1,6 +1,6 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
-## Rà soát Phạm vi dữ liệu + Xử lý 1 nguồn nhiều đích + Hợp nhất — sửa 2 lỗi (Ngày thực hiện: 18/11/2026) — 247
+## Rà soát Phạm vi dữ liệu + Xử lý 1 nguồn nhiều đích + Hợp nhất — sửa 2 lỗi (Ngày thực hiện: 18/11/2026) — 267
 
 **Lỗi đã sửa:**
 - *Dữ liệu sau xử lý*: đã chọn một đích ở bảng nguồn A rồi chuyển sang bảng nguồn B (hoặc gỡ đích đang chọn) → tab báo "Chưa cấu hình CSDL đích" dù B có đích. Nay id đích không còn thì tự về đích đầu tiên.
@@ -12,7 +12,7 @@
 
 **File sửa:** `processing/GenericProcessingPage.tsx`, `processing/DataMappingModal.tsx`.
 
-## Phạm vi dữ liệu — popup tài khoản API: danh sách phạm vi + Thêm / Chỉnh sửa / Xóa (Ngày thực hiện: 17/11/2026) — 246
+## Phạm vi dữ liệu — popup tài khoản API: danh sách phạm vi + Thêm / Chỉnh sửa / Xóa (Ngày thực hiện: 17/11/2026) — 266
 
 **Nội dung (BA yêu cầu: không hiển thị sẵn mọi chiều rồi cấu hình, mà có nút thêm mới từng tiêu chí + danh sách có thao tác):**
 - Khối **Phạm vi dữ liệu** chỉ liệt kê các chiều **đã khai**: STT / Chiều phạm vi / Giá trị được phép (tối đa 3 chip *mã – tên*, còn lại "+n", rê chuột xem đủ) / Thao tác (**Chỉnh sửa**, **Xóa**). Tiêu đề hiện số chiều đã khai.
@@ -25,7 +25,7 @@
 
 **Kiểm tra:** tsc không lỗi; trên app: popup tài khoản yte_bacninh_01 hiện 2 chiều đã khai; Thêm phạm vi chỉ gợi ý Xã/Phường, Số hợp đồng; bấm Thêm khi chưa chọn → báo lỗi; thêm Xã/Phường 2 giá trị → danh sách 3 chiều; Chỉnh sửa khóa ô chiều; Xóa Xã/Phường qua popup xác nhận → còn 2 chiều.
 
-## Xử lý dữ liệu — điều kiện lọc theo CSDL đích hỗ trợ AND / OR và Gom Nhóm (Ngày thực hiện: 17/11/2026) — 245
+## Xử lý dữ liệu — điều kiện lọc theo CSDL đích hỗ trợ AND / OR và Gom Nhóm (Ngày thực hiện: 17/11/2026) — 265
 
 **Nội dung (BA yêu cầu: điều kiện cần kết hợp OR, AND và nhóm):**
 - Popup **Điều kiện lọc bản ghi**: mỗi điều kiện (từ dòng thứ 2) có ô **AND / OR** nối với dòng trước; nút **Gom Nhóm** thêm một nhóm (viền xanh bên trái) có nút *Thêm điều kiện* / *Xóa nhóm* riêng, các điều kiện trong nhóm cũng nối bằng AND / OR; nhóm nối với phần trước bằng AND / OR. Cùng mô hình và giao diện "Gom Nhóm" của Bộ lọc nâng cao (`common/AdvancedFilterGroup`, không sửa file dùng chung vì danh sách phép so sánh khác).
@@ -37,7 +37,7 @@
 
 **Kiểm tra:** tsc không lỗi; trên app: popup lọc của DIP_PERSON hiện điều kiện + nhóm (AND, trong nhóm OR); Gom Nhóm thêm nhóm mới, đổi nối OR → biểu thức `… OR (GIOITINH = Nữ)`; thêm điều kiện trống bấm Lưu bị chặn; lưu xong cột Điều kiện lọc cập nhật đúng biểu thức.
 
-## Xử lý dữ liệu — 1 nguồn xử lý về nhiều CSDL đích (Ngày thực hiện: 17/11/2026) — 244
+## Xử lý dữ liệu — 1 nguồn xử lý về nhiều CSDL đích (Ngày thực hiện: 17/11/2026) — 264
 
 **Nội dung (BA chốt theo đề xuất):** quy tắc làm sạch / chuẩn hóa / biến đổi **dùng chung**; mỗi đích có **ánh xạ riêng** + **điều kiện lọc riêng** (không bắt buộc, trống = toàn bộ bản ghi); **1 lịch biểu chung**; mỗi đích chạy độc lập.
 - Đầu trang: dòng "CSDL làm sạch" đổi thành **CSDL đích (n)** với các chip *CSDL › bảng*, bấm mở chi tiết CSDL đích.
@@ -52,7 +52,7 @@
 
 **Kiểm tra:** tsc không lỗi; trên app (Xử lý › CSDL Thông tin Bản án): 2 chip đích ở đầu trang; Chuyển đổi chỉ cho chọn DIP_PERSON (HS_KHAI_SINH bị khóa – đã có dữ liệu), chạy xong đích chuyển "Đã có dữ liệu" và Lịch sử có dòng mới; thêm đích CSDL Phân tích số liệu › HS_KHAI_SINH thành công, thêm lại lần nữa bị chặn trùng; Dữ liệu sau xử lý liệt kê 3 đích.
 
-## Hợp nhất dữ liệu — tab Dữ liệu đích hiện dữ liệu cho mọi cấu hình đã có dữ liệu (Ngày thực hiện: 17/11/2026) — 243
+## Hợp nhất dữ liệu — tab Dữ liệu đích hiện dữ liệu cho mọi cấu hình đã có dữ liệu (Ngày thực hiện: 17/11/2026) — 263
 
 **Lỗi (PM báo):** cấu hình `HN_KHAI_SINH` có 11.406 bản ghi nhưng tab *Dữ liệu đích* báo "Chưa có dữ liệu – cấu hình chưa chạy lần nào" (chỉ `HN_CONG_DAN` có dữ liệu mẫu).
 - Thêm dữ liệu mẫu cho `HN_KHAI_SINH` (Union All 2 nguồn): 4 dòng kèm `DIP_SourceId` / `DIP_RefId` theo từng nguồn, cột không có ở nguồn tỉnh để trống; danh sách không được chọn gồm 1 dòng trùng khóa (giữ theo ưu tiên nguồn) và 1 dòng thiếu giá trị bắt buộc.
@@ -63,7 +63,7 @@
 
 **Kiểm tra:** tsc không lỗi; trên app: chi tiết HN_KHAI_SINH → tab Dữ liệu đích hiện 4 dòng + 2 bản ghi không được chọn; sinh mẫu cho HN_CHINH_SACH (Inner Join) giả định có dữ liệu ra đúng cột `ID … DIP_SourceRefs`.
 
-## Phạm vi dữ liệu — thêm "Trường hiển thị" cho chiều lấy từ danh mục (Ngày thực hiện: 12/11/2026) — 242
+## Phạm vi dữ liệu — thêm "Trường hiển thị" cho chiều lấy từ danh mục (Ngày thực hiện: 12/11/2026) — 262
 
 **Nội dung (BA hỏi: chọn Trường giá trị là mã thì bên tài khoản chỉ thấy danh sách mã, không biết tỉnh nào):**
 - Popup Thêm/Sửa chiều phạm vi: thêm ô **Trường hiển thị** (không bắt buộc, chọn tối đa 3 cột cùng bảng, VD `ma_tinh` → `ten_tinh`, `cap_hanh_chinh`). Trường giá trị dùng để **so sánh** khi gọi API; trường hiển thị chỉ để **nhận biết** khi cấp tài khoản. Vẫn sửa được khi chiều đang được API dùng (không ảnh hưởng việc lọc). Đổi Loại / CSDL / Bảng xóa trường hiển thị đã chọn.
@@ -78,7 +78,7 @@
 
 **Kiểm tra:** tsc không lỗi; trên app: sửa chiều TINH hiện Trường hiển thị `ten_tinh, cap_hanh_chinh` + bảng xem trước; popup tài khoản yte_bacninh_01: ô Tỉnh hiện *27 – Bắc Ninh*, danh sách chọn có tiêu đề `ma_tinh | ten_tinh | cap_hanh_chinh`, gõ "thành phố" lọc ra 5 tỉnh/thành theo cột cấp hành chính.
 
-## Phạm vi dữ liệu (Data scope) cho API cung cấp — danh mục chiều, phạm vi tài khoản, trường phân vùng (Ngày thực hiện: 12/11/2026) — 241
+## Phạm vi dữ liệu (Data scope) cho API cung cấp — danh mục chiều, phạm vi tài khoản, trường phân vùng (Ngày thực hiện: 12/11/2026) — 261
 
 **Nội dung (theo HANDOFF_Code_PhamViDuLieu_API.md + mockup đã chốt với BA; mỗi API key chỉ nhận dữ liệu trong phạm vi được cấp):**
 - **Tab mới "Danh mục chiều phạm vi"** (tab cuối màn Quản lý API cung cấp & đối soát, không thêm menu – BA chốt): bảng STT / Mã chiều / Tên chiều / Phương thức nhập / Nguồn giá trị / Đang dùng ở API / Trạng thái / Thao tác. Popup Thêm/Sửa: Mã (A–Z, 0–9, `_`, ≤ 30, duy nhất, khóa khi sửa), Tên, Phương thức *Lấy từ danh mục* / *Tự nhập*; *Lấy từ danh mục* chọn Loại → Bảng → Trường (combobox có tìm kiếm), **Loại = CSDL đích thì thêm ô CSDL đích** trước Bảng (BA chốt); đổi lựa chọn trước xóa lựa chọn sau. Chiều đang dùng: không xóa (popup liệt kê API), không đổi phương thức/nguồn, chuyển Ngừng hoạt động có xác nhận.
@@ -93,6 +93,207 @@
 **Chưa sửa (file dùng chung, cần PM):** breadcrumb `layout/MainLayout.tsx` chưa có nhãn cho `?tab=chieu_pham_vi` (đang hiện "API Cung cấp dữ liệu").
 
 **Kiểm tra:** tsc không lỗi ở các file trên; trên app: tab Danh mục chiều phạm vi hiện 5 chiều mẫu, chọn CSDL đích hiện thêm ô CSDL; popup tài khoản sinh 4 dòng (chiều đang hoạt động), chọn nhiều giá trị không bị đóng popup; tab Phân quyền hiện *Lọc theo phạm vi: Tỉnh/Thành phố → ma_tinh* và cột Phạm vi áp dụng (Bắc Ninh / trống → 403); Bước 3 hiện khối Trường phân vùng và cảnh báo 403.
+
+## Toàn hệ thống — viền dưới dòng tiêu đề bảng grid (Ngày thực hiện: 12/11/2026) — 260
+
+**Nội dung (PM yêu cầu):** nhiều bảng chưa có viền dưới dòng tiêu đề (vd. bảng Hồ sơ đăng ký khai sinh). Thêm rule chung `table thead th { border-bottom: 1px solid #E2E8F0; }` trong `src/index.css` — áp dụng mọi bảng, màu khớp `TABLE_HEAD_ROW_CLS` (compomennt.md mục 5.3).
+
+**File sửa:** `src/index.css`.
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Toàn hệ thống — đồng bộ màu nền dòng tiêu đề bảng grid theo compomennt.md (Ngày thực hiện: 12/11/2026) — 259
+
+**Nội dung (PM yêu cầu):** nền dòng tiêu đề các bảng chưa đồng nhất (khảo sát `thead`: `bg-slate-50` 158, `bg-[#F8FAFC]` 140, `bg-gray-50` 5, `bg-[#f8fafc]` 4, `bg-white` 2, `bg-[#f8f7f5]` 2, `bg-[#e9ecef]` 1; `th`: thêm `bg-[#F1F5F9]` 5, `bg-[#E2E8F0]` 1; 16 file dùng `TABLE_HEAD_BG` = `#F1F5F9`). Đồng bộ về **`#F8FAFC`** theo compomennt.md mục 5.3.
+- `src/index.css`: rule chung `table thead, table thead tr, table thead th { background-color: #F8FAFC !important; }` — ghi đè mọi class nền đặt riêng.
+- `collection/collectionUi.tsx`: `TABLE_HEAD_BG` đổi `bg-[#F1F5F9]` → `bg-[#F8FAFC]` (khớp tài liệu).
+
+**File sửa:** `src/index.css`, `collection/collectionUi.tsx`.
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Toàn hệ thống — viền dọc giữa các cột cho mọi bảng grid (Ngày thực hiện: 12/11/2026) — 258
+
+**Nội dung (PM yêu cầu, mở rộng từ demo mục 257):** tất cả các bảng trong hệ thống có viền dọc 1px `#E2E8F0` giữa các cột (cả `th` và `td`; cột cuối không có viền phải).
+- `src/index.css`: đổi rule demo `table.grid-col-borders` thành rule chung `table:not(.no-col-borders) th/td`. Bảng nào không muốn viền dọc: gắn class `no-col-borders` vào `<table>`.
+- `collection/CollectionSetupPage.tsx`: bỏ class demo `grid-col-borders` (không còn cần).
+
+**File sửa:** `src/index.css` (file chung — PM đã xác nhận), `collection/CollectionSetupPage.tsx` (`[x]`).
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Thiết lập thu thập — DEMO viền dọc giữa các cột bảng (Ngày thực hiện: 12/11/2026) — 257
+
+**Nội dung (PM yêu cầu demo):** bảng danh sách dịch vụ màn **Quản lý thu thập › Thiết lập thu thập** thêm viền dọc 1px `#E2E8F0` giữa các cột (cả dòng tiêu đề và dòng dữ liệu; cột cuối không có viền phải).
+- `src/index.css`: thêm class dùng chung `table.grid-col-borders` (bật viền dọc cho `th` / `td`, bỏ viền ở cột cuối).
+- `collection/CollectionSetupPage.tsx`: gắn class `grid-col-borders` vào `<table>`.
+- Áp dụng bảng khác: chỉ cần thêm class `grid-col-borders`; đổi màu / độ dày: sửa 1 chỗ trong `index.css`. Bỏ demo: xóa class khỏi `<table>`.
+
+**File sửa:** `src/index.css`, `collection/CollectionSetupPage.tsx` (`[x]` trong stauts.md).
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Toàn hệ thống — căn giữa dòng tiêu đề của mọi bảng (Ngày thực hiện: 12/11/2026) — 256
+
+**Nội dung (PM yêu cầu):** tiêu đề cột (`th`) của tất cả các bảng căn giữa, sửa 1 chỗ cho toàn hệ thống:
+- `src/index.css` — rule chung `table th, table thead th, th.uppercase` thêm `text-align: center !important;` (ghi đè `text-left` / `text-right` đang đặt trên từng `th`: ~1.450 / ~128 chỗ). Dữ liệu trong ô (`td`) giữ nguyên căn lề cũ.
+- `tailieu/docs/compomennt.md` mục 5.3.3 — cập nhật nguyên tắc: tiêu đề cột luôn căn giữa; bảng căn lề theo kiểu cột chỉ còn áp dụng cho dữ liệu.
+- Lưu ý: tiêu đề có nội dung bọc trong khối `flex` (icon sắp xếp, ô chọn tất cả…) không chịu `text-align`; nếu gặp cần thêm `justify-center` riêng cho ô đó.
+
+**File sửa:** `src/index.css` (file chung, không có trong stauts.md — PM đã xác nhận), `tailieu/docs/compomennt.md`.
+
+**Kiểm tra:** `npm run build` thành công; port 3000 trả đúng CSS mới.
+
+## Xử lý dữ liệu — Dữ liệu không hợp lệ: hiện đủ giá trị, chỉ bôi đỏ trường lỗi; bỏ icon khóa (Ngày thực hiện: 11/11/2026) — 255
+
+**Nội dung (PM yêu cầu):**
+- Bỏ icon khóa ở tiêu đề cột MaCongDan.
+- Mọi bản ghi hiện đủ giá trị ở tất cả các cột (bỏ `--`); chỉ bôi đỏ trường bị lỗi tương ứng của từng dòng (theo `ERROR_FIELDS`); giá trị lỗi rỗng vẫn hiện `(trống)` màu đỏ.
+- Bộ lọc nâng cao lọc trên giá trị thật; file XML / Excel tải xuống ghi đủ giá trị.
+- Danh sách cột giữ nguyên: MaCongDan, SoDDCN, HoTen, NgaySinh, GioiTinh, MaTinh.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu không hợp lệ: bỏ cột Quy tắc loại bỏ, thêm cột Mã định danh (khóa chính) (Ngày thực hiện: 11/11/2026) — 254
+
+**Nội dung (PM yêu cầu):**
+- Bỏ cột **Quy tắc loại bỏ** (badge nhóm + tên quy tắc) khỏi bảng Dữ liệu không hợp lệ.
+- Thêm cột đầu **MaCongDan** — mã định danh (khóa chính) của bản ghi: luôn hiển thị giá trị (không thay bằng `--`), tiêu đề cột có icon khóa + tooltip "Mã định danh (khóa chính)".
+- Cột bảng: MaCongDan, SoDDCN, HoTen, NgaySinh, GioiTinh, MaTinh. Bộ lọc nâng cao và popup Chọn trường tải xuống dùng cùng danh sách này (bỏ Nhóm quy tắc / Quy tắc loại bỏ khỏi file tải xuống).
+- Dữ liệu quy tắc của bản ghi mẫu vẫn giữ trong code (dùng xác định trường cấu hình).
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — tab Dữ liệu sau xử lý: bỏ 2 thanh cuộn khung, chỉ bảng cuộn dọc (Ngày thực hiện: 10/11/2026) — 253
+
+**Nội dung (PM yêu cầu):** tab **Dữ liệu sau xử lý** có 2 thanh cuộn dọc lồng nhau (khung nội dung `overflow-y-auto` + vùng tab `max-h-[calc(100vh-320px)] overflow-y-auto`). Sửa riêng cho tab này:
+- Khung nội dung (giữ chiều cao bằng inner menu Danh mục dữ liệu) chuyển sang `flex flex-col overflow-hidden` — không cuộn.
+- Vùng tab: `flex-1 min-h-0 flex flex-col` (bỏ `max-h` + `overflow-y-auto` + `pb-32`); `ProcessedDataTab` gốc `flex-1 min-h-0`.
+- Bảng dữ liệu: `flex-initial min-h-0 overflow-auto` — cao theo số dòng, co lại khi thiếu chỗ và **chỉ bảng có thanh cuộn dọc** (kèm cuộn ngang khi nhiều cột); tiêu đề cột `sticky top-0`. Thanh phân trang luôn nằm ngay dưới bảng, không bị đẩy ra ngoài.
+- Các tab khác (Cấu hình ánh xạ, Làm sạch, Chuẩn hóa, Biến đổi, Phân loại, Lịch sử) giữ nguyên cách cuộn cũ.
+
+**File sửa:** `processing/GenericProcessingPage.tsx`, `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — tab Dữ liệu sau xử lý: bỏ khoảng trắng dưới phân trang (Ngày thực hiện: 10/11/2026) — 252
+
+**Nội dung (PM yêu cầu):** cuộn hết tab **Dữ liệu sau xử lý** còn khoảng trắng ~128px dưới thanh phân trang do vùng nội dung tab có `pb-32`. Bỏ `pb-32` riêng cho tab này (`pb-0`); các tab quy tắc khác giữ `pb-32` (chừa chỗ cho dropdown).
+
+**File sửa:** `processing/GenericProcessingPage.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — khung nội dung cao bằng inner menu Danh mục dữ liệu (Ngày thực hiện: 10/11/2026) — 251
+
+**Nội dung (PM yêu cầu):** khung nội dung bên phải (tiêu đề "Dữ liệu sau xử lý", thẻ thống kê, tabs) giảm chiều cao bằng inner menu **Danh mục dữ liệu**: `height: calc(100vh - 160px)` (= `maxHeight` của `InnerSidebar`), `self-start` để không giãn hết chiều cao trang; nội dung bên trong vẫn cuộn dọc như trước. Áp dụng cho khung chung của mọi tab trên màn Xử lý dữ liệu (cùng một khung).
+
+**File sửa:** `processing/GenericProcessingPage.tsx` (`[x]` trong stauts.md). Không sửa `collection/InnerSidebar.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — popup Chọn trường tải xuống: cố định chiều cao, cuộn dọc bên trong (Ngày thực hiện: 10/11/2026) — 250
+
+**Nội dung (PM yêu cầu):** popup **Chọn trường tải xuống** (tab Dữ liệu không hợp lệ) có chiều cao cố định `h-[480px]` (tối đa `90vh` trên màn hình thấp), không co giãn theo số trường. Header, ô **Chọn tất cả** và footer cố định; chỉ danh sách trường cuộn dọc (`flex-1 min-h-0 overflow-y-auto custom-scrollbar`) — theo compomennt.md 5.4.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — đổi tên tab con Dữ liệu loại bỏ → Dữ liệu không hợp lệ (Ngày thực hiện: 10/11/2026) — 249
+
+**Nội dung (PM yêu cầu):** tab con **Dữ liệu loại bỏ** đổi thành **Dữ liệu không hợp lệ**; đổi theo các chữ liên quan: thông báo bảng rỗng ("Không có bản ghi không hợp lệ"), dòng phụ popup Chọn trường tải xuống ("n bản ghi không hợp lệ"), tên file tải xuống `du_lieu_khong_hop_le_DIP_PERSON_<ngày>.xml/.xlsx`, thẻ gốc XML `<DuLieuKhongHopLe>`, tên sheet Excel "Du lieu khong hop le". Cột **Quy tắc loại bỏ** giữ nguyên tên.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: chỉ hiện giá trị sai của trường vi phạm, các trường khác "--" (Ngày thực hiện: 10/11/2026) — 248
+
+**Nội dung (PM yêu cầu):** mỗi bản ghi loại bỏ chỉ hiển thị giá trị của trường vi phạm (vd Trần Văn Nam: chỉ SoDDCN `89a10@`), các trường còn lại hiển thị `--`.
+- Bảng `ERROR_FIELDS` (theo MaCongDan, dữ liệu mẫu) khai báo trường vi phạm của từng bản ghi; bản ghi 20 vi phạm 2 trường (HoTen, GioiTinh).
+- Giá trị sai hiển thị chữ đỏ; giá trị sai rỗng hiển thị `(trống)`; `--` màu xám.
+- Bộ lọc nâng cao lọc trên giá trị đang hiển thị (không lọc trúng giá trị đã ẩn). File XML / Excel tải xuống cũng ghi `--` cho trường không vi phạm.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: bỏ tick chọn bản ghi, bảng chỉ hiện trường có cấu hình trong quy tắc (Ngày thực hiện: 10/11/2026) — 247
+
+**Nội dung (PM yêu cầu, PM chốt qua câu hỏi: bỏ hết tick, tải toàn bộ; không giữ MaCongDan):**
+- Bỏ cột tick chọn (cả ô chọn tất cả ở tiêu đề và ô từng dòng).
+- Nút **Tải xuống** tải **toàn bộ bản ghi loại bỏ theo bộ lọc đang áp dụng**; chỉ khóa khi không có bản ghi. Vẫn chọn định dạng XML / Excel → popup Chọn trường tải xuống (dòng phụ: "n bản ghi loại bỏ (theo bộ lọc) · Định dạng …").
+- Bảng Dữ liệu loại bỏ chỉ hiển thị **Quy tắc loại bỏ** + các trường dữ liệu có cấu hình trong ít nhất một quy tắc Làm sạch / Chuẩn hóa / Biến đổi (`RULE_CONFIG_FIELDS`, dữ liệu mẫu): SoDDCN, HoTen, NgaySinh, GioiTinh, MaTinh. Bộ lọc nâng cao và popup chọn trường dùng cùng danh sách trường này. Tab Dữ liệu hợp lệ giữ đủ cột.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: popup chọn trường khi tải xuống (Ngày thực hiện: 10/11/2026) — 246
+
+**Nội dung (PM yêu cầu):** khi tải xuống bản ghi loại bỏ, hiện popup **Chọn trường tải xuống**:
+- Luồng: tick bản ghi → [Tải xuống] → chọn **Định dạng XML / Excel** → popup mở, mặc định tick tất cả trường.
+- Popup (compomennt.md 5.4): tiêu đề + dòng phụ "n bản ghi đã chọn · Định dạng …", nút X; ô **Chọn tất cả (x/y)** (hỗ trợ trạng thái chọn một phần) và danh sách trường 2 cột: Nhóm quy tắc, Quy tắc loại bỏ, các trường dữ liệu; footer [Hủy] [Tải xuống] — Tải xuống khóa khi chưa chọn trường nào.
+- File XML / Excel chỉ chứa các trường đã chọn, giữ thứ tự như danh sách. Tải xong đóng popup.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: bỏ trường Quy tắc loại bỏ khỏi bộ lọc nâng cao (Ngày thực hiện: 09/11/2026) — 245
+
+**Nội dung (PM yêu cầu):** danh sách **Trường dữ liệu** của Bộ lọc nâng cao (tab Dữ liệu sau xử lý) chỉ gồm các trường dữ liệu của bảng; bỏ lựa chọn **Quy tắc loại bỏ**. Cột Quy tắc loại bỏ vẫn hiển thị trên bảng Dữ liệu loại bỏ.
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (`fieldOptions` lấy từ `dataColumns`).
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: mock nhiều bản ghi cùng một quy tắc (Ngày thực hiện: 09/11/2026) — 244
+
+**Nội dung (PM yêu cầu):** bổ sung dữ liệu mẫu tab con **Dữ liệu loại bỏ** cho trường hợp nhiều bản ghi bị loại bởi cùng một quy tắc (tổng 16 bản ghi, bảng có 2 trang khi hiển thị 10 dòng/trang):
+- **Kiểm tra quy tắc về chuẩn định dạng**: 7 bản ghi (SoDDCN có ký tự đặc biệt / khoảng trắng / chữ cái / sai độ dài, họ tên chứa ký tự đặc biệt hoặc viết thường).
+- **Kiểm tra tính hợp lệ của dữ liệu**: 3 bản ghi. **Kiểm tra đối sánh tồn tại dựa trên trường khóa**: 3 bản ghi (trùng SoDDCN với dữ liệu hợp lệ).
+- Các quy tắc khác giữ 1 bản ghi.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công; port 3000 trả đúng code mới.
+
+## Xử lý dữ liệu — Dữ liệu loại bỏ: bỏ cột Lý do, tick chọn bản ghi để tải xuống XML / Excel (Ngày thực hiện: 09/11/2026) — 243
+
+**Nội dung (PM yêu cầu):** tab con **Dữ liệu loại bỏ** của tab Dữ liệu sau xử lý:
+- Bỏ cột **Lý do loại bỏ**; giữ cột **Quy tắc loại bỏ** (badge nhóm + tên quy tắc).
+- Mỗi bản ghi chỉ có ô **tick chọn** (không có thao tác khác); ô tick ở header chọn / bỏ chọn tất cả bản ghi trong trang (hỗ trợ trạng thái chọn một phần). Dòng đã chọn tô nền xanh nhạt.
+- Nút **Tải xuống (n)** trên thanh công cụ (chỉ hiện ở Dữ liệu loại bỏ, bị khóa khi chưa chọn bản ghi) → menu **Định dạng XML** / **Định dạng Excel**. File gồm Nhóm quy tắc, Quy tắc loại bỏ và các trường dữ liệu của bản ghi đã chọn; XML sinh phía client (`<DuLieuLoaiBo><BanGhi>…`), Excel dùng thư viện `xlsx`.
+- Chuyển tab con → xóa lựa chọn.
+
+**File sửa:** `processing/ProcessedDataTab.tsx`.
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công.
+
+## Xử lý dữ liệu — tab Dữ liệu sau xử lý chia Dữ liệu hợp lệ / Dữ liệu loại bỏ (Ngày thực hiện: 09/11/2026) — 242
+
+**Nội dung (PM yêu cầu):** tab **Dữ liệu sau xử lý** (màn Xử lý dữ liệu › CSDL Trong ngành) chia 2 tab con:
+- **Dữ liệu hợp lệ**: bảng dữ liệu CSDL đích như trước (`mockTableData.DIP_PERSON`).
+- **Dữ liệu loại bỏ**: bản ghi bị loại sau khi chạy quy tắc; thêm 2 cột đầu **Quy tắc loại bỏ** (badge nhóm Làm sạch / Chuẩn hóa / Biến đổi + tên quy tắc đúng như tiêu đề quy tắc ở các tab quy tắc) và **Lý do loại bỏ**, sau đó là các cột dữ liệu. 6 bản ghi mẫu.
+- Tab con dạng segmented bên trái thanh công cụ, có số lượng bản ghi; [Tải lại] [Bộ lọc] giữ bên phải. Chuyển tab con → xóa bộ lọc, về trang 1. Bộ lọc nâng cao lọc được cả theo Quy tắc loại bỏ / Lý do.
+
+**File sửa:** `processing/ProcessedDataTab.tsx` (không có trong stauts.md).
+
+**Kiểm tra:** tsc 0 lỗi ở file sửa; `npm run build` thành công.
+
+## Thiết lập điều phối dữ liệu — 6 thẻ thống kê trên 1 hàng (Ngày thực hiện: 04/11/2026) — 241
+
+**Nội dung (PM yêu cầu):** màn **Cung cấp dữ liệu › Thiết lập điều phối dữ liệu › Thiết lập dịch vụ**: 6 thẻ thống kê (Tổng số API, Đang công khai, Chờ phê duyệt, Cần chỉnh sửa, Đã duyệt, Bản nháp) luôn nằm **trên 1 hàng** — trước đây `grid-cols-3 xl:grid-cols-6` nên ở màn hình rộng dưới 1280px bị xuống 2 hàng.
+
+**File sửa:** `provisioning/DataProvisionServiceSetupPage.tsx` (`grid grid-cols-6 gap-4`).
+
+**Kiểm tra:** tsc 0 lỗi; `npm run build` thành công; đã xác nhận server port 3000 trả đúng code mới.
 
 ## Hợp nhất dữ liệu — thống nhất luồng nút với màn Xử lý dữ liệu, bỏ Tạm dừng, chỉnh sửa một phần khi có dữ liệu (Ngày thực hiện: 02/11/2026) — 240
 

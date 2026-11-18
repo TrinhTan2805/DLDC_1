@@ -416,7 +416,7 @@ export function DataProvisionServiceSetupPage() {
             <div className="space-y-4">
               {/* Stat Cards (mục 5.6.1) */}
               {activeTab === 'setup' && (
-                <div className="grid grid-cols-3 xl:grid-cols-6 gap-4">
+                <div className="grid grid-cols-6 gap-4">{/* 6 thẻ thống kê luôn trên 1 hàng (PM 04/11/2026) */}
                   {statCards.map(card => (
                     <div key={card.label} className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
                       <div className="flex items-center gap-3">

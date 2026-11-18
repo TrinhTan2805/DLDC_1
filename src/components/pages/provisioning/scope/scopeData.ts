@@ -1,4 +1,4 @@
-// Phạm vi dữ liệu (Data scope) cho API cung cấp — dữ liệu mẫu + store dùng chung (log 241)
+// Phạm vi dữ liệu (Data scope) cho API cung cấp — dữ liệu mẫu + store dùng chung (log 261)
 // Nguồn nghiệp vụ: HANDOFF_Code_PhamViDuLieu_API.md (BR01–BR09).
 // Dùng chung giữa: tab "Danh mục chiều phạm vi" + "Danh sách tài khoản" + "Phân quyền truy cập"
 // (DataProvisionApiManagementPage) và tab "Thiết kế cấu trúc gói tin" (ProvisionServiceModal).
@@ -15,7 +15,7 @@ export interface ScopeDimension {
   sourceDb?: string;       // chỉ khi sourceType = 'CSDL đích'
   sourceTable?: string;
   sourceColumn?: string;
-  /** Trường hiển thị (≤ 3 cột cùng bảng) giúp người chọn nhận biết giá trị, VD ma_tinh → ten_tinh (log 242) */
+  /** Trường hiển thị (≤ 3 cột cùng bảng) giúp người chọn nhận biết giá trị, VD ma_tinh → ten_tinh (log 262) */
   displayColumns?: string[];
   status: 'Hoạt động' | 'Ngừng hoạt động';
 }
@@ -149,7 +149,7 @@ const read = <T,>(key: string, fallback: T): T => {
   return fallback;
 };
 
-// Dữ liệu đã lưu trước log 242 chưa có displayColumns → bổ sung theo mẫu mặc định cùng nguồn
+// Dữ liệu đã lưu trước log 262 chưa có displayColumns → bổ sung theo mẫu mặc định cùng nguồn
 let dims: ScopeDimension[] = read(DIM_KEY, DEFAULT_DIMS).map((d) => {
   if (d.displayColumns) return d;
   const def = DEFAULT_DIMS.find((x) => x.sourceTable === d.sourceTable && x.sourceColumn === d.sourceColumn);

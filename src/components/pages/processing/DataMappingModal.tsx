@@ -12,9 +12,9 @@ interface DataMappingModalProps {
   onClose: () => void;
   targetDatabase?: TargetDatabase | null;
   sourceDatasetName?: string;
-  /** Bảng đích mở sẵn khi sửa ánh xạ của 1 đích đã có (log 244) */
+  /** Bảng đích mở sẵn khi sửa ánh xạ của 1 đích đã có (log 264) */
   initialTable?: string;
-  /** Báo bảng đích + số trường đã ánh xạ khi Lưu cấu hình (log 244 – 1 nguồn nhiều đích); trả false để giữ popup mở (VD trùng đích) */
+  /** Báo bảng đích + số trường đã ánh xạ khi Lưu cấu hình (log 264 – 1 nguồn nhiều đích); trả false để giữ popup mở (VD trùng đích) */
   onSave?: (result: { table: string; mappedCount: number }) => boolean | void;
 }
 

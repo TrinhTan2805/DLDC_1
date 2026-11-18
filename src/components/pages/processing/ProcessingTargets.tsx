@@ -1,4 +1,4 @@
-// Xử lý dữ liệu — 1 nguồn xử lý về NHIỀU CSDL đích (log 244)
+// Xử lý dữ liệu — 1 nguồn xử lý về NHIỀU CSDL đích (log 264)
 // Chốt với BA: quy tắc làm sạch/chuẩn hóa/biến đổi DÙNG CHUNG; mỗi đích có ánh xạ + điều kiện lọc RIÊNG;
 // 1 lịch biểu chung; chạy theo từng đích, đích này lỗi không ảnh hưởng đích khác.
 import { Fragment, useEffect, useState } from 'react';
@@ -6,7 +6,7 @@ import { ArrowLeftRight, ArrowUpRight, ChevronUp, Database, Eye, Filter, Info, L
 import { BaseModal } from '../../common/BaseModal';
 import { Badge, RowIconAction, BTN_OUTLINE, BTN_PRIMARY, BTN_DESTRUCTIVE, INPUT_CLS } from '../collection/collectionUi';
 
-// Điều kiện lọc (log 245): danh sách điều kiện + nhóm, nối nhau bằng AND / OR — cùng mô hình "Gom Nhóm"
+// Điều kiện lọc (log 265): danh sách điều kiện + nhóm, nối nhau bằng AND / OR — cùng mô hình "Gom Nhóm"
 // của Bộ lọc nâng cao (common/AdvancedFilterGroup). Xét theo thứ tự từ trên xuống; nhóm = cặp ngoặc.
 export type FilterLogic = 'AND' | 'OR';
 export interface TargetFilterCondition { id: string; logic: FilterLogic; field: string; op: string; value: string }
