@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 import { X, Database, Search, TableProperties, Merge, ArrowLeftRight, SquarePen, Trash2, Split, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { BaseModal } from '../../common/BaseModal';
@@ -12,6 +12,10 @@ interface DataMappingModalProps {
   onClose: () => void;
   targetDatabase?: TargetDatabase | null;
   sourceDatasetName?: string;
+  /** Bảng đích mở sẵn khi sửa ánh xạ của 1 đích đã có (log 264) */
+  initialTable?: string;
+  /** Báo bảng đích + số trường đã ánh xạ khi Lưu cấu hình (log 264 – 1 nguồn nhiều đích); trả false để giữ popup mở (VD trùng đích) */
+  onSave?: (result: { table: string; mappedCount: number }) => boolean | void;
 }
 
 // Tooltip nằm trong BaseModal (z-index 9000+) nên cần nâng z-index cao hơn modal
@@ -57,8 +61,12 @@ const onCardKey = (e: React.KeyboardEvent, action: () => void) => {
   }
 };
 
-export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatasetName }: DataMappingModalProps) {
+export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatasetName, initialTable, onSave }: DataMappingModalProps) {
   const [selectedTargetTable, setSelectedTargetTable] = useState('HS_KHAI_SINH');
+  useEffect(() => {
+    // Màn nhiều đích: mở để Thêm đích thì về bảng mặc định, Sửa đích thì mở đúng bảng đang dùng
+    if (isOpen && (initialTable || onSave)) setSelectedTargetTable(initialTable || 'HS_KHAI_SINH');
+  }, [isOpen, initialTable]); // eslint-disable-line react-hooks/exhaustive-deps
   const [sourceSearch, setSourceSearch] = useState('');
   const [tableSearch, setTableSearch] = useState('');
   const [fieldSearch, setFieldSearch] = useState('');
@@ -201,6 +209,12 @@ export function DataMappingModal({ isOpen, onClose, targetDatabase, sourceDatase
   };
 
   const handleSaveConfig = () => {
+    if (onSave) {
+      // Bảng mẫu chưa ánh xạ tay → coi như đã ánh xạ đủ các trường trùng tên (mock)
+      const ok = onSave({ table: selectedTargetTable, mappedCount: Object.keys(mappings).length || 5 });
+      if (ok !== false) onClose();
+      return;
+    }
     toast.success('Đã lưu cấu hình ánh xạ');
     onClose();
   };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Users, Key, Copy, RefreshCw, KeyRound, Shield } from 'lucide-react';
 import { BTN_PRIMARY, BTN_OUTLINE, BTN_GHOST_ICON, INPUT_CLS as BASE_INPUT_CLS, VIEW_FIELD_CLS, LABEL_CLS, REQUIRED_MARK } from '../../collection/collectionUi';
+import { AccountScopeSection } from '../scope/AccountScopeSection';
+import { type AccountScopeValues, DEFAULT_ACCOUNT_SCOPES } from '../scope/scopeData';
 // Ô nhập chuẩn + quy tắc ô bị khóa ở màn Xem chi tiết (giá trị đen, placeholder xám)
 const INPUT_CLS = `${BASE_INPUT_CLS} ${VIEW_FIELD_CLS}`;
 
@@ -19,6 +21,8 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
   const [clientId, setClientId] = useState('');
   const [apiName, setApiName] = useState('Lấy danh sách Hộ tịch');
   const [isCopied, setIsCopied] = useState(false);
+  // Phạm vi dữ liệu của tài khoản (log 261): mã chiều → giá trị được phép
+  const [scopeValues, setScopeValues] = useState<AccountScopeValues>({});
 
   const generateClientId = () => {
     return 'client_' + Math.random().toString(36).substring(2, 10);
@@ -30,10 +34,12 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
         setSelectedOrg(accountData.organization || '');
         setUsername(accountData.username || '');
         setClientId(accountData.clientId || '');
+        setScopeValues(accountData.scopeValues ?? DEFAULT_ACCOUNT_SCOPES[accountData.id] ?? {});
       } else {
         setClientId(generateClientId());
         setUsername('');
         setSelectedOrg('');
+        setScopeValues({});
       }
       setIsCopied(false);
     }
@@ -55,7 +61,8 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
         organization: selectedOrg,
         username: username,
         clientId: clientId,
-        apiName: apiName
+        apiName: apiName,
+        scopeValues
       });
     }
     onClose();
@@ -63,7 +70,7 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
 
   return createPortal(
     <div style={{ zIndex: 999999 }} className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
 
         {/* Header (mục 5.4) */}
         <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-[#E2E8F0]">
@@ -163,6 +170,9 @@ export function ProvisionAccountModal({ isOpen, onClose, organizations, onSave, 
                 </button>
               </div>
             </div>
+
+            {/* Phạm vi dữ liệu (log 261) */}
+            <AccountScopeSection value={scopeValues} onChange={setScopeValues} />
 
           </div>
 

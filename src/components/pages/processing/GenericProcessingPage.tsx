@@ -8,6 +8,11 @@ import { TargetDatabaseConfigModal } from './TargetDatabaseConfigModal';
 import { ScheduleManagementModal } from './ScheduleManagementModal';
 import { TargetDatabase, initialTargetDatabases } from './mockTargetDatabases';
 import { ProcessedDataTab } from './ProcessedDataTab';
+import { toast } from 'sonner';
+import { ConfirmModal } from '../../common/ConfirmModal';
+import {
+  type ProcessingTarget, type RunAction, TargetsPanel, TargetFilterModal, RunTargetsModal, seedTargets, RUN_LABEL
+} from './ProcessingTargets';
 import { StatusTag } from '../../common/StatusTag';
 import { BaseModal } from '../../common/BaseModal';
 import { Portal } from '../../common/Portal';
@@ -381,6 +386,75 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
   const activeService = datasets.find(s => s.id === activeServiceId) || datasets[0];
 
+  // ===== 1 nguồn → nhiều CSDL đích (log 264) =====
+  // Mỗi dataset có danh sách đích riêng (ánh xạ + điều kiện lọc riêng); quy tắc xử lý & lịch biểu dùng chung.
+  const [targetsByDataset, setTargetsByDataset] = useState<Record<string, ProcessingTarget[]>>(
+    () => (datasets[0] ? { [datasets[0].id]: seedTargets(datasets[0].id) } : {})
+  );
+  const targets = targetsByDataset[activeService?.id] || [];
+  const setTargets = (fn: (prev: ProcessingTarget[]) => ProcessingTarget[]) =>
+    setTargetsByDataset(prev => ({ ...prev, [activeService.id]: fn(prev[activeService.id] || []) }));
+  const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
+  const editingTarget = targets.find(t => t.id === editingTargetId) || null;
+  const [filterTarget, setFilterTarget] = useState<ProcessingTarget | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<ProcessingTarget | null>(null);
+  const [runAction, setRunAction] = useState<RunAction | null>(null);
+  const [processedTargetId, setProcessedTargetId] = useState('');
+  // Id đã chọn có thể không còn (đổi dataset / gỡ đích) → rơi về đích đầu tiên
+  const shownTargetId = targets.some(t => t.id === processedTargetId) ? processedTargetId : (targets[0]?.id || '');
+  const [historyTargetFilter, setHistoryTargetFilter] = useState('');
+  const targetLabel = (t: ProcessingTarget) => `${t.dbName} › ${t.table}`;
+  const [history, setHistory] = useState(() => mockHistory.map((h, i) => ({
+    ...h, target: i % 2 === 0 ? 'CSDL Kho DLDC › HS_KHAI_SINH' : 'CSDL Phân tích số liệu › DIP_PERSON'
+  })));
+  const nowText = () => {
+    const d = new Date(); const p = (n: number) => String(n).padStart(2, '0');
+    return `${p(d.getDate())}-${p(d.getMonth() + 1)}-${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  };
+
+  const handleAddTarget = () => { setEditingTargetId(null); setIsSelectDBModalOpen(true); };
+  const handleEditTargetMapping = (t: ProcessingTarget) => {
+    setEditingTargetId(t.id);
+    setSelectedTargetDB(initialTargetDatabases.find(db => db.id === t.dbId) || null);
+    setIsMappingModalOpen(true);
+  };
+  const handleMappingSaved = ({ table, mappedCount }: { table: string; mappedCount: number }) => {
+    const db = selectedTargetDB;
+    if (!db) return false;
+    if (targets.some(t => t.dbId === db.id && t.table === table && t.id !== editingTargetId)) {
+      toast.error(`${db.name} › ${table} đã là CSDL đích của nguồn này – chọn bảng đích khác.`);
+      return false;
+    }
+    if (editingTargetId) {
+      setTargets(prev => prev.map(t => t.id === editingTargetId ? { ...t, table, mappedCount } : t));
+      triggerToast('Thành công!', 'Đã cập nhật ánh xạ của CSDL đích.');
+    } else {
+      setTargets(prev => [...prev, { id: `${activeService.id}-${Date.now()}`, dbId: db.id, dbName: db.name, dbType: db.type, table, mappedCount, filter: [], hasData: false }]);
+      triggerToast('Thành công!', `Đã thêm CSDL đích ${db.name} › ${table}.`);
+    }
+    setEditingTargetId(null);
+    return true;
+  };
+  const handleRun = (ids: string[]) => {
+    const action = runAction!;
+    const time = nowText();
+    const chosen = targets.filter(t => ids.includes(t.id));
+    setTargets(prev => prev.map(t => !ids.includes(t.id) ? t : {
+      ...t, hasData: action !== 'delete', lastRun: action === 'delete' ? t.lastRun : time.slice(0, 16)
+    }));
+    // Lịch sử: mỗi đích 1 dòng
+    setHistory(prev => [
+      ...chosen.map((t, i) => ({
+        ...prev[0], id: String(Date.now() + i).slice(-4), dbName: t.dbName, target: targetLabel(t),
+        type: action === 'convert' ? 'NEW' : action === 'update' ? 'UPDATE' : 'DELETE', creator: 'administrator',
+        time, startTime: time, endTime: time, processingTime: '–', status: 'SUCCESSFUL', fixedRecords: 0
+      })),
+      ...prev
+    ]);
+    setRunAction(null);
+    triggerToast('Thành công!', `Đã khởi tạo yêu cầu ${RUN_LABEL[action].toLowerCase()} cho ${ids.length} CSDL đích.`);
+  };
+
 
 
   return (
@@ -414,22 +488,28 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               >
                 <Check className="w-5 h-5" />
               </button>
+              {/* Chạy theo từng CSDL đích: bấm → popup chọn đích (log 264) */}
               <button
-                title="Chuyển đổi dữ liệu"
-                className="p-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center"
+                onClick={() => setRunAction('convert')}
+                disabled={targets.length === 0}
+                title={targets.length ? 'Chuyển đổi dữ liệu' : 'Chuyển đổi dữ liệu – chưa có CSDL đích'}
+                className="p-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-all shadow-sm active:scale-95 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Play className="w-5 h-5" />
               </button>
               <button
-                onClick={() => setIsUpdateSuccessModalOpen(true)}
-                title="Cập nhật dữ liệu"
-                className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center"
+                onClick={() => setRunAction('update')}
+                disabled={targets.length === 0}
+                title={targets.length ? 'Cập nhật dữ liệu' : 'Cập nhật dữ liệu – chưa có CSDL đích'}
+                className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-100 transition-all shadow-sm active:scale-95 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <RefreshCw className="w-5 h-5" />
               </button>
               <button
-                title="Xóa dữ liệu"
-                className="p-2.5 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 transition-all shadow-sm active:scale-95 flex items-center justify-center"
+                onClick={() => setRunAction('delete')}
+                disabled={targets.length === 0}
+                title={targets.length ? 'Xóa dữ liệu' : 'Xóa dữ liệu – chưa có CSDL đích'}
+                className="p-2.5 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 transition-all shadow-sm active:scale-95 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -446,17 +526,22 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
             </div>
           </div>
           <p className="text-[13px] text-slate-500">Nguồn dữ liệu: {systemName} | Dữ liệu {activeService.name.toLowerCase()}</p>
-          {/* CSDL làm sạch (CSDL đích) + nút chuyển sang màn chi tiết CSDL đích để xem dữ liệu sau xử lý */}
-          <div className="flex items-center gap-2 mt-1 mb-6 text-[13px] text-slate-500">
-            <span>CSDL làm sạch: <span className="text-[#020817] font-medium">{cleanTargetDB.name}</span></span>
-            <button
-              type="button"
-              onClick={() => (window as any).navigateToPage?.(`target-database-detail-${cleanTargetDB.id}`)}
-              className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[13px] font-medium text-[#155DFC] hover:bg-blue-50 outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
-            >
-              Xem cơ sở dữ liệu
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+          {/* CSDL đích (1 nguồn → nhiều đích, log 264): mỗi chip mở màn chi tiết CSDL đích */}
+          <div className="flex flex-wrap items-center gap-2 mt-1 mb-6 text-[13px] text-slate-500">
+            <span>CSDL đích ({targets.length}):</span>
+            {targets.length === 0 && <span className="text-[#94A3B8]">Chưa cấu hình</span>}
+            {targets.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => (window as any).navigateToPage?.(`target-database-detail-${t.dbId}`)}
+                title="Xem cơ sở dữ liệu"
+                className="inline-flex items-center gap-1 h-7 px-2.5 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] text-[13px] text-[#155DFC] hover:bg-blue-100 outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors"
+              >
+                {targetLabel(t)}
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            ))}
           </div>
 
           {/* Thẻ thống kê — compomennt.md 5.6.1 (PM 13/10/2026: bỏ tỷ lệ %) */}
@@ -491,7 +576,7 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                 }`}
               style={{ fontSize: '13px' }}
             >
-              Cấu hình ánh xạ
+              CSDL đích &amp; Ánh xạ
             </button>
             {!isOnlyTransform && (
               <>
@@ -562,87 +647,14 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
 
           <div className={activeTab === 'processed-data' ? 'flex-1 min-h-0 flex flex-col' : 'pt-4 pb-32 overflow-y-auto max-h-[calc(100vh-320px)] pr-2 custom-scrollbar'}>
             {activeTab === 'mapping' && (
-              <div className="flex flex-col">
-                {!selectedTargetDB ? (
-                  <div className="flex flex-col items-center justify-center py-16 bg-white border-2 border-dashed border-slate-200 rounded-2xl shadow-sm">
-                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4 shadow-inner">
-                      <ArrowLeftRight className="w-10 h-10 text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-3">Chưa có cấu hình ánh xạ</h3>
-                    <p className="text-slate-500 mb-6 max-w-lg text-center leading-relaxed" style={{ fontSize: '13px' }}>
-                      Thiết lập ánh xạ giữa các trường của CSDL thu thập sang CSDL xử lý để bắt đầu áp dụng các quy tắc làm sạch, chuẩn hóa và biến đổi.
-                    </p>
-                    <button
-                      onClick={handleOpenTargetConfig}
-                      className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-all shadow-md active:scale-95 text-[13px]"
-                    >
-                      Cấu hình ánh xạ
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-[15px] font-bold text-slate-800">Bảng ánh xạ đã cấu hình</h3>
-                        <p className="text-[13px] text-slate-500 mt-1">Tổng cộng 5 trường được ánh xạ</p>
-                      </div>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => setIsDeleteDataModalOpen(true)}
-                          style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-                          className="flex items-center gap-2 text-[13px] text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 transition-all active:scale-95 shadow-sm"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Xóa ánh xạ
-                        </button>
-                        <button
-                          onClick={() => setIsEditMappingCheckModalOpen(true)}
-                          style={{ padding: '8px 16px', borderRadius: '6px', fontWeight: 500 }}
-                          className="flex items-center gap-2 text-[13px] text-[#020817] bg-white border border-[#e2e8f0] hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
-                        >
-                          <ArrowLeftRight className="w-4 h-4" />
-                          Chỉnh sửa ánh xạ
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="bg-slate-50/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                            <th className="px-6 py-4">Trường nguồn</th>
-                            <th className="px-6 py-4">Kiểu</th>
-                            <th className="px-6 py-4 text-center w-20"></th>
-                            <th className="px-6 py-4">Trường đích</th>
-                            <th className="px-6 py-4">Kiểu</th>
-                            <th className="px-6 py-4">Ghi chú</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {[
-                            { source: 'HOCSINH.ID', sourceType: 'INT', target: 'CongDan.ID', targetType: 'INT', note: 'Khóa chính' },
-                            { source: 'HOCSINH.HOTEN', sourceType: 'NVARCHAR(255)', target: 'CongDan.HoTen', targetType: 'NVARCHAR(255)', note: '' },
-                            { source: 'HOCSINH.NGAYSINH', sourceType: 'DATE', target: 'CongDan.NgaySinh', targetType: 'DATE', note: '' },
-                            { source: 'HOCSINH.GIOITINH', sourceType: 'VARCHAR(10)', target: 'CongDan.GioiTinh', targetType: 'VARCHAR(10)', note: '' },
-                            { source: 'HOCSINH.DIP_RefId', sourceType: 'VARCHAR(4000)', target: 'CongDan.DIP_RefId', targetType: 'VARCHAR(4000)', note: 'Tham chiếu' },
-                          ].map((mapping, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
-                              <td className="px-6 py-4 text-[13px] font-bold text-slate-700">{mapping.source}</td>
-                              <td className="px-6 py-4 text-[12px] text-slate-500 font-mono">{mapping.sourceType}</td>
-                              <td className="px-6 py-4 text-center">
-                                <ArrowLeftRight className="w-4 h-4 text-slate-300 mx-auto" />
-                              </td>
-                              <td className="px-6 py-4 text-[13px] font-bold text-slate-900">{mapping.target}</td>
-                              <td className="px-6 py-4 text-[12px] text-slate-500 font-mono">{mapping.targetType}</td>
-                              <td className="px-6 py-4 text-[13px] text-slate-500 italic">{mapping.note}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <TargetsPanel
+                targets={targets}
+                onAdd={handleAddTarget}
+                onEditMapping={handleEditTargetMapping}
+                onEditFilter={setFilterTarget}
+                onRemove={setRemoveTarget}
+                onOpenDb={(t) => (window as any).navigateToPage?.(`target-database-detail-${t.dbId}`)}
+              />
             )}
 
             {activeTab === 'clean' && (
@@ -1468,7 +1480,30 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
               </div>
             )}
 
-            {activeTab === 'processed-data' && <ProcessedDataTab />}
+            {activeTab === 'processed-data' && (
+              <div className="space-y-4">
+                {/* Chọn CSDL đích để xem dữ liệu sau xử lý (log 264) */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <label htmlFor="processed-target" className="text-[13px] font-semibold text-[#020817]">CSDL đích:</label>
+                  <select
+                    id="processed-target"
+                    className={`${INPUT_CLS} !w-auto min-w-[320px] cursor-pointer`}
+                    value={shownTargetId}
+                    onChange={(e) => setProcessedTargetId(e.target.value)}
+                    disabled={targets.length === 0}
+                  >
+                    {targets.length === 0 && <option value="">Chưa có CSDL đích</option>}
+                    {targets.map(t => <option key={t.id} value={t.id}>{targetLabel(t)}{t.hasData ? '' : ' (chưa có dữ liệu)'}</option>)}
+                  </select>
+                </div>
+                {(() => {
+                  const cur = targets.find(t => t.id === shownTargetId);
+                  if (!cur) return <p className="py-10 text-center text-[13px] text-[#64748B]">Chưa cấu hình CSDL đích cho nguồn này.</p>;
+                  if (!cur.hasData) return <p className="py-10 text-center text-[13px] text-[#64748B]">CSDL đích {targetLabel(cur)} chưa có dữ liệu – chạy Chuyển đổi dữ liệu cho đích này.</p>;
+                  return <ProcessedDataTab key={cur.id} />;
+                })()}
+              </div>
+            )}
 
             {activeTab === 'history' && (
               <div className="flex flex-col">
@@ -1476,12 +1511,21 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" placeholder="Tìm kiếm theo tên quy tắc, thời gian..." className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:border-blue-500" />
                 </div>
+                {/* Lọc lịch sử theo CSDL đích (log 264) */}
+                <div className="flex items-center gap-2 -mt-3 mb-4">
+                  <label htmlFor="history-target" className="text-[13px] font-semibold text-[#020817]">CSDL đích:</label>
+                  <select id="history-target" className={`${INPUT_CLS} !w-auto min-w-[320px] cursor-pointer`} value={historyTargetFilter} onChange={(e) => setHistoryTargetFilter(e.target.value)}>
+                    <option value="">Tất cả CSDL đích</option>
+                    {Array.from(new Set(history.map(h => h.target))).map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
                 <div className="bg-white border border-slate-200 overflow-hidden">
                   <table className="w-full border-collapse">
                     <thead className="bg-[#e9ecef] border-b border-slate-300">
                       <tr>
                         <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap w-24">Hoạt động</th>
                         <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Loại</th>
+                        <th className="px-6 py-4 text-left text-[13px] font-bold text-slate-700 whitespace-nowrap">CSDL đích</th>
                         <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Người tạo</th>
                         <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Thời gian</th>
                         <th className="px-6 py-4 text-center text-[13px] font-bold text-slate-700 whitespace-nowrap">Trạng thái</th>
@@ -1489,10 +1533,11 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {mockHistory.map((item, idx) => (
+                      {history.filter(h => !historyTargetFilter || h.target === historyTargetFilter).map((item, idx) => (
                         <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/30 transition-all`}>
                           <td className="px-6 py-4 text-center text-[13px] text-slate-700">{idx + 1}</td>
                           <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.type}</td>
+                          <td className="px-6 py-4 text-left text-[13px] text-slate-700 whitespace-nowrap">{item.target}</td>
                           <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.creator}</td>
                           <td className="px-6 py-4 text-center text-[13px] text-slate-700">{item.time}</td>
                           <td className="px-6 py-4 text-center">
@@ -1746,6 +1791,34 @@ export function GenericProcessingPage({ systemName, datasets }: GenericProcessin
         onClose={() => setIsMappingModalOpen(false)}
         targetDatabase={selectedTargetDB}
         sourceDatasetName={activeService.name}
+        initialTable={editingTarget?.table}
+        onSave={handleMappingSaved}
+      />
+
+      {/* 1 nguồn → nhiều CSDL đích (log 264) */}
+      <TargetFilterModal
+        target={filterTarget}
+        onClose={() => setFilterTarget(null)}
+        onSave={(filter) => {
+          setTargets(prev => prev.map(t => t.id === filterTarget?.id ? { ...t, filter } : t));
+          setFilterTarget(null);
+          triggerToast('Thành công!', 'Đã lưu điều kiện lọc của CSDL đích.');
+        }}
+      />
+      <RunTargetsModal action={runAction} targets={targets} onClose={() => setRunAction(null)} onConfirm={handleRun} />
+      <ConfirmModal
+        isOpen={!!removeTarget}
+        onClose={() => setRemoveTarget(null)}
+        onConfirm={() => {
+          setTargets(prev => prev.filter(t => t.id !== removeTarget?.id));
+          setRemoveTarget(null);
+          triggerToast('Thành công!', 'Đã gỡ CSDL đích khỏi nguồn.');
+        }}
+        title="Gỡ CSDL đích"
+        type="delete"
+        confirmText="Gỡ"
+        cancelText="Hủy bỏ"
+        message={<div>Gỡ <b>{removeTarget ? targetLabel(removeTarget) : ''}</b> khỏi nguồn <b>{activeService.name}</b>? Cấu hình ánh xạ và điều kiện lọc của đích này sẽ bị xóa; các đích khác không ảnh hưởng.</div>}
       />
 
       <ScheduleManagementModal

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import {
   Server, GitCompare, Shield, History, Search, Filter, Plus,
   Trash2, Edit, Key, Clock, Calendar, CheckCircle2, XCircle, AlertTriangle, FileJson, Power, FileText, Users, KeyRound, RefreshCw, Lock, Unlock, Copy,
-  ChevronDown, X, Eye, MoreVertical
+  ChevronDown, X, Eye, MoreVertical, SlidersHorizontal, Ban
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../ui/dropdown-menu';
@@ -21,8 +21,12 @@ import { ProvisionApiModal } from './modals/ProvisionApiModal';
 import { ProvisionReconciliationApiModal } from './modals/ProvisionReconciliationApiModal';
 import { ProvisionAccessControlModal } from './modals/ProvisionAccessControlModal';
 import { ProvisionVersionHistoryModal } from './modals/ProvisionVersionHistoryModal';
-import { ProvisionAccountModal } from './modals/ProvisionAccountModal';
+import { ProvisionAccountModal } from './modals/ProvisionAccountModal';
+
 import { MenuAction } from '../collection/collectionUi';
+import { ScopeDimensionTab } from './scope/ScopeDimensionTab';
+import { AccountScopeSummary } from './scope/AccountScopeSection';
+import { useScopeDimensions, useServiceScopeMap, scopeFieldsOf, scopeValueLabel, DEFAULT_ACCOUNT_SCOPES } from './scope/scopeData';
 
 
 // Nút ⋯ mở menu thao tác khác (tooltip chỉ hiện khi hover)
@@ -98,15 +102,15 @@ export function DataProvisionApiManagementPage() {
   const getInitialTab = () => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab === 'api_cung_cap' || tab === 'api_doi_soat' || tab === 'phan_quyen' || tab === 'danh_sach_tai_khoan') {
-      return tab as 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan';
+    if (tab === 'api_cung_cap' || tab === 'api_doi_soat' || tab === 'phan_quyen' || tab === 'danh_sach_tai_khoan' || tab === 'chieu_pham_vi') {
+      return tab as 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan' | 'chieu_pham_vi';
     }
     return 'api_cung_cap';
   };
 
-  const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan'>(getInitialTab);
+  const [activeTab, setActiveTab] = useState<'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan' | 'chieu_pham_vi'>(getInitialTab);
 
-  const handleTabChange = (tab: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan') => {
+  const handleTabChange = (tab: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan' | 'chieu_pham_vi') => {
     setActiveTab(tab);
     setSearchTerm('');
     setApplied(prev => ({ ...prev, searchTerm: '' }));
@@ -119,7 +123,7 @@ export function DataProvisionApiManagementPage() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab === 'api_cung_cap' || tab === 'api_doi_soat' || tab === 'phan_quyen' || tab === 'danh_sach_tai_khoan') {
+    if (tab === 'api_cung_cap' || tab === 'api_doi_soat' || tab === 'phan_quyen' || tab === 'danh_sach_tai_khoan' || tab === 'chieu_pham_vi') {
       if (tab !== activeTab) {
         setActiveTab(tab);
       }
@@ -475,11 +479,35 @@ export function DataProvisionApiManagementPage() {
   const MODAL_BODY = 'px-6 py-4 overflow-y-auto custom-scrollbar text-[13px] text-[#020817] leading-5';
   const MODAL_FOOTER = 'px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex justify-end gap-3';
 
-  const tabs: { key: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan'; label: string; icon: ReactNode }[] = [
+  // Phạm vi áp dụng (log 261): giá trị lấy từ tài khoản, chỉ xem
+  const scopeDims = useScopeDimensions();
+  const scopeFieldMap = useServiceScopeMap();
+  const selectedApiObj = apis.find(a => a.name === selectedApiForAccess);
+  const selectedScopeFields = scopeFieldsOf(scopeFieldMap, selectedApiObj?.code, selectedApiForAccess);
+  const renderAppliedScope = (perm: any) => {
+    if (selectedScopeFields.length === 0) return <Badge label="Không lọc" variant="slate" />;
+    const acc = accounts.find(a => a.organization === perm.organization && a.apiName === perm.apiName);
+    const values = acc ? (acc.scopeValues ?? DEFAULT_ACCOUNT_SCOPES[acc.id] ?? {}) : {};
+    return (
+      <div className="flex flex-wrap gap-1 py-1">
+        {selectedScopeFields.map(f => {
+          const d = scopeDims.find(x => x.code === f.dimension);
+          const v: string[] = values[f.dimension] || [];
+          const name = d?.name ?? f.dimension;
+          return v.length === 0
+            ? <Badge key={f.dimension} label={`${name}: trống → 403`} variant="red" icon={<Ban className="w-3.5 h-3.5 shrink-0" />} />
+            : <Badge key={f.dimension} label={`${name}: ${v.length > 2 ? `${v.length} giá trị` : v.map(x => scopeValueLabel(d, x)).join(', ')}`} variant="blue" />;
+        })}
+      </div>
+    );
+  };
+
+  const tabs: { key: 'api_cung_cap' | 'api_doi_soat' | 'phan_quyen' | 'danh_sach_tai_khoan' | 'chieu_pham_vi'; label: string; icon: ReactNode }[] = [
     { key: 'api_cung_cap', label: 'API Cung cấp dữ liệu', icon: <Server className="w-4 h-4" /> },
     { key: 'api_doi_soat', label: 'API Đối soát dữ liệu', icon: <GitCompare className="w-4 h-4" /> },
     { key: 'phan_quyen', label: 'Phân quyền truy cập', icon: <Shield className="w-4 h-4" /> },
     { key: 'danh_sach_tai_khoan', label: 'Danh sách tài khoản', icon: <Users className="w-4 h-4" /> },
+    { key: 'chieu_pham_vi', label: 'Danh mục chiều phạm vi', icon: <SlidersHorizontal className="w-4 h-4" /> },
   ];
 
   return (
@@ -508,7 +536,7 @@ export function DataProvisionApiManagementPage() {
           <div className="space-y-4">
 
             {/* Filters and Actions (mục 5.19) */}
-            {activeTab !== 'phan_quyen' && (
+            {activeTab !== 'phan_quyen' && activeTab !== 'chieu_pham_vi' && (
               <div>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 flex items-center gap-1.5">
@@ -942,7 +970,17 @@ export function DataProvisionApiManagementPage() {
                     </button>
                   </div>
 
-                  <div className="p-4">
+                  <div className="p-4 space-y-3">
+                  {/* Trường phân vùng của API đang chọn — cấu hình ở Thiết lập điều phối › Thiết kế cấu trúc gói tin (log 261) */}
+                  <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                    <span className="font-semibold text-[#020817]">Lọc theo phạm vi:</span>
+                    {selectedScopeFields.length === 0
+                      ? <Badge label="Không lọc theo phạm vi" variant="slate" />
+                      : selectedScopeFields.map(f => (
+                          <Badge key={f.dimension} label={`${scopeDims.find(d => d.code === f.dimension)?.name ?? f.dimension} → ${f.column}`} variant="indigo" icon={<Filter className="w-3.5 h-3.5 shrink-0" />} />
+                        ))}
+                    <span className="text-[12px] text-[#64748B]">(cấu hình ở Thiết lập điều phối dữ liệu › Thiết kế cấu trúc gói tin)</span>
+                  </div>
                   <div className={TABLE_WRAP}>
                     <div className="overflow-x-auto">
                       <table className={TABLE_CLS}>
@@ -952,13 +990,14 @@ export function DataProvisionApiManagementPage() {
                             <th className={TH}>Tài khoản (Username)</th>
                             <th className={TH}>IP Whitelist</th>
                             <th className={TH}>Thời hạn hiệu lực</th>
+                            <th className={TH}>Phạm vi áp dụng</th>
                             <th className={TH_ACTION}>Thu hồi</th>
                           </tr>
                         </thead>
                         <tbody>
                           {paginatedPermissions.length === 0 ? (
                             <tr>
-                              <td colSpan={5} className={EMPTY_TD}>
+                              <td colSpan={6} className={EMPTY_TD}>
                                 Chưa có đơn vị nào được cấp quyền khai thác API này.
                               </td>
                             </tr>
@@ -981,6 +1020,7 @@ export function DataProvisionApiManagementPage() {
                                     <span>{perm.validFrom} ~ {perm.validTo}</span>
                                   </div>
                                 </td>
+                                <td className={TD}>{renderAppliedScope(perm)}</td>
                                 <td className={TD_ACTION}>
                                   <RowIconAction
                                     label="Thu hồi quyền truy cập"
@@ -1003,6 +1043,9 @@ export function DataProvisionApiManagementPage() {
               </div>
             )}
 
+            {/* TAB 5: DANH MỤC CHIỀU PHẠM VI (log 261) */}
+            {activeTab === 'chieu_pham_vi' && <ScopeDimensionTab />}
+
             {/* TAB 4: DANH SÁCH TÀI KHOẢN */}
             {activeTab === 'danh_sach_tai_khoan' && (
               <div className={TABLE_WRAP}>
@@ -1013,6 +1056,7 @@ export function DataProvisionApiManagementPage() {
                         <th className={TH}>Tài khoản (Username)</th>
                         <th className={TH}>Đơn vị được cấp quyền</th>
                         <th className={TH}>Client ID / App Key</th>
+                        <th className={TH}>Phạm vi dữ liệu</th>
                         <th className={TH}>Ngày tạo</th>
                         <th className={TH}>Trạng thái</th>
                         <th className={TH_ACTION}>Thao tác</th>
@@ -1021,7 +1065,7 @@ export function DataProvisionApiManagementPage() {
                     <tbody>
                       {paginatedAccounts.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className={EMPTY_TD}>
+                          <td colSpan={7} className={EMPTY_TD}>
                             Chưa có tài khoản nào được tạo.
                           </td>
                         </tr>
@@ -1040,6 +1084,9 @@ export function DataProvisionApiManagementPage() {
                               <TruncatedText text={acc.organization} />
                             </td>
                             <td className={`${TD} whitespace-nowrap`}>{acc.clientId}</td>
+                            <td className={`${TD} whitespace-nowrap`}>
+                              <AccountScopeSummary value={acc.scopeValues ?? DEFAULT_ACCOUNT_SCOPES[acc.id]} />
+                            </td>
                             <td className={`${TD} whitespace-nowrap leading-[18px]`}>
                               <DateTimeCell value={acc.createdAt} />
                             </td>
