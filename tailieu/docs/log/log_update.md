@@ -1,5 +1,68 @@
 # Nhật ký cập nhật hệ thống (Changelog)
 
+## Rà soát Phạm vi dữ liệu + Xử lý 1 nguồn nhiều đích + Hợp nhất — sửa 2 lỗi (Ngày thực hiện: 18/11/2026) — 247
+
+**Lỗi đã sửa:**
+- *Dữ liệu sau xử lý*: đã chọn một đích ở bảng nguồn A rồi chuyển sang bảng nguồn B (hoặc gỡ đích đang chọn) → tab báo "Chưa cấu hình CSDL đích" dù B có đích. Nay id đích không còn thì tự về đích đầu tiên.
+- *Thêm CSDL đích*: popup ánh xạ giữ bảng đích của lần Sửa trước. Nay mở để Thêm thì về bảng mặc định, Sửa thì mở đúng bảng của đích.
+
+**Rà soát không lỗi:** tab Danh mục chiều phạm vi (5 chiều), Phân quyền truy cập (dòng Lọc theo phạm vi + cột Phạm vi áp dụng), Bước 3 Trường phân vùng (API Hộ tịch điện tử lọc TINH), popup tài khoản (Thêm / Sửa / Xóa phạm vi), màn Hợp nhất mở bình thường; tsc không lỗi.
+
+**Cần BA chốt (chưa làm):** một bảng đích có thể bị nhiều luồng cùng ghi mà không cảnh báo – VD `CSDL Kho DLDC › HS_KHAI_SINH` vừa là đích của Xử lý (bảng nguồn 1) vừa là đích của cấu hình Hợp nhất `HN_KHAI_SINH`, và thêm được làm đích cho bảng nguồn khác.
+
+**File sửa:** `processing/GenericProcessingPage.tsx`, `processing/DataMappingModal.tsx`.
+
+## Phạm vi dữ liệu — popup tài khoản API: danh sách phạm vi + Thêm / Chỉnh sửa / Xóa (Ngày thực hiện: 17/11/2026) — 246
+
+**Nội dung (BA yêu cầu: không hiển thị sẵn mọi chiều rồi cấu hình, mà có nút thêm mới từng tiêu chí + danh sách có thao tác):**
+- Khối **Phạm vi dữ liệu** chỉ liệt kê các chiều **đã khai**: STT / Chiều phạm vi / Giá trị được phép (tối đa 3 chip *mã – tên*, còn lại "+n", rê chuột xem đủ) / Thao tác (**Chỉnh sửa**, **Xóa**). Tiêu đề hiện số chiều đã khai.
+- Nút **Thêm phạm vi** mở form ngay trong khối (không mở popup chồng): chọn Chiều (chỉ các chiều đang hoạt động chưa khai, có tìm kiếm) → nhập/chọn Giá trị (chọn nhiều dạng bảng hoặc tự nhập) → Thêm. Bắt buộc chọn chiều và ≥ 1 giá trị. Khai đủ mọi chiều thì nút Thêm khóa.
+- **Chỉnh sửa**: mở cùng form, khóa ô Chiều, dòng đang sửa tô nền xanh nhạt. **Xóa**: popup xác nhận nhắc tài khoản sẽ không có quyền với API lọc theo chiều đó (403).
+- Câu hướng dẫn đổi thành "Chỉ thêm các chiều cần cấp quyền. Chiều không khai = không có quyền…" (BR05 fail-closed giữ nguyên). Danh sách trống: hướng dẫn bấm Thêm phạm vi.
+- Cột **Phạm vi dữ liệu** ở Danh sách tài khoản: "Đã khai n chiều" (rê chuột xem chi tiết) hoặc "Chưa khai báo".
+
+**File sửa:** `provisioning/scope/AccountScopeSection.tsx`.
+
+**Kiểm tra:** tsc không lỗi; trên app: popup tài khoản yte_bacninh_01 hiện 2 chiều đã khai; Thêm phạm vi chỉ gợi ý Xã/Phường, Số hợp đồng; bấm Thêm khi chưa chọn → báo lỗi; thêm Xã/Phường 2 giá trị → danh sách 3 chiều; Chỉnh sửa khóa ô chiều; Xóa Xã/Phường qua popup xác nhận → còn 2 chiều.
+
+## Xử lý dữ liệu — điều kiện lọc theo CSDL đích hỗ trợ AND / OR và Gom Nhóm (Ngày thực hiện: 17/11/2026) — 245
+
+**Nội dung (BA yêu cầu: điều kiện cần kết hợp OR, AND và nhóm):**
+- Popup **Điều kiện lọc bản ghi**: mỗi điều kiện (từ dòng thứ 2) có ô **AND / OR** nối với dòng trước; nút **Gom Nhóm** thêm một nhóm (viền xanh bên trái) có nút *Thêm điều kiện* / *Xóa nhóm* riêng, các điều kiện trong nhóm cũng nối bằng AND / OR; nhóm nối với phần trước bằng AND / OR. Cùng mô hình và giao diện "Gom Nhóm" của Bộ lọc nâng cao (`common/AdvancedFilterGroup`, không sửa file dùng chung vì danh sách phép so sánh khác).
+- Thêm khung **Biểu thức lọc** xem trước, VD `MA_TINH = 27 AND (MA_DON_VI = 27.STP OR MA_DON_VI = 27.CA)`; quy ước xét từ trên xuống, nhóm = cặp ngoặc. Xóa điều kiện cuối của nhóm thì xóa cả nhóm.
+- Lưu: điều kiện thiếu trường / giá trị → viền đỏ + câu báo, không cho lưu.
+- Cột **Điều kiện lọc** ở bảng CSDL đích và popup chọn đích khi chạy hiện biểu thức có ngoặc. Dữ liệu mẫu đích DIP_PERSON đổi thành biểu thức có nhóm.
+
+**File sửa:** `processing/ProcessingTargets.tsx`.
+
+**Kiểm tra:** tsc không lỗi; trên app: popup lọc của DIP_PERSON hiện điều kiện + nhóm (AND, trong nhóm OR); Gom Nhóm thêm nhóm mới, đổi nối OR → biểu thức `… OR (GIOITINH = Nữ)`; thêm điều kiện trống bấm Lưu bị chặn; lưu xong cột Điều kiện lọc cập nhật đúng biểu thức.
+
+## Xử lý dữ liệu — 1 nguồn xử lý về nhiều CSDL đích (Ngày thực hiện: 17/11/2026) — 244
+
+**Nội dung (BA chốt theo đề xuất):** quy tắc làm sạch / chuẩn hóa / biến đổi **dùng chung**; mỗi đích có **ánh xạ riêng** + **điều kiện lọc riêng** (không bắt buộc, trống = toàn bộ bản ghi); **1 lịch biểu chung**; mỗi đích chạy độc lập.
+- Đầu trang: dòng "CSDL làm sạch" đổi thành **CSDL đích (n)** với các chip *CSDL › bảng*, bấm mở chi tiết CSDL đích.
+- Tab "Cấu hình ánh xạ" → **CSDL đích & Ánh xạ**: bảng STT / CSDL đích / Bảng đích / Ánh xạ (n trường) / Điều kiện lọc / Dữ liệu (đã có – chưa có, lần chạy) / Thao tác (Xem ánh xạ mở rộng ngay dưới dòng, Chỉnh sửa ánh xạ, Điều kiện lọc, Gỡ CSDL đích). Đích đã có dữ liệu: khóa sửa ánh xạ / lọc / gỡ, tooltip "Đích đã có dữ liệu – xóa dữ liệu của đích trước". Nút **Thêm CSDL đích** dùng lại popup Chọn CSDL đích → Ánh xạ; chặn trùng (cùng CSDL + bảng), giữ popup ánh xạ mở để chọn bảng khác.
+- Popup **Điều kiện lọc bản ghi** của từng đích: Trường nguồn / Toán tử (=, ≠, Thuộc (IN), Chứa, >, <) / Giá trị, các dòng kết hợp VÀ.
+- Nút **Chuyển đổi / Cập nhật / Xóa dữ liệu** → popup **chọn CSDL đích** (mặc định chọn mọi đích hợp lệ); đích không chạy được bị khóa kèm lý do (Chuyển đổi: đã có dữ liệu / chưa ánh xạ; Cập nhật, Xóa: chưa có dữ liệu). Chạy xong cập nhật trạng thái từng đích, mỗi đích ghi 1 dòng lịch sử. Không có đích → 3 nút khóa.
+- Tab **Dữ liệu sau xử lý**: ô chọn CSDL đích; đích chưa có dữ liệu thì báo cần chạy Chuyển đổi.
+- Tab **Lịch sử**: thêm cột **CSDL đích** + bộ lọc theo đích.
+- Dữ liệu mẫu: dataset đầu tiên của mỗi màn có 2 đích (CSDL Kho DLDC › HS_KHAI_SINH đã có dữ liệu; CSDL Phân tích số liệu › DIP_PERSON lọc `MA_TINH = 27`, chưa có dữ liệu).
+
+**File mới:** `processing/ProcessingTargets.tsx`. **File sửa:** `processing/GenericProcessingPage.tsx` (template – áp cho mọi màn xử lý dùng chung), `processing/DataMappingModal.tsx` (thêm `initialTable`, `onSave`).
+
+**Kiểm tra:** tsc không lỗi; trên app (Xử lý › CSDL Thông tin Bản án): 2 chip đích ở đầu trang; Chuyển đổi chỉ cho chọn DIP_PERSON (HS_KHAI_SINH bị khóa – đã có dữ liệu), chạy xong đích chuyển "Đã có dữ liệu" và Lịch sử có dòng mới; thêm đích CSDL Phân tích số liệu › HS_KHAI_SINH thành công, thêm lại lần nữa bị chặn trùng; Dữ liệu sau xử lý liệt kê 3 đích.
+
+## Hợp nhất dữ liệu — tab Dữ liệu đích hiện dữ liệu cho mọi cấu hình đã có dữ liệu (Ngày thực hiện: 17/11/2026) — 243
+
+**Lỗi (PM báo):** cấu hình `HN_KHAI_SINH` có 11.406 bản ghi nhưng tab *Dữ liệu đích* báo "Chưa có dữ liệu – cấu hình chưa chạy lần nào" (chỉ `HN_CONG_DAN` có dữ liệu mẫu).
+- Thêm dữ liệu mẫu cho `HN_KHAI_SINH` (Union All 2 nguồn): 4 dòng kèm `DIP_SourceId` / `DIP_RefId` theo từng nguồn, cột không có ở nguồn tỉnh để trống; danh sách không được chọn gồm 1 dòng trùng khóa (giữ theo ưu tiên nguồn) và 1 dòng thiếu giá trị bắt buộc.
+- Cấu hình đã có dữ liệu nhưng chưa có mẫu viết sẵn (VD vừa tạo và Chuyển đổi trên prototype) → tự sinh 5 dòng minh họa theo cột bảng đích, cách lấy khóa chính và nguồn tạo dòng (`buildSampleData`).
+- Tab chỉ hiện dữ liệu khi bảng đích đang có dữ liệu (Xóa dữ liệu xong thì trống); câu báo trống đổi thành "Bảng đích chưa có dữ liệu của cấu hình này – bấm Chuyển đổi dữ liệu để chạy lần đầu".
+
+**File sửa:** `processing/merge/mockDataMerge.ts`, `DataMergeDetail.tsx`.
+
+**Kiểm tra:** tsc không lỗi; trên app: chi tiết HN_KHAI_SINH → tab Dữ liệu đích hiện 4 dòng + 2 bản ghi không được chọn; sinh mẫu cho HN_CHINH_SACH (Inner Join) giả định có dữ liệu ra đúng cột `ID … DIP_SourceRefs`.
+
 ## Phạm vi dữ liệu — thêm "Trường hiển thị" cho chiều lấy từ danh mục (Ngày thực hiện: 12/11/2026) — 242
 
 **Nội dung (BA hỏi: chọn Trường giá trị là mã thì bên tài khoản chỉ thấy danh sách mã, không biết tỉnh nào):**
