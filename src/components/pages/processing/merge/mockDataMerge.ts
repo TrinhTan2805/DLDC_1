@@ -648,6 +648,20 @@ export interface MergeSampleData {
   unmatched?: { source: string; key: string; reason: string }[];
 }
 export const MERGE_SAMPLE_DATA: Record<string, MergeSampleData> = {
+  'mc-1': {
+    note: 'Union All Khai sinh (Hộ tịch điện tử) + Khai sinh (hệ thống tỉnh), lọc NGAY_DANG_KY từ 01/01/2016. Khóa chính MA_SO_DINH_DANH theo cột Gộp.MA_SO_DINH_DANH; trùng khóa thì ưu tiên nguồn Khai sinh (Hộ tịch điện tử). Mỗi dòng giữ (DIP_SourceId, DIP_RefId) của bản ghi nguồn tạo ra dòng.',
+    columns: ['MA_SO_DINH_DANH', 'HO_TEN', 'NGAY_SINH', 'GIOI_TINH', 'NOI_SINH', 'DAN_TOC', 'HO_TEN_CHA', 'HO_TEN_ME', 'NGAY_DANG_KY', 'DIP_SourceId', 'DIP_RefId'],
+    rows: [
+      { MA_SO_DINH_DANH: '001224000101', HO_TEN: 'Nguyễn Minh Khang', NGAY_SINH: '12/03/2024', GIOI_TINH: '1', NOI_SINH: 'BV Phụ sản Hà Nội', DAN_TOC: 'Kinh', HO_TEN_CHA: 'Nguyễn Văn Hùng', HO_TEN_ME: 'Trần Thị Mai', NGAY_DANG_KY: '20/03/2024', DIP_SourceId: 'Khai sinh', DIP_RefId: 'SO_DANG_KY=KS-3310' },
+      { MA_SO_DINH_DANH: '046224000215', HO_TEN: 'Lê Bảo Ngọc', NGAY_SINH: '05/07/2024', GIOI_TINH: '2', NOI_SINH: 'BV Trung ương Huế', DAN_TOC: 'Kinh', HO_TEN_CHA: 'Lê Văn Tâm', HO_TEN_ME: 'Phạm Thị Hoa', NGAY_DANG_KY: '15/07/2024', DIP_SourceId: 'Khai sinh', DIP_RefId: 'SO_DANG_KY=KS-3311' },
+      { MA_SO_DINH_DANH: '079224000377', HO_TEN: 'TRẦN GIA HUY', NGAY_SINH: '21/01/2024', GIOI_TINH: 'Nam', NOI_SINH: 'BV Từ Dũ', DAN_TOC: 'Kinh', HO_TEN_CHA: '', HO_TEN_ME: '', NGAY_DANG_KY: '02/02/2024', DIP_SourceId: 'Khai sinh (hệ thống tỉnh)', DIP_RefId: 'ID=501' },
+      { MA_SO_DINH_DANH: '038224000412', HO_TEN: 'HOÀNG ANH THƯ', NGAY_SINH: '30/09/2023', GIOI_TINH: 'Nữ', NOI_SINH: 'BV Đa khoa Thanh Hóa', DAN_TOC: 'Mường', HO_TEN_CHA: '', HO_TEN_ME: '', NGAY_DANG_KY: '10/10/2023', DIP_SourceId: 'Khai sinh (hệ thống tỉnh)', DIP_RefId: 'ID=502' },
+    ],
+    unmatched: [
+      { source: 'Khai sinh (hệ thống tỉnh)', key: 'ID=503', reason: 'Trùng MA_SO_DINH_DANH 001224000101 với Khai sinh KS-3310 – giữ dòng theo ưu tiên nguồn (Khai sinh), dòng này lưu ở vùng tạm' },
+      { source: 'Khai sinh (hệ thống tỉnh)', key: 'ID=517', reason: 'Thiếu giá trị bắt buộc: HO_TEN trống – không ghi vào đích' },
+    ],
+  },
   'mc-2': {
     note: 'Bảng chính Công dân, LEFT JOIN Khai sinh và LEFT JOIN BHXH (đang hoạt động) theo CCCD. ID bảng đích lấy theo cột Công dân.ID_CD; HO_TEN lấy theo độ ưu tiên Công dân → BHXH → Khai sinh.',
     columns: ['ID', 'CCCD', 'HO_TEN', 'DIA_CHI', 'MA_SO_BHXH', 'NOI_KCB', 'NOI_SINH', 'DIP_RefId', 'DIP_SourceRefs'],
@@ -663,4 +677,50 @@ export const MERGE_SAMPLE_DATA: Record<string, MergeSampleData> = {
       { source: 'Công dân', key: '21', reason: 'Thiếu giá trị bắt buộc: HO_TEN trống ở mọi cột ưu tiên – không ghi vào đích' },
     ],
   },
+};
+
+// Cấu hình đã có dữ liệu nhưng chưa có mẫu viết sẵn (VD vừa tạo và Chuyển đổi trên prototype):
+// sinh vài dòng minh họa theo cột bảng đích, cách lấy khóa chính và nguồn tạo dòng
+const FAKE: { test: RegExp; values: string[] }[] = [
+  { test: /CCCD|DINH_DANH|CMND/, values: ['001090000123', '046185000456', '079200000789', '038195000321', '052301000654'] },
+  { test: /HO_TEN|HOTEN/, values: ['Nguyễn Văn An', 'Trần Thị Bình', 'Lê Minh Châu', 'Phạm Quốc Dũng', 'Võ Thị Hạnh'] },
+  { test: /NGAY/, values: ['12/03/1990', '05/07/1985', '21/01/2000', '30/09/1995', '14/02/2001'] },
+  { test: /GIOI_TINH|GIOITINH/, values: ['1', '2', '2', '1', '2'] },
+  { test: /DIA_CHI|NOI_|QUE_QUAN/, values: ['Hà Nội', 'Thừa Thiên Huế', 'TP. Hồ Chí Minh', 'Thanh Hóa', 'Đà Nẵng'] },
+  { test: /DAN_TOC|DANTOC/, values: ['Kinh', 'Kinh', 'Tày', 'Mường', 'Kinh'] },
+  { test: /BHXH/, values: ['0123456789', '', '7912345678', '', '4801234567'] },
+  { test: /CHINH_SACH/, values: ['Thương binh', 'Bệnh binh', 'Thân nhân liệt sĩ', 'Người có công giúp đỡ cách mạng', 'Thương binh'] },
+];
+const fakeValue = (col: MergeTargetColumn, i: number) => {
+  const hit = FAKE.find(f => f.test.test(col.name.toUpperCase()));
+  if (hit) return hit.values[i % hit.values.length];
+  if (/NUMBER|INT|DECIMAL/i.test(col.type)) return String(100 + i);
+  if (/DATE|TIMESTAMP/i.test(col.type)) return FAKE[2].values[i % 5];
+  return `Giá trị ${i + 1}`;
+};
+export const buildSampleData = (cfg: MergeConfig, cols: MergeTargetColumn[]): MergeSampleData | undefined => {
+  if (!cols.length || !cfg.sources.length) return undefined;
+  const names = cols.map(c => c.name);
+  const isJoin = cfg.combineType === 'join';
+  const columns = [...names, 'DIP_SourceId', 'DIP_RefId', ...(isJoin ? ['DIP_SourceRefs'] : [])];
+  const rowSources = isJoin ? [cfg.baseTable || cfg.sources[0].datasetId] : cfg.sources.map(s => s.datasetId);
+  const rows = Array.from({ length: 5 }, (_, i) => {
+    const src = rowSources[i % rowSources.length];
+    const ref = cfg.sources.find(s => s.datasetId === src);
+    const keyField = (ref && sourceKeyOf(ref)[0]) || 'ID';
+    const row: Record<string, string> = {};
+    cols.forEach(c => {
+      if (c.isKey) row[c.name] = cfg.targetKey.mode === 'auto' ? String(1001 + i) : fakeValue(c, i);
+      else row[c.name] = mappingFilled(cfg.mappings[c.name]) ? fakeValue(c, i) : '';
+    });
+    row.DIP_SourceId = findDataset(src)?.name || src;
+    row.DIP_RefId = `${keyField}=${200 + i}`;
+    if (isJoin) row.DIP_SourceRefs = cfg.joins.map(j => `${findDataset(j.table)?.name}:${i % 3 === 2 ? '–' : `#${300 + i}`}`).join(' · ');
+    return row;
+  });
+  return {
+    note: `Dữ liệu minh họa (prototype) cho ${isJoin ? 'Join' : unionLabel(cfg.unionAll)} – ${describeCombine(cfg)}. Khóa chính ${cfg.targetKey.mode === 'auto' ? 'tự động' : 'theo cột'}; cập nhật căn cứ (DIP_SourceId, DIP_RefId)${isJoin ? ' và DIP_SourceRefs' : ''}.`,
+    columns,
+    rows,
+  };
 };

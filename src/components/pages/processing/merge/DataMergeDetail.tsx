@@ -8,7 +8,7 @@ import {
 } from '../../collection/collectionUi';
 import { initialTargetDatabases } from '../mockTargetDatabases';
 import {
-  MergeConfig, MergeRunLog, findDataset, getSourceGroup, mergeTargetTables, TECH_COLUMNS, describeRule, ruleGroupOf, RULE_KINDS, RULE_GROUP_LABEL, sourceKeyOf, MERGE_SAMPLE_DATA, ONE_TO_MANY_LABEL,
+  MergeConfig, MergeRunLog, findDataset, getSourceGroup, mergeTargetTables, TECH_COLUMNS, describeRule, ruleGroupOf, RULE_KINDS, RULE_GROUP_LABEL, sourceKeyOf, MERGE_SAMPLE_DATA, buildSampleData, ONE_TO_MANY_LABEL,
   JOIN_TYPE_LABEL, VALUE_MODE_LABEL, DUPLICATE_RULE_LABEL, combineFamily, describeOn, describeWhere, describeMapping, mappingFilled, columnLabel, operandLabel, unionLabel,
   MERGE_STATUS_LABEL, MERGE_STATUS_VARIANT, mergeActionReasons, RUN_RESULT_LABEL, RUN_RESULT_VARIANT, RUN_ACTIVITY_LABEL, RUN_ACTIVITY_VARIANT,
 } from './mockDataMerge';
@@ -56,7 +56,8 @@ export function DataMergeDetail({ config, runs, onBack, onEdit, onRun, onClearDa
   const keyColumns = targetCols.filter(c => c.isKey).map(c => c.name);
   const lastRun = runs.find(r => r.activity !== 'clear'); // lần chạy gần nhất có số liệu theo nguồn
   const targetKeyText = `${keyColumns.join(', ') || '-'} = ${config.targetKey.mode === 'auto' ? 'Tự động' : columnLabel(config, config.targetKey.column) || '-'}`;
-  const sample = MERGE_SAMPLE_DATA[config.id];
+  // Chỉ hiện khi bảng đích đang có dữ liệu (Xóa dữ liệu xong thì trống); không có mẫu viết sẵn thì sinh mẫu minh họa
+  const sample = config.dataCount > 0 ? MERGE_SAMPLE_DATA[config.id] || buildSampleData(config, targetCols) : undefined;
   const historyRows = runs.filter(r => {
     const q = normalizeSearch(historyApplied);
     return !q || normalizeSearch(`${r.id} ${RUN_ACTIVITY_LABEL[r.activity]} ${r.createdBy} ${r.createdAt} ${RUN_RESULT_LABEL[r.result]}`).includes(q);
@@ -388,7 +389,7 @@ export function DataMergeDetail({ config, runs, onBack, onEdit, onRun, onClearDa
             )}
           </div>
         ) : (
-          <div className={`${CARD_CLS} text-center text-[13px] text-[#64748B]`}>Chưa có dữ liệu – cấu hình chưa chạy lần nào</div>
+          <div className={`${CARD_CLS} text-center text-[13px] text-[#64748B]`}>Bảng đích chưa có dữ liệu của cấu hình này – bấm Chuyển đổi dữ liệu để chạy lần đầu</div>
         )
       )}
 
